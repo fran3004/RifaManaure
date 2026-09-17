@@ -1,0 +1,29 @@
+.breadcrumbsNav {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--text-muted, #5e7a6f);
+}
+
+.crumbLink {
+  color: var(--text-secondary, #9cb5ab);
+  text-decoration: none;
+  transition: color var(--transition-fast, 150ms ease);
+}
+
+.crumbLink:hover {
+  color: var(--color-brand-accent, #f59e0b);
+}
+
+.separator {
+  display: flex;
+  align-items: center;
+  color: var(--border-subtle, rgba(156, 181, 171, 0.3));
+}
+
+.currentCrumb {
+  color: var(--text-primary, #f3f7f5);
+  font-weight: 600;
+}
+

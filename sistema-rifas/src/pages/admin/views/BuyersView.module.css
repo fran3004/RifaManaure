@@ -1,0 +1,291 @@
+.viewContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Barra de Filtros y Búsqueda */
+.filterToolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.searchBox {
+  position: relative;
+  flex: 1;
+  min-width: 280px;
+  max-width: 480px;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 0.9rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted, #5e7a6f);
+  pointer-events: none;
+}
+
+.searchInput {
+  width: 100%;
+  background-color: var(--bg-surface, #11221c);
+  border: 1px solid var(--border-subtle, rgba(156, 181, 171, 0.2));
+  border-radius: var(--radius-md, 10px);
+  padding: 0.65rem 1rem 0.65rem 2.5rem;
+  color: var(--text-primary, #f3f7f5);
+  font-size: 0.88rem;
+  outline: none;
+  transition: border-color var(--transition-fast, 150ms ease);
+}
+
+.searchInput:focus {
+  border-color: var(--color-brand-accent, #f59e0b);
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.15);
+}
+
+.toolbarActions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* Card y Tabla de Compradores */
+.tableCard {
+  background-color: var(--bg-surface, #11221c);
+  border: 1px solid var(--border-subtle, rgba(156, 181, 171, 0.15));
+  border-radius: var(--radius-lg, 16px);
+  overflow: hidden;
+  box-shadow: 0 4px 20px -4px rgba(0, 0, 0, 0.35);
+}
+
+.tableScrollWrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.buyersTable {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.buyersTable thead th {
+  padding: 0.95rem 1.15rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted, #7e9c90);
+  background: rgba(7, 15, 12, 0.75);
+  border-bottom: 1px solid var(--border-subtle, rgba(156, 181, 171, 0.18));
+  white-space: nowrap;
+}
+
+.buyersTableRow {
+  transition: background-color var(--transition-fast, 150ms ease);
+}
+
+.buyersTableRow:nth-child(even) {
+  background-color: rgba(255, 255, 255, 0.015);
+}
+
+.buyersTableRow:hover {
+  background-color: rgba(16, 185, 129, 0.05);
+}
+
+.buyersTableRow td {
+  padding: 0.85rem 1.15rem;
+  color: var(--text-secondary, #9cb5ab);
+  border-bottom: 1px solid rgba(156, 181, 171, 0.08);
+  vertical-align: middle;
+  font-size: 0.84rem;
+}
+
+/* Celdas personalizadas */
+.buyerCell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.buyerName {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text-primary, #f3f7f5);
+}
+
+.docBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.75rem;
+  color: #fbbf24;
+  background-color: rgba(245, 158, 11, 0.1);
+  padding: 0.1rem 0.45rem;
+  border-radius: 4px;
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  width: fit-content;
+}
+
+.phoneLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: #34d399;
+  text-decoration: none;
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+
+.phoneLink:hover {
+  text-decoration: underline;
+}
+
+.emailText {
+  font-size: 0.8rem;
+  color: #9cb5ab;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cityText {
+  font-size: 0.82rem;
+  color: #d1e3db;
+}
+
+.ordersCountBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.55rem;
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(156, 181, 171, 0.2);
+  color: #f3f7f5;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.ordersCountBadgeActive {
+  background-color: rgba(16, 185, 129, 0.12);
+  border-color: rgba(16, 185, 129, 0.3);
+  color: #34d399;
+}
+
+.spentAmount {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #34d399;
+  white-space: nowrap;
+}
+
+/* Botones de Acción */
+.actionsCell {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.btnActionHistory {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.7rem;
+  background-color: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  color: #60a5fa;
+  border-radius: var(--radius-md, 8px);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast, 150ms ease);
+}
+
+.btnActionHistory:hover {
+  background-color: rgba(59, 130, 246, 0.2);
+  color: #93c5fd;
+  transform: translateY(-1px);
+}
+
+.btnActionEdit {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.7rem;
+  background-color: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  color: #34d399;
+  border-radius: var(--radius-md, 8px);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast, 150ms ease);
+}
+
+.btnActionEdit:hover {
+  background-color: rgba(16, 185, 129, 0.2);
+  color: #6ee7b7;
+  transform: translateY(-1px);
+}
+
+/* Banner de Notificación */
+.feedbackToast {
+  padding: 0.85rem 1.25rem;
+  border-radius: var(--radius-md, 10px);
+  font-size: 0.88rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  animation: fadeIn 200ms ease;
+}
+
+.feedbackSuccess {
+  background-color: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  color: #34d399;
+}
+
+.feedbackError {
+  background-color: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #fca5a5;
+}
+
+.feedbackCloseBtn {
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  padding: 0.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.8;
+}
+
+.feedbackCloseBtn:hover {
+  opacity: 1;
+}
+
+/* Pie de Tabla con Paginación Integrada */
+.tableFooterPagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1.25rem;
+  background-color: rgba(7, 15, 12, 0.5);
+  border-top: 1px solid var(--border-subtle, rgba(156, 181, 171, 0.12));
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+

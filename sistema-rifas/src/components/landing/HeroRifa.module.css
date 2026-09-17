@@ -1,0 +1,223 @@
+.heroSection {
+  position: relative;
+  min-height: 90vh;
+  display: flex;
+  align-items: center;
+  padding: 6rem 0 5rem;
+  overflow: hidden;
+}
+
+.bgWrapper {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.bgImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.gradientOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(10, 20, 16, 0.7) 0%,
+    rgba(10, 20, 16, 0.88) 60%,
+    var(--bg-main) 100%
+  );
+}
+
+.contentContainer {
+  position: relative;
+  z-index: 1;
+  max-width: 900px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 1.1rem;
+  border-radius: var(--radius-full);
+  background: var(--color-brand-accent-soft);
+  border: 1px solid var(--color-brand-accent);
+  color: var(--color-brand-accent);
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  backdrop-filter: blur(8px);
+}
+
+.badgeIcon {
+  color: var(--color-brand-accent);
+}
+
+.title {
+  font-size: clamp(2.3rem, 5.2vw, 3.8rem);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  margin-bottom: 1.5rem;
+  color: var(--text-primary);
+}
+
+.subtitle {
+  font-size: clamp(1.05rem, 2vw, 1.25rem);
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 2.5rem;
+  max-width: 780px;
+}
+
+.ctaBox {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 2rem;
+  padding: 1.5rem;
+  border-radius: var(--radius-lg);
+  background-color: var(--bg-surface-glass);
+  border: 1px solid var(--border-subtle);
+  backdrop-filter: blur(12px);
+  margin-bottom: 3.5rem;
+  max-width: 680px;
+}
+
+.priceTag {
+  display: flex;
+  flex-direction: column;
+}
+
+.priceLabel {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.priceValue {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--color-brand-accent);
+  line-height: 1.1;
+}
+
+.ctaActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  flex: 1;
+}
+
+.btnPrimary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 0.9rem 1.6rem;
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: var(--text-inverse);
+  font-size: 1rem;
+  font-weight: 700;
+  box-shadow: var(--shadow-glow);
+  transition: all var(--transition-fast);
+  flex: 1;
+  min-width: 180px;
+}
+
+.btnPrimary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 30px rgba(245, 158, 11, 0.45);
+}
+
+.btnSecondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 0.9rem 1.4rem;
+  border-radius: var(--radius-md);
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+  font-size: 1rem;
+  font-weight: 600;
+  transition: all var(--transition-fast);
+}
+
+.btnSecondary:hover {
+  background: var(--color-brand-primary-light);
+  border-color: var(--color-brand-accent);
+}
+
+.trustGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.25rem;
+}
+
+.trustItem {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border-radius: var(--radius-md);
+  background-color: var(--bg-surface-glass);
+  border: 1px solid var(--border-subtle);
+  backdrop-filter: blur(8px);
+}
+
+.trustIconWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: var(--radius-md);
+  background-color: var(--color-brand-accent-soft);
+  color: var(--color-brand-accent);
+  flex-shrink: 0;
+}
+
+.trustTitle {
+  display: block;
+  font-size: 0.925rem;
+  color: var(--text-primary);
+}
+
+.trustSub {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+@media (max-width: 768px) {
+  .heroSection {
+    padding: 4rem 0 3rem;
+  }
+
+  .ctaBox {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1.25rem;
+  }
+
+  .ctaActions {
+    flex-direction: column;
+  }
+
+  .btnPrimary, .btnSecondary {
+    width: 100%;
+  }
+
+  .trustGrid {
+    grid-template-columns: 1fr;
+  }
+}
+

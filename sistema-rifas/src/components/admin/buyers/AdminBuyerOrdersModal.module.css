@@ -1,0 +1,396 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: var(--z-modal, 1000);
+  padding: 1rem;
+  animation: fadeIn 150ms ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modalCard {
+  background-color: var(--bg-surface, #11221c);
+  border: 1px solid var(--border-subtle, rgba(156, 181, 171, 0.2));
+  border-radius: var(--radius-xl, 20px);
+  width: 100%;
+  max-width: 820px;
+  max-height: 88vh;
+  overflow: hidden;
+  box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.65);
+  display: flex;
+  flex-direction: column;
+  animation: scaleIn 200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.96);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--border-subtle, rgba(156, 181, 171, 0.15));
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0) 100%);
+}
+
+.headerTitleGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.headerIcon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md, 10px);
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  color: #fbbf24;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.headerTitle {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-primary, #f3f7f5);
+  margin: 0;
+}
+
+.headerSubtitle {
+  font-size: 0.8rem;
+  color: var(--text-secondary, #9cb5ab);
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  color: var(--text-muted, #5e7a6f);
+  cursor: pointer;
+  padding: 0.4rem;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast, 150ms ease);
+}
+
+.closeButton:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+  color: var(--text-primary, #f3f7f5);
+}
+
+.modalBody {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  overflow-y: auto;
+  max-height: calc(88vh - 140px);
+}
+
+/* Tarjeta Resumen del Comprador */
+.buyerProfileCard {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(10, 20, 16, 0.6) 100%);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: var(--radius-lg, 16px);
+  padding: 1.15rem 1.35rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.profileTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.profileName {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+}
+
+.profileDoc {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.6rem;
+  background-color: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  color: #fbbf24;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.8rem;
+  font-weight: 700;
+  border-radius: 6px;
+}
+
+.profileInfoGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.75rem;
+}
+
+.infoItem {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.82rem;
+  color: #9cb5ab;
+}
+
+.infoItem a {
+  color: #34d399;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.infoItem a:hover {
+  text-decoration: underline;
+}
+
+/* Estadísticas rápidas */
+.statsRow {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+}
+
+@media (max-width: 640px) {
+  .statsRow {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.statCard {
+  background-color: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-subtle, rgba(156, 181, 171, 0.12));
+  border-radius: var(--radius-md, 10px);
+  padding: 0.75rem 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.statLabel {
+  font-size: 0.72rem;
+  color: var(--text-muted, #5e7a6f);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+}
+
+.statValue {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #f3f7f5;
+}
+
+.statValueEmerald {
+  color: #34d399;
+}
+
+.statValueGold {
+  color: #fbbf24;
+}
+
+/* Tabla de Órdenes */
+.ordersSectionTitle {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #e2f0ea;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.tableWrapper {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: var(--radius-md, 10px);
+  border: 1px solid var(--border-subtle, rgba(156, 181, 171, 0.15));
+}
+
+.ordersTable {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.84rem;
+}
+
+.ordersTable th {
+  padding: 0.75rem 0.9rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted, #7e9c90);
+  background: rgba(7, 15, 12, 0.85);
+  border-bottom: 1px solid var(--border-subtle, rgba(156, 181, 171, 0.18));
+  white-space: nowrap;
+}
+
+.ordersTable td {
+  padding: 0.75rem 0.9rem;
+  color: var(--text-secondary, #9cb5ab);
+  border-bottom: 1px solid rgba(156, 181, 171, 0.08);
+  vertical-align: middle;
+}
+
+.ordersTable tr:last-child td {
+  border-bottom: none;
+}
+
+.ordersTable tr:hover td {
+  background-color: rgba(16, 185, 129, 0.04);
+}
+
+.refChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.2rem 0.55rem;
+  background-color: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  color: #fbbf24;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.8rem;
+  font-weight: 700;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.ticketNumberChip {
+  display: inline-block;
+  padding: 0.1rem 0.4rem;
+  background-color: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: #34d399;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.72rem;
+  font-weight: 700;
+  border-radius: 4px;
+  margin-right: 0.25rem;
+  margin-bottom: 0.2rem;
+}
+
+.statusPaid {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.55rem;
+  background-color: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.statusPending {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.55rem;
+  background-color: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.statusRejected {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.55rem;
+  background-color: rgba(239, 68, 68, 0.15);
+  color: #fca5a5;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.statusExpired {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.55rem;
+  background-color: rgba(156, 181, 171, 0.1);
+  color: #9cb5ab;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.receiptBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.25rem 0.55rem;
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  color: #60a5fa;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all var(--transition-fast, 150ms ease);
+}
+
+.receiptBtn:hover {
+  background: rgba(59, 130, 246, 0.2);
+  color: #93c5fd;
+}
+
+.modalFooter {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 1.15rem 1.5rem;
+  border-top: 1px solid var(--border-subtle, rgba(156, 181, 171, 0.15));
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+.btnClose {
+  background: none;
+  border: 1px solid var(--border-subtle, rgba(156, 181, 171, 0.25));
+  color: var(--text-secondary, #9cb5ab);
+  padding: 0.55rem 1.25rem;
+  border-radius: var(--radius-md, 10px);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast, 150ms ease);
+}
+
+.btnClose:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary, #f3f7f5);
+}
+

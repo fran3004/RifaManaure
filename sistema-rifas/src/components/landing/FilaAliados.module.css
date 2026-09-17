@@ -1,0 +1,257 @@
+.aliadosSection {
+  padding: 4.5rem 0 5.5rem 0;
+  background-color: var(--bg-main, #0a1410);
+  border-top: 1px solid var(--border-subtle, rgba(156, 181, 171, 0.15));
+  border-bottom: 1px solid var(--border-subtle, rgba(156, 181, 171, 0.15));
+  position: relative;
+  overflow: hidden;
+}
+
+.header {
+  text-align: center;
+  max-width: 760px;
+  margin: 0 auto 2rem;
+  padding: 0 1.5rem;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 1rem;
+  border-radius: var(--radius-full, 9999px);
+  background: var(--color-brand-accent-soft, rgba(245, 158, 11, 0.12));
+  border: 1px solid var(--color-brand-accent, #f59e0b);
+  color: var(--color-brand-accent, #f59e0b);
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.title {
+  font-size: clamp(1.8rem, 3.5vw, 2.5rem);
+  font-weight: 800;
+  color: var(--text-primary, #f3f7f5);
+  margin-bottom: 0.75rem;
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  font-size: 1.02rem;
+  color: var(--text-secondary, #9cb5ab);
+  line-height: 1.5;
+  margin: 0 auto;
+}
+
+.interactionHint {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: #9cb5ab;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 0.35rem 0.9rem;
+  border-radius: 9999px;
+  margin-top: 1rem;
+}
+
+/* Contenedor del carrusel con máscaras de desvanecimiento lateral */
+.marqueeOuter {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  padding: 0.75rem 0;
+}
+
+.fadeLeft,
+.fadeRight {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 100px;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.fadeLeft {
+  left: 0;
+  background: linear-gradient(to right, var(--bg-main, #0a1410) 20%, transparent 100%);
+}
+
+.fadeRight {
+  right: 0;
+  background: linear-gradient(to left, var(--bg-main, #0a1410) 20%, transparent 100%);
+}
+
+/* Pista de Aliados en fila única continua */
+.aliadosTrack {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  gap: 2.75rem;
+  overflow-x: scroll;
+  overflow-y: hidden;
+  padding: 1.5rem 2rem 1.75rem 2rem;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE y Edge */
+}
+
+.aliadosTrack::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+.isDragging {
+  cursor: grabbing !important;
+}
+
+/* Elemento individual de aliado: SIN recuadro contenedor */
+.aliadoItem {
+  flex: 0 0 170px;
+  width: 170px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  background: transparent;
+  border: none;
+  padding: 0;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  outline: none;
+  transition: transform 250ms ease;
+}
+
+/* Contenedor del logotipo: completamente transparente en reposo (solo se ven logo y texto) */
+.logoCircle {
+  width: 135px;
+  height: 135px;
+  border-radius: 50%;
+  background: transparent;
+  border: 2px solid transparent; /* Invisible en reposo, evita saltos de píxeles al hacer hover */
+  box-shadow: none; /* Sin ningún sombreado en reposo */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.35rem;
+  position: relative;
+  transition: all 260ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Efecto hover: El círculo que lo rodea SOLO aparece cuando pones el cursor encima */
+.aliadoItem:hover .logoCircleHasInstagram,
+.logoCircleHasInstagram:hover {
+  transform: translateY(-4px) scale(1.06);
+  border-color: #e1306c;
+  box-shadow: 0 0 0 3px rgba(225, 48, 108, 0.85),
+              0 0 24px rgba(225, 48, 108, 0.45);
+}
+
+/* Para aliados sin Instagram activo por ahora */
+.aliadoItem:hover .logoCircleNoInstagram,
+.logoCircleNoInstagram:hover {
+  transform: translateY(-4px) scale(1.04);
+  border-color: rgba(245, 158, 11, 0.8);
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.65),
+              0 0 20px rgba(245, 158, 11, 0.35);
+}
+
+/* Logotipo mucho más grande y sin ningún filtro distorsionante */
+.aliadoLogo {
+  max-width: 95%;
+  max-height: 95%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  pointer-events: none;
+  filter: none !important; /* Limpio, sin sombreados */
+  transition: transform 250ms ease;
+}
+
+.aliadoItem:hover .aliadoLogo {
+  transform: scale(1.06);
+}
+
+.placeholderLogo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  opacity: 0.8;
+}
+
+.aliadoName {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary, #f3f7f5);
+  margin-top: 0.85rem;
+  line-height: 1.25;
+  text-align: center;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  max-width: 100%;
+  transition: color 200ms ease;
+}
+
+.aliadoItem:hover .aliadoName {
+  color: #ffffff;
+}
+
+.aliadoCategory {
+  font-size: 0.78rem;
+  color: var(--text-secondary, #9cb5ab);
+  line-height: 1.25;
+  margin-top: 0.25rem;
+  text-align: center;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  max-width: 100%;
+}
+
+@media (max-width: 768px) {
+  .aliadosSection {
+    padding: 3.5rem 0 4.5rem 0;
+  }
+
+  .fadeLeft,
+  .fadeRight {
+    width: 45px;
+  }
+
+  .aliadosTrack {
+    gap: 2rem;
+    padding: 1rem 1.25rem 1.25rem 1.25rem;
+  }
+
+  .aliadoItem {
+    flex: 0 0 135px;
+    width: 135px;
+  }
+
+  .logoCircle {
+    width: 105px;
+    height: 105px;
+    padding: 0.25rem;
+  }
+
+  .aliadoName {
+    font-size: 0.85rem;
+    margin-top: 0.65rem;
+  }
+
+  .aliadoCategory {
+    font-size: 0.72rem;
+  }
+}

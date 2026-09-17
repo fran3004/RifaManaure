@@ -1,0 +1,530 @@
+.section {
+  padding: 6rem 0 7rem;
+  background-color: var(--bg-main);
+  position: relative;
+}
+
+.header {
+  text-align: center;
+  max-width: 800px;
+  margin: 0 auto 3rem;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 1rem;
+  border-radius: var(--radius-full);
+  background: var(--color-brand-accent-soft);
+  border: 1px solid var(--color-brand-accent);
+  color: var(--color-brand-accent);
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 1.25rem;
+}
+
+.title {
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.statsStrip {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-top: 2rem;
+  padding: 1rem 1.5rem;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+}
+
+.statItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.statDotAvailable {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #10b981;
+}
+
+.statDotSelected {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: var(--color-brand-accent);
+}
+
+.statDotSelectedMax {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #fbbf24;
+  box-shadow: 0 0 8px rgba(251, 191, 36, 0.8);
+  animation: pulseGlow 1.5s infinite alternate;
+}
+
+@keyframes pulseGlow {
+  from {
+    transform: scale(0.9);
+    opacity: 0.8;
+  }
+  to {
+    transform: scale(1.25);
+    opacity: 1;
+  }
+}
+
+.statDotReserved {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #f97316;
+}
+
+.statDotSold {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #6b7280;
+}
+
+/* --- Panel de Control y Azar --- */
+.controlPanel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.searchBox {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-width: 260px;
+  flex: 1;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 1rem;
+  color: var(--text-muted);
+}
+
+.searchInput {
+  width: 100%;
+  padding: 0.75rem 1rem 0.75rem 2.75rem;
+  border-radius: var(--radius-md);
+  background-color: var(--bg-surface-elevated);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  transition: border-color var(--transition-fast);
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: var(--color-brand-accent);
+}
+
+.clearSearchBtn {
+  position: absolute;
+  right: 0.75rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  padding: 0.2rem 0.5rem;
+  background-color: var(--bg-main);
+  border-radius: var(--radius-sm);
+}
+
+.randomButtons {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.randomLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-brand-accent);
+  margin-right: 0.25rem;
+}
+
+.randomBtn {
+  padding: 0.5rem 0.9rem;
+  border-radius: var(--radius-md);
+  background-color: var(--bg-surface-elevated);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+  font-weight: 700;
+  font-size: 0.875rem;
+  transition: all var(--transition-fast);
+}
+
+.randomBtn:hover {
+  background-color: var(--color-brand-primary-light);
+  border-color: var(--color-brand-accent);
+  color: var(--color-brand-accent);
+}
+
+.clearBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-md);
+  background-color: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #ef4444;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+/* --- Rango Tabs y Filtros --- */
+.rangeTabs {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.rangeButtons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.rangeBtn {
+  padding: 0.45rem 0.9rem;
+  border-radius: var(--radius-sm);
+  background-color: var(--bg-surface-elevated);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  font-size: 0.825rem;
+  font-weight: 600;
+  transition: all var(--transition-fast);
+}
+
+.rangeBtn:hover {
+  color: var(--text-primary);
+}
+
+.rangeBtnActive {
+  background-color: var(--color-brand-primary-light);
+  border-color: var(--color-brand-accent);
+  color: var(--color-brand-accent);
+  font-weight: 700;
+}
+
+.filterGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-muted);
+}
+
+.filterTag {
+  padding: 0.35rem 0.75rem;
+  border-radius: var(--radius-full);
+  background: none;
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  font-weight: 500;
+  transition: all var(--transition-fast);
+}
+
+.filterTagActive {
+  background-color: var(--bg-surface-elevated);
+  border-color: var(--text-primary);
+  color: var(--text-primary);
+}
+
+/* --- Grilla de 1000 Boletos --- */
+.ticketGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(62px, 1fr));
+  gap: 0.6rem;
+}
+
+.ticketCard {
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  font-weight: 700;
+  position: relative;
+  transition: all var(--transition-fast);
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.ticketAvailable {
+  background-color: #11281e;
+  border-color: #1e4534;
+  color: #e2f0ea;
+}
+
+.ticketAvailable:hover {
+  transform: translateY(-2px);
+  border-color: var(--color-brand-accent);
+  background-color: #17382a;
+}
+
+.ticketSelected {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  border-color: #fbbf24;
+  color: #08120e;
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.4);
+  transform: scale(1.04);
+}
+
+.ticketReserved {
+  background-color: #2b1704;
+  border-color: #78350f;
+  color: #fb923c;
+  cursor: not-allowed;
+  opacity: 0.75;
+}
+
+.ticketSold {
+  background-color: #18201c;
+  border-color: #25332d;
+  color: #4b5e55;
+  cursor: not-allowed;
+  opacity: 0.5;
+  text-decoration: line-through;
+}
+
+.ticketNumber {
+  line-height: 1;
+}
+
+.ticketIcon {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+}
+
+.loadingBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 1rem;
+  gap: 1rem;
+  color: var(--text-secondary);
+}
+
+.spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid rgba(245, 158, 11, 0.2);
+  border-top-color: var(--color-brand-accent);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.emptyResults {
+  text-align: center;
+  padding: 4rem 1rem;
+  color: var(--text-secondary);
+}
+
+.resetFilterBtn {
+  margin-top: 1rem;
+  padding: 0.6rem 1.25rem;
+  border-radius: var(--radius-md);
+  background-color: var(--bg-surface-elevated);
+  border: 1px solid var(--border-subtle);
+  color: var(--color-brand-accent);
+  font-weight: 600;
+}
+
+/* --- Carrito Flotante Inferior --- */
+.floatingCart {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 900;
+  background-color: rgba(10, 20, 16, 0.95);
+  backdrop-filter: blur(16px);
+  border-top: 2px solid var(--color-brand-accent);
+  padding: 1rem 0;
+  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.6);
+  animation: slideUp 200ms ease;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.cartContainer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+.cartInfo {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+  overflow: hidden;
+}
+
+.cartCountBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.8rem;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-brand-accent);
+  color: var(--text-inverse);
+  font-weight: 800;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.limitReachedBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 9999px;
+  background: rgba(245, 158, 11, 0.2);
+  border: 1px solid rgba(245, 158, 11, 0.45);
+  color: #fbbf24;
+  font-size: 0.8rem;
+  font-weight: 700;
+  white-space: nowrap;
+  letter-spacing: 0.01em;
+}
+
+.cartNumbersList {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  overflow-x: auto;
+  white-space: nowrap;
+  padding: 0.25rem 0;
+}
+
+.miniTag {
+  padding: 0.25rem 0.55rem;
+  border-radius: var(--radius-sm);
+  background-color: var(--bg-surface-elevated);
+  border: 1px solid var(--color-brand-accent);
+  color: var(--color-brand-accent);
+  font-family: var(--font-mono);
+  font-size: 0.825rem;
+  font-weight: 700;
+}
+
+.cartCheckout {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.cartTotalBox {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.cartTotalLabel {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.cartTotalValue {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--color-brand-accent);
+  line-height: 1.1;
+}
+
+.checkoutBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.85rem 1.6rem;
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: var(--text-inverse);
+  font-size: 1.05rem;
+  font-weight: 800;
+  box-shadow: var(--shadow-glow);
+  transition: all var(--transition-fast);
+}
+
+.checkoutBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 30px rgba(245, 158, 11, 0.55);
+}
+
+@media (max-width: 768px) {
+  .controlPanel {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .cartContainer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+
+  .cartCheckout {
+    justify-content: space-between;
+  }
+
+  .checkoutBtn {
+    flex: 1;
+    justify-content: center;
+  }
+}
+

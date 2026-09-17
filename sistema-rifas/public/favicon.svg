@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="mvGoldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fbbf24" />
+      <stop offset="100%" stop-color="#d97706" />
+    </linearGradient>
+    <linearGradient id="mvGreenGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#34d399" />
+      <stop offset="100%" stop-color="#059669" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background Base -->
+  <rect width="64" height="64" rx="16" fill="#0a1410" />
+  <rect width="60" height="60" x="2" y="2" rx="14" fill="none" stroke="url(#mvGoldGrad)" stroke-width="2" opacity="0.85" />
+
+  <!-- Mountain Silhouettes (Serranía del Perijá) -->
+  <path d="M12 44 L28 20 L40 34 L48 24 L54 44 Z" fill="url(#mvGreenGrad)" opacity="0.9" />
+  <path d="M22 44 L34 26 L44 44 Z" fill="#064e3b" opacity="0.75" />
+
+  <!-- Hummingbird / Sun Emblem (Manaure Vive) -->
+  <circle cx="20" cy="18" r="4.5" fill="url(#mvGoldGrad)" />
+  
+  <!-- Stylized MV Wings / Ascending Curve -->
+  <path d="M20 22 C26 24 38 28 48 20 C42 27 34 32 20 30 Z" fill="url(#mvGoldGrad)" />
+
+  <!-- Base Accent line -->
+  <path d="M16 47 L48 47" stroke="url(#mvGoldGrad)" stroke-width="2.5" stroke-linecap="round" />
+</svg>

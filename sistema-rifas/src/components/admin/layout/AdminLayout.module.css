@@ -1,0 +1,43 @@
+.adminShell {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--bg-main, #0a1410);
+  color: var(--text-primary, #f3f7f5);
+  position: relative;
+}
+
+.backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 35;
+}
+
+.contentWrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0; /* Previene desbordamiento horizontal en flex containers */
+  min-height: 100vh;
+}
+
+.mainContent {
+  flex: 1;
+  padding: 2rem;
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+@media (max-width: 1024px) {
+  .backdropVisible {
+    display: block;
+  }
+
+  .mainContent {
+    padding: 1.5rem 1rem;
+  }
+}
+

@@ -1,0 +1,618 @@
+.settingsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  width: 100%;
+}
+
+.alertBanner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.9rem 1.25rem;
+  border-radius: var(--radius-md, 10px);
+  font-size: 0.88rem;
+  animation: fadeIn 200ms ease;
+}
+
+.alertSuccess {
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  color: #34d399;
+}
+
+.alertError {
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #f87171;
+}
+
+.alertInfo {
+  background: rgba(59, 130, 246, 0.12);
+  border: 1px solid rgba(59, 130, 246, 0.35);
+  color: #60a5fa;
+}
+
+.alertCloseBtn {
+  background: transparent;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  opacity: 0.7;
+  padding: 0.2rem;
+  display: flex;
+  align-items: center;
+  transition: opacity 150ms ease;
+}
+
+.alertCloseBtn:hover {
+  opacity: 1;
+}
+
+.metadataCard {
+  background: rgba(16, 185, 129, 0.04);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: var(--radius-md, 10px);
+  padding: 0.85rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  font-size: 0.84rem;
+  color: #9cb5ab;
+}
+
+.saveNotice {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: #fbbf24;
+  font-weight: 600;
+  background: rgba(245, 158, 11, 0.12);
+  padding: 0.25rem 0.65rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.sectionBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.sectionBlockHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.sectionTitle {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-primary, #f3f7f5);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+}
+
+.sectionSubtitle {
+  font-size: 0.84rem;
+  color: var(--text-secondary, #9cb5ab);
+  margin: 0;
+}
+
+.twoColumnGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+}
+
+.settingCard {
+  background: var(--bg-surface, #0f241d);
+  border: 1px solid var(--border-subtle, rgba(156, 181, 171, 0.15));
+  border-radius: var(--radius-lg, 14px);
+  padding: 1.4rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1.25rem;
+  transition: border-color 200ms ease, box-shadow 200ms ease, transform 200ms ease;
+  position: relative;
+}
+
+.settingCard:hover {
+  border-color: rgba(52, 211, 153, 0.3);
+}
+
+.settingCard:focus-within {
+  border-color: rgba(52, 211, 153, 0.5);
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.1);
+}
+
+.cardTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.cardIconWrapper {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  background: rgba(16, 185, 129, 0.12);
+  color: #34d399;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.cardBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.25rem 0.65rem;
+  background: rgba(245, 158, 11, 0.12);
+  color: #fbbf24;
+  border-radius: 9999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.cardContent {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.cardLabel {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary, #f3f7f5);
+  margin: 0;
+}
+
+.cardDescription {
+  font-size: 0.83rem;
+  color: var(--text-secondary, #9cb5ab);
+  line-height: 1.45;
+  margin: 0;
+}
+
+.controlsArea {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  margin-top: 0.5rem;
+}
+
+.stepperWrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.stepperBtn {
+  background: var(--bg-surface-elevated, #163026);
+  border: 1px solid var(--border-subtle, rgba(156, 181, 171, 0.2));
+  color: #9cb5ab;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md, 8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 150ms ease;
+  flex-shrink: 0;
+}
+
+.stepperBtn:hover:not(:disabled) {
+  background: #1e3f32;
+  color: #34d399;
+  border-color: rgba(52, 211, 153, 0.4);
+}
+
+.stepperBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.inputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.textInput {
+  width: 100%;
+  padding: 0.65rem 0.9rem;
+  background: var(--bg-surface-elevated, #163026);
+  border: 1px solid var(--border-subtle, rgba(156, 181, 171, 0.2));
+  border-radius: var(--radius-md, 8px);
+  color: #f3f7f5;
+  font-size: 0.95rem;
+  font-weight: 600;
+  transition: all 150ms ease;
+}
+
+.textInput:focus {
+  outline: none;
+  border-color: var(--color-brand-primary, #10b981);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+  background: #19382d;
+}
+
+.inputSuffix {
+  position: absolute;
+  right: 0.9rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #6ee7b7;
+  pointer-events: none;
+}
+
+.presetChipsRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.presetChipLabel {
+  font-size: 0.72rem;
+  color: #6ee7b7;
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-right: 0.2rem;
+}
+
+.presetChip {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(156, 181, 171, 0.2);
+  color: #9cb5ab;
+  padding: 0.22rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+
+.presetChip:hover {
+  background: rgba(52, 211, 153, 0.1);
+  color: #34d399;
+  border-color: rgba(52, 211, 153, 0.4);
+}
+
+.presetChipActive {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+  border-color: #10b981;
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.25);
+}
+
+.cardHint {
+  font-size: 0.76rem;
+  color: #84a296;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  line-height: 1.35;
+}
+
+.previewAndTestBox {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  padding: 0.6rem 0.8rem;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.previewText {
+  font-size: 0.8rem;
+  color: #9cb5ab;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.previewStrong {
+  color: #e2e8f0;
+  font-family: monospace;
+  font-size: 0.85rem;
+}
+
+.testLinkBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: #34d399;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: 6px;
+  text-decoration: none;
+  transition: all 150ms ease;
+  cursor: pointer;
+}
+
+.testLinkBtn:hover {
+  background: rgba(16, 185, 129, 0.22);
+  color: #6ee7b7;
+  border-color: #34d399;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.btnSecondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.1rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #9cb5ab;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(156, 181, 171, 0.25);
+  border-radius: var(--radius-md, 8px);
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+
+.btnSecondary:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  color: #f3f7f5;
+  border-color: rgba(156, 181, 171, 0.4);
+}
+
+.btnSecondary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.keyboardShortcutBadge {
+  font-size: 0.72rem;
+  color: #6ee7b7;
+  background: rgba(16, 185, 129, 0.15);
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+  margin-left: 0.4rem;
+  font-family: monospace;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 900px) {
+  .twoColumnGrid {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+}
+
+/* --- Gestión de Administradores Autorizados --- */
+.usersHeaderGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.inviteUserBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.55rem 1rem;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25);
+  transition: all 150ms ease;
+}
+
+.inviteUserBtn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
+  background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+}
+
+.refreshUsersBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.55rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(156, 181, 171, 0.2);
+  color: #9cb5ab;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+
+.refreshUsersBtn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  color: #f3f7f5;
+  border-color: rgba(156, 181, 171, 0.4);
+}
+
+.refreshUsersBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.userRowSelf {
+  background-color: rgba(16, 185, 129, 0.04) !important;
+}
+
+.userNameCell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.userName {
+  font-weight: 600;
+  color: #f3f7f5;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.userEmail {
+  font-size: 0.82rem;
+  color: #9cb5ab;
+  font-family: monospace;
+}
+
+.selfBadge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0.1rem 0.45rem;
+  border-radius: 4px;
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+  border: 1px solid rgba(52, 211, 153, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.roleBadgeSuperadmin {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.6rem;
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.roleBadgeAdmin {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.6rem;
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.roleBadgeAuditor {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.6rem;
+  background: rgba(148, 163, 184, 0.15);
+  color: #cbd5e1;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.authBadgeLinked {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  color: #34d399;
+  font-weight: 600;
+}
+
+.authBadgePending {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  color: #fbbf24;
+  font-weight: 600;
+}
+
+.statusToggleBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  transition: all 150ms ease;
+}
+
+.statusToggleActive {
+  background-color: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+}
+
+.statusToggleActive:hover:not(:disabled) {
+  background-color: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border-color: rgba(239, 68, 68, 0.35);
+}
+
+.statusToggleInactive {
+  background-color: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+}
+
+.statusToggleInactive:hover:not(:disabled) {
+  background-color: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
+.statusToggleDisabled {
+  opacity: 0.45;
+  cursor: not-allowed !important;
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: #9cb5ab !important;
+}
+
+.dateCell {
+  font-size: 0.8rem;
+  color: #84a296;
+  white-space: nowrap;
+}
+

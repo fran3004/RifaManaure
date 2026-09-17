@@ -1,0 +1,248 @@
+.header {
+  height: 64px;
+  background-color: var(--bg-surface, #11221c);
+  border-bottom: 1px solid var(--border-subtle, rgba(156, 181, 171, 0.15));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.5rem;
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  backdrop-filter: blur(10px);
+}
+
+.leftSection {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.menuToggleBtn {
+  display: none;
+  background: none;
+  border: 1px solid var(--border-subtle, rgba(156, 181, 171, 0.2));
+  color: var(--text-primary, #f3f7f5);
+  cursor: pointer;
+  padding: 0.45rem;
+  border-radius: var(--radius-md, 10px);
+  align-items: center;
+  justify-content: center;
+  transition: background-color var(--transition-fast, 150ms ease);
+}
+
+.menuToggleBtn:hover {
+  background-color: var(--bg-surface-elevated, #1a332a);
+}
+
+.rightSection {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.storeLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.85rem;
+  background-color: var(--bg-surface-elevated, #1a332a);
+  color: var(--text-secondary, #9cb5ab);
+  border: 1px solid var(--border-subtle, rgba(156, 181, 171, 0.15));
+  border-radius: var(--radius-md, 10px);
+  font-size: 0.825rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all var(--transition-fast, 150ms ease);
+}
+
+.storeLink:hover {
+  color: var(--color-brand-accent, #f59e0b);
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
+.userBadge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.75rem;
+  background-color: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--border-subtle, rgba(156, 181, 171, 0.15));
+  border-radius: var(--radius-full, 9999px);
+}
+
+.userEmail {
+  font-size: 0.825rem;
+  color: var(--text-primary, #f3f7f5);
+  font-weight: 500;
+}
+
+.roleTag {
+  font-size: 0.675rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--color-brand-accent, #f59e0b);
+  background-color: var(--color-brand-accent-soft, rgba(245, 158, 11, 0.15));
+  padding: 0.1rem 0.4rem;
+  border-radius: var(--radius-full, 9999px);
+}
+
+.headerLogoutBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.85rem;
+  background-color: rgba(239, 68, 68, 0.1);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  border-radius: var(--radius-md, 10px);
+  font-size: 0.825rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast, 150ms ease);
+}
+
+.headerLogoutBtn:hover {
+  background-color: #ef4444;
+  color: #ffffff;
+}
+
+@media (max-width: 1024px) {
+  .menuToggleBtn {
+    display: flex;
+  }
+}
+
+@media (max-width: 480px) {
+  .userBadge {
+    display: none;
+  }
+}
+
+/* Selector Global de Rifa Activa en Cabecera */
+.raffleSelectorContainer {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.75rem;
+  background-color: rgba(10, 20, 16, 0.6);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  border-radius: var(--radius-md, 10px);
+  transition: border-color var(--transition-fast, 150ms ease);
+}
+
+.raffleSelectorContainer:hover,
+.raffleSelectorContainer:focus-within {
+  border-color: rgba(16, 185, 129, 0.5);
+}
+
+.raffleSelectorLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #34d399;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.raffleIcon {
+  color: #34d399;
+  flex-shrink: 0;
+}
+
+.selectWrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.raffleSelect {
+  background: transparent;
+  color: var(--text-primary, #f3f7f5);
+  font-size: 0.825rem;
+  font-weight: 600;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  max-width: 260px;
+  text-overflow: ellipsis;
+  padding: 0.15rem 0.25rem;
+}
+
+.raffleSelect option {
+  background-color: #11221c;
+  color: #f3f7f5;
+  padding: 0.5rem;
+}
+
+.raffleLoadingBadge,
+.raffleEmptyBadge {
+  font-size: 0.75rem;
+  color: var(--text-muted, #5e7a6f);
+  font-style: italic;
+}
+
+.statusDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.statusDotActive {
+  background-color: #10b981;
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
+}
+
+.statusDotPaused {
+  background-color: #f59e0b;
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.6);
+}
+
+.statusDotFinished {
+  background-color: #94a3b8;
+}
+
+.statusDotDefault {
+  background-color: #8b5cf6;
+}
+
+@media (max-width: 768px) {
+  .raffleSelectorLabel {
+    display: none;
+  }
+  .raffleSelect {
+    max-width: 150px;
+  }
+}
+
+@media (max-width: 640px) {
+  .header {
+    padding: 0 1rem;
+  }
+
+  .userBadge {
+    display: none;
+  }
+
+  .storeText {
+    display: none;
+  }
+
+  .logoutText {
+    display: none;
+  }
+
+  .headerLogoutBtn {
+    padding: 0.45rem;
+  }
+
+  .storeLink {
+    padding: 0.45rem;
+  }
+}
+

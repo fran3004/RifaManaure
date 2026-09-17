@@ -1,0 +1,28 @@
+{
+  "name": "Manaure Vive - Gran Sorteo Ecoturístico",
+  "short_name": "Manaure Vive",
+  "description": "Plataforma oficial del Gran Sorteo Ecoturístico Manaure Vive. Vive experiencias inolvidables en la Serranía del Perijá, Cesar.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a1410",
+  "theme_color": "#0a1410",
+  "lang": "es-CO",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/favicon-32x32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}
+
