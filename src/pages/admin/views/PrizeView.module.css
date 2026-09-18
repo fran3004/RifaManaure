@@ -1,0 +1,744 @@
+/* ==========================================================================
+   PrizeView.module.css - Estilos del Módulo Administrativo de Gestión del Premio
+   ========================================================================== */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  width: 100%;
+}
+
+/* --------------------------------------------------------------------------
+   Tarjeta de Configuración de Cabecera (Header Settings)
+   -------------------------------------------------------------------------- */
+.settingsCard {
+  background: var(--bg-surface, #11221c);
+  border: 1px solid var(--border-subtle, rgba(156, 181, 171, 0.15));
+  border-radius: var(--radius-lg, 16px);
+  padding: 1.75rem;
+  box-shadow: var(--shadow-sm, 0 4px 20px rgba(0, 0, 0, 0.2));
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px solid var(--border-subtle, rgba(156, 181, 171, 0.1));
+  padding-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.cardTitleGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.cardIconBox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: var(--radius-md, 10px);
+  background: rgba(245, 158, 11, 0.12);
+  color: var(--color-brand-accent, #f59e0b);
+}
+
+.cardTitle {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-primary, #f3f7f5);
+  margin: 0;
+}
+
+.cardSubtitle {
+  font-size: 0.85rem;
+  color: var(--text-secondary, #9cb5ab);
+  margin: 0.2rem 0 0 0;
+}
+
+.settingsForm {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+
+.fullWidth {
+  grid-column: 1 / -1;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary, #f3f7f5);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.input,
+.textarea,
+.select {
+  background-color: var(--bg-main, #0a1410);
+  border: 1px solid var(--border-subtle, rgba(156, 181, 171, 0.2));
+  border-radius: var(--radius-md, 10px);
+  padding: 0.75rem 1rem;
+  color: var(--text-primary, #f3f7f5);
+  font-size: 0.9rem;
+  outline: none;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.input:focus,
+.textarea:focus,
+.select:focus {
+  border-color: var(--color-brand-accent, #f59e0b);
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2);
+}
+
+.textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.settingsActions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+/* --------------------------------------------------------------------------
+   Catálogo de Experiencias
+   -------------------------------------------------------------------------- */
+.experiencesSection {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.sectionBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.sectionTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary, #f3f7f5);
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0;
+}
+
+.countBadge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.2rem 0.6rem;
+  border-radius: 9999px;
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+}
+
+.cardsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+}
+
+/* Tarjeta individual de experiencia */
+.experienceCard {
+  background: var(--bg-surface, #11221c);
+  border: 1px solid var(--border-subtle, rgba(156, 181, 171, 0.15));
+  border-radius: var(--radius-lg, 16px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+  position: relative;
+}
+
+.experienceCard:hover {
+  border-color: rgba(245, 158, 11, 0.35);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.cardInactive {
+  opacity: 0.65;
+  border-style: dashed;
+}
+
+.imageContainer {
+  width: 100%;
+  height: 180px;
+  position: relative;
+  background: #0d1a15;
+  overflow: hidden;
+}
+
+.cardImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.experienceCard:hover .cardImg {
+  transform: scale(1.03);
+}
+
+.partnerBadge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: rgba(10, 20, 16, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(156, 181, 171, 0.25);
+  color: var(--color-brand-accent, #f59e0b);
+  padding: 0.3rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  max-width: 80%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.orderBadge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(10, 20, 16, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(156, 181, 171, 0.25);
+  color: var(--text-secondary, #9cb5ab);
+  padding: 0.25rem 0.6rem;
+  border-radius: 9999px;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.cardBody {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 0.85rem;
+}
+
+.cardTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.itemIconBox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: rgba(245, 158, 11, 0.12);
+  color: var(--color-brand-accent, #f59e0b);
+  flex-shrink: 0;
+}
+
+.itemTitle {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary, #f3f7f5);
+  margin: 0;
+  line-height: 1.3;
+}
+
+.itemDescription {
+  font-size: 0.85rem;
+  color: var(--text-secondary, #9cb5ab);
+  line-height: 1.5;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.featureChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: auto;
+  padding-top: 0.5rem;
+}
+
+.featureChip {
+  font-size: 0.725rem;
+  background: rgba(156, 181, 171, 0.08);
+  border: 1px solid rgba(156, 181, 171, 0.15);
+  color: var(--text-secondary, #9cb5ab);
+  padding: 0.2rem 0.55rem;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.cardFooter {
+  border-top: 1px solid var(--border-subtle, rgba(156, 181, 171, 0.1));
+  padding: 0.85rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  background: rgba(10, 20, 16, 0.3);
+}
+
+.statusToggle {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.775rem;
+  cursor: pointer;
+  background: none;
+  border: none;
+  color: var(--text-secondary, #9cb5ab);
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+}
+
+.statusToggle:hover {
+  background: rgba(156, 181, 171, 0.1);
+  color: var(--text-primary, #f3f7f5);
+}
+
+.statusActive {
+  color: #10b981;
+}
+
+.statusInactive {
+  color: #ef4444;
+}
+
+.actionButtons {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.btnIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: rgba(156, 181, 171, 0.08);
+  border: 1px solid rgba(156, 181, 171, 0.15);
+  color: var(--text-secondary, #9cb5ab);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btnIcon:hover {
+  background: rgba(245, 158, 11, 0.15);
+  border-color: rgba(245, 158, 11, 0.4);
+  color: var(--color-brand-accent, #f59e0b);
+}
+
+.btnIconDanger:hover {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #ef4444;
+}
+
+/* --------------------------------------------------------------------------
+   Modales (Formulario y Confirmación)
+   -------------------------------------------------------------------------- */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  padding: 1.5rem;
+}
+
+.modalContent {
+  background: var(--bg-surface, #11221c);
+  border: 1px solid var(--border-subtle, rgba(156, 181, 171, 0.2));
+  border-radius: var(--radius-lg, 16px);
+  width: 100%;
+  max-width: 650px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+  animation: modalEnter 0.2s ease-out;
+}
+
+@keyframes modalEnter {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.modalHeader {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--border-subtle, rgba(156, 181, 171, 0.15));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modalTitle {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text-primary, #f3f7f5);
+  margin: 0;
+}
+
+.modalCloseBtn {
+  background: none;
+  border: none;
+  color: var(--text-muted, #5e7a6f);
+  cursor: pointer;
+  padding: 0.3rem;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.modalCloseBtn:hover {
+  color: var(--text-primary, #f3f7f5);
+  background: rgba(156, 181, 171, 0.1);
+}
+
+.modalBody {
+  padding: 1.5rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.modalFooter {
+  padding: 1.25rem 1.5rem;
+  border-top: 1px solid var(--border-subtle, rgba(156, 181, 171, 0.15));
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* --------------------------------------------------------------------------
+   Gestor de Features / Beneficios
+   -------------------------------------------------------------------------- */
+.featureList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.featureRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.featureInput {
+  flex: 1;
+  background-color: var(--bg-main, #0a1410);
+  border: 1px solid var(--border-subtle, rgba(156, 181, 171, 0.2));
+  border-radius: var(--radius-md, 8px);
+  padding: 0.5rem 0.75rem;
+  color: var(--text-primary, #f3f7f5);
+  font-size: 0.85rem;
+  outline: none;
+}
+
+.featureInput:focus {
+  border-color: var(--color-brand-accent, #f59e0b);
+}
+
+.addFeatureRow {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* --------------------------------------------------------------------------
+   Selector de Imagen y Subida
+   -------------------------------------------------------------------------- */
+.imageSelectorTabs {
+  display: flex;
+  gap: 0.5rem;
+  background: var(--bg-main, #0a1410);
+  padding: 0.25rem;
+  border-radius: 8px;
+  border: 1px solid var(--border-subtle, rgba(156, 181, 171, 0.15));
+}
+
+.tabBtn {
+  flex: 1;
+  background: none;
+  border: none;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary, #9cb5ab);
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+}
+
+.tabBtnActive {
+  background: rgba(245, 158, 11, 0.15);
+  color: var(--color-brand-accent, #f59e0b);
+}
+
+.uploadBox {
+  border: 2px dashed var(--border-subtle, rgba(156, 181, 171, 0.25));
+  border-radius: var(--radius-md, 10px);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 0.5rem;
+  background: rgba(10, 20, 16, 0.4);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.uploadBox:hover {
+  border-color: var(--color-brand-accent, #f59e0b);
+  background: rgba(245, 158, 11, 0.04);
+}
+
+.localPhotosGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 0.6rem;
+  max-height: 180px;
+  overflow-y: auto;
+  padding: 0.5rem;
+  background: var(--bg-main, #0a1410);
+  border-radius: 8px;
+  border: 1px solid var(--border-subtle, rgba(156, 181, 171, 0.15));
+}
+
+.photoThumbOption {
+  position: relative;
+  aspect-ratio: 4/3;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.photoThumbOption:hover {
+  transform: scale(1.04);
+}
+
+.photoThumbSelected {
+  border-color: var(--color-brand-accent, #f59e0b);
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.3);
+}
+
+.thumbImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* --------------------------------------------------------------------------
+   Botones principales
+   -------------------------------------------------------------------------- */
+.btnPrimary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: var(--color-brand-accent, #f59e0b);
+  color: #0a1410;
+  font-weight: 700;
+  font-size: 0.875rem;
+  padding: 0.65rem 1.25rem;
+  border-radius: var(--radius-md, 10px);
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btnPrimary:hover:not(:disabled) {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.3);
+}
+
+.btnPrimary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btnSecondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: rgba(156, 181, 171, 0.1);
+  border: 1px solid var(--border-subtle, rgba(156, 181, 171, 0.2));
+  color: var(--text-primary, #f3f7f5);
+  font-weight: 600;
+  font-size: 0.875rem;
+  padding: 0.65rem 1.25rem;
+  border-radius: var(--radius-md, 10px);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btnSecondary:hover {
+  background: rgba(156, 181, 171, 0.18);
+}
+
+.btnDanger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: #ef4444;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.875rem;
+  padding: 0.65rem 1.25rem;
+  border-radius: var(--radius-md, 10px);
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btnDanger:hover:not(:disabled) {
+  filter: brightness(1.1);
+  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.3);
+}
+
+/* --------------------------------------------------------------------------
+   Icon Selector Grid
+   -------------------------------------------------------------------------- */
+.iconGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+  gap: 0.5rem;
+}
+
+.iconOption {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  padding: 0.6rem 0.4rem;
+  background: var(--bg-main, #0a1410);
+  border: 1px solid var(--border-subtle, rgba(156, 181, 171, 0.15));
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--text-secondary, #9cb5ab);
+  font-size: 0.7rem;
+  transition: all 0.15s ease;
+}
+
+.iconOption:hover {
+  border-color: var(--color-brand-accent, #f59e0b);
+  color: var(--text-primary, #f3f7f5);
+}
+
+.iconOptionSelected {
+  border-color: var(--color-brand-accent, #f59e0b);
+  background: rgba(245, 158, 11, 0.12);
+  color: var(--color-brand-accent, #f59e0b);
+}
+
+/* --------------------------------------------------------------------------
+   Alert Notification Banner
+   -------------------------------------------------------------------------- */
+.notificationBanner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1.25rem;
+  border-radius: var(--radius-md, 10px);
+  font-size: 0.875rem;
+  font-weight: 500;
+  animation: bannerEnter 0.2s ease;
+}
+
+@keyframes bannerEnter {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.bannerSuccess {
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  color: #34d399;
+}
+
+.bannerError {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #f87171;
+}
+
+/* Responsividad */
+@media (max-width: 768px) {
+  .settingsForm {
+    grid-template-columns: 1fr;
+  }
+
+  .cardsGrid {
+    grid-template-columns: 1fr;
+  }
+}

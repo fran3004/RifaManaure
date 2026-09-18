@@ -564,6 +564,75 @@ export type Database = {
         };
         Relationships: [];
       };
+      prize_settings: {
+        Row: {
+          id: string;
+          badge_text: string;
+          title: string;
+          subtitle: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          badge_text?: string;
+          title?: string;
+          subtitle?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          badge_text?: string;
+          title?: string;
+          subtitle?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      prize_experiences: {
+        Row: {
+          id: string;
+          title: string;
+          partner_name: string;
+          description: string;
+          features: Json;
+          image_url: string | null;
+          image_slug: string | null;
+          icon: string;
+          display_order: number;
+          is_active: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          title: string;
+          partner_name: string;
+          description: string;
+          features?: Json;
+          image_url?: string | null;
+          image_slug?: string | null;
+          icon?: string;
+          display_order?: number;
+          is_active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          title?: string;
+          partner_name?: string;
+          description?: string;
+          features?: Json;
+          image_url?: string | null;
+          image_slug?: string | null;
+          icon?: string;
+          display_order?: number;
+          is_active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: {
       [_ in never]: never;

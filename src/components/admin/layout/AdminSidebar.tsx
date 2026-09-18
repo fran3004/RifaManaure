@@ -16,6 +16,7 @@ import {
   X,
   LogOut,
   Users,
+  Gift,
 } from 'lucide-react';
 import styles from './AdminSidebar.module.css';
 
@@ -136,6 +137,17 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({ isOpen, onClose }) =
           >
             <Sparkles size={18} className={styles.linkIcon} />
             <span>Rifas</span>
+          </NavLink>
+
+          <NavLink
+            to="/admin/premio"
+            className={({ isActive }) =>
+              `${styles.navLink} ${isActive ? styles.navLinkActive : ''}`
+            }
+            onClick={handleLinkClick}
+          >
+            <Gift size={18} className={styles.linkIcon} />
+            <span>El Premio</span>
           </NavLink>
 
           <NavLink

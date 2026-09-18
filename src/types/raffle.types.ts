@@ -101,3 +101,15 @@ export interface SystemSettingsResponse {
   error?: string;
   message?: string;
 }
+
+export type PrizeSettingsRow = Database['public']['Tables']['prize_settings']['Row'];
+export type PrizeSettingsUpdate = Database['public']['Tables']['prize_settings']['Update'];
+
+export type PrizeExperienceRow = Database['public']['Tables']['prize_experiences']['Row'];
+export type PrizeExperienceInsert = Database['public']['Tables']['prize_experiences']['Insert'];
+export type PrizeExperienceUpdate = Database['public']['Tables']['prize_experiences']['Update'];
+
+export interface PublicPrizeData {
+  settings: PrizeSettingsRow;
+  experiences: PrizeExperienceRow[];
+}
