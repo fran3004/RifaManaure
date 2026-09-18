@@ -50,3 +50,4 @@ $$;
 
 GRANT EXECUTE ON FUNCTION public.is_admin(UUID) TO anon, authenticated, service_role;
 GRANT EXECUTE ON FUNCTION public.is_superadmin(UUID) TO anon, authenticated, service_role;
+
