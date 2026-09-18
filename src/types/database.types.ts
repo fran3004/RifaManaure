@@ -438,7 +438,6 @@ export type Database = {
           event_type: 'payment_received' | 'payment_approved' | 'payment_rejected' | 'PAYMENT_RECEIVED' | 'PAYMENT_APPROVED' | 'PAYMENT_REJECTED';
           channel: 'email' | 'whatsapp' | 'sms';
           recipient: string;
-          resend_email_id: string | null;
           status: 'pending' | 'sent' | 'delivered' | 'failed' | 'bounced';
           attempts: number;
           error_message: string | null;
@@ -453,7 +452,6 @@ export type Database = {
           event_type: 'payment_received' | 'payment_approved' | 'payment_rejected' | 'PAYMENT_RECEIVED' | 'PAYMENT_APPROVED' | 'PAYMENT_REJECTED';
           channel?: 'email' | 'whatsapp' | 'sms';
           recipient: string;
-          resend_email_id?: string | null;
           status?: 'pending' | 'sent' | 'delivered' | 'failed' | 'bounced';
           attempts?: number;
           error_message?: string | null;
@@ -468,7 +466,6 @@ export type Database = {
           event_type?: 'payment_received' | 'payment_approved' | 'payment_rejected' | 'PAYMENT_RECEIVED' | 'PAYMENT_APPROVED' | 'PAYMENT_REJECTED';
           channel?: 'email' | 'whatsapp' | 'sms';
           recipient?: string;
-          resend_email_id?: string | null;
           status?: 'pending' | 'sent' | 'delivered' | 'failed' | 'bounced';
           attempts?: number;
           error_message?: string | null;
