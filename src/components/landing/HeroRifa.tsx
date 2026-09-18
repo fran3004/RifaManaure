@@ -43,15 +43,18 @@ export const HeroRifa: React.FC<HeroRifaProps> = ({
   drawDateFormatted: propDrawDate,
   lotteryReference: propLottery,
 }) => {
-  const { raffle, unitPrice } = useTicketCart();
+  const { raffle, unitPrice, isLoading } = useTicketCart();
+
+  const isPaused = raffle?.status === 'paused';
+  const isClosed = raffle?.status === 'closed' || raffle?.status === 'finished';
 
   const ticketPrice =
     propTicketPrice ?? (raffle?.ticket_price ? Number(raffle.ticket_price) : unitPrice);
   const drawDateFormatted = propDrawDate ?? formatDrawDate(raffle?.draw_date);
   const lotteryReference =
     propLottery ?? (raffle?.lottery_reference || 'Lotería de Santander (3 cifras)');
-  const isPaused = raffle?.status === 'paused';
-  const isClosed = raffle?.status === 'closed' || raffle?.status === 'finished';
+
+  const isColdLoading = isLoading && !raffle;
 
   const heroImage = fotosParaHero[0] || {
     hero: '',
@@ -80,7 +83,9 @@ export const HeroRifa: React.FC<HeroRifaProps> = ({
 
       <div className={`container ${styles.contentContainer}`}>
         {/* Badge superior con estado de la rifa */}
-        {isPaused ? (
+        {isColdLoading ? (
+          <div className={styles.skeletonBadge} />
+        ) : isPaused ? (
           <div
             className={styles.badge}
             style={{
@@ -108,33 +113,37 @@ export const HeroRifa: React.FC<HeroRifaProps> = ({
           <div className={styles.badge}>
             <Sparkles size={16} className={styles.badgeIcon} />
             <span>
-              {raffle?.title ? 'Sorteo Oficial Activo' : 'Gran Rifa Ecoturística Oficial 2026'}
+              {raffle?.status === 'active' ? 'Sorteo Oficial Activo' : 'Gran Sorteo Manaure Vive'}
             </span>
           </div>
         )}
 
         {/* Titular Impactante */}
-        <h1 className={styles.title}>
-          {raffle?.title ? (
-            raffle.title
-          ) : (
-            <>
-              Gana una experiencia <span className="highlight-text">todo incluido</span> en Manaure,
-              Balcón del Cesar
-            </>
-          )}
-        </h1>
+        {isColdLoading ? (
+          <div className={styles.skeletonTitle} />
+        ) : (
+          <h1 className={styles.title}>{raffle?.title || 'Gran Rifa Ecoturística Manaure Vive'}</h1>
+        )}
 
-        <p className={styles.subtitle}>
-          {raffle?.description ||
-            'Disfruta 3 días y 2 noches de ensueño para 2 personas con hospedaje en Glamping de lujo, rutas en Cuatrimoto por la Serranía del Perijá, vuelo en Parapente, gastronomía típica y fotografía profesional.'}
-        </p>
+        {/* Subtítulo Descriptivo */}
+        {isColdLoading ? (
+          <div className={styles.skeletonSubtitle} />
+        ) : (
+          <p className={styles.subtitle}>
+            {raffle?.description ||
+              'Gana una experiencia ecoturística todo incluido para 2 personas en Manaure (Balcón del Cesar): Hospedaje en Glamping de lujo, Tour en Cuatrimoto por la Serranía del Perijá, Vuelo en Parapente, Cena Gourmet y Fotografía Profesional.'}
+          </p>
+        )}
 
         {/* Tarjeta de Precios y CTA */}
         <div className={styles.ctaBox}>
           <div className={styles.priceTag}>
             <span className={styles.priceLabel}>Valor por Boleto</span>
-            <strong className={styles.priceValue}>{formatCOP(ticketPrice)}</strong>
+            {isColdLoading || ticketPrice <= 0 ? (
+              <div className={styles.skeletonPrice} />
+            ) : (
+              <strong className={styles.priceValue}>{formatCOP(ticketPrice)}</strong>
+            )}
           </div>
 
           <div className={styles.ctaActions}>

@@ -32,9 +32,27 @@ const localAliadosMap = new Map(
   ])
 );
 
+const PARTNERS_CACHE_KEY = 'manaure_partners_cache';
+
+function getCachedPartners(): PartnerRow[] {
+  try {
+    if (typeof window !== 'undefined') {
+      const cached = localStorage.getItem(PARTNERS_CACHE_KEY);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    }
+  } catch {
+    // Ignorar errores de cache
+  }
+  return [];
+}
+
 export const FilaAliados: React.FC = () => {
-  const [partners, setPartners] = useState<PartnerRow[]>([]);
-  const [isLoadedFromDb, setIsLoadedFromDb] = useState(false);
+  const cachedPartners = getCachedPartners();
+  const [partners, setPartners] = useState<PartnerRow[]>(cachedPartners);
+  const [isLoadedFromDb, setIsLoadedFromDb] = useState<boolean>(() => cachedPartners.length > 0);
 
   // Referencias para el carrusel continuo con acumulador de coma flotante y arrastre
   const trackRef = useRef<HTMLDivElement>(null);
@@ -56,6 +74,11 @@ export const FilaAliados: React.FC = () => {
         if (data && data.length > 0) {
           setPartners(data);
           setIsLoadedFromDb(true);
+          try {
+            if (typeof window !== 'undefined') {
+              localStorage.setItem(PARTNERS_CACHE_KEY, JSON.stringify(data));
+            }
+          } catch {}
         }
       } catch (err) {
         console.warn('Aviso: usando catálogo local de aliados:', err);

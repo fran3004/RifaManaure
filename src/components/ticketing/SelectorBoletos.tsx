@@ -107,7 +107,7 @@ export const SelectorBoletos: React.FC = () => {
           </h2>
           <p className={styles.subtitle}>
             Haz clic en los números que deseas comprar o usa el botón de selección aleatoria. Valor
-            por boleto: <strong>{formatCOP(unitPrice)}</strong>.
+            por boleto: <strong>{unitPrice > 0 ? formatCOP(unitPrice) : '...'}</strong>.
           </p>
 
           {/* Banner de Sorteo Pausado */}

@@ -8,19 +8,47 @@ import { getRandomTicketNumbers } from '@/lib/utils';
 import { TicketCartContext } from './TicketCartContextDefinition';
 import { ToastNotification, type ToastItem } from '@/components/common/ToastNotification';
 
+const RAFFLE_CACHE_KEY = 'manaure_active_raffle_cache';
+const WINNER_CACHE_KEY = 'manaure_active_winner_cache';
+
+function getCachedRaffle(): RaffleRow | null {
+  try {
+    if (typeof window !== 'undefined') {
+      const item = localStorage.getItem(RAFFLE_CACHE_KEY);
+      if (item) return JSON.parse(item);
+    }
+  } catch {
+    // Ignorar errores de parseo o almacenamiento
+  }
+  return null;
+}
+
+function getCachedWinner(): WinnerWithDetails | null {
+  try {
+    if (typeof window !== 'undefined') {
+      const item = localStorage.getItem(WINNER_CACHE_KEY);
+      if (item) return JSON.parse(item);
+    }
+  } catch {
+    // Ignorar errores de parseo o almacenamiento
+  }
+  return null;
+}
+
 export const TicketCartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const systemSettings = useSystemSettings();
-  const [raffle, setRaffle] = useState<RaffleRow | null>(null);
-  const [winner, setWinner] = useState<WinnerWithDetails | null>(null);
+  const cachedRaffle = getCachedRaffle();
+  const [raffle, setRaffle] = useState<RaffleRow | null>(cachedRaffle);
+  const [winner, setWinner] = useState<WinnerWithDetails | null>(getCachedWinner);
   const [tickets, setTickets] = useState<TicketRow[]>([]);
   const [selectedTickets, setSelectedTickets] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(() => !cachedRaffle);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState<boolean>(false);
   const [toast, setToast] = useState<ToastItem | null>(null);
 
   const maxTicketsPerBuyer =
     systemSettings?.max_tickets_per_buyer ?? raffle?.max_tickets_per_buyer ?? 20;
-  const unitPrice = raffle?.ticket_price ? Number(raffle.ticket_price) : 25000;
+  const unitPrice = raffle?.ticket_price ? Number(raffle.ticket_price) : 0;
   const totalAmount = selectedTickets.length * unitPrice;
 
   const showToast = useCallback(
@@ -48,21 +76,42 @@ export const TicketCartProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
       if (currentRaffle) {
         setRaffle(currentRaffle);
+        try {
+          if (typeof window !== 'undefined') {
+            localStorage.setItem(RAFFLE_CACHE_KEY, JSON.stringify(currentRaffle));
+          }
+        } catch {}
 
         // Consultar si esta edición de la rifa ya tiene ganador oficial registrado
         const raffleWinner = await getWinnerForRaffle(currentRaffle.id);
         if (raffleWinner && currentRaffle.status === 'finished') {
           setWinner(raffleWinner);
+          try {
+            if (typeof window !== 'undefined') {
+              localStorage.setItem(WINNER_CACHE_KEY, JSON.stringify(raffleWinner));
+            }
+          } catch {}
           setTickets([]);
           setSelectedTickets([]);
         } else {
           setWinner(null);
+          try {
+            if (typeof window !== 'undefined') {
+              localStorage.removeItem(WINNER_CACHE_KEY);
+            }
+          } catch {}
           const ticketList = await getTickets(currentRaffle.id);
           setTickets(ticketList);
         }
       } else {
         setRaffle(null);
         setWinner(null);
+        try {
+          if (typeof window !== 'undefined') {
+            localStorage.removeItem(RAFFLE_CACHE_KEY);
+            localStorage.removeItem(WINNER_CACHE_KEY);
+          }
+        } catch {}
         setTickets([]);
       }
     } catch (err) {
@@ -79,14 +128,30 @@ export const TicketCartProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
         if (currentRaffle) {
           setRaffle(currentRaffle);
+          try {
+            if (typeof window !== 'undefined') {
+              localStorage.setItem(RAFFLE_CACHE_KEY, JSON.stringify(currentRaffle));
+            }
+          } catch {}
+
           const raffleWinner = await getWinnerForRaffle(currentRaffle.id);
           if (ignore) return;
           if (raffleWinner && currentRaffle.status === 'finished') {
             setWinner(raffleWinner);
+            try {
+              if (typeof window !== 'undefined') {
+                localStorage.setItem(WINNER_CACHE_KEY, JSON.stringify(raffleWinner));
+              }
+            } catch {}
             setTickets([]);
             setSelectedTickets([]);
           } else {
             setWinner(null);
+            try {
+              if (typeof window !== 'undefined') {
+                localStorage.removeItem(WINNER_CACHE_KEY);
+              }
+            } catch {}
             const ticketList = await getTickets(currentRaffle.id);
             if (ignore) return;
             setTickets(ticketList);
@@ -94,6 +159,12 @@ export const TicketCartProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         } else {
           setRaffle(null);
           setWinner(null);
+          try {
+            if (typeof window !== 'undefined') {
+              localStorage.removeItem(RAFFLE_CACHE_KEY);
+              localStorage.removeItem(WINNER_CACHE_KEY);
+            }
+          } catch {}
           setTickets([]);
         }
       } catch (err) {

@@ -91,6 +91,7 @@ function formatOrderDateTime(date: Date): string {
 export const ModalCheckout: React.FC = () => {
   const {
     raffle,
+    unitPrice,
     selectedTickets,
     totalAmount,
     isCheckoutOpen,
@@ -715,7 +716,7 @@ export const ModalCheckout: React.FC = () => {
             <div className={styles.pricingCard}>
               <div className={styles.pricingRow}>
                 <span>Rifa:</span>
-                <strong>{raffle?.title || 'Gran Rifa Ecoturística'}</strong>
+                <strong>{raffle?.title || 'Gran Rifa Ecoturística Manaure Vive'}</strong>
               </div>
 
               <div className={styles.pricingRow}>
@@ -725,7 +726,7 @@ export const ModalCheckout: React.FC = () => {
 
               <div className={styles.pricingRow}>
                 <span>Valor Unitario por Boleto:</span>
-                <strong>{formatCOP(raffle?.ticket_price || 20000)}</strong>
+                <strong>{formatCOP(unitPrice || raffle?.ticket_price || 0)}</strong>
               </div>
 
               <div className={styles.pricingRow}>
