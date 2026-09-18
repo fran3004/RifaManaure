@@ -14,7 +14,7 @@ Plataforma web de alta concurrencia para la promoción ecoturística del municip
 - **Lógica Transaccional:** Funciones RPC atómicas con `pg_advisory_xact_lock` (`reserve_tickets`, `confirm_order_payment`, `reject_order_payment`, `register_winner`)
 - **Edge Functions (Deno):** Manejo de webhooks, despacho transaccional y cron de liberación de boletos expirados
 - **Servicio de Email Transaccional:** [Resend](https://resend.com/)
-- **Infraestructura de Despliegue:** [Cloudflare Pages](https://pages.cloudflare.com/) (SPA con cabeceras de seguridad CSP en `_headers`)
+- **Infraestructura de Despliegue:** [Vercel](https://vercel.com/) (SPA con enrutamiento dinámico rewrites, cabeceras CSP y caché en `vercel.json`)
 - **Calidad y Herramientas:** [Vitest 5](https://vitest.dev/), [Oxlint](https://oxc.rs/) (con plugins React, a11y, import y promise), [Prettier 3](https://prettier.io/)
 
 ---
@@ -34,7 +34,7 @@ Clonar el repositorio y ejecutar la instalación de dependencias:
 
 ```bash
 git clone <URL_DEL_REPOSITORIO>
-cd sistema-rifas
+cd RifaManaure
 npm install
 ```
 
@@ -98,9 +98,8 @@ supabase secrets set WOMPI_EVENTS_SECRET="tu_secreto_wompi"
 ## 6. Arquitectura del Proyecto
 
 ```
-sistema-rifas/
-├── public/                     # Activos estáticos públicos (PWA manifest, favicons, _headers CSP)
-│   ├── _headers                # Reglas de seguridad HTTP y CSP para Cloudflare Pages
+RifaManaure/
+├── public/                     # Activos estáticos públicos (PWA manifest, favicons, OG image)
 │   ├── site.webmanifest        # Manifiesto PWA con iconos 192x192 y 512x512
 │   ├── favicon.svg             # Favicon vectorial oficial de Manaure Vive
 │   └── og-image.jpg            # Imagen OpenGraph estandarizada (1200x630)
@@ -139,6 +138,7 @@ sistema-rifas/
 ├── .oxlintrc.json              # Configuración de Oxlint con plugins y reglas a11y
 ├── .prettierrc                 # Configuración de formateo Prettier
 ├── tsconfig.app.json           # Configuración TypeScript estricta del cliente ("strict": true)
+├── vercel.json                 # Configuración de Vercel (rewrites SPA, cabeceras CSP y caché)
 └── vite.config.ts              # Configuración de compilación Vite, alias @ y Vitest
 ```
 
@@ -158,17 +158,23 @@ sistema-rifas/
 
 ---
 
-## 8. Despliegue en Cloudflare Pages
+## 8. Despliegue en Vercel
 
-1. **Build Command:** `npm run build`
-2. **Build Output Directory:** `dist`
-3. **Variables de Entorno en Cloudflare Pages:**
-   - `VITE_SUPABASE_URL`: URL del proyecto de producción
-   - `VITE_SUPABASE_ANON_KEY`: Llave anónima pública de producción
-   - `VITE_SITE_URL`: Dominio público de producción (ej. `https://manaurevive.pages.dev` o dominio propio)
-   - `VITE_WHATSAPP_SUPPORT_NUMBER`: Número oficial de soporte (+57...)
-4. **Enrutamiento SPA:** Cloudflare Pages redirige automáticamente las sub-rutas a `index.html`.
-5. **Cabeceras de Seguridad:** El archivo `public/_headers` se copia automáticamente a la raíz de `dist/` en el build, aplicando directivas CSP, prevención de clickjacking (`X-Frame-Options: SAMEORIGIN`) y política de tipos MIME (`X-Content-Type-Options: nosniff`).
+La aplicación está completamente optimizada para su despliegue continuo en **Vercel** mediante integración con GitHub:
+
+1. **Preset de Framework:** `Vite` (autodetectado por Vercel).
+2. **Build Command:** `npm run build` (`tsc -b && vite build`).
+3. **Output Directory:** `dist`.
+4. **Node.js Version:** `20.x` (LTS).
+5. **Configuración Nativa (`vercel.json`):**
+   - **Enrutamiento SPA:** Regla de reescritura `/(.*) -> /index.html` para soportar navegación del lado del cliente (`react-router-dom`) sin errores 404 en refresco o acceso directo.
+   - **Cabeceras de Seguridad:** Inyección de directivas Content Security Policy (CSP estricta para Supabase y WSS), protección contra clickjacking (`X-Frame-Options: SAMEORIGIN`), prevención de sniffing MIME (`X-Content-Type-Options: nosniff`) y `Permissions-Policy`.
+   - **Caché Inmutable:** Cabecera `Cache-Control: public, max-age=31536000, immutable` para todos los activos estáticos versionados bajo `/assets/*`.
+6. **Variables de Entorno en Vercel Dashboard (Production & Preview):**
+   - `VITE_SUPABASE_URL`: URL del proyecto de producción Supabase (`https://<id>.supabase.co`).
+   - `VITE_SUPABASE_ANON_KEY`: Llave anónima pública de Supabase.
+   - `VITE_SITE_URL`: Dominio oficial de producción (ej. `https://manaurevive.vercel.app` o dominio propio `https://manaurevive.com`).
+   - `VITE_WHATSAPP_SUPPORT_NUMBER`: Número oficial de atención y soporte (+57...).
 
 ---
 

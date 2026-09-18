@@ -15,8 +15,8 @@ function getCorsHeaders(req: Request) {
     "http://127.0.0.1:4173",
   ];
 
-  const isCloudflarePages = origin.endsWith(".pages.dev") && origin.startsWith("https://");
-  const isAllowed = allowedOrigins.includes(origin) || isCloudflarePages;
+  const isVercel = origin.endsWith(".vercel.app") && origin.startsWith("https://");
+  const isAllowed = allowedOrigins.includes(origin) || isVercel;
 
   return {
     "Access-Control-Allow-Origin": isAllowed ? origin : allowedOrigins[0],
