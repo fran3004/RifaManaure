@@ -45,4 +45,3 @@ describe('Inventario de Assets y Aliados (src/assets/assets.ts)', () => {
     expect(logoPrincipal).toBeDefined();
   });
 });
-
