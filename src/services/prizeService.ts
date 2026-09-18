@@ -335,7 +335,8 @@ export async function updatePrizeExperience(
         title: updates.title ? updates.title.trim() : undefined,
         partner_name: updates.partner_name ? updates.partner_name.trim() : undefined,
         description: updates.description ? updates.description.trim() : undefined,
-        image_url: updates.image_url !== undefined ? updates.image_url?.trim() || null : undefined,
+        image_url:
+          updates.image_url !== undefined ? updates.image_url?.trim() || null : undefined,
         image_slug: updates.image_slug ? updates.image_slug.trim() : undefined,
         icon: updates.icon ? updates.icon.trim() : undefined,
         updated_at: new Date().toISOString(),
@@ -469,3 +470,4 @@ export async function uploadPrizeImage(
     };
   }
 }
+

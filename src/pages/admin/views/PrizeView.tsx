@@ -240,7 +240,10 @@ export const PrizeView: React.FC = () => {
         setExperiences((prev) =>
           prev.map((item) => (item.id === exp.id ? { ...item, is_active: newState } : item))
         );
-        showFeedback('success', `Experiencia ${newState ? 'activada' : 'ocultada'} correctamente.`);
+        showFeedback(
+          'success',
+          `Experiencia ${newState ? 'activada' : 'ocultada'} correctamente.`
+        );
       } else {
         showFeedback('error', res.error || 'No fue posible cambiar el estado.');
       }
@@ -407,7 +410,11 @@ export const PrizeView: React.FC = () => {
         description="Administra el paquete completo, textos de presentación y las experiencias o actividades premiadas."
         badge="Premio Mayor"
         actions={
-          <button type="button" onClick={handleOpenCreateModal} className={styles.btnPrimary}>
+          <button
+            type="button"
+            onClick={handleOpenCreateModal}
+            className={styles.btnPrimary}
+          >
             <Plus size={18} />
             <span>Nueva Experiencia</span>
           </button>
@@ -453,7 +460,8 @@ export const PrizeView: React.FC = () => {
                 Edita el distintivo, título principal y la descripción introductoria.{' '}
                 {settings.updated_at && (
                   <span>
-                    (Última edición: {new Date(settings.updated_at).toLocaleDateString('es-CO')})
+                    (Última edición:{' '}
+                    {new Date(settings.updated_at).toLocaleDateString('es-CO')})
                   </span>
                 )}
               </p>
@@ -576,14 +584,21 @@ export const PrizeView: React.FC = () => {
                   className={`${styles.experienceCard} ${!exp.is_active ? styles.cardInactive : ''}`}
                 >
                   <div className={styles.imageContainer}>
-                    <img src={imageSrc} alt={exp.title} className={styles.cardImg} loading="lazy" />
+                    <img
+                      src={imageSrc}
+                      alt={exp.title}
+                      className={styles.cardImg}
+                      loading="lazy"
+                    />
                     <span className={styles.partnerTag}>{exp.partner_name}</span>
                     <span className={styles.orderBadge}>#{exp.display_order}</span>
                   </div>
 
                   <div className={styles.cardBody}>
                     <div className={styles.cardTitleRow}>
-                      <div className={styles.itemIconBox}>{renderExperienceIcon(exp.icon, 16)}</div>
+                      <div className={styles.itemIconBox}>
+                        {renderExperienceIcon(exp.icon, 16)}
+                      </div>
                       <h3 className={styles.itemTitle}>{exp.title}</h3>
                     </div>
 
@@ -597,7 +612,9 @@ export const PrizeView: React.FC = () => {
                           </span>
                         ))}
                         {featuresList.length > 3 && (
-                          <span className={styles.featureChip}>+{featuresList.length - 3} más</span>
+                          <span className={styles.featureChip}>
+                            +{featuresList.length - 3} más
+                          </span>
                         )}
                       </div>
                     )}
@@ -1054,3 +1071,4 @@ export const PrizeView: React.FC = () => {
     </div>
   );
 };
+
