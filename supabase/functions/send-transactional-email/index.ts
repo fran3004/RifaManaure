@@ -337,6 +337,8 @@ serve(async (req) => {
     const supportPhone = Deno.env.get("SUPPORT_PHONE") || "+57 300 000 0000";
     const supportEmail = Deno.env.get("SUPPORT_EMAIL") || "soporte@manaurevive.com";
 
+    const replyTo = Deno.env.get("RESEND_REPLY_TO") || supportEmail;
+
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // 2. Obtener datos reales de la orden desde PostgreSQL
@@ -388,7 +390,10 @@ serve(async (req) => {
     const buyer = order.buyers as unknown as { full_name: string; email: string; phone: string } | null;
     const raffle = order.raffles as unknown as { title: string; draw_date?: string } | null;
 
-    if (!buyer || !buyer.email) {
+    const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    const cleanBuyerEmail = buyer?.email?.trim().toLowerCase() || "";
+
+    if (!cleanBuyerEmail || !EMAIL_REGEX.test(cleanBuyerEmail)) {
       return new Response(
         JSON.stringify({
           success: false,
@@ -447,7 +452,7 @@ serve(async (req) => {
 
     // 6. Construir contenido del correo
     const { subject, html } = getEmailHtml(eventType, {
-      buyerName: buyer.full_name || "Comprador",
+      buyerName: buyer?.full_name || "Comprador",
       orderReference: order.reference,
       totalAmount: order.total_amount,
       ticketNumbers,
@@ -469,7 +474,8 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         from: fromEmail,
-        to: [buyer.email.trim().toLowerCase()],
+        to: [cleanBuyerEmail],
+        ...(replyTo ? { reply_to: replyTo.trim() } : {}),
         subject,
         html,
         tags: [

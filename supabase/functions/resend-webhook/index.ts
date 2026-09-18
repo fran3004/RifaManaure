@@ -36,33 +36,39 @@ serve(async (req) => {
     const rawBody = await req.text();
     const webhookSecret = Deno.env.get("RESEND_WEBHOOK_SECRET");
 
-    // 1. Verificación criptográfica de firma Svix si el secreto está configurado
-    if (webhookSecret) {
-      const svixId = req.headers.get("svix-id");
-      const svixTimestamp = req.headers.get("svix-timestamp");
-      const svixSignature = req.headers.get("svix-signature");
+    if (!webhookSecret) {
+      console.error("RESEND_WEBHOOK_SECRET no está configurado en los secretos de Supabase.");
+      return new Response(
+        JSON.stringify({ success: false, error: "Servicio de webhook no configurado en el servidor." }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
-      if (!svixId || !svixTimestamp || !svixSignature) {
-        return new Response(
-          JSON.stringify({ success: false, error: "Cabeceras Svix faltantes en el webhook de Resend." }),
-          { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
+    // 1. Verificación criptográfica obligatoria de firma Svix
+    const svixId = req.headers.get("svix-id");
+    const svixTimestamp = req.headers.get("svix-timestamp");
+    const svixSignature = req.headers.get("svix-signature");
 
-      try {
-        const wh = new Webhook(webhookSecret);
-        wh.verify(rawBody, {
-          "svix-id": svixId,
-          "svix-timestamp": svixTimestamp,
-          "svix-signature": svixSignature,
-        });
-      } catch (verifyError: unknown) {
-        const verifyMsg = verifyError instanceof Error ? verifyError.message : "Firma inválida";
-        return new Response(
-          JSON.stringify({ success: false, error: `Firma de webhook inválida: ${verifyMsg}` }),
-          { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
+    if (!svixId || !svixTimestamp || !svixSignature) {
+      return new Response(
+        JSON.stringify({ success: false, error: "Cabeceras Svix faltantes en el webhook de Resend." }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    try {
+      const wh = new Webhook(webhookSecret);
+      wh.verify(rawBody, {
+        "svix-id": svixId,
+        "svix-timestamp": svixTimestamp,
+        "svix-signature": svixSignature,
+      });
+    } catch (verifyError: unknown) {
+      const verifyMsg = verifyError instanceof Error ? verifyError.message : "Firma inválida";
+      return new Response(
+        JSON.stringify({ success: false, error: `Firma de webhook inválida: ${verifyMsg}` }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
@@ -108,10 +114,14 @@ serve(async (req) => {
       case "email.bounced":
         newStatus = "bounced";
         break;
+      case "email.complained":
+        newStatus = "complained";
+        break;
       case "email.failed":
         newStatus = "failed";
         break;
       default:
+        console.log(`Evento de Resend recibido (${type}) no requiere actualización de estado en notification_logs.`);
         newStatus = null;
     }
 
@@ -132,6 +142,10 @@ serve(async (req) => {
 
       if (error) {
         console.error("Error al actualizar notification_logs por webhook:", error.message);
+        return new Response(
+          JSON.stringify({ success: false, error: "Error al actualizar estado en base de datos." }),
+          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
       }
     }
 
