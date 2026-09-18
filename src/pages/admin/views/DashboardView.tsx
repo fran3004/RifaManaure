@@ -31,7 +31,7 @@ import {
   Layers,
   Send,
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { AdminOrderReviewModal } from '@/components/admin/orders/AdminOrderReviewModal';
 import { useAdminRaffle } from '@/context/AdminRaffleContext';
 import styles from './AdminViews.module.css';
@@ -226,6 +226,7 @@ export const DashboardView: React.FC = () => {
   >([]);
 
   const { selectedRaffleId, selectedRaffle } = useAdminRaffle();
+  const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = useState<'orders' | 'receipts' | 'audit'>('orders');
   const [selectedOrderForReview, setSelectedOrderForReview] = useState<OrderWithDetails | null>(
@@ -312,6 +313,29 @@ export const DashboardView: React.FC = () => {
     setSelectedOrderForReview(null);
   };
 
+  const handleViewReceipts = () => {
+    // 1. Buscar si hay comprobante pendiente de verificación en los datos cargados en memoria
+    const pendingOrder =
+      recentReceipts.find((o) => o.status === 'pending_verification') ||
+      recentOrders.find((o) => o.status === 'pending_verification');
+
+    // 2. Activar la pestaña de comprobantes
+    setActiveTab('receipts');
+
+    // 3. Desplazar suavemente la pantalla hacia la sección de comprobantes
+    const tabsSection = document.getElementById('dashboard-tabs-section');
+    if (tabsSection) {
+      tabsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // 4. Si hay una orden pendiente específica, abrir de inmediato su modal de revisión
+    if (pendingOrder) {
+      handleOpenReview(pendingOrder);
+    } else if (!tabsSection && recentReceipts.length === 0) {
+      navigate('/admin/comprobantes');
+    }
+  };
+
   const handleOrderUpdated = async () => {
     await loadData();
   };
@@ -385,11 +409,7 @@ export const DashboardView: React.FC = () => {
                 </div>
               </div>
               <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <button
-                  type="button"
-                  className={styles.btnPrimary}
-                  onClick={() => setActiveTab('receipts')}
-                >
+                <button type="button" className={styles.btnPrimary} onClick={handleViewReceipts}>
                   <Eye size={16} />
                   <span>Ver Comprobantes</span>
                 </button>
@@ -491,7 +511,7 @@ export const DashboardView: React.FC = () => {
                 {metrics.pendingReceiptsCount > 0 ? (
                   <button
                     type="button"
-                    onClick={() => setActiveTab('receipts')}
+                    onClick={handleViewReceipts}
                     style={{
                       background: 'none',
                       border: 'none',
@@ -645,7 +665,7 @@ export const DashboardView: React.FC = () => {
           </div>
 
           {/* Sección Dinámica con Pestañas: Órdenes, Comprobantes, Actividad */}
-          <div className={styles.cardSection}>
+          <div id="dashboard-tabs-section" className={styles.cardSection}>
             <div className={styles.dashboardTabsRow}>
               <button
                 type="button"
