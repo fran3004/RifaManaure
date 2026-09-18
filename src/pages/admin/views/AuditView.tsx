@@ -297,16 +297,60 @@ function getNarrative(log: AuditLogItem): NarrativeResult {
     };
   }
 
-  if (action.includes('RAFFLE_UPDATED')) {
+  if (action.includes('RAFFLE_UPDATED') || action.includes('RAFFLE_EDIT')) {
     const newVals = (d.new_values as Record<string, unknown>) || {};
-    const title = (newVals.title as string) || 'Rifa';
-    const status = (newVals.status as string) || '';
+    const prevVals = (d.previous_values as Record<string, unknown>) || {};
+    const title =
+      (newVals.title as string) || (prevVals.title as string) || (d.title as string) || 'Rifa';
+    const status = (newVals.status as string) || (d.status as string) || '';
+    const newPrice =
+      typeof newVals.ticket_price === 'number'
+        ? formatCOP(newVals.ticket_price)
+        : typeof d.ticket_price === 'number'
+          ? formatCOP(d.ticket_price)
+          : null;
+    const oldPrice =
+      typeof prevVals.ticket_price === 'number' ? formatCOP(prevVals.ticket_price) : null;
+
+    const changeDetails: string[] = [];
+    if (newVals.status && prevVals.status && newVals.status !== prevVals.status) {
+      changeDetails.push(`el estado pasó a "${newVals.status}"`);
+    } else if (status) {
+      changeDetails.push(`estado "${status}"`);
+    }
+
+    if (
+      newVals.ticket_price &&
+      prevVals.ticket_price &&
+      newVals.ticket_price !== prevVals.ticket_price
+    ) {
+      changeDetails.push(`precio ajustado de ${oldPrice} a ${newPrice}`);
+    }
+
+    if (
+      newVals.lottery_reference &&
+      prevVals.lottery_reference &&
+      newVals.lottery_reference !== prevVals.lottery_reference
+    ) {
+      changeDetails.push(`lotería asignada "${newVals.lottery_reference}"`);
+    }
+
+    if (newVals.draw_date && prevVals.draw_date && newVals.draw_date !== prevVals.draw_date) {
+      changeDetails.push('fecha del sorteo actualizada');
+    }
+
+    const detailText =
+      changeDetails.length > 0
+        ? `Se modificaron los parámetros: ${changeDetails.join(', ')} desde el panel de administración.`
+        : `Se actualizaron los parámetros operativos, precio o fecha de sorteo desde el panel de administración.`;
+
     return {
       headline: `Parámetros de la rifa "${title}" actualizados.`,
-      detail: `Se modificaron precio, fecha de sorteo, lotería de referencia o estado operativo desde el panel de administración.`,
+      detail: detailText,
       chips: [
         { label: title, type: 'emerald' as const },
         ...(status ? [{ label: `Estado: ${status}`, type: 'gold' as const }] : []),
+        ...(newPrice ? [{ label: `Precio: ${newPrice}`, type: 'muted' as const }] : []),
       ],
     };
   }
@@ -676,20 +720,123 @@ function getAuditRowData(log: AuditLogItem): AuditRowData {
     };
   }
 
+  if (action.includes('RAFFLE_UPDATED') || action.includes('RAFFLE_EDIT')) {
+    const newVals = (d.new_values as Record<string, unknown>) || {};
+    const prevVals = (d.previous_values as Record<string, unknown>) || {};
+    const title =
+      (newVals.title as string) || (prevVals.title as string) || (d.title as string) || 'Rifa';
+    const status = (newVals.status as string) || (d.status as string) || '';
+    const newPrice =
+      typeof newVals.ticket_price === 'number'
+        ? formatCOP(newVals.ticket_price)
+        : typeof d.ticket_price === 'number'
+          ? formatCOP(d.ticket_price)
+          : null;
+    const oldPrice =
+      typeof prevVals.ticket_price === 'number' ? formatCOP(prevVals.ticket_price) : null;
+
+    const changeDetails: string[] = [];
+    if (newVals.status && prevVals.status && newVals.status !== prevVals.status) {
+      changeDetails.push(`Estado: ${prevVals.status} → ${newVals.status}`);
+    } else if (status) {
+      changeDetails.push(`Estado: ${status}`);
+    }
+
+    if (
+      newVals.ticket_price &&
+      prevVals.ticket_price &&
+      newVals.ticket_price !== prevVals.ticket_price
+    ) {
+      changeDetails.push(`Precio: ${oldPrice} → ${newPrice}`);
+    }
+
+    if (
+      newVals.lottery_reference &&
+      prevVals.lottery_reference &&
+      newVals.lottery_reference !== prevVals.lottery_reference
+    ) {
+      changeDetails.push(`Lotería: ${newVals.lottery_reference}`);
+    }
+
+    if (newVals.draw_date && prevVals.draw_date && newVals.draw_date !== prevVals.draw_date) {
+      changeDetails.push('Fecha de sorteo actualizada');
+    }
+
+    const description =
+      changeDetails.length > 0
+        ? `Parámetros de "${title}" actualizados (${changeDetails.join(', ')}).`
+        : `Parámetros operativos de "${title}" modificados desde la configuración administrativa.`;
+
+    return {
+      time,
+      event: {
+        title: 'Parámetros Editados',
+        pillClass: styles.pillSuccess,
+        icon: <Sparkles size={14} />,
+      },
+      reference: title,
+      referenceType: null,
+      description,
+      amount: newPrice,
+      tickets: status ? `Estado: ${status}` : null,
+      fileInfo: null,
+      actor: { label: 'Administrador', type: 'admin' },
+    };
+  }
+
+  if (action.includes('RAFFLE_CREATED') || action === 'RAFFLE') {
+    const title = (d.title as string) || 'Nueva Rifa';
+    const total = typeof d.total_tickets === 'number' ? d.total_tickets : null;
+    const price = typeof d.ticket_price === 'number' ? formatCOP(d.ticket_price) : null;
+
+    return {
+      time,
+      event: {
+        title: 'Nueva Rifa Creada',
+        pillClass: styles.pillSuccess,
+        icon: <Sparkles size={14} />,
+      },
+      reference: title,
+      referenceType: null,
+      description: `Lanzamiento y configuración de nueva edición "${title}". Boletos generados atómicamente.`,
+      amount: price,
+      tickets: total ? `${total} boletos` : null,
+      fileInfo: null,
+      actor: { label: 'Administrador', type: 'admin' },
+    };
+  }
+
+  // Fallback con nombres amigables en español y actor coherente
+  const isActorAdmin = Boolean(
+    log.performed_by ||
+    action.includes('ADMIN') ||
+    action.includes('UPDATE') ||
+    action.includes('DELETE') ||
+    action.includes('CREATE')
+  );
+
+  let fallbackTitle = action.replace(/_/g, ' ');
+  if (action.includes('RAFFLE')) fallbackTitle = 'Gestión de Rifa';
+  else if (action.includes('PAYMENT')) fallbackTitle = 'Gestión de Pago';
+  else if (action.includes('TICKET')) fallbackTitle = 'Gestión de Boletos';
+  else if (action.includes('ORDER')) fallbackTitle = 'Gestión de Orden';
+
   return {
     time,
     event: {
-      title: action.replace(/_/g, ' '),
+      title: fallbackTitle,
       pillClass: styles.pillNeutral,
       icon: <Activity size={14} />,
     },
     reference: ref || null,
     referenceType: ref ? 'order' : null,
-    description: 'Evento de auditoría registrado correctamente en la plataforma.',
+    description: 'Operación registrada y respaldada en la bitácora inmutable de seguridad.',
     amount: total,
     tickets: null,
     fileInfo: null,
-    actor: { label: 'Sistema', type: 'system' },
+    actor: isActorAdmin
+      ? { label: 'Administrador', type: 'admin' }
+      : { label: 'Sistema', type: 'system' },
   };
 }
 
@@ -858,6 +1005,7 @@ export const AuditView: React.FC = () => {
             <option value="PROOF">Comprobantes Enviados</option>
             <option value="PENDING">Pendientes de Validación</option>
             <option value="TICKET">Gestión de Boletos</option>
+            <option value="RAFFLE">Configuración de Rifa</option>
             <option value="WINNER">Ganadores Registrados</option>
             <option value="REJECTED">Pagos Rechazados</option>
           </select>
@@ -1158,7 +1306,17 @@ export const AuditView: React.FC = () => {
                               className={
                                 row.referenceType === 'order' ? styles.chipGold : styles.chipEmerald
                               }
-                              style={{ fontSize: '0.78rem', padding: '0.2rem 0.55rem' }}
+                              style={{
+                                fontSize: '0.78rem',
+                                padding: '0.2rem 0.55rem',
+                                display: 'inline-block',
+                                maxWidth: '140px',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap',
+                                verticalAlign: 'middle',
+                              }}
+                              title={row.reference}
                             >
                               {row.reference}
                             </span>

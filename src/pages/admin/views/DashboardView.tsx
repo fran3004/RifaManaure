@@ -31,6 +31,7 @@ import {
   Layers,
   Send,
   Trophy,
+  Sparkles,
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AdminOrderReviewModal } from '@/components/admin/orders/AdminOrderReviewModal';
@@ -925,6 +926,7 @@ export const DashboardView: React.FC = () => {
                   <div className={styles.activityTimeline}>
                     {auditLogs.map((log) => {
                       const isWinner = log.action.toLowerCase().includes('winner');
+                      const isRaffle = log.action.toLowerCase().includes('raffle');
                       const isApprove =
                         log.action.toLowerCase().includes('approve') ||
                         log.action.toLowerCase().includes('aprobar');
@@ -944,6 +946,12 @@ export const DashboardView: React.FC = () => {
                         iconClass = styles.activityIconApprove;
                         icon = <Trophy size={16} />;
                         actionTitle = 'Sorteo Oficial: Ganador Registrado';
+                      } else if (isRaffle) {
+                        iconClass = styles.activityIconApprove;
+                        icon = <Sparkles size={16} />;
+                        actionTitle = log.action.toLowerCase().includes('create')
+                          ? 'Nueva Rifa Creada'
+                          : 'Parámetros de Rifa Editados';
                       } else if (isApprove) {
                         iconClass = styles.activityIconApprove;
                         icon = <CheckCircle2 size={16} />;
@@ -975,6 +983,28 @@ export const DashboardView: React.FC = () => {
                                   {log.details.order_reference
                                     ? `Orden: ${String(log.details.order_reference)}`
                                     : ''}
+                                </span>
+                              ) : isRaffle && log.details ? (
+                                <span>
+                                  {Boolean(
+                                    (log.details.new_values as Record<string, unknown>)?.title ||
+                                    log.details.title
+                                  ) && (
+                                    <>
+                                      Rifa:{' '}
+                                      {String(
+                                        (log.details.new_values as Record<string, unknown>)
+                                          ?.title || log.details.title
+                                      )}{' '}
+                                      •{' '}
+                                    </>
+                                  )}
+                                  {Boolean(
+                                    (log.details.new_values as Record<string, unknown>)?.status ||
+                                    log.details.status
+                                  )
+                                    ? `Estado: ${String((log.details.new_values as Record<string, unknown>)?.status || log.details.status)}`
+                                    : 'Parámetros operativos actualizados'}
                                 </span>
                               ) : log.details ? (
                                 <span>
