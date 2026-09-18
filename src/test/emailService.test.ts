@@ -6,6 +6,7 @@ import {
   retryOrderEmail,
   getOrderEmailLogs,
   ResendEmailProvider,
+  defaultEmailProvider,
 } from '@/services/emailService';
 import { supabase } from '@/lib/supabase';
 
@@ -226,6 +227,135 @@ describe('Servicio de Correo Transaccional Resend (src/services/emailService.ts)
       expect(supabase.from).toHaveBeenCalledWith('notification_logs');
       expect(logs).toHaveLength(1);
       expect(logs[0].resend_email_id).toBe('re_abc123');
+    });
+  });
+
+  describe('Casos de Idempotencia y Respuestas Cacheadas', () => {
+    it('debe procesar correctamente una respuesta con cached: true sin reenvíos', async () => {
+      vi.mocked(supabase.functions.invoke).mockResolvedValueOnce({
+        data: {
+          success: true,
+          emailId: 're_cached_999',
+          status: 'sent',
+          cached: true,
+        },
+        error: null,
+      });
+
+      const result = await sendPaymentReceivedEmail('ord_cached_001');
+
+      expect(result.success).toBe(true);
+      expect(result.cached).toBe(true);
+      expect(result.emailId).toBe('re_cached_999');
+      expect(result.status).toBe('sent');
+    });
+  });
+
+  describe('Simulación de Reglas de Seguridad Backend y Validaciones de Edge Function', () => {
+    it('debe propagar error de validación cuando el orderId es un UUID malformado o ausente', async () => {
+      vi.mocked(supabase.functions.invoke).mockResolvedValueOnce({
+        data: {
+          success: false,
+          error: 'El parámetro orderId es obligatorio y debe ser un UUID válido.',
+        },
+        error: null,
+      });
+
+      const result = await defaultEmailProvider.sendOrderEmail('id-invalido', 'PAYMENT_RECEIVED');
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('UUID válido');
+    });
+
+    it('debe propagar error de autorización cuando un usuario no administrador intenta PAYMENT_APPROVED', async () => {
+      vi.mocked(supabase.functions.invoke).mockResolvedValueOnce({
+        data: null,
+        error: {
+          message:
+            'Acceso no autorizado: la operación solicitada requiere permisos de administrador.',
+        } as any,
+      });
+
+      const result = await sendPaymentApprovedEmail('a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d');
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('requiere permisos de administrador');
+    });
+
+    it('debe propagar error cuando el comprador no tiene un email válido registrado', async () => {
+      vi.mocked(supabase.functions.invoke).mockResolvedValueOnce({
+        data: {
+          success: false,
+          error:
+            'El comprador asociado a la orden no tiene una dirección de correo electrónico válida.',
+        },
+        error: null,
+      });
+
+      const result = await sendPaymentReceivedEmail('a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d');
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('dirección de correo electrónico válida');
+    });
+
+    it('debe propagar error cuando el estado de la orden no coincide con el evento solicitado', async () => {
+      vi.mocked(supabase.functions.invoke).mockResolvedValueOnce({
+        data: {
+          success: false,
+          error: "No se puede enviar email de aprobación porque la orden está en estado 'pending'.",
+        },
+        error: null,
+      });
+
+      const result = await sendPaymentApprovedEmail('a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d');
+      expect(result.success).toBe(false);
+      expect(result.error).toContain("en estado 'pending'");
+    });
+
+    it('debe propagar error de Resend API (ej. 403 sandbox o 500 upstream)', async () => {
+      vi.mocked(supabase.functions.invoke).mockResolvedValueOnce({
+        data: {
+          success: false,
+          error: 'You can only send testing emails to your own email address.',
+          status: 'failed',
+        },
+        error: null,
+      });
+
+      const result = await sendPaymentReceivedEmail('a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d');
+      expect(result.success).toBe(false);
+      expect(result.status).toBe('failed');
+      expect(result.error).toContain('You can only send testing emails');
+    });
+  });
+
+  describe('Lógica de Estados de Webhook de Resend (Simulación de Mapeo)', () => {
+    const mapWebhookEventToStatus = (type: string): string | null => {
+      switch (type) {
+        case 'email.sent':
+          return 'sent';
+        case 'email.delivered':
+          return 'delivered';
+        case 'email.bounced':
+          return 'bounced';
+        case 'email.complained':
+          return 'complained';
+        case 'email.failed':
+          return 'failed';
+        default:
+          return null;
+      }
+    };
+
+    it('debe mapear correctamente todos los eventos soportados por Resend', () => {
+      expect(mapWebhookEventToStatus('email.sent')).toBe('sent');
+      expect(mapWebhookEventToStatus('email.delivered')).toBe('delivered');
+      expect(mapWebhookEventToStatus('email.bounced')).toBe('bounced');
+      expect(mapWebhookEventToStatus('email.complained')).toBe('complained');
+      expect(mapWebhookEventToStatus('email.failed')).toBe('failed');
+    });
+
+    it('debe ignorar eventos no transaccionales sin romper el flujo (retornando null)', () => {
+      expect(mapWebhookEventToStatus('email.opened')).toBeNull();
+      expect(mapWebhookEventToStatus('email.clicked')).toBeNull();
+      expect(mapWebhookEventToStatus('unknown.event')).toBeNull();
     });
   });
 });

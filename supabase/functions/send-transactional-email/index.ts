@@ -3,9 +3,11 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.8";
 
 function getCorsHeaders(req: Request) {
   const origin = req.headers.get("origin") || "";
-  const allowedOrigins = [
-    "https://manaurevive.com",
-    "https://www.manaurevive.com",
+  const envOrigins = Deno.env.get("ALLOWED_ORIGINS")
+    ? Deno.env.get("ALLOWED_ORIGINS")!.split(",").map((o) => o.trim()).filter(Boolean)
+    : [];
+  const defaultOrigins = [
+    "https://rifa-manaure.vercel.app",
     "http://localhost:5173",
     "http://localhost:3000",
     "http://localhost:4173",
@@ -13,12 +15,13 @@ function getCorsHeaders(req: Request) {
     "http://127.0.0.1:3000",
     "http://127.0.0.1:4173",
   ];
+  const allowedOrigins = [...new Set([...defaultOrigins, ...envOrigins])];
 
   const isVercel = origin.endsWith(".vercel.app") && origin.startsWith("https://");
   const isAllowed = allowedOrigins.includes(origin) || isVercel;
 
   return {
-    "Access-Control-Allow-Origin": isAllowed ? origin : allowedOrigins[0],
+    "Access-Control-Allow-Origin": isAllowed ? origin : (allowedOrigins[0] || "*"),
     "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
   };
@@ -269,20 +272,36 @@ serve(async (req) => {
     const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
     const functionSecret = Deno.env.get("FUNCTION_SECRET") ?? "";
 
-    const payload: RequestPayload = await req.json().catch(() => ({}));
+    const payload: RequestPayload = await req.json().catch(() => ({} as RequestPayload));
     const { orderId, eventType, reason, isRetry } = payload;
 
-    if (!orderId || !eventType) {
+    // Validación estricta de parámetros obligatorios
+    const ALLOWED_EVENTS = ["PAYMENT_RECEIVED", "PAYMENT_APPROVED", "PAYMENT_REJECTED"] as const;
+    const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+    if (!orderId || typeof orderId !== "string" || !UUID_REGEX.test(orderId)) {
       return new Response(
         JSON.stringify({
           success: false,
-          error: "Los parámetros orderId y eventType son obligatorios.",
+          error: "El parámetro orderId es obligatorio y debe ser un UUID válido.",
         }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    // 1. Verificación estricta de autorización y token
+    if (!eventType || !ALLOWED_EVENTS.includes(eventType)) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: `El evento '${eventType}' no es válido. Eventos permitidos: ${ALLOWED_EVENTS.join(", ")}.`,
+        }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // 1. Verificación estricta de autorización y permisos por rol
     const authHeader = req.headers.get("authorization") || "";
     const token = authHeader.replace(/^Bearer\s+/i, "").trim();
     const apiKeyHeader = req.headers.get("apikey") || "";
@@ -294,16 +313,26 @@ serve(async (req) => {
       isAuthorized = true;
     }
 
-    // B. Validación por JWT de sesión de usuario autenticado (administrador)
+    // B. Validación por JWT de sesión de usuario administrador autenticado
     if (!isAuthorized && token && token !== supabaseAnonKey) {
       const supabaseUserClient = createClient(supabaseUrl, supabaseAnonKey || supabaseServiceKey);
       const { data: userData, error: userError } = await supabaseUserClient.auth.getUser(token);
       if (!userError && userData?.user) {
-        isAuthorized = true;
+        // Consultar rol en la tabla admin_users para garantizar privilegios administrativos
+        const { data: adminRecord } = await supabase
+          .from("admin_users")
+          .select("role")
+          .eq("user_id", userData.user.id)
+          .maybeSingle();
+
+        if (adminRecord && ["superadmin", "admin"].includes(adminRecord.role)) {
+          isAuthorized = true;
+        }
       }
     }
 
-    // C. Validación por clave anónima (checkout público legítimo: únicamente para PAYMENT_RECEIVED)
+    // C. Validación por clave anónima (checkout público legítimo):
+    // Únicamente permitida para notificar PAYMENT_RECEIVED tras subir comprobante y JAMÁS para reintentos
     if (!isAuthorized && (token === supabaseAnonKey || apiKeyHeader === supabaseAnonKey)) {
       if (eventType === "PAYMENT_RECEIVED" && !isRetry) {
         isAuthorized = true;
@@ -314,7 +343,7 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({
           success: false,
-          error: "Acceso no autorizado: se requiere sesión válida de administrador o credencial de servicio.",
+          error: "Acceso no autorizado: la operación solicitada requiere permisos de administrador.",
         }),
         { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
@@ -333,13 +362,11 @@ serve(async (req) => {
 
     const fromEmail =
       Deno.env.get("RESEND_FROM_EMAIL") || "Manaure Vive <onboarding@resend.dev>";
-    const appUrl = Deno.env.get("PUBLIC_APP_URL") || "https://manaurevive.com";
+    const appUrl = Deno.env.get("PUBLIC_APP_URL") || "https://rifa-manaure.vercel.app";
     const supportPhone = Deno.env.get("SUPPORT_PHONE") || "+57 300 000 0000";
     const supportEmail = Deno.env.get("SUPPORT_EMAIL") || "soporte@manaurevive.com";
 
     const replyTo = Deno.env.get("RESEND_REPLY_TO") || supportEmail;
-
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // 2. Obtener datos reales de la orden desde PostgreSQL
     const { data: order, error: orderError } = await supabase
@@ -380,13 +407,34 @@ serve(async (req) => {
       );
     }
 
-    // 3. Obtener los boletos asociados a la orden
+    // 3. Obtener y validar los boletos asociados a la orden
     const { data: tickets } = await supabase
       .from("tickets")
       .select("number, status")
       .eq("order_id", orderId);
 
     const ticketNumbers = (tickets || []).map((t: { number: string }) => t.number);
+    if (!ticketNumbers || ticketNumbers.length === 0) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "La orden no registra ningún boleto asociado en la base de datos.",
+        }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Validar monto total positivo
+    if (typeof order.total_amount !== "number" || order.total_amount <= 0) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "El monto total de la orden en la base de datos es inválido.",
+        }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     const buyer = order.buyers as unknown as { full_name: string; email: string; phone: string } | null;
     const raffle = order.raffles as unknown as { title: string; draw_date?: string } | null;
 
@@ -403,7 +451,17 @@ serve(async (req) => {
       );
     }
 
-    // 4. Validar consistencia entre el evento solicitado y el estado real de la orden
+    // 4. Validar consistencia estricta entre el evento solicitado y el estado real de la orden
+    if (eventType === "PAYMENT_RECEIVED" && order.status !== "pending_verification") {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: `No se puede enviar email de comprobante recibido porque la orden está en estado '${order.status}' y no en 'pending_verification'.`,
+        }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     if (eventType === "PAYMENT_APPROVED" && !["paid", "completed"].includes(order.status)) {
       return new Response(
         JSON.stringify({

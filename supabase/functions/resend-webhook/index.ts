@@ -4,9 +4,11 @@ import { Webhook } from "https://esm.sh/svix@1.15.0";
 
 function getCorsHeaders(req: Request) {
   const origin = req.headers.get("origin") || "";
-  const allowedOrigins = [
-    "https://manaurevive.com",
-    "https://www.manaurevive.com",
+  const envOrigins = Deno.env.get("ALLOWED_ORIGINS")
+    ? Deno.env.get("ALLOWED_ORIGINS")!.split(",").map((o) => o.trim()).filter(Boolean)
+    : [];
+  const defaultOrigins = [
+    "https://rifa-manaure.vercel.app",
     "http://localhost:5173",
     "http://localhost:3000",
     "http://localhost:4173",
@@ -14,12 +16,13 @@ function getCorsHeaders(req: Request) {
     "http://127.0.0.1:3000",
     "http://127.0.0.1:4173",
   ];
+  const allowedOrigins = [...new Set([...defaultOrigins, ...envOrigins])];
 
   const isVercel = origin.endsWith(".vercel.app") && origin.startsWith("https://");
   const isAllowed = allowedOrigins.includes(origin) || isVercel;
 
   return {
-    "Access-Control-Allow-Origin": isAllowed ? origin : allowedOrigins[0],
+    "Access-Control-Allow-Origin": isAllowed ? origin : (allowedOrigins[0] || "*"),
     "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, svix-id, svix-timestamp, svix-signature",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
   };
