@@ -23,18 +23,11 @@ import {
   getWhatsAppProvider,
   type WhatsAppSendResult,
 } from './whatsappService';
-import {
-  sendPaymentReceivedEmail,
-  sendPaymentApprovedEmail,
-  sendPaymentRejectedEmail,
-  retryOrderEmail,
-  type EmailSendResult,
-  type NotificationLogRow,
-} from './emailService';
 import type { ContactPreference } from '@/types/raffle.types';
-import type { Json } from '@/database.types';
+import type { Database, Json } from '@/database.types';
 
-export type NotificationChannel = 'whatsapp' | 'email';
+export type NotificationLogRow = Database['public']['Tables']['notification_logs']['Row'];
+export type NotificationChannel = 'whatsapp';
 export type NotificationEventType = 'payment_received' | 'payment_approved' | 'payment_rejected';
 export type NotificationStatus = 'pending' | 'sent' | 'failed' | 'delivered' | 'bounced';
 
@@ -66,15 +59,13 @@ export interface GeneratedNotification {
 
 export interface DispatchNotificationOptions {
   orderId: string;
-  contactPreference?: ContactPreference;
+  contactPreference?: ContactPreference | string;
   eventType: 'PAYMENT_RECEIVED' | 'PAYMENT_APPROVED' | 'PAYMENT_REJECTED' | NotificationEventType;
   notificationData: OrderNotificationData;
 }
 
 export interface DispatchNotificationResult {
-  contactPreference: ContactPreference;
-  emailDispatched: boolean;
-  emailResult?: EmailSendResult;
+  contactPreference: ContactPreference | string;
   whatsappDispatched: boolean;
   whatsappNotification?: GeneratedNotification;
 }
@@ -310,98 +301,52 @@ export function generateOrderNotification(
 export async function dispatchOrderNotifications(
   options: DispatchNotificationOptions
 ): Promise<DispatchNotificationResult> {
-  const preference: ContactPreference = options.contactPreference || 'both';
+  const preference = options.contactPreference || 'whatsapp';
   const normalizedType = normalizeEventType(options.eventType);
-  let emailResult: EmailSendResult | undefined;
   let whatsappNotification: GeneratedNotification | undefined;
 
-  // 1. Envío por Correo Transaccional Resend (si la preferencia es 'email' o 'both')
-  if (preference === 'email' || preference === 'both') {
-    try {
-      if (normalizedType === 'payment_approved') {
-        emailResult = await sendPaymentApprovedEmail(options.orderId);
-      } else if (normalizedType === 'payment_rejected') {
-        emailResult = await sendPaymentRejectedEmail(
-          options.orderId,
-          options.notificationData.rejectionReason
-        );
-      } else {
-        emailResult = await sendPaymentReceivedEmail(options.orderId);
-      }
-    } catch (emailErr) {
-      console.warn(
-        'Aviso: Falló el envío de correo transaccional pero la venta no se revierte:',
-        emailErr
-      );
-      const errMsg =
-        emailErr instanceof Error
-          ? emailErr.message
-          : 'Error inesperado al enviar correo transaccional.';
-      emailResult = {
-        success: false,
-        error: errMsg,
-      };
+  const typeMapping: Record<NotificationEventType, NotificationType> = {
+    payment_received: 'receipt_received',
+    payment_approved: 'payment_approved',
+    payment_rejected: 'payment_rejected',
+  };
 
-      // Registrar fallo en trazabilidad si la Edge Function no pudo responder
-      void recordNotificationLog({
-        orderId: options.orderId,
-        channel: 'email',
-        eventType: normalizedType,
-        recipient: options.notificationData.buyerEmail || 'Sin email',
-        status: 'failed',
-        errorMessage: errMsg,
-        metadata: { client_error: true },
-      });
-    }
-  }
+  whatsappNotification = generateOrderNotification(
+    typeMapping[normalizedType],
+    options.notificationData
+  );
 
-  // 2. Notificación WhatsApp (si la preferencia es 'whatsapp' o 'both')
-  if (preference === 'whatsapp' || preference === 'both') {
-    const typeMapping: Record<NotificationEventType, NotificationType> = {
-      payment_received: 'receipt_received',
-      payment_approved: 'payment_approved',
-      payment_rejected: 'payment_rejected',
-    };
+  const hasPhone = Boolean(
+    options.notificationData.buyerPhone && options.notificationData.buyerPhone.trim().length >= 7
+  );
 
-    whatsappNotification = generateOrderNotification(
-      typeMapping[normalizedType],
-      options.notificationData
-    );
-
-    const hasPhone = Boolean(
-      options.notificationData.buyerPhone && options.notificationData.buyerPhone.trim().length >= 7
-    );
-
-    // Registrar en trazabilidad el despacho de WhatsApp
-    void recordNotificationLog({
-      orderId: options.orderId,
-      channel: 'whatsapp',
-      eventType: normalizedType,
-      recipient: options.notificationData.buyerPhone || 'Sin teléfono',
-      status: hasPhone ? 'sent' : 'failed',
-      errorMessage: hasPhone
-        ? null
-        : 'El comprador no tiene un número de celular válido registrado para WhatsApp.',
-      attempts: 1,
-      metadata: {
-        buyer_name: options.notificationData.buyerName,
-        reference: options.notificationData.reference,
-        tickets_count: options.notificationData.ticketNumbers.length,
-      },
-    });
-  }
+  // Registrar en trazabilidad el despacho de WhatsApp
+  void recordNotificationLog({
+    orderId: options.orderId,
+    channel: 'whatsapp',
+    eventType: normalizedType,
+    recipient: options.notificationData.buyerPhone || 'Sin teléfono',
+    status: hasPhone ? 'sent' : 'failed',
+    errorMessage: hasPhone
+      ? null
+      : 'El comprador no tiene un número de celular válido registrado para WhatsApp.',
+    attempts: 1,
+    metadata: {
+      buyer_name: options.notificationData.buyerName,
+      reference: options.notificationData.reference,
+      tickets_count: options.notificationData.ticketNumbers.length,
+    },
+  });
 
   return {
     contactPreference: preference,
-    emailDispatched: preference === 'email' || preference === 'both',
-    emailResult,
-    whatsappDispatched: preference === 'whatsapp' || preference === 'both',
+    whatsappDispatched: true,
     whatsappNotification,
   };
 }
 
 /**
- * Reintenta una notificación específica (WhatsApp o Correo) y actualiza la trazabilidad.
+ * Reintenta una notificación específica de WhatsApp y actualiza la trazabilidad.
  */
 export async function retryNotification(
   orderId: string,
@@ -416,21 +361,6 @@ export async function retryNotification(
   }
 ): Promise<{ success: boolean; error?: string; whatsAppLink?: string }> {
   const normalizedType = normalizeEventType(eventType);
-
-  if (channel === 'email') {
-    const emailUpperType =
-      normalizedType === 'payment_approved'
-        ? 'PAYMENT_APPROVED'
-        : normalizedType === 'payment_rejected'
-          ? 'PAYMENT_REJECTED'
-          : 'PAYMENT_RECEIVED';
-
-    const result = await retryOrderEmail(orderId, emailUpperType, data?.reason);
-    return {
-      success: result.success,
-      error: result.error,
-    };
-  }
 
   if (channel === 'whatsapp') {
     const phone = data?.buyerPhone || '';

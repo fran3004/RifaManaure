@@ -11,8 +11,8 @@ import {
   getOrderNotificationLogs,
   generateOrderNotification,
   type GeneratedNotification,
+  type NotificationLogRow,
 } from '@/services/notificationService';
-import { retryOrderEmail, type NotificationLogRow } from '@/services/emailService';
 import {
   X,
   CheckCircle2,
@@ -186,10 +186,10 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
           `¡Pago aprobado! Se confirmaron definitivamente ${order.ticket_count} boletos como vendidos.`
         );
 
-        // Despachar notificaciones centralizadas según preferencia del comprador (whatsapp, email, both)
+        // Despachar notificaciones centralizadas por WhatsApp
         const dispatchResult = await dispatchOrderNotifications({
           orderId: order.id,
-          contactPreference: order.contact_preference || 'both',
+          contactPreference: 'whatsapp',
           eventType: 'PAYMENT_APPROVED',
           notificationData: {
             reference: order.reference,
@@ -247,10 +247,10 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
           `Orden rechazada exitosamente. Los ${order.ticket_count} boletos fueron liberados inmediatamente a disponibles.`
         );
 
-        // Despachar notificaciones centralizadas según preferencia del comprador (whatsapp, email, both)
+        // Despachar notificaciones centralizadas por WhatsApp
         const dispatchResult = await dispatchOrderNotifications({
           orderId: order.id,
-          contactPreference: order.contact_preference || 'both',
+          contactPreference: 'whatsapp',
           eventType: 'PAYMENT_REJECTED',
           notificationData: {
             reference: order.reference,
@@ -284,11 +284,8 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
     }
   };
 
-  // REINTENTAR NOTIFICACIÓN (EMAIL O WHATSAPP)
-  const handleRetryNotification = async (
-    channel: 'email' | 'whatsapp',
-    log?: NotificationLogRow
-  ) => {
+  // REINTENTAR NOTIFICACIÓN (WHATSAPP)
+  const handleRetryWhatsAppNotification = async (log?: NotificationLogRow) => {
     if (!order) return;
     setIsRetryingNotif(true);
     setNotifActionResult(null);
@@ -299,63 +296,41 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
           ? 'payment_approved'
           : order.status === 'rejected'
             ? 'payment_rejected'
-            : 'payment_received');
+            : 'receipt_received');
 
-      if (channel === 'email') {
-        const emailUpperType = eventType.toLowerCase().includes('approved')
-          ? 'PAYMENT_APPROVED'
+      const notif = generateOrderNotification(
+        eventType.toLowerCase().includes('approved')
+          ? 'payment_approved'
           : eventType.toLowerCase().includes('rejected')
-            ? 'PAYMENT_REJECTED'
-            : 'PAYMENT_RECEIVED';
-
-        const res = await retryOrderEmail(
-          order.id,
-          emailUpperType,
-          order.rejection_reason || undefined
-        );
-
-        if (res.success) {
-          setNotifActionResult(
-            `¡Correo transaccional reenviado exitosamente a ${order.buyers?.email || 'comprador'}!`
-          );
-        } else {
-          setNotifActionResult(
-            `Aviso: ${res.error || 'No se pudo enviar el correo transaccional'}`
-          );
+            ? 'payment_rejected'
+            : 'receipt_received',
+        {
+          reference: order.reference,
+          buyerName: order.buyers?.full_name || 'Comprador',
+          buyerPhone: order.buyers?.phone || '',
+          buyerEmail: order.buyers?.email,
+          ticketNumbers: formattedTickets,
+          totalAmount: order.total_amount,
+          rejectionReason: order.rejection_reason || undefined,
+          verifyUrl:
+            typeof window !== 'undefined' ? `${window.location.origin}/verificar` : '/verificar',
         }
-      } else if (channel === 'whatsapp') {
-        const notif = generateOrderNotification(
-          eventType.toLowerCase().includes('approved')
-            ? 'payment_approved'
-            : eventType.toLowerCase().includes('rejected')
-              ? 'payment_rejected'
-              : 'receipt_received',
-          {
-            reference: order.reference,
-            buyerName: order.buyers?.full_name || 'Comprador',
-            buyerPhone: order.buyers?.phone || '',
-            buyerEmail: order.buyers?.email,
-            ticketNumbers: formattedTickets,
-            totalAmount: order.total_amount,
-            rejectionReason: order.rejection_reason || undefined,
-            verifyUrl:
-              typeof window !== 'undefined' ? `${window.location.origin}/verificar` : '/verificar',
-          }
-        );
+      );
 
-        setPreparedNotification(notif);
-        if (notif.whatsAppLink) {
-          window.open(notif.whatsAppLink, '_blank', 'noopener,noreferrer');
-          setNotifActionResult('Enlace directo a WhatsApp abierto con la plantilla oficial.');
-        } else {
-          setNotifActionResult('El comprador no tiene teléfono válido para WhatsApp.');
-        }
+      setPreparedNotification(notif);
+      if (notif.whatsAppLink) {
+        window.open(notif.whatsAppLink, '_blank', 'noopener,noreferrer');
+        setNotifActionResult('Enlace directo a WhatsApp abierto con la plantilla oficial.');
+      } else {
+        setNotifActionResult('El comprador no tiene teléfono válido para WhatsApp.');
       }
 
       const updatedLogs = await getOrderNotificationLogs(order.id);
       setNotificationLogs(updatedLogs);
     } catch (err) {
-      setNotifActionResult(err instanceof Error ? err.message : 'Error al reintentar notificación');
+      setNotifActionResult(
+        err instanceof Error ? err.message : 'Error al reintentar notificación por WhatsApp'
+      );
     } finally {
       setIsRetryingNotif(false);
     }
@@ -985,19 +960,18 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
                 </div>
               ) : (
                 <span style={{ fontSize: '0.75rem', color: '#9cb5ab' }}>
-                  * El comprador no registró teléfono para enlace directo de WhatsApp. Puedes copiar
-                  el texto y enviarlo por correo.
+                  * El comprador no registró teléfono para enlace directo de WhatsApp.
                 </span>
               )}
             </div>
           )}
 
-          {/* 5. Trazabilidad Integral de Notificaciones (WhatsApp y Email) */}
+          {/* 5. Trazabilidad de Notificaciones (WhatsApp) */}
           <div className={styles.reviewCard} style={{ borderLeft: '4px solid #34d399' }}>
             <div className={styles.reviewCardHeader}>
               <Send size={16} color="#34d399" />
               <span className={styles.reviewCardHeaderTitle}>
-                5. Trazabilidad de Notificaciones (WhatsApp y Correo)
+                5. Trazabilidad de Notificaciones (WhatsApp)
               </span>
             </div>
 
@@ -1008,12 +982,6 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
                   <span className={styles.infoLabel}>📱 Destino WhatsApp:</span>
                   <span className={styles.infoValue} style={{ color: '#34d399' }}>
                     {order.buyers?.phone || 'Sin celular registrado'}
-                  </span>
-                </div>
-                <div className={styles.infoRow}>
-                  <span className={styles.infoLabel}>✉️ Destino Correo:</span>
-                  <span className={styles.infoValue} style={{ color: '#60a5fa' }}>
-                    {order.buyers?.email || 'Sin correo registrado'}
                   </span>
                 </div>
               </div>
@@ -1231,24 +1199,12 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
                   type="button"
                   className={styles.btnSecondary}
                   style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}
-                  onClick={() => void handleRetryNotification('whatsapp')}
+                  onClick={() => void handleRetryWhatsAppNotification()}
                   disabled={isRetryingNotif || !order.buyers?.phone}
                   title="Abrir WhatsApp oficial para enviar o reenviar confirmación"
                 >
                   <Phone size={13} color="#25d366" />
                   <span>Reenviar por WhatsApp</span>
-                </button>
-
-                <button
-                  type="button"
-                  className={styles.btnSecondary}
-                  style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}
-                  onClick={() => void handleRetryNotification('email')}
-                  disabled={isRetryingNotif || !order.buyers?.email}
-                  title="Reenviar correo transaccional de forma segura e idempotente"
-                >
-                  <Mail size={13} color="#60a5fa" />
-                  <span>{isRetryingNotif ? 'Reenviando...' : 'Reintentar Envío de Correo'}</span>
                 </button>
               </div>
             </div>

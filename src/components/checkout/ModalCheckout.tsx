@@ -20,7 +20,6 @@ import {
   Calendar,
   Building2,
   Hash,
-  Mail,
   Bell,
   Search,
 } from 'lucide-react';
@@ -32,7 +31,6 @@ import {
   validateProofFile,
 } from '@/services/paymentService';
 import { generateOrderNotification } from '@/services/notificationService';
-import { sendPaymentReceivedEmail } from '@/services/emailService';
 import type { PaymentAccountRow, ContactPreference } from '@/types/raffle.types';
 import styles from './ModalCheckout.module.css';
 
@@ -125,7 +123,7 @@ export const ModalCheckout: React.FC = () => {
     phone: '',
     email: '',
     city: '',
-    contactPreference: 'both',
+    contactPreference: 'whatsapp',
     acceptTerms: true,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -384,11 +382,6 @@ export const ModalCheckout: React.FC = () => {
         throw new Error(uploadRes.error || 'No se pudo procesar el comprobante de pago.');
       }
 
-      // Disparar correo transaccional PAYMENT_RECEIVED en segundo plano si la preferencia incluye email
-      if (formData.contactPreference === 'email' || formData.contactPreference === 'both') {
-        void sendPaymentReceivedEmail(createdOrderId);
-      }
-
       // Transición exitosa a confirmación definitiva (Paso 7)
       setCurrentStep(7);
       clearSelection();
@@ -597,55 +590,21 @@ export const ModalCheckout: React.FC = () => {
               </div>
             </div>
 
-            {/* Selector de Preferencia de Notificación */}
+            {/* Canal Oficial de Notificación */}
             <div className={styles.contactPreferenceContainer}>
               <label className={styles.contactPreferenceTitle}>
                 <Bell size={15} color="#f59e0b" />
-                ¿Cómo deseas recibir la confirmación?
+                Canal oficial de confirmación
               </label>
-              <div className={styles.contactPreferenceGrid}>
+              <div className={styles.contactPreferenceGrid} style={{ gridTemplateColumns: '1fr' }}>
                 <div
-                  className={`${styles.contactOptionCard} ${
-                    formData.contactPreference === 'whatsapp'
-                      ? styles.contactOptionCardSelected
-                      : ''
-                  }`}
-                  onClick={() =>
-                    setFormData((prev) => ({ ...prev, contactPreference: 'whatsapp' }))
-                  }
-                  role="button"
-                  tabIndex={0}
+                  className={`${styles.contactOptionCard} ${styles.contactOptionCardSelected}`}
+                  style={{ cursor: 'default' }}
                 >
                   <MessageCircle size={20} className={styles.contactOptionIcon} />
-                  <span className={styles.contactOptionLabel}>WhatsApp</span>
-                </div>
-
-                <div
-                  className={`${styles.contactOptionCard} ${
-                    formData.contactPreference === 'email' ? styles.contactOptionCardSelected : ''
-                  }`}
-                  onClick={() => setFormData((prev) => ({ ...prev, contactPreference: 'email' }))}
-                  role="button"
-                  tabIndex={0}
-                >
-                  <Mail size={20} className={styles.contactOptionIcon} />
-                  <span className={styles.contactOptionLabel}>Correo electrónico</span>
-                </div>
-
-                <div
-                  className={`${styles.contactOptionCard} ${
-                    formData.contactPreference === 'both' ? styles.contactOptionCardSelected : ''
-                  }`}
-                  onClick={() => setFormData((prev) => ({ ...prev, contactPreference: 'both' }))}
-                  role="button"
-                  tabIndex={0}
-                >
-                  <span className={styles.contactOptionBadge}>Recomendado</span>
-                  <div style={{ display: 'flex', gap: '4px' }}>
-                    <MessageCircle size={18} className={styles.contactOptionIcon} />
-                    <Mail size={18} className={styles.contactOptionIcon} />
-                  </div>
-                  <span className={styles.contactOptionLabel}>WhatsApp y Correo</span>
+                  <span className={styles.contactOptionLabel}>
+                    WhatsApp Oficial (Confirmación y enlace de verificación)
+                  </span>
                 </div>
               </div>
             </div>
@@ -1378,9 +1337,7 @@ export const ModalCheckout: React.FC = () => {
                   className={styles.confirmationTableVal}
                   style={{ fontSize: '0.85rem', color: '#34d399' }}
                 >
-                  {formData.contactPreference === 'whatsapp' && '📱 Solo WhatsApp'}
-                  {formData.contactPreference === 'email' && '✉️ Solo Correo Electrónico'}
-                  {formData.contactPreference === 'both' && '📱 WhatsApp y ✉️ Correo'}
+                  📱 WhatsApp Oficial
                 </span>
               </div>
             </div>
