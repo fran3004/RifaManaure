@@ -312,6 +312,36 @@
   color: #ffffff;
 }
 
+/* Botones de acción formulario retrocompatibles */
+.submitBtn {
+  composes: btnPrimary;
+}
+
+.cancelBtn {
+  composes: btnSecondary;
+}
+
+.copyMiniBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.65rem;
+  border-radius: var(--radius-sm, 6px);
+  background-color: var(--bg-surface-elevated, #1a332a);
+  border: 1px solid var(--border-subtle, rgba(156, 181, 171, 0.2));
+  color: var(--text-secondary, #9cb5ab);
+  font-size: 0.775rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast, 150ms ease);
+}
+
+.copyMiniBtn:hover {
+  background-color: rgba(245, 158, 11, 0.15);
+  border-color: var(--color-brand-accent, #f59e0b);
+  color: var(--color-brand-accent, #f59e0b);
+}
+
 /* --- Grid de Comprobantes --- */
 .receiptGrid {
   display: grid;

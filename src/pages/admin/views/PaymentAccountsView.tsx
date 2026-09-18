@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useTransition } from 'react';
 import { AdminPageHeader } from '@/components/admin/common/AdminPageHeader';
+import { AdminEmptyState } from '@/components/admin/common/AdminEmptyState';
+import { AdminLoadingState } from '@/components/admin/common/AdminLoadingState';
 import { AdminErrorState } from '@/components/admin/common/AdminErrorState';
 import {
   getAllPaymentAccountsAdmin,
@@ -25,6 +27,7 @@ import {
   X,
   Smartphone,
   Landmark,
+  Zap,
 } from 'lucide-react';
 import styles from './AdminViews.module.css';
 
@@ -32,24 +35,28 @@ const BANK_PRESETS = [
   { name: 'Nequi', defaultType: 'digital_wallet' },
   { name: 'Daviplata', defaultType: 'digital_wallet' },
   { name: 'Bancolombia', defaultType: 'savings' },
+  { name: 'Bre-B', defaultType: 'bre_b' },
   { name: 'Banco de Bogotá', defaultType: 'savings' },
   { name: 'Davivienda', defaultType: 'savings' },
-  { name: 'Dale!', defaultType: 'digital_wallet' },
-  { name: 'Movii', defaultType: 'digital_wallet' },
-  { name: 'Transfiya', defaultType: 'transfiya' },
+  { name: 'BBVA Colombia', defaultType: 'savings' },
+  { name: 'Nu Colombia', defaultType: 'savings' },
 ];
 
 const ACCOUNT_TYPE_OPTIONS = [
   { value: 'digital_wallet', label: 'Billetera Digital / Móvil' },
   { value: 'savings', label: 'Cuenta de Ahorros' },
   { value: 'current', label: 'Cuenta Corriente' },
-  { value: 'transfiya', label: 'Llave Transfiya' },
+  { value: 'bre_b', label: 'Llave Bre-B (Interoperable)' },
+  { value: 'transfiya', label: 'Llave Transfiya (Legado)' },
   { value: 'other', label: 'Otro Método Manual' },
 ];
 
 function formatAccountTypeLabel(type?: string | null): string {
   if (!type) return 'Cuenta Bancaria';
-  const found = ACCOUNT_TYPE_OPTIONS.find((opt) => opt.value === type.toLowerCase());
+  const clean = type.toLowerCase();
+  if (clean === 'bre_b' || clean === 'breb') return 'Llave Bre-B (Interoperable)';
+  if (clean === 'transfiya') return 'Llave Transfiya (Legado)';
+  const found = ACCOUNT_TYPE_OPTIONS.find((opt) => opt.value === clean);
   return found ? found.label : type;
 }
 
@@ -200,11 +207,24 @@ export const PaymentAccountsView: React.FC = () => {
   };
 
   const handlePresetSelect = (preset: { name: string; defaultType: string }) => {
-    setFormData((prev) => ({
-      ...prev,
-      bank_name: preset.name,
-      account_type: preset.defaultType,
-    }));
+    setFormData((prev) => {
+      let suggestedInstructions = prev.instructions;
+      if (!suggestedInstructions) {
+        if (preset.name === 'Bre-B') {
+          suggestedInstructions =
+            'Realiza tu pago usando llave Bre-B desde cualquier entidad bancaria o billetera móvil y adjunta el comprobante con el código de aprobación.';
+        } else if (preset.defaultType === 'digital_wallet') {
+          suggestedInstructions = `Transfiere directamente desde tu aplicación ${preset.name} al número indicado y adjunta la captura donde se aprecie claramente el número de comprobante.`;
+        }
+      }
+
+      return {
+        ...prev,
+        bank_name: preset.name,
+        account_type: preset.defaultType,
+        instructions: suggestedInstructions,
+      };
+    });
   };
 
   const validateForm = (): boolean => {
@@ -318,7 +338,7 @@ export const PaymentAccountsView: React.FC = () => {
         description="Administración de cuentas bancarias y billeteras digitales autorizadas para la recepción de transferencias manuales."
         badge={`${accounts.length} Cuentas`}
         actions={
-          <button type="button" className={styles.submitBtn} onClick={handleOpenCreate}>
+          <button type="button" className={styles.btnPrimary} onClick={handleOpenCreate}>
             <Plus size={18} /> Nueva Cuenta de Pago
           </button>
         }
@@ -444,10 +464,7 @@ export const PaymentAccountsView: React.FC = () => {
 
       {/* Listado de Cuentas */}
       {loading ? (
-        <div style={{ textAlign: 'center', padding: '3rem', color: '#9cb5ab' }}>
-          <div className={styles.spinner} style={{ margin: '0 auto 1rem' }} />
-          <span>Cargando cuentas oficiales de pago...</span>
-        </div>
+        <AdminLoadingState message="Cargando cuentas oficiales de pago..." />
       ) : error ? (
         <div className={styles.cardSection}>
           <AdminErrorState
@@ -458,23 +475,27 @@ export const PaymentAccountsView: React.FC = () => {
         </div>
       ) : accounts.length === 0 ? (
         /* Estado Vacío Cuando No Hay Cuentas en la BD */
-        <div className={styles.emptyStateCard}>
-          <div className={styles.emptyStateIconWrapper}>
-            <CreditCard size={32} />
-          </div>
-          <h3 className={styles.emptyStateTitle}>No hay cuentas de pago configuradas</h3>
-          <p className={styles.emptyStateDescription}>
-            Aún no has registrado ninguna cuenta bancaria o billetera digital oficial. Agrega las
-            cuentas donde los compradores realizarán sus transferencias para que aparezcan en el
-            checkout.
-          </p>
-          <button type="button" className={styles.submitBtn} onClick={handleOpenCreate}>
-            <Plus size={18} /> Agregar Primera Cuenta Oficial
-          </button>
+        <div className={styles.cardSection}>
+          <AdminEmptyState
+            icon={<CreditCard size={36} color="var(--color-brand-accent, #f59e0b)" />}
+            title="No hay cuentas de pago configuradas"
+            description="Aún no has registrado ninguna cuenta bancaria o billetera digital oficial. Agrega las cuentas donde los compradores realizarán sus transferencias para que aparezcan en el checkout."
+            actionLabel="Agregar Primera Cuenta Oficial"
+            onAction={handleOpenCreate}
+          />
         </div>
       ) : filteredAccounts.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '3rem', color: '#9cb5ab' }}>
-          <p>No se encontraron cuentas que coincidan con los filtros aplicados.</p>
+        <div className={styles.cardSection}>
+          <AdminEmptyState
+            icon={<CreditCard size={36} color="var(--color-brand-accent, #f59e0b)" />}
+            title="No se encontraron cuentas"
+            description="No hay cuentas registradas que coincidan con los filtros o término de búsqueda aplicado."
+            actionLabel="Restablecer Filtros"
+            onAction={() => {
+              setSearchTerm('');
+              setFilterStatus('all');
+            }}
+          />
         </div>
       ) : (
         <div className={styles.receiptGrid}>
@@ -488,7 +509,9 @@ export const PaymentAccountsView: React.FC = () => {
               {/* Encabezado de la Tarjeta */}
               <div className={styles.accountHeaderRow}>
                 <div className={styles.accountTitleGroup}>
-                  {acc.account_type === 'digital_wallet' ? (
+                  {acc.account_type === 'bre_b' ? (
+                    <Zap size={20} color="#34d399" />
+                  ) : acc.account_type === 'digital_wallet' ? (
                     <Smartphone size={20} color="var(--color-brand-accent, #f59e0b)" />
                   ) : (
                     <Landmark size={20} color="var(--color-brand-accent, #f59e0b)" />
@@ -813,7 +836,7 @@ export const PaymentAccountsView: React.FC = () => {
                     Instrucciones de Transferencia para el Comprador
                   </label>
                   <textarea
-                    placeholder="Ej: Realiza la transferencia directa o por Transfiya y adjunta la captura donde se aprecie claramente el código de aprobación."
+                    placeholder="Ej: Realiza la transferencia directa o por Bre-B y adjunta la captura donde se aprecie claramente el código de aprobación."
                     value={formData.instructions}
                     onChange={(e) => setFormData({ ...formData, instructions: e.target.value })}
                     className={styles.formModalTextarea}
@@ -850,13 +873,13 @@ export const PaymentAccountsView: React.FC = () => {
               >
                 <button
                   type="button"
-                  className={styles.cancelBtn}
+                  className={styles.btnSecondary}
                   onClick={() => setIsFormModalOpen(false)}
                   disabled={isSubmitting}
                 >
                   Cancelar
                 </button>
-                <button type="submit" className={styles.submitBtn} disabled={isSubmitting}>
+                <button type="submit" className={styles.btnPrimary} disabled={isSubmitting}>
                   {isSubmitting
                     ? 'Guardando...'
                     : editingAccount
@@ -907,7 +930,7 @@ export const PaymentAccountsView: React.FC = () => {
             >
               <button
                 type="button"
-                className={styles.cancelBtn}
+                className={styles.btnSecondary}
                 onClick={() => setIsDeleteModalOpen(false)}
                 disabled={isSubmitting}
               >
@@ -915,12 +938,12 @@ export const PaymentAccountsView: React.FC = () => {
               </button>
               <button
                 type="button"
-                className={styles.btnActionDelete}
-                style={{ padding: '0.65rem 1.25rem' }}
+                className={styles.btnDanger}
                 onClick={handleConfirmDelete}
                 disabled={isSubmitting}
               >
-                {isSubmitting ? 'Eliminando...' : 'Sí, Eliminar Cuenta'}
+                <Trash2 size={15} />
+                <span>{isSubmitting ? 'Eliminando...' : 'Sí, Eliminar Cuenta'}</span>
               </button>
             </div>
           </div>

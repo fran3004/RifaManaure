@@ -57,6 +57,9 @@ function formatAccountType(type?: string | null): string {
       return 'Cuenta de Ahorros';
     case 'current':
       return 'Cuenta Corriente';
+    case 'bre_b':
+    case 'breb':
+      return 'Llave Bre-B';
     case 'transfiya':
       return 'Transfiya';
     case 'other':
