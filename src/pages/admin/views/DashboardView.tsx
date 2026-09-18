@@ -12,6 +12,7 @@ import {
   type OrderWithDetails,
 } from '@/services/paymentService';
 import { formatCOP, formatTicketNumber } from '@/lib/utils';
+import { supabase } from '@/lib/supabase';
 import {
   TrendingUp,
   Ticket,
@@ -273,7 +274,32 @@ export const DashboardView: React.FC = () => {
   }, [loadData]);
 
   useEffect(() => {
+    let isMounted = true;
     void loadData();
+
+    const ordersChannel = supabase
+      .channel('dashboard_orders_realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => {
+        if (isMounted) {
+          void loadData();
+        }
+      })
+      .subscribe();
+
+    const ticketsChannel = supabase
+      .channel('dashboard_tickets_realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'tickets' }, () => {
+        if (isMounted) {
+          void loadData();
+        }
+      })
+      .subscribe();
+
+    return () => {
+      isMounted = false;
+      void supabase.removeChannel(ordersChannel);
+      void supabase.removeChannel(ticketsChannel);
+    };
   }, [loadData]);
 
   const handleOpenReview = (order: OrderWithDetails) => {

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { fetchAdminRaffles, type RaffleWithStats } from '@/services/raffleService';
+import { supabase } from '@/lib/supabase';
 
 export interface AdminRaffleContextValue {
   selectedRaffleId: string | null;
@@ -59,6 +60,25 @@ export const AdminRaffleProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
   useEffect(() => {
     void reloadRaffles();
+
+    const channel = supabase
+      .channel('admin_raffles_realtime_channel')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'raffles',
+        },
+        () => {
+          void reloadRaffles();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      void supabase.removeChannel(channel);
+    };
   }, [reloadRaffles]);
 
   const setSelectedRaffleId = useCallback((id: string) => {

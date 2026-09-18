@@ -14,6 +14,7 @@ import {
   type OrderWithDetails,
 } from '@/services/paymentService';
 import { useAdminRaffle } from '@/context/AdminRaffleContext';
+import { supabase } from '@/lib/supabase';
 import { formatCOP, formatTicketNumber, maskDocumentId } from '@/lib/utils';
 import {
   Ticket,
@@ -153,10 +154,29 @@ export const TicketsView: React.FC = () => {
         setIsLoading(false);
       });
 
+    const channel = supabase
+      .channel(`admin_tickets_realtime_${selectedRaffleId || 'all'}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'tickets',
+          ...(selectedRaffleId ? { filter: `raffle_id=eq.${selectedRaffleId}` } : {}),
+        },
+        () => {
+          if (isMounted) {
+            void loadTickets();
+          }
+        }
+      )
+      .subscribe();
+
     return () => {
       isMounted = false;
+      void supabase.removeChannel(channel);
     };
-  }, [ticketStatus, searchTicket, currentPage, pageSize, selectedRaffleId]);
+  }, [ticketStatus, searchTicket, currentPage, pageSize, selectedRaffleId, loadTickets]);
 
   // Manejadores de Inspección
   const handleSelectTicket = (t: AdminTicketWithDetails) => {

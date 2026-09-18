@@ -10,6 +10,7 @@ import {
   type OrderWithDetails,
 } from '@/services/paymentService';
 import { useAdminRaffle } from '@/context/AdminRaffleContext';
+import { supabase } from '@/lib/supabase';
 import { formatCOP } from '@/lib/utils';
 import {
   ShoppingCart,
@@ -154,10 +155,29 @@ export const OrdersView: React.FC = () => {
       }
     };
     void init();
+
+    const channel = supabase
+      .channel('admin_orders_realtime_channel')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'orders',
+        },
+        () => {
+          if (isMounted) {
+            void loadOrders();
+          }
+        }
+      )
+      .subscribe();
+
     return () => {
       isMounted = false;
+      void supabase.removeChannel(channel);
     };
-  }, [statusFilter, searchTerm, sortBy, sortOrder, page, pageSize, selectedRaffleId]);
+  }, [statusFilter, searchTerm, sortBy, sortOrder, page, pageSize, selectedRaffleId, loadOrders]);
 
   // Reiniciar a página 1 al cambiar filtros o búsqueda
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {

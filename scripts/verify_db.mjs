@@ -44,7 +44,7 @@ async function verifyMigrationStatus() {
     { name: 'reserve_tickets', params: { p_raffle_id: '00000000-0000-0000-0000-000000000000', p_ticket_numbers: ['001'], p_buyer_id: '00000000-0000-0000-0000-000000000000' } },
     { name: 'release_expired_reservations', params: {} },
     { name: 'is_admin', params: {} },
-    { name: 'submit_order_receipt', params: { p_order_id: '00000000-0000-0000-0000-000000000000', p_receipt_url: 'test' } },
+    { name: 'submit_payment_proof', params: { p_order_id: '00000000-0000-0000-0000-000000000000', p_file_path: 'test', p_file_name: 'test.jpg', p_file_size: 1024, p_mime_type: 'image/jpeg' } },
     { name: 'approve_order_payment', params: { p_order_id: '00000000-0000-0000-0000-000000000000' } },
     { name: 'reject_order_payment', params: { p_order_id: '00000000-0000-0000-0000-000000000000', p_reason: 'test' } },
     { name: 'cancel_order', params: { p_order_id: '00000000-0000-0000-0000-000000000000' } }
