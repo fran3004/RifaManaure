@@ -28,6 +28,8 @@ import {
   User,
   Cpu,
   Sparkles,
+  Trophy,
+  ExternalLink,
 } from 'lucide-react';
 import commonStyles from './AdminViews.module.css';
 import styles from './AuditView.module.css';
@@ -124,6 +126,15 @@ function getActionConfig(action: string): ActionConfig {
       actor: 'Administrador (Edición)',
     };
   }
+  if (upper.includes('WINNER')) {
+    return {
+      title: 'Ganador Oficial Registrado',
+      pillClass: styles.pillSuccess,
+      nodeClass: styles.nodeSuccess,
+      icon: <Trophy size={15} />,
+      actor: 'Administrador (Sorteo)',
+    };
+  }
   if (upper.includes('RAFFLE_UPDATED') || upper.includes('RAFFLE_EDIT')) {
     return {
       title: 'Parámetros de Rifa Editados',
@@ -155,7 +166,7 @@ function getActionConfig(action: string): ActionConfig {
 interface NarrativeResult {
   headline: string;
   detail: string;
-  chips: { label: string; type: 'gold' | 'emerald' | 'muted' }[];
+  chips: { label: string; type: 'gold' | 'emerald' | 'muted'; link?: string }[];
 }
 
 function getNarrative(log: AuditLogItem): NarrativeResult {
@@ -313,14 +324,69 @@ function getNarrative(log: AuditLogItem): NarrativeResult {
     };
   }
 
+  if (action.includes('WINNER')) {
+    const winnerName = (d.buyer_name as string) || '';
+    const ticket = (d.ticket_number as string) || '';
+    const drawNum = (d.lottery_draw_number as string) || '';
+    const raffleTitle = (d.raffle_title as string) || '';
+    const orderRef = (d.order_reference as string) || (d.reference as string) || '';
+    const buyerDoc = (d.buyer_document as string) || '';
+    const actUrl = (d.official_act_url as string) || '';
+
+    const numFormatted = ticket
+      ? `#${formatTicketNumber(ticket)}`
+      : drawNum
+        ? `#${formatTicketNumber(drawNum)}`
+        : '';
+
+    return {
+      headline: `Ganador oficial registrado para ${raffleTitle || 'la rifa'}.`,
+      detail: `Sorteo oficial completado con éxito. Boleto premiado ${numFormatted || 'asignado'} perteneciente a ${winnerName || 'un comprador verificado'}${buyerDoc ? ` (Documento: ${buyerDoc})` : ''}${orderRef ? ` respaldado por la orden ${orderRef}` : ''}.`,
+      chips: [
+        ...(numFormatted
+          ? [{ label: `Boleto Ganador ${numFormatted}`, type: 'gold' as const }]
+          : []),
+        ...(winnerName ? [{ label: winnerName, type: 'emerald' as const }] : []),
+        ...(orderRef ? [{ label: `Orden ${orderRef}`, type: 'muted' as const }] : []),
+        ...(actUrl
+          ? [{ label: 'Acta Oficial Adjunta (PDF)', type: 'emerald' as const, link: actUrl }]
+          : []),
+      ],
+    };
+  }
+
+  // Filtrar claves técnicas internas para evitar volcados crudos ("poco de letras")
+  const technicalKeys = new Set([
+    'buyer_id',
+    'order_id',
+    'raffle_id',
+    'user_id',
+    'admin_id',
+    'registered_by_admin',
+    'official_act_url',
+    'proof_url',
+    'receipt_url',
+    'payment_proof_url',
+    'id',
+  ]);
+
+  const readableEntries = Object.entries(d).filter(
+    ([k, v]) =>
+      !technicalKeys.has(k) &&
+      !k.endsWith('_id') &&
+      !k.includes('uuid') &&
+      typeof v !== 'object' &&
+      v !== null &&
+      v !== '' &&
+      !String(v).startsWith('http')
+  );
+
   return {
     headline: `Transición de estado: ${action.replace(/_/g, ' ')}.`,
     detail:
-      Object.keys(d).length > 0
-        ? Object.entries(d)
-            .map(([k, v]) => `${k}: ${v}`)
-            .join(' • ')
-        : 'Evento procesado correctamente por el backend.',
+      readableEntries.length > 0
+        ? readableEntries.map(([k, v]) => `${k.replace(/_/g, ' ')}: ${v}`).join(' • ')
+        : 'Operación procesada y respaldada en la bitácora inmutable de seguridad.',
     chips: [...(ref ? [{ label: `Ref: ${ref}`, type: 'gold' as const }] : [])],
   };
 }
@@ -581,6 +647,35 @@ function getAuditRowData(log: AuditLogItem): AuditRowData {
     };
   }
 
+  if (action.includes('WINNER')) {
+    const winnerName = (d.buyer_name as string) || '';
+    const ticket = (d.ticket_number as string) || '';
+    const drawNum = (d.lottery_draw_number as string) || '';
+    const orderRef = (d.order_reference as string) || (d.reference as string) || '';
+    const actUrl = (d.official_act_url as string) || '';
+    const numFormatted = ticket
+      ? `#${formatTicketNumber(ticket)}`
+      : drawNum
+        ? `#${formatTicketNumber(drawNum)}`
+        : '';
+
+    return {
+      time,
+      event: {
+        title: 'Ganador Registrado',
+        pillClass: styles.pillSuccess,
+        icon: <Trophy size={14} />,
+      },
+      reference: orderRef || numFormatted || null,
+      referenceType: orderRef ? 'order' : 'ticket',
+      description: `Boleto premiado ${numFormatted} (${winnerName || 'Ganador'}). Sorteo oficial registrado.`,
+      amount: null,
+      tickets: numFormatted,
+      fileInfo: actUrl ? 'Acta Oficial (PDF)' : null,
+      actor: { label: 'Administrador', type: 'admin' },
+    };
+  }
+
   return {
     time,
     event: {
@@ -763,6 +858,7 @@ export const AuditView: React.FC = () => {
             <option value="PROOF">Comprobantes Enviados</option>
             <option value="PENDING">Pendientes de Validación</option>
             <option value="TICKET">Gestión de Boletos</option>
+            <option value="WINNER">Ganadores Registrados</option>
             <option value="REJECTED">Pagos Rechazados</option>
           </select>
 
@@ -888,6 +984,29 @@ export const AuditView: React.FC = () => {
                             let chipClass = styles.chipMuted;
                             if (chip.type === 'gold') chipClass = styles.chipGold;
                             if (chip.type === 'emerald') chipClass = styles.chipEmerald;
+
+                            if (chip.link) {
+                              return (
+                                <a
+                                  key={idx}
+                                  href={chip.link}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className={chipClass}
+                                  style={{
+                                    textDecoration: 'none',
+                                    cursor: 'pointer',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '0.35rem',
+                                  }}
+                                  title="Abrir documento en nueva pestaña"
+                                >
+                                  <span>{chip.label}</span>
+                                  <ExternalLink size={11} />
+                                </a>
+                              );
+                            }
 
                             return (
                               <span key={idx} className={chipClass}>

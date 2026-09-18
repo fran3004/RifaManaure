@@ -30,6 +30,7 @@ import {
   ArrowUpRight,
   Layers,
   Send,
+  Trophy,
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AdminOrderReviewModal } from '@/components/admin/orders/AdminOrderReviewModal';
@@ -923,6 +924,7 @@ export const DashboardView: React.FC = () => {
                 ) : (
                   <div className={styles.activityTimeline}>
                     {auditLogs.map((log) => {
+                      const isWinner = log.action.toLowerCase().includes('winner');
                       const isApprove =
                         log.action.toLowerCase().includes('approve') ||
                         log.action.toLowerCase().includes('aprobar');
@@ -936,25 +938,45 @@ export const DashboardView: React.FC = () => {
 
                       let iconClass = styles.activityIconGeneric;
                       let icon = <Activity size={16} />;
+                      let actionTitle = log.action.replace(/_/g, ' ');
 
-                      if (isApprove) {
+                      if (isWinner) {
+                        iconClass = styles.activityIconApprove;
+                        icon = <Trophy size={16} />;
+                        actionTitle = 'Sorteo Oficial: Ganador Registrado';
+                      } else if (isApprove) {
                         iconClass = styles.activityIconApprove;
                         icon = <CheckCircle2 size={16} />;
+                        actionTitle = 'Pago Aprobado y Boletos Vendidos';
                       } else if (isReject) {
                         iconClass = styles.activityIconReject;
                         icon = <XCircle size={16} />;
+                        actionTitle = 'Pago Rechazado';
                       } else if (isNotify) {
                         iconClass = styles.activityIconNotify;
                         icon = <Send size={16} />;
+                        actionTitle = 'Notificación Despachada';
                       }
 
                       return (
                         <div key={log.id} className={styles.activityItem}>
                           <div className={`${styles.activityIcon} ${iconClass}`}>{icon}</div>
                           <div className={styles.activityBody}>
-                            <div className={styles.activityActionTitle}>{log.action}</div>
+                            <div className={styles.activityActionTitle}>{actionTitle}</div>
                             <div className={styles.activityActionDetails}>
-                              {log.details ? (
+                              {isWinner && log.details ? (
+                                <span>
+                                  {log.details.ticket_number
+                                    ? `Boleto Ganador #${formatTicketNumber(String(log.details.ticket_number))} • `
+                                    : ''}
+                                  {log.details.buyer_name
+                                    ? `Ganador: ${String(log.details.buyer_name)} • `
+                                    : ''}
+                                  {log.details.order_reference
+                                    ? `Orden: ${String(log.details.order_reference)}`
+                                    : ''}
+                                </span>
+                              ) : log.details ? (
                                 <span>
                                   {log.details.reference
                                     ? `Orden: ${String(log.details.reference)} • `
