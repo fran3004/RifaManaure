@@ -16,11 +16,7 @@ interface AdminEditBuyerFormProps {
   onSuccess: (updatedBuyer: BuyerItem) => void;
 }
 
-const AdminEditBuyerForm: React.FC<AdminEditBuyerFormProps> = ({
-  buyer,
-  onClose,
-  onSuccess,
-}) => {
+const AdminEditBuyerForm: React.FC<AdminEditBuyerFormProps> = ({ buyer, onClose, onSuccess }) => {
   const [fullName, setFullName] = useState<string>(buyer.full_name || '');
   const [phone, setPhone] = useState<string>(buyer.phone || '');
   const [email, setEmail] = useState<string>(buyer.email || '');
@@ -125,7 +121,8 @@ const AdminEditBuyerForm: React.FC<AdminEditBuyerFormProps> = ({
                 readOnly
               />
               <span className={styles.helpText}>
-                El documento es el identificador fiscal único del comprador y no es editable directamente.
+                El documento es el identificador fiscal único del comprador y no es editable
+                directamente.
               </span>
             </div>
 
@@ -199,11 +196,7 @@ const AdminEditBuyerForm: React.FC<AdminEditBuyerFormProps> = ({
             >
               Cancelar
             </button>
-            <button
-              type="submit"
-              className={styles.btnSubmit}
-              disabled={isSaving}
-            >
+            <button type="submit" className={styles.btnSubmit} disabled={isSaving}>
               {isSaving ? (
                 <>
                   <Loader2 size={16} className="animate-spin" />
@@ -232,12 +225,6 @@ export const AdminEditBuyerModal: React.FC<AdminEditBuyerModalProps> = ({
   if (!isOpen || !buyer) return null;
 
   return (
-    <AdminEditBuyerForm
-      key={buyer.id}
-      buyer={buyer}
-      onClose={onClose}
-      onSuccess={onSuccess}
-    />
+    <AdminEditBuyerForm key={buyer.id} buyer={buyer} onClose={onClose} onSuccess={onSuccess} />
   );
 };
-

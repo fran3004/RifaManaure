@@ -5,16 +5,16 @@ import styles from './AdminBreadcrumbs.module.css';
 
 const ROUTE_LABELS: Record<string, string> = {
   '': 'Dashboard',
-  'dashboard': 'Dashboard',
-  'ordenes': 'Órdenes',
-  'comprobantes': 'Comprobantes',
-  'tickets': 'Tickets',
-  'rifas': 'Rifas',
-  'cuentas': 'Cuentas de pago',
-  'aliados': 'Aliados',
-  'ganadores': 'Ganadores',
-  'auditoria': 'Auditoría',
-  'configuracion': 'Configuración',
+  dashboard: 'Dashboard',
+  ordenes: 'Órdenes',
+  comprobantes: 'Comprobantes',
+  tickets: 'Tickets',
+  rifas: 'Rifas',
+  cuentas: 'Cuentas de pago',
+  aliados: 'Aliados',
+  ganadores: 'Ganadores',
+  auditoria: 'Auditoría',
+  configuracion: 'Configuración',
 };
 
 export const AdminBreadcrumbs: React.FC = () => {
@@ -39,4 +39,3 @@ export const AdminBreadcrumbs: React.FC = () => {
     </nav>
   );
 };
-

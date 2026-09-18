@@ -42,16 +42,11 @@ const AdminRegisterWinnerModalContent: React.FC<AdminRegisterWinnerModalProps> =
   initialRaffleId,
 }) => {
   const defaultRaffleId =
-    initialRaffleId ||
-    raffles.find((r) => r.status === 'active')?.id ||
-    raffles[0]?.id ||
-    '';
+    initialRaffleId || raffles.find((r) => r.status === 'active')?.id || raffles[0]?.id || '';
   const [selectedRaffleId, setSelectedRaffleId] = useState<string>(defaultRaffleId);
   const [lotteryDrawNumber, setLotteryDrawNumber] = useState<string>('');
   const [ticketNumber, setTicketNumber] = useState<string>('');
-  const [drawDate, setDrawDate] = useState<string>(
-    new Date().toISOString().slice(0, 16)
-  );
+  const [drawDate, setDrawDate] = useState<string>(new Date().toISOString().slice(0, 16));
 
   const [candidate, setCandidate] = useState<TicketWinnerCandidate | null>(null);
   const [candidateError, setCandidateError] = useState<string | null>(null);
@@ -253,9 +248,7 @@ const AdminRegisterWinnerModalContent: React.FC<AdminRegisterWinnerModalProps> =
 
               <div className={styles.formGrid2}>
                 <div className={styles.formGroup}>
-                  <label className={styles.formLabel}>
-                    Número Oficial Lotería de Santander *
-                  </label>
+                  <label className={styles.formLabel}>Número Oficial Lotería de Santander *</label>
                   <input
                     type="text"
                     value={lotteryDrawNumber}
@@ -340,9 +333,7 @@ const AdminRegisterWinnerModalContent: React.FC<AdminRegisterWinnerModalProps> =
                       <CheckCircle size={15} />
                       <span>Boleto Pagado y Validado</span>
                     </div>
-                    <span className={styles.ticketBadgeHero}>
-                      #{candidate.ticketNumber}
-                    </span>
+                    <span className={styles.ticketBadgeHero}>#{candidate.ticketNumber}</span>
                   </div>
 
                   <div className={styles.candidateGrid}>
@@ -368,7 +359,9 @@ const AdminRegisterWinnerModalContent: React.FC<AdminRegisterWinnerModalProps> =
                     </div>
                     <div className={styles.candidateItem}>
                       <span className={styles.candidateItemLabel}>Valor Total Pagado</span>
-                      <span className={styles.candidateItemValue}>{formatCOP(candidate.totalAmount)}</span>
+                      <span className={styles.candidateItemValue}>
+                        {formatCOP(candidate.totalAmount)}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -452,10 +445,7 @@ const AdminRegisterWinnerModalContent: React.FC<AdminRegisterWinnerModalProps> =
                   <div className={styles.photoGrid}>
                     {photoFiles.map((photo, idx) => (
                       <div key={idx} className={styles.photoThumbnail}>
-                        <img
-                          src={URL.createObjectURL(photo)}
-                          alt={`Foto entrega ${idx + 1}`}
-                        />
+                        <img src={URL.createObjectURL(photo)} alt={`Foto entrega ${idx + 1}`} />
                         <button
                           type="button"
                           onClick={() => removePhotoFile(idx)}

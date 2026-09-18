@@ -101,4 +101,3 @@ export interface SystemSettingsResponse {
   error?: string;
   message?: string;
 }
-

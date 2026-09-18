@@ -248,7 +248,14 @@ import { maskDocumentId, maskFullName } from '@/lib/utils';
 export interface PublicOrderVerification {
   id: string;
   reference: string;
-  status: 'pending' | 'pending_verification' | 'paid' | 'completed' | 'rejected' | 'expired' | 'cancelled';
+  status:
+    | 'pending'
+    | 'pending_verification'
+    | 'paid'
+    | 'completed'
+    | 'rejected'
+    | 'expired'
+    | 'cancelled';
   createdAt: string;
   totalAmount: number;
   ticketCount: number;
@@ -279,11 +286,19 @@ export interface PublicVerificationResult {
  * Protege estrictamente la privacidad: el enmascarado se realiza en el propio motor SQL,
  * sin exponer jamás comprobantes, teléfonos, correos, datos bancarios ni metadatos administrativos.
  */
-export async function verifyPublicOrderOrTickets(searchQuery: string): Promise<PublicVerificationResult> {
+export async function verifyPublicOrderOrTickets(
+  searchQuery: string
+): Promise<PublicVerificationResult> {
   try {
     const raw = searchQuery.trim();
     if (!raw) {
-      return { success: false, searchedBy: 'reference', searchTerm: '', orders: [], error: 'Ingresa un número de referencia o documento de identidad.' };
+      return {
+        success: false,
+        searchedBy: 'reference',
+        searchTerm: '',
+        orders: [],
+        error: 'Ingresa un número de referencia o documento de identidad.',
+      };
     }
 
     const { data, error } = await supabase.rpc('verify_public_order_or_tickets', {
@@ -364,7 +379,13 @@ export async function verifyPublicOrderOrTickets(searchQuery: string): Promise<P
  */
 export async function getTicketsByBuyerDocument(documentId: string): Promise<{
   buyer: { fullName: string; phone: string; email: string } | null;
-  tickets: { number: string; status: string; raffleTitle: string; orderReference: string; orderStatus?: string }[];
+  tickets: {
+    number: string;
+    status: string;
+    raffleTitle: string;
+    orderReference: string;
+    orderStatus?: string;
+  }[];
 }> {
   try {
     const res = await verifyPublicOrderOrTickets(documentId);
@@ -396,5 +417,3 @@ export async function getTicketsByBuyerDocument(documentId: string): Promise<{
     return { buyer: null, tickets: [] };
   }
 }
-
-

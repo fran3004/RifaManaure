@@ -80,9 +80,7 @@ export async function getAllPartnersAdmin(): Promise<PartnerRow[]> {
 /**
  * Crea un nuevo aliado en la base de datos.
  */
-export async function createPartner(
-  partner: PartnerInsert
-): Promise<PartnerMutationResult> {
+export async function createPartner(partner: PartnerInsert): Promise<PartnerMutationResult> {
   try {
     const cleanName = partner.name.trim();
     const cleanSlug = (partner.slug && partner.slug.trim()) || generatePartnerSlug(cleanName);
@@ -131,10 +129,13 @@ export async function updatePartner(
         name: updates.name ? updates.name.trim() : undefined,
         slug: updates.slug ? updates.slug.trim() : undefined,
         category: updates.category ? updates.category.trim() : undefined,
-        description: updates.description !== undefined ? (updates.description?.trim() || null) : undefined,
-        logo_url: updates.logo_url !== undefined ? (updates.logo_url?.trim() || null) : undefined,
-        website_url: updates.website_url !== undefined ? (updates.website_url?.trim() || null) : undefined,
-        instagram_url: updates.instagram_url !== undefined ? (updates.instagram_url?.trim() || null) : undefined,
+        description:
+          updates.description !== undefined ? updates.description?.trim() || null : undefined,
+        logo_url: updates.logo_url !== undefined ? updates.logo_url?.trim() || null : undefined,
+        website_url:
+          updates.website_url !== undefined ? updates.website_url?.trim() || null : undefined,
+        instagram_url:
+          updates.instagram_url !== undefined ? updates.instagram_url?.trim() || null : undefined,
         updated_at: new Date().toISOString(),
       })
       .eq('id', id)
@@ -207,10 +208,7 @@ export async function deletePartner(id: string): Promise<{ success: boolean; err
  * Sube una imagen de logotipo al bucket 'partner-logos' en Supabase Storage.
  * Retorna la URL pública permanente para almacenarla en la base de datos.
  */
-export async function uploadPartnerLogo(
-  file: File,
-  slug: string
-): Promise<UploadLogoResult> {
+export async function uploadPartnerLogo(file: File, slug: string): Promise<UploadLogoResult> {
   try {
     // Validar tipo de archivo
     const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml'];
@@ -249,9 +247,7 @@ export async function uploadPartnerLogo(
       };
     }
 
-    const { data: publicData } = supabase.storage
-      .from('partner-logos')
-      .getPublicUrl(filePath);
+    const { data: publicData } = supabase.storage.from('partner-logos').getPublicUrl(filePath);
 
     return {
       success: true,
@@ -265,4 +261,3 @@ export async function uploadPartnerLogo(
     };
   }
 }
-

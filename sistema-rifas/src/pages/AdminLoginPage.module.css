@@ -107,7 +107,9 @@
   border-radius: 0.5rem;
   color: #ffffff;
   font-size: 0.95rem;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .input:focus {
@@ -157,7 +159,10 @@
   font-weight: 600;
   cursor: pointer;
   margin-top: 0.5rem;
-  transition: opacity 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+  transition:
+    opacity 0.2s ease,
+    transform 0.1s ease,
+    box-shadow 0.2s ease;
   box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
 
@@ -210,4 +215,3 @@
 .backLink:hover {
   color: #10b981;
 }
-

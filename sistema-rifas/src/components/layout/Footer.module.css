@@ -61,7 +61,9 @@
 .linkList a {
   font-size: 0.9rem;
   color: var(--text-secondary);
-  transition: color var(--transition-fast), transform var(--transition-fast);
+  transition:
+    color var(--transition-fast),
+    transform var(--transition-fast);
   display: inline-block;
 }
 
@@ -174,4 +176,3 @@
     gap: 0.75rem;
   }
 }
-

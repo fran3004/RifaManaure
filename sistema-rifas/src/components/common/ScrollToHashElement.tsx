@@ -41,4 +41,3 @@ export const ScrollToHashElement: React.FC = () => {
 
   return null;
 };
-

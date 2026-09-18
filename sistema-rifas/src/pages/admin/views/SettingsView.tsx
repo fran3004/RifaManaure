@@ -91,7 +91,9 @@ export const SettingsView: React.FC = () => {
       });
     } catch (err: unknown) {
       console.error('Error al cargar configuración:', err);
-      setError(err instanceof Error ? err.message : 'No fue posible cargar los parámetros de configuración');
+      setError(
+        err instanceof Error ? err.message : 'No fue posible cargar los parámetros de configuración'
+      );
     } finally {
       setIsLoading(false);
     }
@@ -120,7 +122,11 @@ export const SettingsView: React.FC = () => {
       } catch (err: unknown) {
         if (!ignore) {
           console.error('Error al cargar configuración:', err);
-          setError(err instanceof Error ? err.message : 'No fue posible cargar los parámetros de configuración');
+          setError(
+            err instanceof Error
+              ? err.message
+              : 'No fue posible cargar los parámetros de configuración'
+          );
         }
       } finally {
         if (!ignore) {
@@ -181,7 +187,8 @@ export const SettingsView: React.FC = () => {
     if (result.success && result.settings) {
       setNotification({
         type: 'success',
-        message: result.message || 'Parámetros del sistema guardados y sincronizados con toda la web.',
+        message:
+          result.message || 'Parámetros del sistema guardados y sincronizados con toda la web.',
       });
       setUpdatedAt(result.settings.updated_at);
       setInitialSettings({
@@ -403,8 +410,8 @@ export const SettingsView: React.FC = () => {
               notification.type === 'success'
                 ? styles.alertSuccess
                 : notification.type === 'error'
-                ? styles.alertError
-                : styles.alertInfo
+                  ? styles.alertError
+                  : styles.alertInfo
             }`}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
@@ -444,545 +451,571 @@ export const SettingsView: React.FC = () => {
           <>
             {/* Barra de Metadatos y Estado en Tiempo Real */}
             <div className={styles.metadataCard}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Sparkles size={16} style={{ color: '#34d399' }} />
-            <span>
-              Configuración en vivo gobernada por <strong>public.system_settings</strong> y Supabase Realtime.
-            </span>
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            {hasUnsavedChanges && (
-              <span className={styles.saveNotice}>
-                <AlertCircle size={14} /> Tienes modificaciones sin guardar
-              </span>
-            )}
-            <span>
-              Última actualización: <strong>{formatLastUpdated(updatedAt)}</strong>
-            </span>
-          </div>
-        </div>
-
-        {/* ========================================================================= */}
-        {/* SECCIÓN 1: PARÁMETROS OPERATIVOS DE VENTA Y RESERVA (2 COLUMNAS BALANCEADAS) */}
-        {/* ========================================================================= */}
-        <div className={styles.sectionBlock}>
-          <div className={styles.sectionBlockHeader}>
-            <h3 className={styles.sectionTitle}>
-              <Sliders size={18} style={{ color: '#34d399' }} />
-              Parámetros Operativos de Venta y Reserva
-            </h3>
-            <p className={styles.sectionSubtitle}>
-              Controlan la dinámica de selección de boletos en la cuadrícula y el cronómetro de checkout.
-            </p>
-          </div>
-
-          <div className={styles.twoColumnGrid}>
-            {/* Card 1: Tiempo de Reserva */}
-            <div className={styles.settingCard}>
-              <div className={styles.cardTop}>
-                <div className={styles.cardIconWrapper}>
-                  <Clock size={20} />
-                </div>
-                <span className={styles.cardBadge}>Dinámico</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Sparkles size={16} style={{ color: '#34d399' }} />
+                <span>
+                  Configuración en vivo gobernada por <strong>public.system_settings</strong> y
+                  Supabase Realtime.
+                </span>
               </div>
 
-              <div className={styles.cardContent}>
-                <h4 className={styles.cardLabel}>Tiempo de Reserva Temporal</h4>
-                <p className={styles.cardDescription}>
-                  Plazo en minutos que tiene el comprador para realizar el pago y subir el comprobante antes de liberar los boletos reservados.
-                </p>
-
-                <div className={styles.controlsArea}>
-                  {/* Stepper + Input */}
-                  <div className={styles.stepperWrapper}>
-                    <button
-                      type="button"
-                      className={styles.stepperBtn}
-                      onClick={() => setReservationDurationMinutes((prev) => Math.max(1, prev - 1))}
-                      disabled={isLoading || isSaving || reservationDurationMinutes <= 1}
-                      title="Disminuir 1 minuto"
-                    >
-                      <Minus size={16} />
-                    </button>
-
-                    <div className={styles.inputWrapper}>
-                      <input
-                        id="inputReservationMinutes"
-                        type="number"
-                        min={1}
-                        max={120}
-                        className={styles.textInput}
-                        value={reservationDurationMinutes}
-                        onChange={(e) =>
-                          setReservationDurationMinutes(
-                            Math.max(1, Math.min(120, Number(e.target.value) || 1))
-                          )
-                        }
-                        disabled={isLoading || isSaving}
-                        style={{ paddingRight: '5.5rem' }}
-                      />
-                      <span className={styles.inputSuffix}>Minutos</span>
-                    </div>
-
-                    <button
-                      type="button"
-                      className={styles.stepperBtn}
-                      onClick={() => setReservationDurationMinutes((prev) => Math.min(120, prev + 1))}
-                      disabled={isLoading || isSaving || reservationDurationMinutes >= 120}
-                      title="Aumentar 1 minuto"
-                    >
-                      <Plus size={16} />
-                    </button>
-                  </div>
-
-                  {/* Preset Quick Chips */}
-                  <div className={styles.presetChipsRow}>
-                    <span className={styles.presetChipLabel}>Atajos:</span>
-                    {RESERVATION_PRESETS.map((minutes) => (
-                      <button
-                        key={minutes}
-                        type="button"
-                        className={`${styles.presetChip} ${
-                          reservationDurationMinutes === minutes ? styles.presetChipActive : ''
-                        }`}
-                        onClick={() => setReservationDurationMinutes(minutes)}
-                        disabled={isLoading || isSaving}
-                      >
-                        {minutes} min
-                      </button>
-                    ))}
-                  </div>
-
-                  <span className={styles.cardHint}>
-                    ⚡ Equivale a <strong>{reservationDurationMinutes * 60} segundos</strong> en el cronómetro de checkout.
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                {hasUnsavedChanges && (
+                  <span className={styles.saveNotice}>
+                    <AlertCircle size={14} /> Tienes modificaciones sin guardar
                   </span>
-                </div>
+                )}
+                <span>
+                  Última actualización: <strong>{formatLastUpdated(updatedAt)}</strong>
+                </span>
               </div>
             </div>
 
-            {/* Card 2: Límite por Comprador */}
-            <div className={styles.settingCard}>
-              <div className={styles.cardTop}>
-                <div
-                  className={styles.cardIconWrapper}
-                  style={{ background: 'rgba(59, 130, 246, 0.12)', color: '#60a5fa' }}
-                >
-                  <Users size={20} />
-                </div>
-                <span className={styles.cardBadge}>Control Anti-Acaparamiento</span>
-              </div>
-
-              <div className={styles.cardContent}>
-                <h4 className={styles.cardLabel}>Límite Máximo por Comprador</h4>
-                <p className={styles.cardDescription}>
-                  Número máximo de boletos permitidos por orden y cédula de ciudadanía en la cuadrícula de compra.
+            {/* ========================================================================= */}
+            {/* SECCIÓN 1: PARÁMETROS OPERATIVOS DE VENTA Y RESERVA (2 COLUMNAS BALANCEADAS) */}
+            {/* ========================================================================= */}
+            <div className={styles.sectionBlock}>
+              <div className={styles.sectionBlockHeader}>
+                <h3 className={styles.sectionTitle}>
+                  <Sliders size={18} style={{ color: '#34d399' }} />
+                  Parámetros Operativos de Venta y Reserva
+                </h3>
+                <p className={styles.sectionSubtitle}>
+                  Controlan la dinámica de selección de boletos en la cuadrícula y el cronómetro de
+                  checkout.
                 </p>
+              </div>
 
-                <div className={styles.controlsArea}>
-                  {/* Stepper + Input */}
-                  <div className={styles.stepperWrapper}>
-                    <button
-                      type="button"
-                      className={styles.stepperBtn}
-                      onClick={() => setMaxTicketsPerBuyer((prev) => Math.max(1, prev - 5))}
-                      disabled={isLoading || isSaving || maxTicketsPerBuyer <= 1}
-                      title="Disminuir 5 boletos"
-                    >
-                      <Minus size={16} />
-                    </button>
-
-                    <div className={styles.inputWrapper}>
-                      <input
-                        id="inputMaxTickets"
-                        type="number"
-                        min={1}
-                        max={1000}
-                        className={styles.textInput}
-                        value={maxTicketsPerBuyer}
-                        onChange={(e) =>
-                          setMaxTicketsPerBuyer(
-                            Math.max(1, Math.min(1000, Number(e.target.value) || 1))
-                          )
-                        }
-                        disabled={isLoading || isSaving}
-                        style={{ paddingRight: '5.5rem' }}
-                      />
-                      <span className={styles.inputSuffix}>Boletos</span>
+              <div className={styles.twoColumnGrid}>
+                {/* Card 1: Tiempo de Reserva */}
+                <div className={styles.settingCard}>
+                  <div className={styles.cardTop}>
+                    <div className={styles.cardIconWrapper}>
+                      <Clock size={20} />
                     </div>
-
-                    <button
-                      type="button"
-                      className={styles.stepperBtn}
-                      onClick={() => setMaxTicketsPerBuyer((prev) => Math.min(1000, prev + 5))}
-                      disabled={isLoading || isSaving || maxTicketsPerBuyer >= 1000}
-                      title="Aumentar 5 boletos"
-                    >
-                      <Plus size={16} />
-                    </button>
+                    <span className={styles.cardBadge}>Dinámico</span>
                   </div>
 
-                  {/* Preset Quick Chips */}
-                  <div className={styles.presetChipsRow}>
-                    <span className={styles.presetChipLabel}>Atajos:</span>
-                    {TICKET_LIMIT_PRESETS.map((limit) => (
-                      <button
-                        key={limit}
-                        type="button"
-                        className={`${styles.presetChip} ${
-                          maxTicketsPerBuyer === limit ? styles.presetChipActive : ''
-                        }`}
-                        onClick={() => setMaxTicketsPerBuyer(limit)}
-                        disabled={isLoading || isSaving}
-                      >
-                        {limit} boletos
-                      </button>
-                    ))}
-                  </div>
+                  <div className={styles.cardContent}>
+                    <h4 className={styles.cardLabel}>Tiempo de Reserva Temporal</h4>
+                    <p className={styles.cardDescription}>
+                      Plazo en minutos que tiene el comprador para realizar el pago y subir el
+                      comprobante antes de liberar los boletos reservados.
+                    </p>
 
-                  <span className={styles.cardHint}>
-                    🛡️ Protege la rifa y garantiza equidad en la compra para todos los participantes.
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+                    <div className={styles.controlsArea}>
+                      {/* Stepper + Input */}
+                      <div className={styles.stepperWrapper}>
+                        <button
+                          type="button"
+                          className={styles.stepperBtn}
+                          onClick={() =>
+                            setReservationDurationMinutes((prev) => Math.max(1, prev - 1))
+                          }
+                          disabled={isLoading || isSaving || reservationDurationMinutes <= 1}
+                          title="Disminuir 1 minuto"
+                        >
+                          <Minus size={16} />
+                        </button>
 
-        {/* ========================================================================= */}
-        {/* SECCIÓN 2: CANALES OFICIALES DE ATENCIÓN Y CONTACTO (2 COLUMNAS BALANCEADAS) */}
-        {/* ========================================================================= */}
-        <div className={styles.sectionBlock}>
-          <div className={styles.sectionBlockHeader}>
-            <h3 className={styles.sectionTitle}>
-              <PhoneCall size={18} style={{ color: '#10b981' }} />
-              Canales Oficiales de Atención al Comprador y Soporte
-            </h3>
-            <p className={styles.sectionSubtitle}>
-              Estos datos se actualizan en vivo en el botón flotante de WhatsApp, pie de página, órdenes y recibos digitales.
-            </p>
-          </div>
+                        <div className={styles.inputWrapper}>
+                          <input
+                            id="inputReservationMinutes"
+                            type="number"
+                            min={1}
+                            max={120}
+                            className={styles.textInput}
+                            value={reservationDurationMinutes}
+                            onChange={(e) =>
+                              setReservationDurationMinutes(
+                                Math.max(1, Math.min(120, Number(e.target.value) || 1))
+                              )
+                            }
+                            disabled={isLoading || isSaving}
+                            style={{ paddingRight: '5.5rem' }}
+                          />
+                          <span className={styles.inputSuffix}>Minutos</span>
+                        </div>
 
-          <div className={styles.twoColumnGrid}>
-            {/* Card 3: WhatsApp Oficial */}
-            <div className={styles.settingCard}>
-              <div className={styles.cardTop}>
-                <div
-                  className={styles.cardIconWrapper}
-                  style={{ background: 'rgba(16, 185, 129, 0.12)', color: '#34d399' }}
-                >
-                  <MessageSquare size={20} />
-                </div>
-                <span className={styles.cardBadge}>Línea Directa</span>
-              </div>
+                        <button
+                          type="button"
+                          className={styles.stepperBtn}
+                          onClick={() =>
+                            setReservationDurationMinutes((prev) => Math.min(120, prev + 1))
+                          }
+                          disabled={isLoading || isSaving || reservationDurationMinutes >= 120}
+                          title="Aumentar 1 minuto"
+                        >
+                          <Plus size={16} />
+                        </button>
+                      </div>
 
-              <div className={styles.cardContent}>
-                <h4 className={styles.cardLabel}>Línea WhatsApp Oficial</h4>
-                <p className={styles.cardDescription}>
-                  Número de contacto con código de país (ej: 573001234567) para recepción de comprobantes y consultas de participantes.
-                </p>
+                      {/* Preset Quick Chips */}
+                      <div className={styles.presetChipsRow}>
+                        <span className={styles.presetChipLabel}>Atajos:</span>
+                        {RESERVATION_PRESETS.map((minutes) => (
+                          <button
+                            key={minutes}
+                            type="button"
+                            className={`${styles.presetChip} ${
+                              reservationDurationMinutes === minutes ? styles.presetChipActive : ''
+                            }`}
+                            onClick={() => setReservationDurationMinutes(minutes)}
+                            disabled={isLoading || isSaving}
+                          >
+                            {minutes} min
+                          </button>
+                        ))}
+                      </div>
 
-                <div className={styles.controlsArea}>
-                  <div className={styles.inputWrapper}>
-                    <input
-                      id="inputWhatsapp"
-                      type="text"
-                      placeholder="Ej: 573001234567"
-                      className={styles.textInput}
-                      value={supportWhatsappNumber}
-                      onChange={(e) => setSupportWhatsappNumber(e.target.value)}
-                      disabled={isLoading || isSaving}
-                    />
-                  </div>
-
-                  {/* Vista Previa y Prueba Inmediata */}
-                  <div className={styles.previewAndTestBox}>
-                    <div className={styles.previewText}>
-                      <span>Formato en web:</span>
-                      <strong className={styles.previewStrong}>
-                        {formatPhoneNumber(supportWhatsappNumber) || 'No configurado'}
-                      </strong>
-                    </div>
-
-                    <a
-                      href={whatsappTestUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={styles.testLinkBtn}
-                      title="Probar enlace de WhatsApp en una pestaña nueva"
-                    >
-                      <ExternalLink size={13} />
-                      <span>Probar Enlace WhatsApp</span>
-                    </a>
-                  </div>
-
-                  <span className={styles.cardHint}>
-                    📱 Conectado directamente al botón flotante de la página principal y consultas en /verificar.
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Card 4: Correo Electrónico Institucional */}
-            <div className={styles.settingCard}>
-              <div className={styles.cardTop}>
-                <div
-                  className={styles.cardIconWrapper}
-                  style={{ background: 'rgba(245, 158, 11, 0.12)', color: '#fbbf24' }}
-                >
-                  <Mail size={20} />
-                </div>
-                <span className={styles.cardBadge}>Correo Institucional</span>
-              </div>
-
-              <div className={styles.cardContent}>
-                <h4 className={styles.cardLabel}>Correo Electrónico de Soporte</h4>
-                <p className={styles.cardDescription}>
-                  Dirección oficial para soporte formal, notificaciones transaccionales y requerimientos legales.
-                </p>
-
-                <div className={styles.controlsArea}>
-                  <div className={styles.inputWrapper}>
-                    <input
-                      id="inputSupportEmail"
-                      type="email"
-                      placeholder="soporte@manaurevive.com"
-                      className={styles.textInput}
-                      value={supportEmail}
-                      onChange={(e) => setSupportEmail(e.target.value)}
-                      disabled={isLoading || isSaving}
-                    />
-                  </div>
-
-                  {/* Vista Previa y Prueba Inmediata */}
-                  <div className={styles.previewAndTestBox}>
-                    <div className={styles.previewText}>
-                      <span>Enlace mailto:</span>
-                      <strong className={styles.previewStrong}>
-                        {supportEmail || 'No configurado'}
-                      </strong>
-                    </div>
-
-                    <a
-                      href={`mailto:${supportEmail}?subject=${encodeURIComponent(
-                        'Prueba de Conectividad - Soporte Manaure Vive'
-                      )}`}
-                      className={styles.testLinkBtn}
-                      title="Abrir cliente de correo para probar el enlace"
-                    >
-                      <Mail size={13} />
-                      <span>Probar Mailto</span>
-                    </a>
-                  </div>
-
-                  <span className={styles.cardHint}>
-                    ✉️ Visible en el pie de página de toda la plataforma y comprobantes descargables.
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* ========================================================================= */}
-        {/* SECCIÓN 3: CONTROL DE ACCESOS Y GESTIÓN DE ADMINISTRADORES */}
-        {/* ========================================================================= */}
-        <div className={adminStyles.cardSection}>
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              marginBottom: '1.25rem',
-              flexWrap: 'wrap',
-              gap: '0.75rem',
-            }}
-          >
-            <div>
-              <h3
-                className={adminStyles.sectionTitle}
-                style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}
-              >
-                <Shield size={20} style={{ color: '#10b981' }} />
-                Administradores Autorizados
-              </h3>
-              <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.82rem', color: '#9cb5ab' }}>
-                Usuarios pre-autorizados con acceso al panel administrativo y control granular de roles.
-              </p>
-            </div>
-
-            <div className={styles.usersHeaderGroup}>
-              <button
-                type="button"
-                className={styles.refreshUsersBtn}
-                onClick={() => void loadAdminUsers()}
-                disabled={isLoadingUsers}
-                title="Actualizar lista de administradores"
-                aria-label="Actualizar lista"
-              >
-                <RefreshCw size={15} className={isLoadingUsers ? 'animate-spin' : ''} />
-              </button>
-
-              <button
-                type="button"
-                className={styles.inviteUserBtn}
-                onClick={() => setIsInviteModalOpen(true)}
-              >
-                <UserPlus size={16} />
-                <span>Invitar Administrador</span>
-              </button>
-            </div>
-          </div>
-
-          <div className={adminStyles.tableWrapper}>
-            <table className={adminStyles.table}>
-              <thead>
-                <tr>
-                  <th>Administrador</th>
-                  <th>Rol</th>
-                  <th>Cuenta Auth</th>
-                  <th>Estado Acceso</th>
-                  <th>Fecha de Alta</th>
-                  <th style={{ textAlign: 'right' }}>Acción</th>
-                </tr>
-              </thead>
-              <tbody>
-                {isLoadingUsers && adminUsers.length === 0 ? (
-                  <tr>
-                    <td colSpan={6} style={{ textAlign: 'center', padding: '2.5rem' }}>
-                      <Loader2
-                        size={24}
-                        className="animate-spin"
-                        style={{ margin: '0 auto 0.5rem auto', color: '#34d399', display: 'block' }}
-                      />
-                      <span style={{ color: '#9cb5ab', fontSize: '0.88rem' }}>
-                        Cargando administradores autorizados desde la base de datos...
+                      <span className={styles.cardHint}>
+                        ⚡ Equivale a <strong>{reservationDurationMinutes * 60} segundos</strong> en
+                        el cronómetro de checkout.
                       </span>
-                    </td>
-                  </tr>
-                ) : adminUsers.length === 0 ? (
-                  <tr>
-                    <td colSpan={6} style={{ textAlign: 'center', padding: '2.5rem', color: '#9cb5ab' }}>
-                      No se encontraron administradores registrados en la base de datos.
-                    </td>
-                  </tr>
-                ) : (
-                  adminUsers.map((item) => {
-                    const isSelf =
-                      (Boolean(user?.id) && item.user_id === user?.id) ||
-                      (Boolean(user?.email) && item.email.toLowerCase() === user?.email?.toLowerCase());
-                    const isToggling = togglingUserId === item.id;
+                    </div>
+                  </div>
+                </div>
 
-                    return (
-                      <tr key={item.id} className={isSelf ? styles.userRowSelf : undefined}>
-                        {/* Nombre y Correo */}
-                        <td>
-                          <div className={styles.userNameCell}>
-                            <div className={styles.userName}>
-                              <span>{item.full_name || 'Sin nombre registrado'}</span>
-                              {isSelf && <span className={styles.selfBadge}>Tú</span>}
-                            </div>
-                            <span className={styles.userEmail}>{item.email}</span>
-                          </div>
-                        </td>
+                {/* Card 2: Límite por Comprador */}
+                <div className={styles.settingCard}>
+                  <div className={styles.cardTop}>
+                    <div
+                      className={styles.cardIconWrapper}
+                      style={{ background: 'rgba(59, 130, 246, 0.12)', color: '#60a5fa' }}
+                    >
+                      <Users size={20} />
+                    </div>
+                    <span className={styles.cardBadge}>Control Anti-Acaparamiento</span>
+                  </div>
 
-                        {/* Rol */}
-                        <td>
-                          {item.role === 'superadmin' ? (
-                            <span className={styles.roleBadgeSuperadmin}>Superadmin</span>
-                          ) : item.role === 'auditor' ? (
-                            <span className={styles.roleBadgeAuditor}>Auditor</span>
-                          ) : (
-                            <span className={styles.roleBadgeAdmin}>Admin</span>
-                          )}
-                        </td>
+                  <div className={styles.cardContent}>
+                    <h4 className={styles.cardLabel}>Límite Máximo por Comprador</h4>
+                    <p className={styles.cardDescription}>
+                      Número máximo de boletos permitidos por orden y cédula de ciudadanía en la
+                      cuadrícula de compra.
+                    </p>
 
-                        {/* Estado Vinculación Auth */}
-                        <td>
-                          {item.has_auth_account ? (
-                            <span
-                              className={styles.authBadgeLinked}
-                              title="Cuenta vinculada con credenciales activas en Supabase Auth"
-                            >
-                              <CheckCircle2 size={14} /> Vinculado
-                            </span>
-                          ) : (
-                            <span
-                              className={styles.authBadgePending}
-                              title="El usuario aún no ha iniciado sesión con este correo"
-                            >
-                              <Clock size={14} /> Pendiente
-                            </span>
-                          )}
-                        </td>
+                    <div className={styles.controlsArea}>
+                      {/* Stepper + Input */}
+                      <div className={styles.stepperWrapper}>
+                        <button
+                          type="button"
+                          className={styles.stepperBtn}
+                          onClick={() => setMaxTicketsPerBuyer((prev) => Math.max(1, prev - 5))}
+                          disabled={isLoading || isSaving || maxTicketsPerBuyer <= 1}
+                          title="Disminuir 5 boletos"
+                        >
+                          <Minus size={16} />
+                        </button>
 
-                        {/* Estado Operativo */}
-                        <td>
-                          {item.is_active ? (
-                            <span className={adminStyles.badgeSuccess}>Activo</span>
-                          ) : (
-                            <span className={adminStyles.badgeDanger}>Inactivo</span>
-                          )}
-                        </td>
+                        <div className={styles.inputWrapper}>
+                          <input
+                            id="inputMaxTickets"
+                            type="number"
+                            min={1}
+                            max={1000}
+                            className={styles.textInput}
+                            value={maxTicketsPerBuyer}
+                            onChange={(e) =>
+                              setMaxTicketsPerBuyer(
+                                Math.max(1, Math.min(1000, Number(e.target.value) || 1))
+                              )
+                            }
+                            disabled={isLoading || isSaving}
+                            style={{ paddingRight: '5.5rem' }}
+                          />
+                          <span className={styles.inputSuffix}>Boletos</span>
+                        </div>
 
-                        {/* Fecha Alta */}
-                        <td className={styles.dateCell}>
-                          {item.created_at
-                            ? new Date(item.created_at).toLocaleDateString('es-CO', {
-                                day: '2-digit',
-                                month: 'short',
-                                year: 'numeric',
-                              })
-                            : '—'}
-                        </td>
+                        <button
+                          type="button"
+                          className={styles.stepperBtn}
+                          onClick={() => setMaxTicketsPerBuyer((prev) => Math.min(1000, prev + 5))}
+                          disabled={isLoading || isSaving || maxTicketsPerBuyer >= 1000}
+                          title="Aumentar 5 boletos"
+                        >
+                          <Plus size={16} />
+                        </button>
+                      </div>
 
-                        {/* Botón Switch Acción */}
-                        <td style={{ textAlign: 'right' }}>
-                          {isSelf ? (
-                            <button
-                              type="button"
-                              className={`${styles.statusToggleBtn} ${styles.statusToggleDisabled}`}
-                              disabled
-                              title="No puedes desactivar tu propia cuenta activa"
-                            >
-                              <UserCheck size={13} />
-                              <span>Tu Cuenta</span>
-                            </button>
-                          ) : (
-                            <button
-                              type="button"
-                              className={`${styles.statusToggleBtn} ${
-                                item.is_active ? styles.statusToggleActive : styles.statusToggleInactive
-                              }`}
-                              onClick={() => void handleToggleUserStatus(item)}
-                              disabled={isToggling}
-                              title={
-                                item.is_active
-                                  ? 'Clic para suspender acceso a este administrador'
-                                  : 'Clic para habilitar acceso a este administrador'
-                              }
-                            >
-                              {isToggling ? (
-                                <Loader2 size={13} className="animate-spin" />
-                              ) : item.is_active ? (
-                                <UserCheck size={13} />
-                              ) : (
-                                <UserX size={13} />
-                              )}
-                              <span>{item.is_active ? 'Desactivar' : 'Activar'}</span>
-                            </button>
-                          )}
+                      {/* Preset Quick Chips */}
+                      <div className={styles.presetChipsRow}>
+                        <span className={styles.presetChipLabel}>Atajos:</span>
+                        {TICKET_LIMIT_PRESETS.map((limit) => (
+                          <button
+                            key={limit}
+                            type="button"
+                            className={`${styles.presetChip} ${
+                              maxTicketsPerBuyer === limit ? styles.presetChipActive : ''
+                            }`}
+                            onClick={() => setMaxTicketsPerBuyer(limit)}
+                            disabled={isLoading || isSaving}
+                          >
+                            {limit} boletos
+                          </button>
+                        ))}
+                      </div>
+
+                      <span className={styles.cardHint}>
+                        🛡️ Protege la rifa y garantiza equidad en la compra para todos los
+                        participantes.
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* ========================================================================= */}
+            {/* SECCIÓN 2: CANALES OFICIALES DE ATENCIÓN Y CONTACTO (2 COLUMNAS BALANCEADAS) */}
+            {/* ========================================================================= */}
+            <div className={styles.sectionBlock}>
+              <div className={styles.sectionBlockHeader}>
+                <h3 className={styles.sectionTitle}>
+                  <PhoneCall size={18} style={{ color: '#10b981' }} />
+                  Canales Oficiales de Atención al Comprador y Soporte
+                </h3>
+                <p className={styles.sectionSubtitle}>
+                  Estos datos se actualizan en vivo en el botón flotante de WhatsApp, pie de página,
+                  órdenes y recibos digitales.
+                </p>
+              </div>
+
+              <div className={styles.twoColumnGrid}>
+                {/* Card 3: WhatsApp Oficial */}
+                <div className={styles.settingCard}>
+                  <div className={styles.cardTop}>
+                    <div
+                      className={styles.cardIconWrapper}
+                      style={{ background: 'rgba(16, 185, 129, 0.12)', color: '#34d399' }}
+                    >
+                      <MessageSquare size={20} />
+                    </div>
+                    <span className={styles.cardBadge}>Línea Directa</span>
+                  </div>
+
+                  <div className={styles.cardContent}>
+                    <h4 className={styles.cardLabel}>Línea WhatsApp Oficial</h4>
+                    <p className={styles.cardDescription}>
+                      Número de contacto con código de país (ej: 573001234567) para recepción de
+                      comprobantes y consultas de participantes.
+                    </p>
+
+                    <div className={styles.controlsArea}>
+                      <div className={styles.inputWrapper}>
+                        <input
+                          id="inputWhatsapp"
+                          type="text"
+                          placeholder="Ej: 573001234567"
+                          className={styles.textInput}
+                          value={supportWhatsappNumber}
+                          onChange={(e) => setSupportWhatsappNumber(e.target.value)}
+                          disabled={isLoading || isSaving}
+                        />
+                      </div>
+
+                      {/* Vista Previa y Prueba Inmediata */}
+                      <div className={styles.previewAndTestBox}>
+                        <div className={styles.previewText}>
+                          <span>Formato en web:</span>
+                          <strong className={styles.previewStrong}>
+                            {formatPhoneNumber(supportWhatsappNumber) || 'No configurado'}
+                          </strong>
+                        </div>
+
+                        <a
+                          href={whatsappTestUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={styles.testLinkBtn}
+                          title="Probar enlace de WhatsApp en una pestaña nueva"
+                        >
+                          <ExternalLink size={13} />
+                          <span>Probar Enlace WhatsApp</span>
+                        </a>
+                      </div>
+
+                      <span className={styles.cardHint}>
+                        📱 Conectado directamente al botón flotante de la página principal y
+                        consultas en /verificar.
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Card 4: Correo Electrónico Institucional */}
+                <div className={styles.settingCard}>
+                  <div className={styles.cardTop}>
+                    <div
+                      className={styles.cardIconWrapper}
+                      style={{ background: 'rgba(245, 158, 11, 0.12)', color: '#fbbf24' }}
+                    >
+                      <Mail size={20} />
+                    </div>
+                    <span className={styles.cardBadge}>Correo Institucional</span>
+                  </div>
+
+                  <div className={styles.cardContent}>
+                    <h4 className={styles.cardLabel}>Correo Electrónico de Soporte</h4>
+                    <p className={styles.cardDescription}>
+                      Dirección oficial para soporte formal, notificaciones transaccionales y
+                      requerimientos legales.
+                    </p>
+
+                    <div className={styles.controlsArea}>
+                      <div className={styles.inputWrapper}>
+                        <input
+                          id="inputSupportEmail"
+                          type="email"
+                          placeholder="soporte@manaurevive.com"
+                          className={styles.textInput}
+                          value={supportEmail}
+                          onChange={(e) => setSupportEmail(e.target.value)}
+                          disabled={isLoading || isSaving}
+                        />
+                      </div>
+
+                      {/* Vista Previa y Prueba Inmediata */}
+                      <div className={styles.previewAndTestBox}>
+                        <div className={styles.previewText}>
+                          <span>Enlace mailto:</span>
+                          <strong className={styles.previewStrong}>
+                            {supportEmail || 'No configurado'}
+                          </strong>
+                        </div>
+
+                        <a
+                          href={`mailto:${supportEmail}?subject=${encodeURIComponent(
+                            'Prueba de Conectividad - Soporte Manaure Vive'
+                          )}`}
+                          className={styles.testLinkBtn}
+                          title="Abrir cliente de correo para probar el enlace"
+                        >
+                          <Mail size={13} />
+                          <span>Probar Mailto</span>
+                        </a>
+                      </div>
+
+                      <span className={styles.cardHint}>
+                        ✉️ Visible en el pie de página de toda la plataforma y comprobantes
+                        descargables.
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* ========================================================================= */}
+            {/* SECCIÓN 3: CONTROL DE ACCESOS Y GESTIÓN DE ADMINISTRADORES */}
+            {/* ========================================================================= */}
+            <div className={adminStyles.cardSection}>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  marginBottom: '1.25rem',
+                  flexWrap: 'wrap',
+                  gap: '0.75rem',
+                }}
+              >
+                <div>
+                  <h3
+                    className={adminStyles.sectionTitle}
+                    style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                  >
+                    <Shield size={20} style={{ color: '#10b981' }} />
+                    Administradores Autorizados
+                  </h3>
+                  <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.82rem', color: '#9cb5ab' }}>
+                    Usuarios pre-autorizados con acceso al panel administrativo y control granular
+                    de roles.
+                  </p>
+                </div>
+
+                <div className={styles.usersHeaderGroup}>
+                  <button
+                    type="button"
+                    className={styles.refreshUsersBtn}
+                    onClick={() => void loadAdminUsers()}
+                    disabled={isLoadingUsers}
+                    title="Actualizar lista de administradores"
+                    aria-label="Actualizar lista"
+                  >
+                    <RefreshCw size={15} className={isLoadingUsers ? 'animate-spin' : ''} />
+                  </button>
+
+                  <button
+                    type="button"
+                    className={styles.inviteUserBtn}
+                    onClick={() => setIsInviteModalOpen(true)}
+                  >
+                    <UserPlus size={16} />
+                    <span>Invitar Administrador</span>
+                  </button>
+                </div>
+              </div>
+
+              <div className={adminStyles.tableWrapper}>
+                <table className={adminStyles.table}>
+                  <thead>
+                    <tr>
+                      <th>Administrador</th>
+                      <th>Rol</th>
+                      <th>Cuenta Auth</th>
+                      <th>Estado Acceso</th>
+                      <th>Fecha de Alta</th>
+                      <th style={{ textAlign: 'right' }}>Acción</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {isLoadingUsers && adminUsers.length === 0 ? (
+                      <tr>
+                        <td colSpan={6} style={{ textAlign: 'center', padding: '2.5rem' }}>
+                          <Loader2
+                            size={24}
+                            className="animate-spin"
+                            style={{
+                              margin: '0 auto 0.5rem auto',
+                              color: '#34d399',
+                              display: 'block',
+                            }}
+                          />
+                          <span style={{ color: '#9cb5ab', fontSize: '0.88rem' }}>
+                            Cargando administradores autorizados desde la base de datos...
+                          </span>
                         </td>
                       </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </>
-    )}
+                    ) : adminUsers.length === 0 ? (
+                      <tr>
+                        <td
+                          colSpan={6}
+                          style={{ textAlign: 'center', padding: '2.5rem', color: '#9cb5ab' }}
+                        >
+                          No se encontraron administradores registrados en la base de datos.
+                        </td>
+                      </tr>
+                    ) : (
+                      adminUsers.map((item) => {
+                        const isSelf =
+                          (Boolean(user?.id) && item.user_id === user?.id) ||
+                          (Boolean(user?.email) &&
+                            item.email.toLowerCase() === user?.email?.toLowerCase());
+                        const isToggling = togglingUserId === item.id;
+
+                        return (
+                          <tr key={item.id} className={isSelf ? styles.userRowSelf : undefined}>
+                            {/* Nombre y Correo */}
+                            <td>
+                              <div className={styles.userNameCell}>
+                                <div className={styles.userName}>
+                                  <span>{item.full_name || 'Sin nombre registrado'}</span>
+                                  {isSelf && <span className={styles.selfBadge}>Tú</span>}
+                                </div>
+                                <span className={styles.userEmail}>{item.email}</span>
+                              </div>
+                            </td>
+
+                            {/* Rol */}
+                            <td>
+                              {item.role === 'superadmin' ? (
+                                <span className={styles.roleBadgeSuperadmin}>Superadmin</span>
+                              ) : item.role === 'auditor' ? (
+                                <span className={styles.roleBadgeAuditor}>Auditor</span>
+                              ) : (
+                                <span className={styles.roleBadgeAdmin}>Admin</span>
+                              )}
+                            </td>
+
+                            {/* Estado Vinculación Auth */}
+                            <td>
+                              {item.has_auth_account ? (
+                                <span
+                                  className={styles.authBadgeLinked}
+                                  title="Cuenta vinculada con credenciales activas en Supabase Auth"
+                                >
+                                  <CheckCircle2 size={14} /> Vinculado
+                                </span>
+                              ) : (
+                                <span
+                                  className={styles.authBadgePending}
+                                  title="El usuario aún no ha iniciado sesión con este correo"
+                                >
+                                  <Clock size={14} /> Pendiente
+                                </span>
+                              )}
+                            </td>
+
+                            {/* Estado Operativo */}
+                            <td>
+                              {item.is_active ? (
+                                <span className={adminStyles.badgeSuccess}>Activo</span>
+                              ) : (
+                                <span className={adminStyles.badgeDanger}>Inactivo</span>
+                              )}
+                            </td>
+
+                            {/* Fecha Alta */}
+                            <td className={styles.dateCell}>
+                              {item.created_at
+                                ? new Date(item.created_at).toLocaleDateString('es-CO', {
+                                    day: '2-digit',
+                                    month: 'short',
+                                    year: 'numeric',
+                                  })
+                                : '—'}
+                            </td>
+
+                            {/* Botón Switch Acción */}
+                            <td style={{ textAlign: 'right' }}>
+                              {isSelf ? (
+                                <button
+                                  type="button"
+                                  className={`${styles.statusToggleBtn} ${styles.statusToggleDisabled}`}
+                                  disabled
+                                  title="No puedes desactivar tu propia cuenta activa"
+                                >
+                                  <UserCheck size={13} />
+                                  <span>Tu Cuenta</span>
+                                </button>
+                              ) : (
+                                <button
+                                  type="button"
+                                  className={`${styles.statusToggleBtn} ${
+                                    item.is_active
+                                      ? styles.statusToggleActive
+                                      : styles.statusToggleInactive
+                                  }`}
+                                  onClick={() => void handleToggleUserStatus(item)}
+                                  disabled={isToggling}
+                                  title={
+                                    item.is_active
+                                      ? 'Clic para suspender acceso a este administrador'
+                                      : 'Clic para habilitar acceso a este administrador'
+                                  }
+                                >
+                                  {isToggling ? (
+                                    <Loader2 size={13} className="animate-spin" />
+                                  ) : item.is_active ? (
+                                    <UserCheck size={13} />
+                                  ) : (
+                                    <UserX size={13} />
+                                  )}
+                                  <span>{item.is_active ? 'Desactivar' : 'Activar'}</span>
+                                </button>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </>
+        )}
 
         {/* Modal de Invitación y Pre-autorización */}
         <AdminInviteUserModal

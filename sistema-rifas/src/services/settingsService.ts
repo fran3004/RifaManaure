@@ -122,8 +122,10 @@ export async function updateSystemSettingsAdmin(
     console.error('[settingsService] Excepción al actualizar configuración:', err);
     return {
       success: false,
-      error: err instanceof Error ? formatSettingsRpcError(err.message) : 'Error de conexión al servidor.',
+      error:
+        err instanceof Error
+          ? formatSettingsRpcError(err.message)
+          : 'Error de conexión al servidor.',
     };
   }
 }
-

@@ -19,10 +19,7 @@ import { AdminLoadingState } from '@/components/admin/common/AdminLoadingState';
 import { AdminErrorState } from '@/components/admin/common/AdminErrorState';
 import { AdminEditBuyerModal } from '@/components/admin/buyers/AdminEditBuyerModal';
 import { AdminBuyerOrdersModal } from '@/components/admin/buyers/AdminBuyerOrdersModal';
-import {
-  fetchBuyersPaginated,
-  type BuyerItem,
-} from '@/services/buyerService';
+import { fetchBuyersPaginated, type BuyerItem } from '@/services/buyerService';
 import { formatCOP } from '@/lib/utils';
 import commonStyles from './AdminViews.module.css';
 import styles from './BuyersView.module.css';
@@ -42,7 +39,9 @@ export const BuyersView: React.FC = () => {
   const [viewingOrdersBuyer, setViewingOrdersBuyer] = useState<BuyerItem | null>(null);
 
   // Mensaje de feedback / toast
-  const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(
+    null
+  );
   const [copiedDocId, setCopiedDocId] = useState<string | null>(null);
 
   const loadBuyers = useCallback(async () => {
@@ -230,13 +229,9 @@ export const BuyersView: React.FC = () => {
                     {/* 1. Comprador / Identificación */}
                     <td>
                       <div className={styles.buyerCell}>
-                        <strong className={styles.buyerName}>
-                          {buyer.full_name}
-                        </strong>
+                        <strong className={styles.buyerName}>{buyer.full_name}</strong>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                          <span className={styles.docBadge}>
-                            C.C. {buyer.document_id}
-                          </span>
+                          <span className={styles.docBadge}>C.C. {buyer.document_id}</span>
                           <button
                             type="button"
                             onClick={() => handleCopyDoc(buyer.document_id)}
@@ -287,9 +282,7 @@ export const BuyersView: React.FC = () => {
 
                     {/* 4. Ciudad */}
                     <td>
-                      <span className={styles.cityText}>
-                        {buyer.city || 'Manaure'}
-                      </span>
+                      <span className={styles.cityText}>{buyer.city || 'Manaure'}</span>
                     </td>
 
                     {/* 5. Órdenes */}
@@ -345,11 +338,21 @@ export const BuyersView: React.FC = () => {
           {/* Barra de Paginación Integrada */}
           <div className={styles.tableFooterPagination}>
             <div className={commonStyles.paginationInfo}>
-              Mostrando <strong>{buyers.length}</strong> de <strong>{totalCount}</strong> compradores
+              Mostrando <strong>{buyers.length}</strong> de <strong>{totalCount}</strong>{' '}
+              compradores
             </div>
             <div className={commonStyles.paginationControls}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginRight: '0.5rem' }}>
-                <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary, #9cb5ab)' }}>Por pág.:</span>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.4rem',
+                  marginRight: '0.5rem',
+                }}
+              >
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary, #9cb5ab)' }}>
+                  Por pág.:
+                </span>
                 <select
                   className={commonStyles.pageSizeSelect}
                   value={pageSize}

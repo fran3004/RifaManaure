@@ -28,4 +28,3 @@ export const AdminPageHeader: React.FC<AdminPageHeaderProps> = ({
     </div>
   );
 };
-

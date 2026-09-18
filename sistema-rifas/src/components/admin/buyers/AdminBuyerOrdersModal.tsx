@@ -32,10 +32,7 @@ interface AdminBuyerOrdersContentProps {
   onClose: () => void;
 }
 
-const AdminBuyerOrdersContent: React.FC<AdminBuyerOrdersContentProps> = ({
-  buyer,
-  onClose,
-}) => {
+const AdminBuyerOrdersContent: React.FC<AdminBuyerOrdersContentProps> = ({ buyer, onClose }) => {
   const [orders, setOrders] = useState<BuyerOrderSummary[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -235,16 +232,40 @@ const AdminBuyerOrdersContent: React.FC<AdminBuyerOrdersContentProps> = ({
             </h4>
 
             {isLoading ? (
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem', gap: '0.5rem', color: '#9cb5ab' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '2rem',
+                  gap: '0.5rem',
+                  color: '#9cb5ab',
+                }}
+              >
                 <Loader2 size={20} className="animate-spin" />
                 <span>Cargando historial de órdenes...</span>
               </div>
             ) : errorMessage ? (
-              <div style={{ padding: '1rem', color: '#fca5a5', background: 'rgba(239, 68, 68, 0.1)', borderRadius: '10px' }}>
+              <div
+                style={{
+                  padding: '1rem',
+                  color: '#fca5a5',
+                  background: 'rgba(239, 68, 68, 0.1)',
+                  borderRadius: '10px',
+                }}
+              >
                 {errorMessage}
               </div>
             ) : orders.length === 0 ? (
-              <div style={{ padding: '2rem', textAlign: 'center', color: '#7e9c90', background: 'rgba(255, 255, 255, 0.02)', borderRadius: '10px' }}>
+              <div
+                style={{
+                  padding: '2rem',
+                  textAlign: 'center',
+                  color: '#7e9c90',
+                  background: 'rgba(255, 255, 255, 0.02)',
+                  borderRadius: '10px',
+                }}
+              >
                 Este comprador aún no tiene órdenes registradas.
               </div>
             ) : (
@@ -265,9 +286,7 @@ const AdminBuyerOrdersContent: React.FC<AdminBuyerOrdersContentProps> = ({
                       <tr key={ord.id}>
                         {/* 1. Referencia */}
                         <td>
-                          <span className={styles.refChip}>
-                            {ord.reference}
-                          </span>
+                          <span className={styles.refChip}>{ord.reference}</span>
                         </td>
 
                         {/* 2. Fecha */}
@@ -280,7 +299,10 @@ const AdminBuyerOrdersContent: React.FC<AdminBuyerOrdersContentProps> = ({
                           {ord.tickets && ord.tickets.length > 0 ? (
                             <div style={{ display: 'flex', flexWrap: 'wrap', maxWidth: '240px' }}>
                               {ord.tickets.map((t) => (
-                                <span key={t.id || t.ticket_number} className={styles.ticketNumberChip}>
+                                <span
+                                  key={t.id || t.ticket_number}
+                                  className={styles.ticketNumberChip}
+                                >
                                   #{formatTicketNumber(t.ticket_number)}
                                 </span>
                               ))}
@@ -300,9 +322,7 @@ const AdminBuyerOrdersContent: React.FC<AdminBuyerOrdersContentProps> = ({
                         </td>
 
                         {/* 5. Estado */}
-                        <td>
-                          {getStatusBadge(ord.status)}
-                        </td>
+                        <td>{getStatusBadge(ord.status)}</td>
 
                         {/* 6. Comprobante */}
                         <td style={{ textAlign: 'right' }}>
@@ -348,12 +368,5 @@ export const AdminBuyerOrdersModal: React.FC<AdminBuyerOrdersModalProps> = ({
 }) => {
   if (!isOpen || !buyer) return null;
 
-  return (
-    <AdminBuyerOrdersContent
-      key={buyer.id}
-      buyer={buyer}
-      onClose={onClose}
-    />
-  );
+  return <AdminBuyerOrdersContent key={buyer.id} buyer={buyer} onClose={onClose} />;
 };
-

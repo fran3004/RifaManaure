@@ -110,7 +110,8 @@ export const DigitalReceiptModal: React.FC<DigitalReceiptModalProps> = ({
             <div>
               <h3 className={styles.modalTitle}>Comprobante Digital Oficial</h3>
               <p className={styles.modalSubtitle}>
-                Orden: <strong>{receiptData.orderReference}</strong> • {receiptData.ticketNumbers.length} Boletos
+                Orden: <strong>{receiptData.orderReference}</strong> •{' '}
+                {receiptData.ticketNumbers.length} Boletos
               </p>
             </div>
           </div>
@@ -123,15 +124,23 @@ export const DigitalReceiptModal: React.FC<DigitalReceiptModalProps> = ({
         <div className={styles.previewContainer}>
           {isGenerating ? (
             <div style={{ textAlign: 'center', padding: '2rem', color: '#9cb5ab' }}>
-              <div style={{ fontSize: '1rem', fontWeight: 600 }}>Generando certificado digital en alta resolución...</div>
-              <div style={{ fontSize: '0.8rem', color: '#5e7a6f', marginTop: '0.35rem' }}>Verificando validez y sellos oficiales</div>
+              <div style={{ fontSize: '1rem', fontWeight: 600 }}>
+                Generando certificado digital en alta resolución...
+              </div>
+              <div style={{ fontSize: '0.8rem', color: '#5e7a6f', marginTop: '0.35rem' }}>
+                Verificando validez y sellos oficiales
+              </div>
             </div>
           ) : errorMsg ? (
             <div style={{ textAlign: 'center', padding: '2rem', color: '#f87171' }}>
               <div>{errorMsg}</div>
             </div>
           ) : previewUrl ? (
-            <img src={previewUrl} alt={`Comprobante ${receiptData.orderReference}`} className={styles.previewImage} />
+            <img
+              src={previewUrl}
+              alt={`Comprobante ${receiptData.orderReference}`}
+              className={styles.previewImage}
+            />
           ) : null}
         </div>
 
@@ -139,7 +148,9 @@ export const DigitalReceiptModal: React.FC<DigitalReceiptModalProps> = ({
         <div className={styles.securityNotice}>
           <CheckCircle2 size={18} style={{ flexShrink: 0, color: '#34d399' }} />
           <div>
-            <strong>Documento Oficial Autenticado:</strong> Este comprobante certifica la titularidad oficial de los números adquiridos ante la plataforma <strong>Manaure Vive</strong> y el sorteo programado.
+            <strong>Documento Oficial Autenticado:</strong> Este comprobante certifica la
+            titularidad oficial de los números adquiridos ante la plataforma{' '}
+            <strong>Manaure Vive</strong> y el sorteo programado.
           </div>
         </div>
 
@@ -180,7 +191,14 @@ export const DigitalReceiptModal: React.FC<DigitalReceiptModalProps> = ({
         </div>
 
         {/* Copiar enlace / texto directo */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: '-0.5rem' }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginTop: '-0.5rem',
+          }}
+        >
           <button
             type="button"
             onClick={() => void handleCopyShareLink()}
@@ -197,7 +215,11 @@ export const DigitalReceiptModal: React.FC<DigitalReceiptModalProps> = ({
             }}
           >
             {copiedLink ? <Check size={14} /> : <Copy size={14} />}
-            <span>{copiedLink ? '¡Texto del comprobante copiado!' : 'Copiar texto y resumen de la orden'}</span>
+            <span>
+              {copiedLink
+                ? '¡Texto del comprobante copiado!'
+                : 'Copiar texto y resumen de la orden'}
+            </span>
           </button>
         </div>
       </div>

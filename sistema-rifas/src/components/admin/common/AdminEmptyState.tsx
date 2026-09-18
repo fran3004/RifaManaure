@@ -19,9 +19,7 @@ export const AdminEmptyState: React.FC<AdminEmptyStateProps> = ({
 }) => {
   return (
     <div className={styles.emptyContainer}>
-      <div className={styles.iconWrapper}>
-        {icon || <Inbox size={32} />}
-      </div>
+      <div className={styles.iconWrapper}>{icon || <Inbox size={32} />}</div>
       <h3 className={styles.title}>{title}</h3>
       <p className={styles.description}>{description}</p>
       {actionLabel && onAction && (
@@ -32,4 +30,3 @@ export const AdminEmptyState: React.FC<AdminEmptyStateProps> = ({
     </div>
   );
 };
-

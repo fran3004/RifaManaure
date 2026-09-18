@@ -32,10 +32,14 @@ function loadImage(src: string): Promise<HTMLImageElement> {
 /**
  * Genera el Canvas del Comprobante Digital Oficial con diseño de alta resolución (1080x1440).
  */
-export async function generateDigitalReceiptCanvas(data: DigitalReceiptData): Promise<HTMLCanvasElement> {
+export async function generateDigitalReceiptCanvas(
+  data: DigitalReceiptData
+): Promise<HTMLCanvasElement> {
   // Validación estricta de seguridad
   if (data.orderStatus !== 'paid' && data.orderStatus !== 'completed') {
-    throw new Error('Solo se permite generar comprobantes digitales para órdenes en estado PAGADO / CONFIRMADO.');
+    throw new Error(
+      'Solo se permite generar comprobantes digitales para órdenes en estado PAGADO / CONFIRMADO.'
+    );
   }
 
   const canvas = document.createElement('canvas');
@@ -86,7 +90,7 @@ export async function generateDigitalReceiptCanvas(data: DigitalReceiptData): Pr
   const badgeW = 440;
   const badgeH = 46;
   const badgeX = (W - badgeW) / 2;
-  
+
   // Dibujar rectángulo redondeado
   ctx.beginPath();
   ctx.roundRect(badgeX, badgeY, badgeW, badgeH, 23);
@@ -130,7 +134,11 @@ export async function generateDigitalReceiptCanvas(data: DigitalReceiptData): Pr
 
   ctx.fillStyle = '#5e7a6f';
   ctx.font = '16px sans-serif';
-  ctx.fillText(`Emitido: ${new Date(data.createdAt).toLocaleDateString('es-CO')}`, W - 105, boxY + 118);
+  ctx.fillText(
+    `Emitido: ${new Date(data.createdAt).toLocaleDateString('es-CO')}`,
+    W - 105,
+    boxY + 118
+  );
 
   // 6. Detalles del Comprador y del Sorteo
   const infoY = 475;
@@ -169,7 +177,11 @@ export async function generateDigitalReceiptCanvas(data: DigitalReceiptData): Pr
   if (data.drawDate) {
     ctx.fillStyle = '#f59e0b';
     ctx.font = '600 16px sans-serif';
-    ctx.fillText(`Fecha Sorteo: ${new Date(data.drawDate).toLocaleDateString('es-CO')}`, W - 105, infoY + 115);
+    ctx.fillText(
+      `Fecha Sorteo: ${new Date(data.drawDate).toLocaleDateString('es-CO')}`,
+      W - 105,
+      infoY + 115
+    );
   }
 
   // 7. Sección de Boletos Asignados
@@ -220,7 +232,11 @@ export async function generateDigitalReceiptCanvas(data: DigitalReceiptData): Pr
     ctx.fillStyle = '#fbbf24';
     ctx.font = 'bold 18px sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText(`+ ${data.ticketNumbers.length - 20} números adicionales en la orden`, W / 2, gridY + 280);
+    ctx.fillText(
+      `+ ${data.ticketNumbers.length - 20} números adicionales en la orden`,
+      W / 2,
+      gridY + 280
+    );
   }
 
   // 8. Resumen Financiero Total
@@ -259,12 +275,24 @@ export async function generateDigitalReceiptCanvas(data: DigitalReceiptData): Pr
 
   ctx.fillStyle = '#9cb5ab';
   ctx.font = '15px sans-serif';
-  ctx.fillText('Verifica la validez de este comprobante en: manaurevive.com/verificar', W / 2, footerY + 80);
+  ctx.fillText(
+    'Verifica la validez de este comprobante en: manaurevive.com/verificar',
+    W / 2,
+    footerY + 80
+  );
 
   ctx.fillStyle = '#5e7a6f';
   ctx.font = '13px sans-serif';
-  ctx.fillText('Este documento es un comprobante digital de participación expedido tras la validación bancaria de la orden.', W / 2, footerY + 110);
-  ctx.fillText('Conserva este comprobante como respaldo oficial de tus números adquiridos.', W / 2, footerY + 130);
+  ctx.fillText(
+    'Este documento es un comprobante digital de participación expedido tras la validación bancaria de la orden.',
+    W / 2,
+    footerY + 110
+  );
+  ctx.fillText(
+    'Conserva este comprobante como respaldo oficial de tus números adquiridos.',
+    W / 2,
+    footerY + 130
+  );
 
   return canvas;
 }
@@ -272,7 +300,10 @@ export async function generateDigitalReceiptCanvas(data: DigitalReceiptData): Pr
 /**
  * Descarga el comprobante digital como imagen PNG de alta resolución.
  */
-export async function downloadDigitalReceiptImage(data: DigitalReceiptData, filename?: string): Promise<void> {
+export async function downloadDigitalReceiptImage(
+  data: DigitalReceiptData,
+  filename?: string
+): Promise<void> {
   const canvas = await generateDigitalReceiptCanvas(data);
   const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/png'));
   if (!blob) throw new Error('No se pudo generar la imagen del comprobante.');
@@ -296,7 +327,9 @@ export async function printOrSavePdfDigitalReceipt(data: DigitalReceiptData): Pr
 
   const printWindow = window.open('', '_blank');
   if (!printWindow) {
-    throw new Error('Las ventanas emergentes están bloqueadas en tu navegador. Por favor permítelas para descargar el PDF.');
+    throw new Error(
+      'Las ventanas emergentes están bloqueadas en tu navegador. Por favor permítelas para descargar el PDF.'
+    );
   }
 
   printWindow.document.write(`
@@ -349,8 +382,9 @@ export async function printOrSavePdfDigitalReceipt(data: DigitalReceiptData): Pr
 export function getWhatsAppShareText(data: DigitalReceiptData): string {
   const nums = data.ticketNumbers.map((n) => `#${formatTicketNumber(n)}`).join(', ');
   const total = formatCOP(data.totalAmount);
-  
-  return `🎟️ *COMPROBANTE OFICIAL MANAURE VIVE*\n\n` +
+
+  return (
+    `🎟️ *COMPROBANTE OFICIAL MANAURE VIVE*\n\n` +
     `✅ *Estado:* Pago Confirmado y Boletos Garantizados\n` +
     `📌 *Orden:* ${data.orderReference}\n` +
     `👤 *Comprador:* ${data.buyerName}\n` +
@@ -358,6 +392,6 @@ export function getWhatsAppShareText(data: DigitalReceiptData): string {
     `💰 *Total:* ${total}\n` +
     `🏆 *Sorteo:* ${data.raffleTitle} (${data.lotteryReference})\n\n` +
     `🔍 *Verifica tu comprobante oficial en vivo aquí:*\n` +
-    `https://manaurevive.com/verificar?ref=${data.orderReference}`;
+    `https://manaurevive.com/verificar?ref=${data.orderReference}`
+  );
 }
-

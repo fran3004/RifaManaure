@@ -21,7 +21,9 @@
   max-height: 90vh;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6), 0 0 30px rgba(16, 185, 129, 0.08);
+  box-shadow:
+    0 25px 50px -12px rgba(0, 0, 0, 0.6),
+    0 0 30px rgba(16, 185, 129, 0.08);
   animation: modalEnter 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   overflow: hidden;
 }
@@ -466,4 +468,3 @@
   color: #9cb5ab;
   border: 1px solid rgba(156, 181, 171, 0.25);
 }
-

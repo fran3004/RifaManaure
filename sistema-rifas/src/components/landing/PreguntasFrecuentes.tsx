@@ -57,7 +57,8 @@ export const PreguntasFrecuentes: React.FC = () => {
           </div>
           <h2 className={styles.title}>Preguntas Frecuentes</h2>
           <p className={styles.subtitle}>
-            Todo lo que necesitas saber sobre la mecánica del sorteo, medios de pago y entrega del premio.
+            Todo lo que necesitas saber sobre la mecánica del sorteo, medios de pago y entrega del
+            premio.
           </p>
         </div>
 
@@ -65,10 +66,7 @@ export const PreguntasFrecuentes: React.FC = () => {
           {faqs.map((faq, index) => {
             const isOpen = openIndex === index;
             return (
-              <div
-                key={index}
-                className={`${styles.faqCard} ${isOpen ? styles.faqCardOpen : ''}`}
-              >
+              <div key={index} className={`${styles.faqCard} ${isOpen ? styles.faqCardOpen : ''}`}>
                 <button
                   type="button"
                   className={styles.questionBtn}
@@ -95,4 +93,3 @@ export const PreguntasFrecuentes: React.FC = () => {
     </section>
   );
 };
-

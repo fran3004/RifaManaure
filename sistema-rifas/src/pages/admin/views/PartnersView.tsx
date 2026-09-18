@@ -36,7 +36,10 @@ import {
 import styles from './AdminViews.module.css';
 import partnerStyles from './PartnersView.module.css';
 
-const InstagramIcon: React.FC<{ size?: number; className?: string }> = ({ size = 14, className }) => (
+const InstagramIcon: React.FC<{ size?: number; className?: string }> = ({
+  size = 14,
+  className,
+}) => (
   <svg
     width={size}
     height={size}
@@ -56,9 +59,7 @@ const InstagramIcon: React.FC<{ size?: number; className?: string }> = ({ size =
 );
 
 // Diccionario de logos locales para fallback visual en la vista administrativa
-const localAliadosMap = new Map(
-  fallbackAliados.map((a) => [a.slug, a.logoGrid])
-);
+const localAliadosMap = new Map(fallbackAliados.map((a) => [a.slug, a.logoGrid]));
 
 const CATEGORY_PRESETS = [
   'Aventura y Deportes Extremos',
@@ -104,7 +105,9 @@ export const PartnersView: React.FC = () => {
 
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(
+    null
+  );
 
   const loadPartners = useCallback(async () => {
     setLoading(true);
@@ -202,9 +205,10 @@ export const PartnersView: React.FC = () => {
     setFormData((prev) => ({
       ...prev,
       name: val,
-      slug: !editingPartner || prev.slug === generatePartnerSlug(prev.name)
-        ? generatePartnerSlug(val)
-        : prev.slug,
+      slug:
+        !editingPartner || prev.slug === generatePartnerSlug(prev.name)
+          ? generatePartnerSlug(val)
+          : prev.slug,
     }));
   };
 
@@ -242,7 +246,9 @@ export const PartnersView: React.FC = () => {
 
   const handleRemoveSelectedFile = () => {
     setLogoFile(null);
-    setLogoPreview(logoUrl || (editingPartner ? localAliadosMap.get(editingPartner.slug) || null : null));
+    setLogoPreview(
+      logoUrl || (editingPartner ? localAliadosMap.get(editingPartner.slug) || null : null)
+    );
   };
 
   // Validaciones del Formulario
@@ -302,9 +308,7 @@ export const PartnersView: React.FC = () => {
         });
 
         if (res.success && res.data) {
-          setPartners((prev) =>
-            prev.map((p) => (p.id === res.data!.id ? res.data! : p))
-          );
+          setPartners((prev) => prev.map((p) => (p.id === res.data!.id ? res.data! : p)));
           setFeedback({
             type: 'success',
             message: `Aliado "${formData.name}" actualizado correctamente.`,
@@ -467,11 +471,7 @@ export const PartnersView: React.FC = () => {
             >
               <RefreshCw size={15} className={loading ? 'animate-spin' : ''} />
             </button>
-            <button
-              type="button"
-              className={styles.btnPrimary}
-              onClick={handleOpenCreateModal}
-            >
+            <button type="button" className={styles.btnPrimary} onClick={handleOpenCreateModal}>
               <Plus size={16} />
               <span>Nuevo Aliado</span>
             </button>
@@ -489,22 +489,14 @@ export const PartnersView: React.FC = () => {
             gap: '0.75rem',
             padding: '1rem 1.25rem',
             backgroundColor:
-              feedback.type === 'success'
-                ? 'rgba(16, 185, 129, 0.15)'
-                : 'rgba(239, 68, 68, 0.15)',
+              feedback.type === 'success' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)',
             border: `1px solid ${
-              feedback.type === 'success'
-                ? 'rgba(16, 185, 129, 0.3)'
-                : 'rgba(239, 68, 68, 0.3)'
+              feedback.type === 'success' ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)'
             }`,
             color: feedback.type === 'success' ? '#34d399' : '#fca5a5',
           }}
         >
-          {feedback.type === 'success' ? (
-            <CheckCircle2 size={18} />
-          ) : (
-            <AlertCircle size={18} />
-          )}
+          {feedback.type === 'success' ? <CheckCircle2 size={18} /> : <AlertCircle size={18} />}
           <span style={{ fontSize: '0.9rem', fontWeight: 500 }}>{feedback.message}</span>
         </div>
       )}
@@ -591,7 +583,11 @@ export const PartnersView: React.FC = () => {
       {/* Grid de Aliados */}
       {loading ? (
         <div className={styles.emptyStateCard}>
-          <Loader2 size={32} className="animate-spin" style={{ color: 'var(--color-brand-accent, #f59e0b)' }} />
+          <Loader2
+            size={32}
+            className="animate-spin"
+            style={{ color: 'var(--color-brand-accent, #f59e0b)' }}
+          />
           <h3 className={styles.emptyStateTitle}>Cargando Aliados</h3>
           <p className={styles.emptyStateDescription}>
             Consultando la tabla public.partners en Supabase...
@@ -616,11 +612,7 @@ export const PartnersView: React.FC = () => {
               ? 'No hay registros que coincidan con los filtros aplicados.'
               : 'Aún no hay aliados registrados. Utiliza el botón "Nuevo Aliado" para agregar el primero.'}
           </p>
-          <button
-            type="button"
-            className={styles.btnPrimary}
-            onClick={handleOpenCreateModal}
-          >
+          <button type="button" className={styles.btnPrimary} onClick={handleOpenCreateModal}>
             <Plus size={16} />
             <span>Crear Primer Aliado</span>
           </button>
@@ -648,7 +640,10 @@ export const PartnersView: React.FC = () => {
                         loading="lazy"
                       />
                     ) : (
-                      <Building2 size={28} style={{ color: 'var(--color-brand-accent, #f59e0b)' }} />
+                      <Building2
+                        size={28}
+                        style={{ color: 'var(--color-brand-accent, #f59e0b)' }}
+                      />
                     )}
                   </div>
 
@@ -659,9 +654,15 @@ export const PartnersView: React.FC = () => {
                         type="button"
                         onClick={() => handleToggleActive(partner)}
                         className={`${styles.statusToggleBtn} ${
-                          partner.is_active ? styles.statusToggleActive : styles.statusToggleInactive
+                          partner.is_active
+                            ? styles.statusToggleActive
+                            : styles.statusToggleInactive
                         }`}
-                        title={partner.is_active ? 'Clic para ocultar de la web' : 'Clic para publicar en web'}
+                        title={
+                          partner.is_active
+                            ? 'Clic para ocultar de la web'
+                            : 'Clic para publicar en web'
+                        }
                       >
                         {partner.is_active ? <Check size={13} /> : <EyeOff size={13} />}
                         <span>{partner.is_active ? 'Activo' : 'Inactivo'}</span>
@@ -892,9 +893,7 @@ export const PartnersView: React.FC = () => {
 
               {/* Logotipo: Selección Dual */}
               <div className={`${styles.formModalGroup} ${styles.formModalFull}`}>
-                <label className={styles.formModalLabel}>
-                  Logotipo Oficial del Aliado
-                </label>
+                <label className={styles.formModalLabel}>Logotipo Oficial del Aliado</label>
 
                 <div className={partnerStyles.logoTabsRow}>
                   <button
@@ -922,9 +921,14 @@ export const PartnersView: React.FC = () => {
                 {logoTab === 'upload' ? (
                   <div>
                     <label className={partnerStyles.fileDropzone}>
-                      <ImageIcon size={28} style={{ color: 'var(--color-brand-accent, #f59e0b)' }} />
+                      <ImageIcon
+                        size={28}
+                        style={{ color: 'var(--color-brand-accent, #f59e0b)' }}
+                      />
                       <span className={partnerStyles.dropzoneTitle}>
-                        {logoFile ? logoFile.name : 'Haz clic para seleccionar o arrastra una imagen'}
+                        {logoFile
+                          ? logoFile.name
+                          : 'Haz clic para seleccionar o arrastra una imagen'}
                       </span>
                       <span className={partnerStyles.dropzoneHint}>
                         PNG, WebP, JPG o SVG (máx. 5 MB). Se alojará en Supabase Storage.
@@ -964,7 +968,11 @@ export const PartnersView: React.FC = () => {
                     />
                     <div className={partnerStyles.logoPreviewMeta}>
                       <strong>Vista Previa del Logotipo</strong>
-                      <div>{logoFile ? `${logoFile.name} (${Math.round(logoFile.size / 1024)} KB)` : 'Logo asignado'}</div>
+                      <div>
+                        {logoFile
+                          ? `${logoFile.name} (${Math.round(logoFile.size / 1024)} KB)`
+                          : 'Logo asignado'}
+                      </div>
                     </div>
                     {(logoFile || logoUrl) && (
                       <button
@@ -992,7 +1000,9 @@ export const PartnersView: React.FC = () => {
                   placeholder="Breve reseña sobre las experiencias, rutas o platos que ofrece este aliado..."
                   className={styles.formModalTextarea}
                   value={formData.description}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, description: e.target.value }))
+                  }
                   disabled={isSubmitting}
                 />
               </div>
@@ -1005,11 +1015,15 @@ export const PartnersView: React.FC = () => {
                   placeholder="https://aliado.com o link de WhatsApp"
                   className={styles.formModalInput}
                   value={formData.website_url}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, website_url: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, website_url: e.target.value }))
+                  }
                   disabled={isSubmitting}
                 />
                 {formErrors.website_url && (
-                  <span style={{ fontSize: '0.75rem', color: '#f87171' }}>{formErrors.website_url}</span>
+                  <span style={{ fontSize: '0.75rem', color: '#f87171' }}>
+                    {formErrors.website_url}
+                  </span>
                 )}
               </div>
 
@@ -1021,11 +1035,15 @@ export const PartnersView: React.FC = () => {
                   placeholder="https://instagram.com/usuario"
                   className={styles.formModalInput}
                   value={formData.instagram_url}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, instagram_url: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, instagram_url: e.target.value }))
+                  }
                   disabled={isSubmitting}
                 />
                 {formErrors.instagram_url && (
-                  <span style={{ fontSize: '0.75rem', color: '#f87171' }}>{formErrors.instagram_url}</span>
+                  <span style={{ fontSize: '0.75rem', color: '#f87171' }}>
+                    {formErrors.instagram_url}
+                  </span>
                 )}
               </div>
 
@@ -1083,11 +1101,7 @@ export const PartnersView: React.FC = () => {
                 >
                   Cancelar
                 </button>
-                <button
-                  type="submit"
-                  className={styles.btnPrimary}
-                  disabled={isSubmitting}
-                >
+                <button type="submit" className={styles.btnPrimary} disabled={isSubmitting}>
                   {isSubmitting ? (
                     <>
                       <Loader2 size={16} className="animate-spin" />

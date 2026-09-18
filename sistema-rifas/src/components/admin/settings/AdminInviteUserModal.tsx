@@ -100,7 +100,12 @@ export const AdminInviteUserModal: React.FC<AdminInviteUserModalProps> = ({
   };
 
   return (
-    <div className={styles.modalOverlay} onClick={handleResetAndClose} role="dialog" aria-modal="true">
+    <div
+      className={styles.modalOverlay}
+      onClick={handleResetAndClose}
+      role="dialog"
+      aria-modal="true"
+    >
       <div className={styles.modalCard} onClick={(e) => e.stopPropagation()}>
         {/* Header */}
         <div className={styles.modalHeader}>
@@ -155,17 +160,8 @@ export const AdminInviteUserModal: React.FC<AdminInviteUserModalProps> = ({
                   Enlace de Ingreso para el Administrador
                 </span>
                 <div className={styles.linkRow}>
-                  <input
-                    type="text"
-                    readOnly
-                    value={loginUrl}
-                    className={styles.linkInput}
-                  />
-                  <button
-                    type="button"
-                    className={styles.copyBtn}
-                    onClick={handleCopyLink}
-                  >
+                  <input type="text" readOnly value={loginUrl} className={styles.linkInput} />
+                  <button type="button" className={styles.copyBtn} onClick={handleCopyLink}>
                     {copied ? (
                       <>
                         <Check size={14} /> Copiado
@@ -178,17 +174,17 @@ export const AdminInviteUserModal: React.FC<AdminInviteUserModalProps> = ({
                   </button>
                 </div>
                 <p className={styles.successHint}>
-                  Comparte este enlace con el usuario para que acceda con sus credenciales de Supabase Auth.
+                  Comparte este enlace con el usuario para que acceda con sus credenciales de
+                  Supabase Auth.
                 </p>
               </div>
             </div>
 
-            <div className={styles.modalFooter} style={{ padding: '0.75rem 0 0 0', border: 'none' }}>
-              <button
-                type="button"
-                className={styles.btnSubmit}
-                onClick={handleResetAndClose}
-              >
+            <div
+              className={styles.modalFooter}
+              style={{ padding: '0.75rem 0 0 0', border: 'none' }}
+            >
+              <button type="button" className={styles.btnSubmit} onClick={handleResetAndClose}>
                 Entendido y Cerrar
               </button>
             </div>
@@ -253,7 +249,10 @@ export const AdminInviteUserModal: React.FC<AdminInviteUserModalProps> = ({
                     tabIndex={0}
                     role="button"
                   >
-                    <Shield size={18} style={{ color: role === 'auditor' ? '#34d399' : '#9cb5ab' }} />
+                    <Shield
+                      size={18}
+                      style={{ color: role === 'auditor' ? '#34d399' : '#9cb5ab' }}
+                    />
                     <span className={styles.roleName}>Auditor</span>
                     <span className={styles.roleDesc}>Solo lectura para reportes y órdenes</span>
                   </div>

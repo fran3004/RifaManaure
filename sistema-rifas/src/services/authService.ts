@@ -84,7 +84,10 @@ export async function signOutAdmin(): Promise<{ error?: string }> {
  */
 export async function getInitialAdminSession(): Promise<AdminAuthResult> {
   try {
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    const {
+      data: { session },
+      error: sessionError,
+    } = await supabase.auth.getSession();
 
     if (sessionError || !session?.user) {
       return {
@@ -173,4 +176,3 @@ function translateAuthError(error: AuthError): string {
   }
   return error.message || 'Error al iniciar sesión.';
 }
-

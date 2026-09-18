@@ -208,17 +208,11 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({ isOpen, onClose }) =
             <span className={styles.userName}>
               {adminProfile?.full_name || user?.email?.split('@')[0] || 'Admin'}
             </span>
-            <span className={styles.userRole}>
-              {adminProfile?.role || 'admin'}
-            </span>
+            <span className={styles.userRole}>{adminProfile?.role || 'admin'}</span>
           </div>
         </div>
 
-        <button
-          type="button"
-          className={styles.logoutButton}
-          onClick={() => void signOut()}
-        >
+        <button type="button" className={styles.logoutButton} onClick={() => void signOut()}>
           <LogOut size={16} />
           <span>Cerrar Sesión</span>
         </button>
@@ -226,4 +220,3 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({ isOpen, onClose }) =
     </aside>
   );
 };
-

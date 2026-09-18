@@ -45,7 +45,8 @@ export const Footer: React.FC = () => {
             className={styles.footerLogo}
           />
           <p className={styles.brandDesc}>
-            Iniciativa de promoción del turismo de naturaleza, aventura y cultura en Manaure Balcón del Cesar, impulsando el desarrollo de operadores y emprendimientos locales.
+            Iniciativa de promoción del turismo de naturaleza, aventura y cultura en Manaure Balcón
+            del Cesar, impulsando el desarrollo de operadores y emprendimientos locales.
           </p>
           <div className={styles.location}>
             <MapPin size={16} className={styles.locIcon} />
@@ -149,4 +150,3 @@ export const Footer: React.FC = () => {
     </footer>
   );
 };
-

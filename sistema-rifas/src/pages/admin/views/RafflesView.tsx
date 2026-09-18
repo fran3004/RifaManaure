@@ -69,7 +69,11 @@ export const RafflesView: React.FC = () => {
       }
     } catch (err: unknown) {
       console.error('Error al cargar rifas:', err);
-      setError(err instanceof Error ? err.message : 'Error inesperado de red al consultar el catálogo de rifas.');
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Error inesperado de red al consultar el catálogo de rifas.'
+      );
     } finally {
       setIsLoading(false);
     }
@@ -168,7 +172,11 @@ export const RafflesView: React.FC = () => {
       <AdminPageHeader
         title="Gestión de Rifas"
         description="Supervisión de sorteos, precio unitario de boletos, fecha del sorteo, lotería de referencia y control de estados."
-        badge={raffles.length > 0 ? `${raffles.length} ${raffles.length === 1 ? 'edición' : 'ediciones'}` : undefined}
+        badge={
+          raffles.length > 0
+            ? `${raffles.length} ${raffles.length === 1 ? 'edición' : 'ediciones'}`
+            : undefined
+        }
         actions={
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
             <button
@@ -261,7 +269,12 @@ export const RafflesView: React.FC = () => {
                     <button
                       type="button"
                       className={adminStyles.btnSecondary}
-                      style={{ padding: '0.2rem 0.55rem', fontSize: '0.75rem', borderColor: '#d97706', color: '#fbbf24' }}
+                      style={{
+                        padding: '0.2rem 0.55rem',
+                        fontSize: '0.75rem',
+                        borderColor: '#d97706',
+                        color: '#fbbf24',
+                      }}
                       onClick={() => setSelectedRaffleId(activeRaffle.id)}
                       title="Seleccionar esta rifa para gestionar en todo el panel"
                     >
@@ -296,7 +309,9 @@ export const RafflesView: React.FC = () => {
                 <div className={styles.progressStats}>
                   <strong>{activeRaffle.sold_tickets}</strong> de{' '}
                   <strong>{activeRaffle.total_tickets}</strong> boletos pagados (
-                  <strong style={{ color: '#34d399' }}>{formatCOP(activeRaffle.total_revenue)}</strong>{' '}
+                  <strong style={{ color: '#34d399' }}>
+                    {formatCOP(activeRaffle.total_revenue)}
+                  </strong>{' '}
                   recaudados)
                 </div>
               </div>
@@ -384,10 +399,28 @@ export const RafflesView: React.FC = () => {
                   <div key={r.id} className={styles.otherRaffleCard}>
                     <div className={styles.otherCardTop}>
                       <div>
-                        <div style={{ marginBottom: '0.35rem', display: 'flex', gap: '0.4rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                        <div
+                          style={{
+                            marginBottom: '0.35rem',
+                            display: 'flex',
+                            gap: '0.4rem',
+                            alignItems: 'center',
+                            flexWrap: 'wrap',
+                          }}
+                        >
                           {renderStatusBadge(r.status)}
                           {r.id === selectedRaffleId ? (
-                            <span style={{ fontSize: '0.72rem', color: '#fbbf24', fontWeight: 600, background: 'rgba(217, 119, 6, 0.15)', padding: '0.15rem 0.45rem', borderRadius: '4px', border: '1px solid rgba(217, 119, 6, 0.4)' }}>
+                            <span
+                              style={{
+                                fontSize: '0.72rem',
+                                color: '#fbbf24',
+                                fontWeight: 600,
+                                background: 'rgba(217, 119, 6, 0.15)',
+                                padding: '0.15rem 0.45rem',
+                                borderRadius: '4px',
+                                border: '1px solid rgba(217, 119, 6, 0.4)',
+                              }}
+                            >
                               ★ Activa en Panel
                             </span>
                           ) : null}
@@ -402,7 +435,12 @@ export const RafflesView: React.FC = () => {
                             type="button"
                             className={adminStyles.btnSecondary}
                             onClick={() => setSelectedRaffleId(r.id)}
-                            style={{ padding: '0.35rem 0.55rem', fontSize: '0.75rem', borderColor: '#d97706', color: '#fbbf24' }}
+                            style={{
+                              padding: '0.35rem 0.55rem',
+                              fontSize: '0.75rem',
+                              borderColor: '#d97706',
+                              color: '#fbbf24',
+                            }}
                             title="Seleccionar esta rifa para filtrar el panel"
                           >
                             Gestionar
@@ -429,9 +467,7 @@ export const RafflesView: React.FC = () => {
                       </div>
                       <div className={styles.otherStatItem}>
                         <span className={styles.otherStatLabel}>Emisión</span>
-                        <strong className={styles.otherStatVal}>
-                          {r.total_tickets} boletos
-                        </strong>
+                        <strong className={styles.otherStatVal}>{r.total_tickets} boletos</strong>
                       </div>
                       <div className={styles.otherStatItem}>
                         <span className={styles.otherStatLabel}>Sorteo</span>

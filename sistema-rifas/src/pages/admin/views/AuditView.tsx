@@ -174,7 +174,14 @@ function getNarrative(log: AuditLogItem): NarrativeResult {
       chips: [
         ...(ref ? [{ label: `Orden ${ref}`, type: 'gold' as const }] : []),
         ...(total ? [{ label: total, type: 'emerald' as const }] : []),
-        ...(ticketCount > 0 ? [{ label: `${ticketCount} ${ticketCount === 1 ? 'boleto vendido' : 'boletos vendidos'}`, type: 'muted' as const }] : []),
+        ...(ticketCount > 0
+          ? [
+              {
+                label: `${ticketCount} ${ticketCount === 1 ? 'boleto vendido' : 'boletos vendidos'}`,
+                type: 'muted' as const,
+              },
+            ]
+          : []),
       ],
     };
   }
@@ -210,7 +217,14 @@ function getNarrative(log: AuditLogItem): NarrativeResult {
       chips: [
         ...(ref ? [{ label: `Orden ${ref}`, type: 'gold' as const }] : []),
         ...(total ? [{ label: total, type: 'emerald' as const }] : []),
-        ...(ticketCount > 0 ? [{ label: `${ticketCount} ${ticketCount === 1 ? 'boleto' : 'boletos'}`, type: 'muted' as const }] : []),
+        ...(ticketCount > 0
+          ? [
+              {
+                label: `${ticketCount} ${ticketCount === 1 ? 'boleto' : 'boletos'}`,
+                type: 'muted' as const,
+              },
+            ]
+          : []),
       ],
     };
   }
@@ -301,10 +315,13 @@ function getNarrative(log: AuditLogItem): NarrativeResult {
 
   return {
     headline: `Transición de estado: ${action.replace(/_/g, ' ')}.`,
-    detail: Object.keys(d).length > 0 ? Object.entries(d).map(([k, v]) => `${k}: ${v}`).join(' • ') : 'Evento procesado correctamente por el backend.',
-    chips: [
-      ...(ref ? [{ label: `Ref: ${ref}`, type: 'gold' as const }] : []),
-    ],
+    detail:
+      Object.keys(d).length > 0
+        ? Object.entries(d)
+            .map(([k, v]) => `${k}: ${v}`)
+            .join(' • ')
+        : 'Evento procesado correctamente por el backend.',
+    chips: [...(ref ? [{ label: `Ref: ${ref}`, type: 'gold' as const }] : [])],
   };
 }
 
@@ -395,7 +412,8 @@ function getAuditRowData(log: AuditLogItem): AuditRowData {
       },
       reference: ref || null,
       referenceType: 'order',
-      description: 'Transferencia validada con éxito. Boletos confirmados definitivamente como VENDIDOS.',
+      description:
+        'Transferencia validada con éxito. Boletos confirmados definitivamente como VENDIDOS.',
       amount: total,
       tickets: ticketCount ? `${ticketCount} ${ticketCount === 1 ? 'boleto' : 'boletos'}` : null,
       fileInfo: null,
@@ -405,7 +423,8 @@ function getAuditRowData(log: AuditLogItem): AuditRowData {
 
   if (action.includes('PROOF_SUBMITTED')) {
     const fileName = (d.file_name as string) || '';
-    const fileSize = typeof d.file_size === 'number' ? `${Math.round(d.file_size / 1024)} KB` : null;
+    const fileSize =
+      typeof d.file_size === 'number' ? `${Math.round(d.file_size / 1024)} KB` : null;
     return {
       time,
       event: {
@@ -704,9 +723,7 @@ export const AuditView: React.FC = () => {
               <History size={18} color="#f59e0b" />
             </div>
           </div>
-          <div className={styles.metricValue}>
-            {totalCount}
-          </div>
+          <div className={styles.metricValue}>{totalCount}</div>
           <span className={styles.metricHint}>Historial de operaciones auditadas</span>
         </div>
       </div>
@@ -725,7 +742,14 @@ export const AuditView: React.FC = () => {
         </div>
 
         <div className={commonStyles.filterControls}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-secondary, #9cb5ab)' }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              color: 'var(--text-secondary, #9cb5ab)',
+            }}
+          >
             <Filter size={16} />
             <span style={{ fontSize: '0.85rem' }}>Filtrar:</span>
           </div>
@@ -788,10 +812,23 @@ export const AuditView: React.FC = () => {
       ) : viewMode === 'timeline' ? (
         /* =================== MODO LÍNEA DE TIEMPO (TIMELINE) =================== */
         <div className={commonStyles.cardSection}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: '1.25rem',
+            }}
+          >
             <h2 className={commonStyles.sectionTitle} style={{ margin: 0, fontSize: '1.15rem' }}>
               Actividades y Transiciones Recientes{' '}
-              <span style={{ fontSize: '0.85rem', color: 'var(--text-muted, #5e7a6f)', fontWeight: 500 }}>
+              <span
+                style={{
+                  fontSize: '0.85rem',
+                  color: 'var(--text-muted, #5e7a6f)',
+                  fontWeight: 500,
+                }}
+              >
                 ({totalCount} eventos)
               </span>
             </h2>
@@ -808,7 +845,10 @@ export const AuditView: React.FC = () => {
               return (
                 <div key={log.id} className={styles.timelineItem}>
                   {/* Nodo de estado en la línea */}
-                  <div className={`${styles.timelineNode} ${config.nodeClass}`} title={config.title}>
+                  <div
+                    className={`${styles.timelineNode} ${config.nodeClass}`}
+                    title={config.title}
+                  >
                     {config.icon}
                   </div>
 
@@ -856,7 +896,13 @@ export const AuditView: React.FC = () => {
                             );
                           })}
                         </div>
-                        <span style={{ fontSize: '0.72rem', color: '#5e7a6f', fontFamily: 'var(--font-mono, monospace)' }}>
+                        <span
+                          style={{
+                            fontSize: '0.72rem',
+                            color: '#5e7a6f',
+                            fontFamily: 'var(--font-mono, monospace)',
+                          }}
+                        >
                           {time.full}
                         </span>
                       </div>
@@ -873,8 +919,17 @@ export const AuditView: React.FC = () => {
               Mostrando <strong>{logs.length}</strong> de <strong>{totalCount}</strong> eventos
             </div>
             <div className={commonStyles.paginationControls}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginRight: '0.5rem' }}>
-                <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary, #9cb5ab)' }}>Por pág.:</span>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.4rem',
+                  marginRight: '0.5rem',
+                }}
+              >
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary, #9cb5ab)' }}>
+                  Por pág.:
+                </span>
                 <select
                   className={commonStyles.pageSizeSelect}
                   value={pageSize}
@@ -915,10 +970,23 @@ export const AuditView: React.FC = () => {
       ) : (
         /* =================== MODO TABLA EJECUTIVA =================== */
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: '1rem',
+            }}
+          >
             <h2 className={commonStyles.sectionTitle} style={{ margin: 0, fontSize: '1.15rem' }}>
               Actividades y Transiciones Recientes{' '}
-              <span style={{ fontSize: '0.85rem', color: 'var(--text-muted, #5e7a6f)', fontWeight: 500 }}>
+              <span
+                style={{
+                  fontSize: '0.85rem',
+                  color: 'var(--text-muted, #5e7a6f)',
+                  fontWeight: 500,
+                }}
+              >
                 ({totalCount} eventos)
               </span>
             </h2>
@@ -968,7 +1036,9 @@ export const AuditView: React.FC = () => {
                         <td>
                           {row.reference ? (
                             <span
-                              className={row.referenceType === 'order' ? styles.chipGold : styles.chipEmerald}
+                              className={
+                                row.referenceType === 'order' ? styles.chipGold : styles.chipEmerald
+                              }
                               style={{ fontSize: '0.78rem', padding: '0.2rem 0.55rem' }}
                             >
                               {row.reference}
@@ -980,9 +1050,7 @@ export const AuditView: React.FC = () => {
 
                         {/* 4. Detalle de la Operación */}
                         <td>
-                          <span className={styles.tableDescription}>
-                            {row.description}
-                          </span>
+                          <span className={styles.tableDescription}>{row.description}</span>
                         </td>
 
                         {/* 5. Impacto / Monto */}
@@ -1037,8 +1105,17 @@ export const AuditView: React.FC = () => {
                 Mostrando <strong>{logs.length}</strong> de <strong>{totalCount}</strong> eventos
               </div>
               <div className={commonStyles.paginationControls}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginRight: '0.5rem' }}>
-                  <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary, #9cb5ab)' }}>Por pág.:</span>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.4rem',
+                    marginRight: '0.5rem',
+                  }}
+                >
+                  <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary, #9cb5ab)' }}>
+                    Por pág.:
+                  </span>
                   <select
                     className={commonStyles.pageSizeSelect}
                     value={pageSize}

@@ -51,7 +51,9 @@
   background-color: var(--bg-surface-elevated);
   border: 1px solid var(--border-subtle);
   overflow: hidden;
-  transition: border-color var(--transition-fast), background-color var(--transition-fast);
+  transition:
+    border-color var(--transition-fast),
+    background-color var(--transition-fast);
 }
 
 .faqCard:hover {
@@ -134,4 +136,3 @@
     padding: 0 1rem 1rem;
   }
 }
-

@@ -12,10 +12,7 @@ import {
   Compass,
 } from 'lucide-react';
 import type { WinnerWithDetails } from '@/types/raffle.types';
-import {
-  maskBuyerName,
-  maskDocumentId,
-} from '@/services/winnerService';
+import { maskBuyerName, maskDocumentId } from '@/services/winnerService';
 import styles from './GanadorShowcase.module.css';
 
 interface GanadorShowcaseProps {
@@ -66,8 +63,8 @@ export const GanadorShowcase: React.FC<GanadorShowcaseProps> = ({ winner }) => {
       const startY = height * 0.25;
 
       const angle = fromLeft
-        ? (Math.random() * 0.4 - 0.2) + Math.PI / 4 // hacia la derecha
-        : (Math.random() * 0.4 - 0.2) + (3 * Math.PI) / 4; // hacia la izquierda
+        ? Math.random() * 0.4 - 0.2 + Math.PI / 4 // hacia la derecha
+        : Math.random() * 0.4 - 0.2 + (3 * Math.PI) / 4; // hacia la izquierda
 
       const speed = Math.random() * 9 + 5;
 
@@ -190,7 +187,8 @@ export const GanadorShowcase: React.FC<GanadorShowcaseProps> = ({ winner }) => {
             ¡Tenemos un <span className={styles.goldenHighlight}>Ganador Oficial</span>!
           </h2>
           <p className={styles.subtitle}>
-            La Gran Rifa Ecoturística Manaure Vive ha premiado a su afortunado participante con la experiencia todo incluido en la Serranía del Perijá.
+            La Gran Rifa Ecoturística Manaure Vive ha premiado a su afortunado participante con la
+            experiencia todo incluido en la Serranía del Perijá.
           </p>
         </div>
 
@@ -203,16 +201,14 @@ export const GanadorShowcase: React.FC<GanadorShowcaseProps> = ({ winner }) => {
             </div>
 
             <div className={styles.ticketPresentation}>
-              <span className={styles.ticketPresentationLabel}>
-                Número del Boleto Premiado
-              </span>
-              <div className={styles.hugeTicketNumber}>
-                #{winner.ticket_number}
-              </div>
+              <span className={styles.ticketPresentationLabel}>Número del Boleto Premiado</span>
+              <div className={styles.hugeTicketNumber}>#{winner.ticket_number}</div>
               <div className={styles.lotteryMetaPill}>
                 <Award size={16} color="#fbbf24" />
                 <span>
-                  Sorteo con la <strong>{winner.raffle?.lottery_reference || 'Lotería Oficial'}</strong> • Premio Mayor: <strong>{winner.lottery_draw_number}</strong>
+                  Sorteo con la{' '}
+                  <strong>{winner.raffle?.lottery_reference || 'Lotería Oficial'}</strong> • Premio
+                  Mayor: <strong>{winner.lottery_draw_number}</strong>
                 </span>
               </div>
             </div>
@@ -224,9 +220,7 @@ export const GanadorShowcase: React.FC<GanadorShowcaseProps> = ({ winner }) => {
               <span className={styles.infoLabel}>
                 <User size={14} color="#10b981" /> Ganador Acreditado
               </span>
-              <span className={styles.infoValue}>
-                {maskBuyerName(winner.buyer?.full_name)}
-              </span>
+              <span className={styles.infoValue}>{maskBuyerName(winner.buyer?.full_name)}</span>
               <span className={styles.infoSub}>
                 <CheckCircle size={13} /> {maskDocumentId(winner.buyer?.document_id)}
               </span>
@@ -248,9 +242,7 @@ export const GanadorShowcase: React.FC<GanadorShowcaseProps> = ({ winner }) => {
               <span className={styles.infoLabel}>
                 <Calendar size={14} color="#3b82f6" /> Fecha del Sorteo
               </span>
-              <span className={styles.infoValue}>
-                {formatDate(winner.draw_date)}
-              </span>
+              <span className={styles.infoValue}>{formatDate(winner.draw_date)}</span>
               <span className={styles.infoSub} style={{ color: '#93c5fd' }}>
                 Adjudicado Oficialmente
               </span>
@@ -274,9 +266,7 @@ export const GanadorShowcase: React.FC<GanadorShowcaseProps> = ({ winner }) => {
 
             {winner.delivery_photos && winner.delivery_photos.length > 0 && (
               <div className={styles.photoGalleryRow}>
-                <span className={styles.photoGalleryLabel}>
-                  Registro Fotográfico de Entrega:
-                </span>
+                <span className={styles.photoGalleryLabel}>Registro Fotográfico de Entrega:</span>
                 <div className={styles.photoThumbnails}>
                   {winner.delivery_photos.map((photoUrl, pIdx) => (
                     <a
@@ -297,11 +287,7 @@ export const GanadorShowcase: React.FC<GanadorShowcaseProps> = ({ winner }) => {
 
           {/* Botón para festejar y relanzar confeti */}
           <div>
-            <button
-              type="button"
-              onClick={burstConfetti}
-              className={styles.btnConfetti}
-            >
+            <button type="button" onClick={burstConfetti} className={styles.btnConfetti}>
               <span>🎉 ¡Celebrar de Nuevo!</span>
             </button>
           </div>
@@ -315,7 +301,9 @@ export const GanadorShowcase: React.FC<GanadorShowcaseProps> = ({ winner }) => {
               ¡Pronto una Nueva Aventura Ecoturística en Manaure!
             </h4>
             <p className={styles.noticeDesc}>
-              Esta edición del sorteo ha concluido exitosamente. Nuestro equipo está preparando la siguiente edición con más experiencias únicas en el Balcón del Cesar. Tan pronto se abra la convocatoria, la selección de boletos estará disponible nuevamente aquí.
+              Esta edición del sorteo ha concluido exitosamente. Nuestro equipo está preparando la
+              siguiente edición con más experiencias únicas en el Balcón del Cesar. Tan pronto se
+              abra la convocatoria, la selección de boletos estará disponible nuevamente aquí.
             </p>
           </div>
         </div>
@@ -323,4 +311,3 @@ export const GanadorShowcase: React.FC<GanadorShowcaseProps> = ({ winner }) => {
     </section>
   );
 };
-

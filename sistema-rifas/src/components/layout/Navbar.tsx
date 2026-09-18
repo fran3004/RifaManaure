@@ -70,11 +70,7 @@ export const Navbar: React.FC = () => {
           >
             Aliados
           </a>
-          <a
-            href="/#faq"
-            className={styles.navLink}
-            onClick={(e) => handleSectionClick(e, 'faq')}
-          >
+          <a href="/#faq" className={styles.navLink} onClick={(e) => handleSectionClick(e, 'faq')}>
             <HelpCircle size={16} /> Preguntas
           </a>
           <Link to="/verificar" className={styles.verifyLink} onClick={closeMenu}>
@@ -146,4 +142,3 @@ export const Navbar: React.FC = () => {
     </header>
   );
 };
-

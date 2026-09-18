@@ -12,4 +12,3 @@ export const useTicketCart = () => {
 export const useOptionalTicketCart = () => {
   return useContext(TicketCartContext) ?? null;
 };
-

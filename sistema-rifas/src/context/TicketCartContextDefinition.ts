@@ -1,5 +1,10 @@
 import { createContext } from 'react';
-import type { TicketRow, RaffleRow, WinnerWithDetails, SystemSettingsRow } from '@/types/raffle.types';
+import type {
+  TicketRow,
+  RaffleRow,
+  WinnerWithDetails,
+  SystemSettingsRow,
+} from '@/types/raffle.types';
 
 export interface TicketCartContextType {
   raffle: RaffleRow | null;
@@ -18,8 +23,12 @@ export interface TicketCartContextType {
   isCheckoutOpen: boolean;
   openCheckout: () => void;
   closeCheckout: () => void;
-  showToast: (type: 'warning' | 'info' | 'error' | 'success', title: string, message: string, duration?: number) => void;
+  showToast: (
+    type: 'warning' | 'info' | 'error' | 'success',
+    title: string,
+    message: string,
+    duration?: number
+  ) => void;
 }
 
 export const TicketCartContext = createContext<TicketCartContextType | undefined>(undefined);
-

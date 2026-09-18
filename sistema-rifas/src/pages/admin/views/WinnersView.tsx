@@ -57,8 +57,6 @@ export const WinnersView: React.FC = () => {
     void loadData();
   }, [loadData]);
 
-
-
   const handleWinnerRegistered = () => {
     setSuccessToast('¡Ganador oficial y actas registradas con éxito!');
     loadData();
@@ -200,11 +198,13 @@ export const WinnersView: React.FC = () => {
                       </h3>
                       <div className={styles.winnerLotteryMeta}>
                         <span>
-                          Sorteo: <strong>{winner.raffle?.lottery_reference || 'Lotería Oficial'}</strong>
+                          Sorteo:{' '}
+                          <strong>{winner.raffle?.lottery_reference || 'Lotería Oficial'}</strong>
                         </span>
                         <span>•</span>
                         <span>
-                          Premio Mayor: <strong style={{ color: '#fbbf24' }}>{winner.lottery_draw_number}</strong>
+                          Premio Mayor:{' '}
+                          <strong style={{ color: '#fbbf24' }}>{winner.lottery_draw_number}</strong>
                         </span>
                       </div>
                     </div>
@@ -236,12 +236,8 @@ export const WinnersView: React.FC = () => {
                     <span className={styles.dataGroupLabel}>
                       <Phone size={14} color="#3b82f6" /> Contacto
                     </span>
-                    <span className={styles.dataGroupValue}>
-                      {winner.buyer?.phone || 'N/D'}
-                    </span>
-                    <span className={styles.dataGroupSubvalue}>
-                      {winner.buyer?.email || ''}
-                    </span>
+                    <span className={styles.dataGroupValue}>{winner.buyer?.phone || 'N/D'}</span>
+                    <span className={styles.dataGroupSubvalue}>{winner.buyer?.email || ''}</span>
                   </div>
 
                   {/* Ciudad */}
@@ -263,7 +259,8 @@ export const WinnersView: React.FC = () => {
                       {winner.order?.reference || 'N/D'}
                     </span>
                     <span className={styles.dataGroupSubvalue}>
-                      Total: {winner.order?.total_amount ? formatCOP(winner.order.total_amount) : 'N/D'}
+                      Total:{' '}
+                      {winner.order?.total_amount ? formatCOP(winner.order.total_amount) : 'N/D'}
                     </span>
                   </div>
 
@@ -272,9 +269,7 @@ export const WinnersView: React.FC = () => {
                     <span className={styles.dataGroupLabel}>
                       <Calendar size={14} color="#ec4899" /> Fecha de Sorteo
                     </span>
-                    <span className={styles.dataGroupValue}>
-                      {formatDate(winner.draw_date)}
-                    </span>
+                    <span className={styles.dataGroupValue}>{formatDate(winner.draw_date)}</span>
                   </div>
                 </div>
 
@@ -300,7 +295,9 @@ export const WinnersView: React.FC = () => {
 
                     {winner.delivery_photos && winner.delivery_photos.length > 0 && (
                       <div className={styles.photoGallery}>
-                        <span style={{ fontSize: '0.82rem', color: '#cbd5e1', marginRight: '0.25rem' }}>
+                        <span
+                          style={{ fontSize: '0.82rem', color: '#cbd5e1', marginRight: '0.25rem' }}
+                        >
                           Fotos de entrega:
                         </span>
                         {winner.delivery_photos.map((photoUrl, pIdx) => (

@@ -29,4 +29,3 @@ export const AdminErrorState: React.FC<AdminErrorStateProps> = ({
     </div>
   );
 };
-

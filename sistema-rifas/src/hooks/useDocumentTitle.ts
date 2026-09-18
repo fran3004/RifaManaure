@@ -9,4 +9,3 @@ export function useDocumentTitle(title: string, suffix = 'Manaure Vive'): void {
     document.title = fullTitle;
   }, [title, suffix]);
 }
-

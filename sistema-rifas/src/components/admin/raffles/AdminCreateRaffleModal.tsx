@@ -210,7 +210,8 @@ const CreateRaffleForm: React.FC<{
                 disabled={isSubmitting}
               />
               <span className={styles.helpText}>
-                Identificador URL limpio para el sistema. Se genera automáticamente a partir del título.
+                Identificador URL limpio para el sistema. Se genera automáticamente a partir del
+                título.
               </span>
             </div>
 

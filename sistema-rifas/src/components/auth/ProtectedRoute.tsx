@@ -37,7 +37,8 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
           </div>
           <h1 className={styles.title}>Acceso Denegado</h1>
           <p className={styles.message}>
-            Tu cuenta se encuentra autenticada, pero no cuenta con privilegios de administrador activos en la plataforma de Manaure Vive.
+            Tu cuenta se encuentra autenticada, pero no cuenta con privilegios de administrador
+            activos en la plataforma de Manaure Vive.
           </p>
 
           <div className={styles.userInfo}>
@@ -45,11 +46,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
           </div>
 
           <div className={styles.actions}>
-            <button
-              type="button"
-              className={styles.logoutButton}
-              onClick={() => void signOut()}
-            >
+            <button type="button" className={styles.logoutButton} onClick={() => void signOut()}>
               <LogOut size={18} />
               <span>Cerrar Sesión</span>
             </button>
@@ -65,4 +62,3 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   // 4. Usuario autenticado y con rol de administrador activo
   return <>{children}</>;
 };
-

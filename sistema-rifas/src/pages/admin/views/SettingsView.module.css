@@ -119,7 +119,10 @@
   flex-direction: column;
   justify-content: space-between;
   gap: 1.25rem;
-  transition: border-color 200ms ease, box-shadow 200ms ease, transform 200ms ease;
+  transition:
+    border-color 200ms ease,
+    box-shadow 200ms ease,
+    transform 200ms ease;
   position: relative;
 }
 
@@ -615,4 +618,3 @@
   color: #84a296;
   white-space: nowrap;
 }
-

@@ -12,10 +12,7 @@ import {
   generateOrderNotification,
   type GeneratedNotification,
 } from '@/services/notificationService';
-import {
-  retryOrderEmail,
-  type NotificationLogRow,
-} from '@/services/emailService';
+import { retryOrderEmail, type NotificationLogRow } from '@/services/emailService';
 import {
   X,
   CheckCircle2,
@@ -90,7 +87,9 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
   const [customReason, setCustomReason] = useState<string>('');
 
   // Notificación generada
-  const [preparedNotification, setPreparedNotification] = useState<GeneratedNotification | null>(null);
+  const [preparedNotification, setPreparedNotification] = useState<GeneratedNotification | null>(
+    null
+  );
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
   // Trazabilidad de notificaciones (WhatsApp y Email)
@@ -158,8 +157,7 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
     setTimeout(() => setCopiedKey(null), 2000);
   };
 
-  const isPendingAction =
-    order.status === 'pending_verification' || order.status === 'pending';
+  const isPendingAction = order.status === 'pending_verification' || order.status === 'pending';
 
   const dateStr = new Date(order.created_at).toLocaleString('es-CO', {
     dateStyle: 'medium',
@@ -200,7 +198,8 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
             buyerEmail: order.buyers?.email,
             ticketNumbers: formattedTickets,
             totalAmount: order.total_amount,
-            verifyUrl: typeof window !== 'undefined' ? `${window.location.origin}/verificar` : '/verificar',
+            verifyUrl:
+              typeof window !== 'undefined' ? `${window.location.origin}/verificar` : '/verificar',
           },
         });
 
@@ -261,7 +260,8 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
             ticketNumbers: formattedTickets,
             totalAmount: order.total_amount,
             rejectionReason: finalReason,
-            verifyUrl: typeof window !== 'undefined' ? `${window.location.origin}/verificar` : '/verificar',
+            verifyUrl:
+              typeof window !== 'undefined' ? `${window.location.origin}/verificar` : '/verificar',
           },
         });
 
@@ -285,41 +285,51 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
   };
 
   // REINTENTAR NOTIFICACIÓN (EMAIL O WHATSAPP)
-  const handleRetryNotification = async (channel: 'email' | 'whatsapp', log?: NotificationLogRow) => {
+  const handleRetryNotification = async (
+    channel: 'email' | 'whatsapp',
+    log?: NotificationLogRow
+  ) => {
     if (!order) return;
     setIsRetryingNotif(true);
     setNotifActionResult(null);
     try {
-      const eventType = log?.event_type || (
-        order.status === 'paid' || order.status === 'completed'
+      const eventType =
+        log?.event_type ||
+        (order.status === 'paid' || order.status === 'completed'
           ? 'payment_approved'
           : order.status === 'rejected'
-          ? 'payment_rejected'
-          : 'payment_received'
-      );
+            ? 'payment_rejected'
+            : 'payment_received');
 
       if (channel === 'email') {
-        const emailUpperType =
-          eventType.toLowerCase().includes('approved')
-            ? 'PAYMENT_APPROVED'
-            : eventType.toLowerCase().includes('rejected')
+        const emailUpperType = eventType.toLowerCase().includes('approved')
+          ? 'PAYMENT_APPROVED'
+          : eventType.toLowerCase().includes('rejected')
             ? 'PAYMENT_REJECTED'
             : 'PAYMENT_RECEIVED';
 
-        const res = await retryOrderEmail(order.id, emailUpperType, order.rejection_reason || undefined);
+        const res = await retryOrderEmail(
+          order.id,
+          emailUpperType,
+          order.rejection_reason || undefined
+        );
 
         if (res.success) {
-          setNotifActionResult(`¡Correo transaccional reenviado exitosamente a ${order.buyers?.email || 'comprador'}!`);
+          setNotifActionResult(
+            `¡Correo transaccional reenviado exitosamente a ${order.buyers?.email || 'comprador'}!`
+          );
         } else {
-          setNotifActionResult(`Aviso: ${res.error || 'No se pudo enviar el correo transaccional'}`);
+          setNotifActionResult(
+            `Aviso: ${res.error || 'No se pudo enviar el correo transaccional'}`
+          );
         }
       } else if (channel === 'whatsapp') {
         const notif = generateOrderNotification(
           eventType.toLowerCase().includes('approved')
             ? 'payment_approved'
             : eventType.toLowerCase().includes('rejected')
-            ? 'payment_rejected'
-            : 'receipt_received',
+              ? 'payment_rejected'
+              : 'receipt_received',
           {
             reference: order.reference,
             buyerName: order.buyers?.full_name || 'Comprador',
@@ -328,7 +338,8 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
             ticketNumbers: formattedTickets,
             totalAmount: order.total_amount,
             rejectionReason: order.rejection_reason || undefined,
-            verifyUrl: typeof window !== 'undefined' ? `${window.location.origin}/verificar` : '/verificar',
+            verifyUrl:
+              typeof window !== 'undefined' ? `${window.location.origin}/verificar` : '/verificar',
           }
         );
 
@@ -358,9 +369,7 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
           <div className={styles.modalHeaderTitle}>
             <ShieldCheck size={24} color="#f59e0b" />
             <div>
-              <h2 className={styles.modalTitleText}>
-                Revisión Administrativa de Orden
-              </h2>
+              <h2 className={styles.modalTitleText}>Revisión Administrativa de Orden</h2>
               <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary, #9cb5ab)' }}>
                 Auditoría manual de comprobante y confirmación de venta
               </span>
@@ -434,7 +443,13 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
                   <button
                     type="button"
                     onClick={() => handleCopy(order.reference, 'ref')}
-                    style={{ background: 'none', border: 'none', color: '#9cb5ab', cursor: 'pointer', padding: '2px' }}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: '#9cb5ab',
+                      cursor: 'pointer',
+                      padding: '2px',
+                    }}
                     title="Copiar referencia"
                   >
                     {copiedKey === 'ref' ? <Check size={12} color="#10b981" /> : <Copy size={12} />}
@@ -444,7 +459,10 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
 
               <div className={styles.infoRow}>
                 <span className={styles.infoLabel}>Fecha y Hora:</span>
-                <span className={styles.infoValue} style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                <span
+                  className={styles.infoValue}
+                  style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}
+                >
                   <Calendar size={13} color="#9cb5ab" />
                   {dateStr}
                 </span>
@@ -488,17 +506,38 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
 
               <div className={styles.infoRow}>
                 <span className={styles.infoLabel}>Total Liquidado:</span>
-                <span className={styles.infoValue} style={{ fontSize: '1.1rem', fontWeight: 800, color: '#f59e0b' }}>
+                <span
+                  className={styles.infoValue}
+                  style={{ fontSize: '1.1rem', fontWeight: 800, color: '#f59e0b' }}
+                >
                   {formatCOP(order.total_amount)}
                 </span>
               </div>
 
               {order.rejection_reason && (
-                <div style={{ marginTop: '0.5rem', padding: '0.6rem', backgroundColor: 'rgba(239, 68, 68, 0.12)', borderRadius: 'var(--radius-sm, 6px)', border: '1px solid rgba(239, 68, 68, 0.25)' }}>
-                  <span style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#fca5a5', textTransform: 'uppercase' }}>
+                <div
+                  style={{
+                    marginTop: '0.5rem',
+                    padding: '0.6rem',
+                    backgroundColor: 'rgba(239, 68, 68, 0.12)',
+                    borderRadius: 'var(--radius-sm, 6px)',
+                    border: '1px solid rgba(239, 68, 68, 0.25)',
+                  }}
+                >
+                  <span
+                    style={{
+                      display: 'block',
+                      fontSize: '0.75rem',
+                      fontWeight: 700,
+                      color: '#fca5a5',
+                      textTransform: 'uppercase',
+                    }}
+                  >
                     Motivo de Rechazo:
                   </span>
-                  <span style={{ fontSize: '0.8rem', color: '#fecaca' }}>{order.rejection_reason}</span>
+                  <span style={{ fontSize: '0.8rem', color: '#fecaca' }}>
+                    {order.rejection_reason}
+                  </span>
                 </div>
               )}
             </div>
@@ -534,7 +573,14 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
                         href={`https://wa.me/57${order.buyers.phone.replace(/\D/g, '')}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        style={{ color: '#34d399', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.25rem', fontWeight: 600 }}
+                        style={{
+                          color: '#34d399',
+                          textDecoration: 'none',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.25rem',
+                          fontWeight: 600,
+                        }}
                         title="Contactar directamente por WhatsApp"
                       >
                         <Phone size={13} />
@@ -543,10 +589,20 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
                       <button
                         type="button"
                         onClick={() => handleCopy(order.buyers!.phone, 'phone')}
-                        style={{ background: 'none', border: 'none', color: '#9cb5ab', cursor: 'pointer', padding: '2px' }}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          color: '#9cb5ab',
+                          cursor: 'pointer',
+                          padding: '2px',
+                        }}
                         title="Copiar teléfono"
                       >
-                        {copiedKey === 'phone' ? <Check size={12} color="#10b981" /> : <Copy size={12} />}
+                        {copiedKey === 'phone' ? (
+                          <Check size={12} color="#10b981" />
+                        ) : (
+                          <Copy size={12} />
+                        )}
                       </button>
                     </>
                   ) : (
@@ -560,7 +616,14 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
                 {order.buyers?.email ? (
                   <a
                     href={`mailto:${order.buyers.email}`}
-                    style={{ color: '#9cb5ab', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.85rem' }}
+                    style={{
+                      color: '#9cb5ab',
+                      textDecoration: 'none',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.25rem',
+                      fontSize: '0.85rem',
+                    }}
                   >
                     <Mail size={13} />
                     {order.buyers.email}
@@ -581,17 +644,41 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
                 <span className={styles.infoLabel}>Preferencia de Contacto:</span>
                 <div>
                   {(!order.contact_preference || order.contact_preference === 'both') && (
-                    <span className={styles.badgeSuccess} style={{ fontSize: '0.75rem', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                    <span
+                      className={styles.badgeSuccess}
+                      style={{
+                        fontSize: '0.75rem',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                      }}
+                    >
                       <Phone size={11} /> WhatsApp + <Mail size={11} /> Correo
                     </span>
                   )}
                   {order.contact_preference === 'whatsapp' && (
-                    <span className={styles.badgeInfo} style={{ fontSize: '0.75rem', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                    <span
+                      className={styles.badgeInfo}
+                      style={{
+                        fontSize: '0.75rem',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                      }}
+                    >
                       <Phone size={11} /> Solo WhatsApp
                     </span>
                   )}
                   {order.contact_preference === 'email' && (
-                    <span className={styles.badgeWarning} style={{ fontSize: '0.75rem', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                    <span
+                      className={styles.badgeWarning}
+                      style={{
+                        fontSize: '0.75rem',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                      }}
+                    >
                       <Mail size={11} /> Solo Correo Electrónico
                     </span>
                   )}
@@ -605,7 +692,8 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
             <div className={styles.reviewCardHeader}>
               <Ticket size={16} />
               <span className={styles.reviewCardHeaderTitle}>
-                3. Boletos Reservados ({order.ticket_count} {order.ticket_count === 1 ? 'número' : 'números'})
+                3. Boletos Reservados ({order.ticket_count}{' '}
+                {order.ticket_count === 1 ? 'número' : 'números'})
               </span>
             </div>
 
@@ -628,7 +716,9 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
           <div className={styles.reviewCard}>
             <div className={styles.reviewCardHeader}>
               <CreditCard size={16} />
-              <span className={styles.reviewCardHeaderTitle}>4. Verificación de Pago y Comprobante</span>
+              <span className={styles.reviewCardHeaderTitle}>
+                4. Verificación de Pago y Comprobante
+              </span>
             </div>
 
             <div className={styles.sectionGrid} style={{ gap: '1rem' }}>
@@ -647,19 +737,44 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
                   </span>
                 </div>
 
-                <div style={{ padding: '0.75rem', backgroundColor: 'rgba(245, 158, 11, 0.08)', borderRadius: 'var(--radius-md, 8px)', border: '1px solid rgba(245, 158, 11, 0.2)' }}>
-                  <span style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#f59e0b', marginBottom: '0.2rem' }}>
+                <div
+                  style={{
+                    padding: '0.75rem',
+                    backgroundColor: 'rgba(245, 158, 11, 0.08)',
+                    borderRadius: 'var(--radius-md, 8px)',
+                    border: '1px solid rgba(245, 158, 11, 0.2)',
+                  }}
+                >
+                  <span
+                    style={{
+                      display: 'block',
+                      fontSize: '0.75rem',
+                      fontWeight: 700,
+                      color: '#f59e0b',
+                      marginBottom: '0.2rem',
+                    }}
+                  >
                     Regla de Verificación Manual:
                   </span>
                   <p style={{ margin: 0, fontSize: '0.75rem', color: '#9cb5ab', lineHeight: 1.4 }}>
-                    Verifique en la app bancaria correspondiente que los <strong>{formatCOP(order.total_amount)}</strong> hayan ingresado efectivamente antes de aprobar la orden.
+                    Verifique en la app bancaria correspondiente que los{' '}
+                    <strong>{formatCOP(order.total_amount)}</strong> hayan ingresado efectivamente
+                    antes de aprobar la orden.
                   </p>
                 </div>
               </div>
 
               {/* Visor Seguro del Comprobante */}
               <div>
-                <span style={{ display: 'block', fontSize: '0.75rem', color: '#9cb5ab', marginBottom: '0.4rem', fontWeight: 600 }}>
+                <span
+                  style={{
+                    display: 'block',
+                    fontSize: '0.75rem',
+                    color: '#9cb5ab',
+                    marginBottom: '0.4rem',
+                    fontWeight: 600,
+                  }}
+                >
                   Soporte Adjunto (Acceso Seguro Temporal 15 min):
                 </span>
 
@@ -671,8 +786,13 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
                     </div>
                   ) : proofError || !signedProofUrl ? (
                     <div style={{ padding: '2rem', textAlign: 'center', color: '#ef4444' }}>
-                      <FileText size={28} style={{ display: 'block', margin: '0 auto 0.5rem auto' }} />
-                      <span style={{ fontSize: '0.8rem' }}>{proofError || 'Sin archivo de comprobante adjunto'}</span>
+                      <FileText
+                        size={28}
+                        style={{ display: 'block', margin: '0 auto 0.5rem auto' }}
+                      />
+                      <span style={{ fontSize: '0.8rem' }}>
+                        {proofError || 'Sin archivo de comprobante adjunto'}
+                      </span>
                     </div>
                   ) : isPdf ? (
                     <iframe
@@ -695,7 +815,14 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
                         href={signedProofUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        style={{ color: '#34d399', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.25rem', fontWeight: 600 }}
+                        style={{
+                          color: '#34d399',
+                          textDecoration: 'none',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '0.25rem',
+                          fontWeight: 600,
+                        }}
                       >
                         <ExternalLink size={13} />
                         Abrir en tamaño original
@@ -710,22 +837,40 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
           {/* Formulario de Rechazo si está activo */}
           {showRejectionForm && (
             <div className={styles.rejectionSection}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <h4 style={{ margin: 0, color: '#fca5a5', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              <div
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+              >
+                <h4
+                  style={{
+                    margin: 0,
+                    color: '#fca5a5',
+                    fontSize: '1rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.4rem',
+                  }}
+                >
                   <XCircle size={18} />
                   Indicar Motivo de Rechazo (Obligatorio)
                 </h4>
                 <button
                   type="button"
                   onClick={() => setShowRejectionForm(false)}
-                  style={{ background: 'none', border: 'none', color: '#9cb5ab', cursor: 'pointer', fontSize: '0.8rem' }}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: '#9cb5ab',
+                    cursor: 'pointer',
+                    fontSize: '0.8rem',
+                  }}
                 >
                   Cancelar Rechazo
                 </button>
               </div>
 
               <p style={{ margin: 0, fontSize: '0.8rem', color: '#9cb5ab' }}>
-                Selecciona uno de los motivos comunes o describe la causa del rechazo. Los boletos serán liberados automáticamente para la venta pública.
+                Selecciona uno de los motivos comunes o describe la causa del rechazo. Los boletos
+                serán liberados automáticamente para la venta pública.
               </p>
 
               <div className={styles.presetReasonsGrid}>
@@ -744,7 +889,15 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#e2f0ea', marginBottom: '0.35rem' }}>
+                <label
+                  style={{
+                    display: 'block',
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
+                    color: '#e2f0ea',
+                    marginBottom: '0.35rem',
+                  }}
+                >
                   Detalles o instrucciones adicionales para el comprador:
                 </label>
                 <textarea
@@ -771,7 +924,9 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
                   disabled={isProcessing}
                 >
                   <XCircle size={16} />
-                  <span>{isProcessing ? 'Procesando Rechazo...' : 'Confirmar Rechazo y Liberar Boletos'}</span>
+                  <span>
+                    {isProcessing ? 'Procesando Rechazo...' : 'Confirmar Rechazo y Liberar Boletos'}
+                  </span>
                 </button>
               </div>
             </div>
@@ -781,10 +936,14 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
           {preparedNotification && (
             <div
               className={`${styles.notificationBox} ${
-                preparedNotification.type === 'payment_rejected' ? styles.notificationBoxRejected : ''
+                preparedNotification.type === 'payment_rejected'
+                  ? styles.notificationBoxRejected
+                  : ''
               }`}
             >
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+              >
                 <strong
                   style={{
                     color: preparedNotification.type === 'payment_approved' ? '#34d399' : '#fca5a5',
@@ -826,7 +985,8 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
                 </div>
               ) : (
                 <span style={{ fontSize: '0.75rem', color: '#9cb5ab' }}>
-                  * El comprador no registró teléfono para enlace directo de WhatsApp. Puedes copiar el texto y enviarlo por correo.
+                  * El comprador no registró teléfono para enlace directo de WhatsApp. Puedes copiar
+                  el texto y enviarlo por correo.
                 </span>
               )}
             </div>
@@ -875,7 +1035,9 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
                 >
                   <AlertTriangle size={18} style={{ flexShrink: 0 }} />
                   <div>
-                    <strong>⚠️ Requiere Reintento:</strong> Se detectaron notificaciones que fallaron en su entrega. Puedes reintentar el envío con los botones de acción correspondientes.
+                    <strong>⚠️ Requiere Reintento:</strong> Se detectaron notificaciones que
+                    fallaron en su entrega. Puedes reintentar el envío con los botones de acción
+                    correspondientes.
                   </div>
                 </div>
               )}
@@ -883,7 +1045,15 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
               {/* Historial detallado de notificaciones */}
               {notificationLogs.length > 0 ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                  <span style={{ fontSize: '0.75rem', color: '#9cb5ab', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  <span
+                    style={{
+                      fontSize: '0.75rem',
+                      color: '#9cb5ab',
+                      fontWeight: 700,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.05em',
+                    }}
+                  >
                     Historial de Envíos Registrados ({notificationLogs.length}):
                   </span>
 
@@ -899,7 +1069,9 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
                         key={log.id}
                         style={{
                           padding: '0.75rem 0.9rem',
-                          backgroundColor: isFailed ? 'rgba(239, 68, 68, 0.08)' : 'rgba(0, 0, 0, 0.35)',
+                          backgroundColor: isFailed
+                            ? 'rgba(239, 68, 68, 0.08)'
+                            : 'rgba(0, 0, 0, 0.35)',
                           borderRadius: 'var(--radius-md, 8px)',
                           border: `1px solid ${
                             isFailed ? 'rgba(239, 68, 68, 0.35)' : 'rgba(156, 181, 171, 0.15)'
@@ -909,7 +1081,15 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
                           gap: '0.4rem',
                         }}
                       >
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
+                        <div
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            flexWrap: 'wrap',
+                            gap: '0.5rem',
+                          }}
+                        >
                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                             <span
                               style={{
@@ -917,7 +1097,9 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
                                 borderRadius: '4px',
                                 fontSize: '0.75rem',
                                 fontWeight: 700,
-                                backgroundColor: isWhatsApp ? 'rgba(37, 211, 102, 0.15)' : 'rgba(96, 165, 250, 0.15)',
+                                backgroundColor: isWhatsApp
+                                  ? 'rgba(37, 211, 102, 0.15)'
+                                  : 'rgba(96, 165, 250, 0.15)',
                                 color: isWhatsApp ? '#34d399' : '#60a5fa',
                                 border: `1px solid ${isWhatsApp ? 'rgba(37, 211, 102, 0.3)' : 'rgba(96, 165, 250, 0.3)'}`,
                                 display: 'inline-flex',
@@ -958,13 +1140,28 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
                         </div>
 
                         {/* Metadatos: Destinatario y Fecha */}
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.75rem', color: '#9cb5ab', flexWrap: 'wrap', gap: '0.5rem' }}>
+                        <div
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            fontSize: '0.75rem',
+                            color: '#9cb5ab',
+                            flexWrap: 'wrap',
+                            gap: '0.5rem',
+                          }}
+                        >
                           <span>
                             <strong>Destinatario:</strong> {log.recipient}
                           </span>
-                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                          <span
+                            style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}
+                          >
                             <Calendar size={11} />
-                            {new Date(log.created_at).toLocaleString('es-CO', { dateStyle: 'short', timeStyle: 'short' })}
+                            {new Date(log.created_at).toLocaleString('es-CO', {
+                              dateStyle: 'short',
+                              timeStyle: 'short',
+                            })}
                           </span>
                         </div>
 
@@ -990,7 +1187,8 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
                 </div>
               ) : (
                 <p style={{ margin: 0, fontSize: '0.8rem', color: '#9cb5ab' }}>
-                  Las notificaciones transaccionales se disparan automáticamente y quedan registradas al enviar comprobantes, aprobar o rechazar pagos.
+                  Las notificaciones transaccionales se disparan automáticamente y quedan
+                  registradas al enviar comprobantes, aprobar o rechazar pagos.
                 </p>
               )}
 
@@ -1000,12 +1198,14 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
                   style={{
                     padding: '0.5rem 0.75rem',
                     borderRadius: 'var(--radius-sm, 6px)',
-                    backgroundColor: notifActionResult.startsWith('¡') || notifActionResult.includes('abierto')
-                      ? 'rgba(16, 185, 129, 0.15)'
-                      : 'rgba(245, 158, 11, 0.15)',
-                    color: notifActionResult.startsWith('¡') || notifActionResult.includes('abierto')
-                      ? '#34d399'
-                      : '#fbbf24',
+                    backgroundColor:
+                      notifActionResult.startsWith('¡') || notifActionResult.includes('abierto')
+                        ? 'rgba(16, 185, 129, 0.15)'
+                        : 'rgba(245, 158, 11, 0.15)',
+                    color:
+                      notifActionResult.startsWith('¡') || notifActionResult.includes('abierto')
+                        ? '#34d399'
+                        : '#fbbf24',
                     fontSize: '0.8rem',
                     display: 'flex',
                     alignItems: 'center',
@@ -1018,7 +1218,15 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
               )}
 
               {/* Acciones de Reintento Administrativo */}
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', flexWrap: 'wrap', marginTop: '0.35rem' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'flex-end',
+                  gap: '0.5rem',
+                  flexWrap: 'wrap',
+                  marginTop: '0.35rem',
+                }}
+              >
                 <button
                   type="button"
                   className={styles.btnSecondary}
@@ -1053,7 +1261,9 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
             {isPendingAction ? (
               <span>⚠️ La orden requiere verificación manual del comprobante.</span>
             ) : (
-              <span>Orden en estado <strong>{order.status}</strong>.</span>
+              <span>
+                Orden en estado <strong>{order.status}</strong>.
+              </span>
             )}
           </div>
 
@@ -1120,7 +1330,9 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
             totalAmount: order.total_amount,
             ticketCount: order.tickets?.length || 0,
             buyerName: order.buyers?.full_name || 'Comprador',
-            buyerDocumentMasked: order.buyers?.document_id ? maskDocumentId(order.buyers.document_id) : '***',
+            buyerDocumentMasked: order.buyers?.document_id
+              ? maskDocumentId(order.buyers.document_id)
+              : '***',
             raffleTitle: 'Sorteo Oficial Manaure Vive',
             lotteryReference: 'Lotería Oficial según cronograma',
             ticketNumbers: (order.tickets || []).map((t) => t.number),

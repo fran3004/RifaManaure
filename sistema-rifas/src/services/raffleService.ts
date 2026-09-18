@@ -83,7 +83,8 @@ export async function fetchAdminRaffles(): Promise<{
 
     const enrichedRaffles: RaffleWithStats[] = rafflesData.map((r) => {
       const stats = ticketStatsMap[r.id] || { available: 0, reserved: 0, sold: 0, blocked: 0 };
-      const totalTickets = r.total_tickets || stats.available + stats.reserved + stats.sold + stats.blocked || 1000;
+      const totalTickets =
+        r.total_tickets || stats.available + stats.reserved + stats.sold + stats.blocked || 1000;
       const unitPrice = Number(r.ticket_price) || 0;
       const totalRevenue = stats.sold * unitPrice;
       const salesPercentage = totalTickets > 0 ? Math.round((stats.sold / totalTickets) * 100) : 0;
@@ -114,7 +115,7 @@ export async function fetchAdminRaffles(): Promise<{
 
 function formatRaffleRpcError(rawError: string, functionName: string): string {
   if (!rawError) return 'Error inesperado al procesar la solicitud.';
-  
+
   if (
     rawError.includes('schema cache') ||
     rawError.includes('Could not find the function') ||
@@ -170,7 +171,10 @@ export async function updateRaffleAdmin(
   } catch (err) {
     return {
       success: false,
-      error: err instanceof Error ? formatRaffleRpcError(err.message, 'admin_update_raffle') : 'Error de conexión al actualizar la rifa.',
+      error:
+        err instanceof Error
+          ? formatRaffleRpcError(err.message, 'admin_update_raffle')
+          : 'Error de conexión al actualizar la rifa.',
     };
   }
 }
@@ -224,8 +228,10 @@ export async function createRaffleAdmin(
   } catch (err) {
     return {
       success: false,
-      error: err instanceof Error ? formatRaffleRpcError(err.message, 'admin_create_raffle') : 'Error de red al crear la rifa.',
+      error:
+        err instanceof Error
+          ? formatRaffleRpcError(err.message, 'admin_create_raffle')
+          : 'Error de red al crear la rifa.',
     };
   }
 }
-

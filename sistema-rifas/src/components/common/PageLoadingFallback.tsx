@@ -50,4 +50,3 @@ export const PageLoadingFallback: React.FC<PageLoadingFallbackProps> = ({
     </div>
   );
 };
-

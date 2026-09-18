@@ -24,12 +24,7 @@ import {
   Bell,
   Search,
 } from 'lucide-react';
-import {
-  formatCOP,
-  isValidDocument,
-  isValidPhone,
-  isValidEmail,
-} from '@/lib/utils';
+import { formatCOP, isValidDocument, isValidPhone, isValidEmail } from '@/lib/utils';
 import { createOrder } from '@/services/ticketService';
 import {
   getPaymentAccounts,
@@ -146,7 +141,8 @@ export const ModalCheckout: React.FC = () => {
   // Cuentas de Pago y Método Seleccionado (Paso 4)
   const [paymentAccounts, setPaymentAccounts] = useState<PaymentAccountRow[]>([]);
   const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null);
-  const [selectedPaymentMethodName, setSelectedPaymentMethodName] = useState<string>('Transferencia Manual');
+  const [selectedPaymentMethodName, setSelectedPaymentMethodName] =
+    useState<string>('Transferencia Manual');
 
   // Subida de Comprobante (Paso 6)
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
@@ -179,7 +175,9 @@ export const ModalCheckout: React.FC = () => {
         if (accounts.length > 0) {
           setSelectedAccountId((prev) => prev ?? accounts[0].id);
           setSelectedPaymentMethodName((prev) =>
-            prev === 'Transferencia Manual' ? `Transferencia Manual (${accounts[0].bank_name})` : prev
+            prev === 'Transferencia Manual'
+              ? `Transferencia Manual (${accounts[0].bank_name})`
+              : prev
           );
         }
       }
@@ -299,7 +297,7 @@ export const ModalCheckout: React.FC = () => {
       setConfirmedTickets([...selectedTickets]);
       setConfirmedTotalAmount(
         orderResult.totalAmount ||
-        (raffle?.ticket_price ? raffle.ticket_price * selectedTickets.length : totalAmount)
+          (raffle?.ticket_price ? raffle.ticket_price * selectedTickets.length : totalAmount)
       );
       if (orderResult.reservationExpiresAt) {
         const expiresMs = new Date(orderResult.reservationExpiresAt).getTime();
@@ -401,7 +399,10 @@ export const ModalCheckout: React.FC = () => {
   };
 
   // Generación desacoplada de notificación para WhatsApp
-  const supportPhone = systemSettings?.support_whatsapp_number || import.meta.env.VITE_WHATSAPP_SUPPORT_NUMBER || '573001234567';
+  const supportPhone =
+    systemSettings?.support_whatsapp_number ||
+    import.meta.env.VITE_WHATSAPP_SUPPORT_NUMBER ||
+    '573001234567';
   const receiptNotification = generateOrderNotification('receipt_received', {
     reference: orderReference,
     buyerName: formData.fullName,
@@ -456,7 +457,8 @@ export const ModalCheckout: React.FC = () => {
           <div className={styles.orderSummaryStrip}>
             <div className={styles.summaryItem}>
               <span className={styles.summaryLabel}>
-                Boletos ({confirmedTickets.length > 0 ? confirmedTickets.length : selectedTickets.length}):
+                Boletos (
+                {confirmedTickets.length > 0 ? confirmedTickets.length : selectedTickets.length}):
               </span>
               <div className={styles.summaryTags}>
                 {(confirmedTickets.length > 0 ? confirmedTickets : selectedTickets).map((num) => (
@@ -601,9 +603,13 @@ export const ModalCheckout: React.FC = () => {
               <div className={styles.contactPreferenceGrid}>
                 <div
                   className={`${styles.contactOptionCard} ${
-                    formData.contactPreference === 'whatsapp' ? styles.contactOptionCardSelected : ''
+                    formData.contactPreference === 'whatsapp'
+                      ? styles.contactOptionCardSelected
+                      : ''
                   }`}
-                  onClick={() => setFormData((prev) => ({ ...prev, contactPreference: 'whatsapp' }))}
+                  onClick={() =>
+                    setFormData((prev) => ({ ...prev, contactPreference: 'whatsapp' }))
+                  }
                   role="button"
                   tabIndex={0}
                 >
@@ -650,7 +656,8 @@ export const ModalCheckout: React.FC = () => {
                   onChange={handleInputChange}
                 />
                 <span>
-                  Acepto los términos del sorteo y autorizo el tratamiento de mis datos de contacto para la entrega del premio.
+                  Acepto los términos del sorteo y autorizo el tratamiento de mis datos de contacto
+                  para la entrega del premio.
                 </span>
               </label>
               {errors.acceptTerms && <span className={styles.errorText}>{errors.acceptTerms}</span>}
@@ -674,7 +681,10 @@ export const ModalCheckout: React.FC = () => {
         {!hasReservationError && currentStep === 2 && (
           <div className={styles.stepContent}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <h4 className={styles.sectionHeader} style={{ borderBottom: 'none', paddingBottom: 0 }}>
+              <h4
+                className={styles.sectionHeader}
+                style={{ borderBottom: 'none', paddingBottom: 0 }}
+              >
                 Tus Números Seleccionados
               </h4>
               <span className={styles.stepperBadge}>
@@ -696,10 +706,26 @@ export const ModalCheckout: React.FC = () => {
               ))}
             </div>
 
-            <div style={{ padding: '0.85rem 1rem', backgroundColor: 'var(--bg-main, #0a1410)', borderRadius: 'var(--radius-md, 10px)', border: '1px solid rgba(156, 181, 171, 0.15)' }}>
-              <span style={{ fontSize: '0.8rem', color: '#9cb5ab', display: 'block' }}>Comprador:</span>
+            <div
+              style={{
+                padding: '0.85rem 1rem',
+                backgroundColor: 'var(--bg-main, #0a1410)',
+                borderRadius: 'var(--radius-md, 10px)',
+                border: '1px solid rgba(156, 181, 171, 0.15)',
+              }}
+            >
+              <span style={{ fontSize: '0.8rem', color: '#9cb5ab', display: 'block' }}>
+                Comprador:
+              </span>
               <strong style={{ color: '#f3f7f5', fontSize: '0.9rem' }}>{formData.fullName}</strong>
-              <span style={{ fontSize: '0.8rem', color: '#9cb5ab', display: 'block', marginTop: '0.2rem' }}>
+              <span
+                style={{
+                  fontSize: '0.8rem',
+                  color: '#9cb5ab',
+                  display: 'block',
+                  marginTop: '0.2rem',
+                }}
+              >
                 C.C. {formData.documentId} • Cel: {formData.phone}
               </span>
             </div>
@@ -759,7 +785,9 @@ export const ModalCheckout: React.FC = () => {
                 <strong style={{ display: 'block', color: '#f3f7f5', marginBottom: '0.2rem' }}>
                   Bloqueo atómico de números:
                 </strong>
-                Al hacer clic en el botón a continuación, tus números quedarán asegurados y bloqueados por 10 minutos exclusivamente a tu nombre para que realices tu transferencia bancaria.
+                Al hacer clic en el botón a continuación, tus números quedarán asegurados y
+                bloqueados por 10 minutos exclusivamente a tu nombre para que realices tu
+                transferencia bancaria.
               </div>
             </div>
 
@@ -806,7 +834,9 @@ export const ModalCheckout: React.FC = () => {
               <Clock size={20} className={styles.timerIcon} />
               <div>
                 <strong>Boletos Reservados: {formatTimer(timeLeftSeconds)}</strong>
-                <p>Cuentas oficiales para realizar tu transferencia antes de que termine el tiempo.</p>
+                <p>
+                  Cuentas oficiales para realizar tu transferencia antes de que termine el tiempo.
+                </p>
               </div>
             </div>
 
@@ -835,13 +865,18 @@ export const ModalCheckout: React.FC = () => {
 
               {paymentAccounts.length === 0 ? (
                 <div className={styles.emptyAccountsNotice}>
-                  <AlertCircle size={20} color="#f59e0b" style={{ flexShrink: 0, marginTop: '2px' }} />
+                  <AlertCircle
+                    size={20}
+                    color="#f59e0b"
+                    style={{ flexShrink: 0, marginTop: '2px' }}
+                  />
                   <div>
                     <strong style={{ display: 'block', color: '#f3f7f5', fontSize: '0.9rem' }}>
                       No hay cuentas de pago activas en este momento.
                     </strong>
                     <p style={{ margin: '0.25rem 0 0', fontSize: '0.8rem', color: '#9cb5ab' }}>
-                      Por favor comunícate con el soporte oficial de Manaure Vive para instrucciones.
+                      Por favor comunícate con el soporte oficial de Manaure Vive para
+                      instrucciones.
                     </p>
                   </div>
                 </div>
@@ -901,7 +936,10 @@ export const ModalCheckout: React.FC = () => {
                         <span className={styles.accountHolderText}>
                           <strong>Titular:</strong> {acc.account_holder}
                           {acc.holder_document_id && (
-                            <span className={styles.accountDocText}> • Doc: {acc.holder_document_id}</span>
+                            <span className={styles.accountDocText}>
+                              {' '}
+                              • Doc: {acc.holder_document_id}
+                            </span>
                           )}
                         </span>
                         {acc.instructions && (
@@ -943,7 +981,8 @@ export const ModalCheckout: React.FC = () => {
                 <div className={styles.instructionBody}>
                   <h5 className={styles.instructionHeading}>Abre tu aplicación bancaria</h5>
                   <p className={styles.instructionText}>
-                    Ingresa a Bancolombia, Nequi, Daviplata o la plataforma de tu elección fuera de esta página.
+                    Ingresa a Bancolombia, Nequi, Daviplata o la plataforma de tu elección fuera de
+                    esta página.
                   </p>
                 </div>
               </div>
@@ -952,10 +991,12 @@ export const ModalCheckout: React.FC = () => {
                 <div className={styles.instructionNumber}>2</div>
                 <div className={styles.instructionBody}>
                   <h5 className={styles.instructionHeading}>
-                    Transfiere el monto exacto: <strong style={{ color: '#f59e0b' }}>{formatCOP(totalAmount)}</strong>
+                    Transfiere el monto exacto:{' '}
+                    <strong style={{ color: '#f59e0b' }}>{formatCOP(totalAmount)}</strong>
                   </h5>
                   <p className={styles.instructionText}>
-                    Asegúrate de enviar la cifra precisa correspondiente a tus {confirmedTickets.length} boletos.
+                    Asegúrate de enviar la cifra precisa correspondiente a tus{' '}
+                    {confirmedTickets.length} boletos.
                   </p>
                 </div>
               </div>
@@ -964,10 +1005,12 @@ export const ModalCheckout: React.FC = () => {
                 <div className={styles.instructionNumber}>3</div>
                 <div className={styles.instructionBody}>
                   <h5 className={styles.instructionHeading}>
-                    Indica tu Referencia: <strong style={{ color: '#f59e0b' }}>{orderReference}</strong>
+                    Indica tu Referencia:{' '}
+                    <strong style={{ color: '#f59e0b' }}>{orderReference}</strong>
                   </h5>
                   <p className={styles.instructionText}>
-                    Escribe este código en el campo de concepto, mensaje o descripción de la transferencia.
+                    Escribe este código en el campo de concepto, mensaje o descripción de la
+                    transferencia.
                   </p>
                 </div>
               </div>
@@ -975,9 +1018,12 @@ export const ModalCheckout: React.FC = () => {
               <div className={styles.instructionItem}>
                 <div className={styles.instructionNumber}>4</div>
                 <div className={styles.instructionBody}>
-                  <h5 className={styles.instructionHeading}>Toma captura o guarda el comprobante</h5>
+                  <h5 className={styles.instructionHeading}>
+                    Toma captura o guarda el comprobante
+                  </h5>
                   <p className={styles.instructionText}>
-                    La imagen debe ser nítida y mostrar claramente la fecha, valor y número de aprobación/transacción.
+                    La imagen debe ser nítida y mostrar claramente la fecha, valor y número de
+                    aprobación/transacción.
                   </p>
                 </div>
               </div>
@@ -985,9 +1031,12 @@ export const ModalCheckout: React.FC = () => {
               <div className={styles.instructionItem}>
                 <div className={styles.instructionNumber}>5</div>
                 <div className={styles.instructionBody}>
-                  <h5 className={styles.instructionHeading}>Adjunta tu comprobante en el siguiente paso</h5>
+                  <h5 className={styles.instructionHeading}>
+                    Adjunta tu comprobante en el siguiente paso
+                  </h5>
                   <p className={styles.instructionText}>
-                    Subirás la imagen (JPG, PNG, WEBP) o PDF para que nuestro equipo lo verifique manualmente.
+                    Subirás la imagen (JPG, PNG, WEBP) o PDF para que nuestro equipo lo verifique
+                    manualmente.
                   </p>
                 </div>
               </div>
@@ -1016,13 +1065,14 @@ export const ModalCheckout: React.FC = () => {
 
             <div className={styles.receiptUploadSection}>
               {!receiptPreview ? (
-                <div
-                  className={styles.dropzone}
-                  onClick={() => fileInputRef.current?.click()}
-                >
+                <div className={styles.dropzone} onClick={() => fileInputRef.current?.click()}>
                   <FileImage size={32} color="#9cb5ab" />
-                  <p className={styles.dropzoneText}>Haz clic aquí para seleccionar tu comprobante</p>
-                  <span className={styles.dropzoneSub}>Formatos permitidos: JPG, PNG, WEBP o PDF (Máx. 5 MB)</span>
+                  <p className={styles.dropzoneText}>
+                    Haz clic aquí para seleccionar tu comprobante
+                  </p>
+                  <span className={styles.dropzoneSub}>
+                    Formatos permitidos: JPG, PNG, WEBP o PDF (Máx. 5 MB)
+                  </span>
                 </div>
               ) : (
                 <div className={styles.previewContainer}>
@@ -1043,7 +1093,11 @@ export const ModalCheckout: React.FC = () => {
                         <FileText size={24} color="#f59e0b" />
                       </div>
                     ) : (
-                      <img src={receiptPreview} alt="Vista previa del comprobante" className={styles.previewImg} />
+                      <img
+                        src={receiptPreview}
+                        alt="Vista previa del comprobante"
+                        className={styles.previewImg}
+                      />
                     )}
                     <div>
                       <span className={styles.previewName}>{receiptFile?.name}</span>
@@ -1104,7 +1158,15 @@ export const ModalCheckout: React.FC = () => {
               </div>
 
               {errorMessage && (
-                <div style={{ color: '#ef4444', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                <div
+                  style={{
+                    color: '#ef4444',
+                    fontSize: '0.85rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.4rem',
+                  }}
+                >
                   <AlertCircle size={16} />
                   <span>{errorMessage}</span>
                 </div>
@@ -1166,7 +1228,8 @@ export const ModalCheckout: React.FC = () => {
               <div>
                 <strong>Tu pago será verificado manualmente.</strong>
                 <p style={{ margin: '0.2rem 0 0', fontSize: '0.8rem', color: '#fef3c7' }}>
-                  Recibirás confirmación por WhatsApp o correo electrónico una vez validada la transferencia.
+                  Recibirás confirmación por WhatsApp o correo electrónico una vez validada la
+                  transferencia.
                 </p>
               </div>
             </div>
@@ -1175,11 +1238,16 @@ export const ModalCheckout: React.FC = () => {
             <div className={styles.confirmationTableCard}>
               <div className={styles.confirmationTableRow}>
                 <span className={styles.confirmationTableLabel}>
-                  <Hash size={14} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} />
+                  <Hash
+                    size={14}
+                    style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }}
+                  />
                   Número de Orden:
                 </span>
                 <span className={styles.confirmationTableVal}>
-                  <strong style={{ color: '#f59e0b', fontFamily: 'monospace', fontSize: '1.05rem' }}>
+                  <strong
+                    style={{ color: '#f59e0b', fontFamily: 'monospace', fontSize: '1.05rem' }}
+                  >
                     {orderReference}
                   </strong>
                   <button
@@ -1196,7 +1264,10 @@ export const ModalCheckout: React.FC = () => {
 
               <div className={styles.confirmationTableRow}>
                 <span className={styles.confirmationTableLabel}>
-                  <Ticket size={14} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} />
+                  <Ticket
+                    size={14}
+                    style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }}
+                  />
                   Números Seleccionados:
                 </span>
                 <span className={styles.confirmationTableVal}>
@@ -1224,17 +1295,26 @@ export const ModalCheckout: React.FC = () => {
 
               <div className={styles.confirmationTableRow}>
                 <span className={styles.confirmationTableLabel}>
-                  <Receipt size={14} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} />
+                  <Receipt
+                    size={14}
+                    style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }}
+                  />
                   Total Liquidado:
                 </span>
-                <span className={styles.confirmationTableVal} style={{ fontSize: '1.1rem', color: '#10b981' }}>
+                <span
+                  className={styles.confirmationTableVal}
+                  style={{ fontSize: '1.1rem', color: '#10b981' }}
+                >
                   {formatCOP(confirmedTotalAmount > 0 ? confirmedTotalAmount : totalAmount)}
                 </span>
               </div>
 
               <div className={styles.confirmationTableRow}>
                 <span className={styles.confirmationTableLabel}>
-                  <Clock size={14} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} />
+                  <Clock
+                    size={14}
+                    style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }}
+                  />
                   Estado de la Orden:
                 </span>
                 <span className={styles.confirmationTableVal}>
@@ -1259,7 +1339,10 @@ export const ModalCheckout: React.FC = () => {
 
               <div className={styles.confirmationTableRow}>
                 <span className={styles.confirmationTableLabel}>
-                  <Calendar size={14} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} />
+                  <Calendar
+                    size={14}
+                    style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }}
+                  />
                   Fecha y Hora:
                 </span>
                 <span className={styles.confirmationTableVal} style={{ fontSize: '0.8rem' }}>
@@ -1269,7 +1352,10 @@ export const ModalCheckout: React.FC = () => {
 
               <div className={styles.confirmationTableRow}>
                 <span className={styles.confirmationTableLabel}>
-                  <Building2 size={14} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} />
+                  <Building2
+                    size={14}
+                    style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }}
+                  />
                   Método de Pago:
                 </span>
                 <span className={styles.confirmationTableVal} style={{ fontSize: '0.85rem' }}>
@@ -1279,10 +1365,16 @@ export const ModalCheckout: React.FC = () => {
 
               <div className={styles.confirmationTableRow}>
                 <span className={styles.confirmationTableLabel}>
-                  <Bell size={14} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} />
+                  <Bell
+                    size={14}
+                    style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }}
+                  />
                   Canal de Notificación:
                 </span>
-                <span className={styles.confirmationTableVal} style={{ fontSize: '0.85rem', color: '#34d399' }}>
+                <span
+                  className={styles.confirmationTableVal}
+                  style={{ fontSize: '0.85rem', color: '#34d399' }}
+                >
                   {formData.contactPreference === 'whatsapp' && '📱 Solo WhatsApp'}
                   {formData.contactPreference === 'email' && '✉️ Solo Correo Electrónico'}
                   {formData.contactPreference === 'both' && '📱 WhatsApp y ✉️ Correo'}
@@ -1291,7 +1383,8 @@ export const ModalCheckout: React.FC = () => {
             </div>
 
             <p className={styles.successMessage}>
-              Tus boletos están asegurados y protegidos durante este proceso. Ningún otro usuario podrá tomarlos mientras nuestro equipo verifica tu comprobante.
+              Tus boletos están asegurados y protegidos durante este proceso. Ningún otro usuario
+              podrá tomarlos mientras nuestro equipo verifica tu comprobante.
             </p>
 
             <div className={styles.confirmationActions}>
@@ -1312,11 +1405,7 @@ export const ModalCheckout: React.FC = () => {
                 </a>
               </div>
 
-              <button
-                type="button"
-                className={styles.btnActionFinish}
-                onClick={handleClose}
-              >
+              <button type="button" className={styles.btnActionFinish} onClick={handleClose}>
                 Finalizar y Salir
               </button>
             </div>

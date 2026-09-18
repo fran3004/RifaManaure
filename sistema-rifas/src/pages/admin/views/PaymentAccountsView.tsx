@@ -93,7 +93,9 @@ export const PaymentAccountsView: React.FC = () => {
 
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(
+    null
+  );
 
   const loadAccounts = () => {
     setLoading(true);
@@ -368,7 +370,9 @@ export const PaymentAccountsView: React.FC = () => {
           <span className={styles.metricValue} style={{ color: '#34d399' }}>
             {activeCount}
           </span>
-          <span className={styles.metricHint}>Visibles actualmente para compradores en Checkout</span>
+          <span className={styles.metricHint}>
+            Visibles actualmente para compradores en Checkout
+          </span>
         </div>
 
         <div className={styles.metricCard}>
@@ -431,9 +435,10 @@ export const PaymentAccountsView: React.FC = () => {
       >
         <ShieldCheck size={20} color="#34d399" style={{ flexShrink: 0 }} />
         <span>
-          <strong>Regla de visualización:</strong> Los compradores que ingresan al checkout únicamente
-          podrán ver y copiar las cuentas marcadas como <strong>Activas</strong>. Si desactivas una cuenta,
-          dejará de mostrarse inmediatamente sin afectar el historial de pagos anteriores.
+          <strong>Regla de visualización:</strong> Los compradores que ingresan al checkout
+          únicamente podrán ver y copiar las cuentas marcadas como <strong>Activas</strong>. Si
+          desactivas una cuenta, dejará de mostrarse inmediatamente sin afectar el historial de
+          pagos anteriores.
         </span>
       </div>
 
@@ -460,7 +465,8 @@ export const PaymentAccountsView: React.FC = () => {
           <h3 className={styles.emptyStateTitle}>No hay cuentas de pago configuradas</h3>
           <p className={styles.emptyStateDescription}>
             Aún no has registrado ninguna cuenta bancaria o billetera digital oficial. Agrega las
-            cuentas donde los compradores realizarán sus transferencias para que aparezcan en el checkout.
+            cuentas donde los compradores realizarán sus transferencias para que aparezcan en el
+            checkout.
           </p>
           <button type="button" className={styles.submitBtn} onClick={handleOpenCreate}>
             <Plus size={18} /> Agregar Primera Cuenta Oficial
@@ -670,7 +676,13 @@ export const PaymentAccountsView: React.FC = () => {
 
             {/* Presets Rápidos */}
             <div>
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted, #5e7a6f)', fontWeight: 600 }}>
+              <span
+                style={{
+                  fontSize: '0.75rem',
+                  color: 'var(--text-muted, #5e7a6f)',
+                  fontWeight: 600,
+                }}
+              >
                 Sugerencias de Entidades / Billeteras Rápidas:
               </span>
               <div className={styles.presetChipsRow}>
@@ -689,7 +701,10 @@ export const PaymentAccountsView: React.FC = () => {
               </div>
             </div>
 
-            <form onSubmit={handleSaveAccount} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <form
+              onSubmit={handleSaveAccount}
+              style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}
+            >
               <div className={styles.formModalGrid}>
                 {/* 1. Banco / Plataforma */}
                 <div className={styles.formModalGroup}>
@@ -703,7 +718,9 @@ export const PaymentAccountsView: React.FC = () => {
                     required
                   />
                   {formErrors.bank_name && (
-                    <span style={{ color: '#f87171', fontSize: '0.75rem' }}>{formErrors.bank_name}</span>
+                    <span style={{ color: '#f87171', fontSize: '0.75rem' }}>
+                      {formErrors.bank_name}
+                    </span>
                   )}
                 </div>
 
@@ -735,7 +752,9 @@ export const PaymentAccountsView: React.FC = () => {
                     required
                   />
                   {formErrors.account_number && (
-                    <span style={{ color: '#f87171', fontSize: '0.75rem' }}>{formErrors.account_number}</span>
+                    <span style={{ color: '#f87171', fontSize: '0.75rem' }}>
+                      {formErrors.account_number}
+                    </span>
                   )}
                 </div>
 
@@ -766,25 +785,33 @@ export const PaymentAccountsView: React.FC = () => {
                     required
                   />
                   {formErrors.account_holder && (
-                    <span style={{ color: '#f87171', fontSize: '0.75rem' }}>{formErrors.account_holder}</span>
+                    <span style={{ color: '#f87171', fontSize: '0.75rem' }}>
+                      {formErrors.account_holder}
+                    </span>
                   )}
                 </div>
 
                 {/* 6. Documento del Titular */}
                 <div className={styles.formModalGroup}>
-                  <label className={styles.formModalLabel}>Cédula o NIT del Titular (Opcional)</label>
+                  <label className={styles.formModalLabel}>
+                    Cédula o NIT del Titular (Opcional)
+                  </label>
                   <input
                     type="text"
                     placeholder="Número de documento de identidad o NIT (opcional)"
                     value={formData.holder_document_id}
-                    onChange={(e) => setFormData({ ...formData, holder_document_id: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, holder_document_id: e.target.value })
+                    }
                     className={styles.formModalInput}
                   />
                 </div>
 
                 {/* 7. Instrucciones */}
                 <div className={`${styles.formModalGroup} ${styles.formModalFull}`}>
-                  <label className={styles.formModalLabel}>Instrucciones de Transferencia para el Comprador</label>
+                  <label className={styles.formModalLabel}>
+                    Instrucciones de Transferencia para el Comprador
+                  </label>
                   <textarea
                     placeholder="Ej: Realiza la transferencia directa o por Transfiya y adjunta la captura donde se aprecie claramente el código de aprobación."
                     value={formData.instructions}
@@ -803,7 +830,8 @@ export const PaymentAccountsView: React.FC = () => {
                       className={styles.formModalCheckbox}
                     />
                     <span>
-                      <strong>Cuenta Activa</strong> (Marcar para que los compradores puedan verla y seleccionarla en el checkout)
+                      <strong>Cuenta Activa</strong> (Marcar para que los compradores puedan verla y
+                      seleccionarla en el checkout)
                     </span>
                   </label>
                 </div>
@@ -829,13 +857,11 @@ export const PaymentAccountsView: React.FC = () => {
                   Cancelar
                 </button>
                 <button type="submit" className={styles.submitBtn} disabled={isSubmitting}>
-                  {isSubmitting ? (
-                    'Guardando...'
-                  ) : editingAccount ? (
-                    'Actualizar Cuenta'
-                  ) : (
-                    'Crear Cuenta de Pago'
-                  )}
+                  {isSubmitting
+                    ? 'Guardando...'
+                    : editingAccount
+                      ? 'Actualizar Cuenta'
+                      : 'Crear Cuenta de Pago'}
                 </button>
               </div>
             </form>
@@ -862,8 +888,8 @@ export const PaymentAccountsView: React.FC = () => {
 
             <p style={{ color: '#cbd5e1', fontSize: '0.9rem', lineHeight: 1.5, margin: 0 }}>
               Estás a punto de eliminar la cuenta de <strong>{deletingAccount.bank_name}</strong> (
-              <span style={{ fontFamily: 'monospace' }}>{deletingAccount.account_number}</span>) a nombre
-              de <strong>{deletingAccount.account_holder}</strong>.
+              <span style={{ fontFamily: 'monospace' }}>{deletingAccount.account_number}</span>) a
+              nombre de <strong>{deletingAccount.account_holder}</strong>.
             </p>
             <p style={{ color: 'var(--text-muted, #5e7a6f)', fontSize: '0.8rem', margin: 0 }}>
               Esta acción no puede deshacerse. Si solo deseas que no aparezca en el checkout, puedes

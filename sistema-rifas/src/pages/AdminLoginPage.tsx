@@ -125,11 +125,7 @@ export const AdminLoginPage: React.FC = () => {
             </div>
           </div>
 
-          <button
-            type="submit"
-            className={styles.submitBtn}
-            disabled={isSubmitting || isLoading}
-          >
+          <button type="submit" className={styles.submitBtn} disabled={isSubmitting || isLoading}>
             {isSubmitting ? (
               <>
                 <div className={styles.spinnerSmall} />
@@ -151,4 +147,3 @@ export const AdminLoginPage: React.FC = () => {
     </div>
   );
 };
-

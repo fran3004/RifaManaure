@@ -18,12 +18,18 @@ export const TicketCartProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [isCheckoutOpen, setIsCheckoutOpen] = useState<boolean>(false);
   const [toast, setToast] = useState<ToastItem | null>(null);
 
-  const maxTicketsPerBuyer = systemSettings?.max_tickets_per_buyer ?? raffle?.max_tickets_per_buyer ?? 20;
+  const maxTicketsPerBuyer =
+    systemSettings?.max_tickets_per_buyer ?? raffle?.max_tickets_per_buyer ?? 20;
   const unitPrice = raffle?.ticket_price ? Number(raffle.ticket_price) : 25000;
   const totalAmount = selectedTickets.length * unitPrice;
 
   const showToast = useCallback(
-    (type: 'warning' | 'info' | 'error' | 'success', title: string, message: string, duration = 4500) => {
+    (
+      type: 'warning' | 'info' | 'error' | 'success',
+      title: string,
+      message: string,
+      duration = 4500
+    ) => {
       setToast({
         id: Date.now().toString(),
         type,
@@ -160,9 +166,7 @@ export const TicketCartProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         (payload) => {
           if (payload.eventType === 'UPDATE') {
             const updated = payload.new as TicketRow;
-            setTickets((prev) =>
-              prev.map((t) => (t.id === updated.id ? { ...t, ...updated } : t))
-            );
+            setTickets((prev) => prev.map((t) => (t.id === updated.id ? { ...t, ...updated } : t)));
 
             // Si un boleto que el usuario tenía seleccionado pasó a reservado o vendido por otro comprador, deseleccionarlo
             if (updated.status !== 'available') {
@@ -170,7 +174,9 @@ export const TicketCartProvider: React.FC<{ children: React.ReactNode }> = ({ ch
             }
           } else if (payload.eventType === 'INSERT') {
             const inserted = payload.new as TicketRow;
-            setTickets((prev) => [...prev, inserted].sort((a, b) => a.number.localeCompare(b.number)));
+            setTickets((prev) =>
+              [...prev, inserted].sort((a, b) => a.number.localeCompare(b.number))
+            );
           }
         }
       )
@@ -308,5 +314,3 @@ export const TicketCartProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     </TicketCartContext.Provider>
   );
 };
-
-

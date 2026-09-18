@@ -85,7 +85,9 @@ export const TicketsView: React.FC = () => {
   const [unblockReason, setUnblockReason] = useState('Habilitado nuevamente para venta pública');
 
   // Modal de Orden Completa
-  const [selectedOrderForReview, setSelectedOrderForReview] = useState<OrderWithDetails | null>(null);
+  const [selectedOrderForReview, setSelectedOrderForReview] = useState<OrderWithDetails | null>(
+    null
+  );
   const [isOrderReviewModalOpen, setIsOrderReviewModalOpen] = useState(false);
 
   // Reiniciar a página 1 si cambia la rifa seleccionada
@@ -181,9 +183,8 @@ export const TicketsView: React.FC = () => {
 
   const handleConfirmBlock = async () => {
     if (!selectedTicket) return;
-    const effectiveReason = blockReason === 'Otro motivo justificado'
-      ? customBlockReason.trim()
-      : blockReason;
+    const effectiveReason =
+      blockReason === 'Otro motivo justificado' ? customBlockReason.trim() : blockReason;
 
     if (!effectiveReason) {
       setActionError('Debes indicar un motivo para bloquear el boleto.');
@@ -199,7 +200,18 @@ export const TicketsView: React.FC = () => {
         setIsBlockModalOpen(false);
         await loadTickets();
         // Actualizar ticket seleccionado si sigue en modal
-        setSelectedTicket((prev) => prev ? { ...prev, status: 'blocked', buyer_id: null, order_id: null, buyers: null, orders: null } : null);
+        setSelectedTicket((prev) =>
+          prev
+            ? {
+                ...prev,
+                status: 'blocked',
+                buyer_id: null,
+                order_id: null,
+                buyers: null,
+                orders: null,
+              }
+            : null
+        );
       } else {
         setActionError(res.error || 'No se pudo bloquear el boleto.');
       }
@@ -228,7 +240,7 @@ export const TicketsView: React.FC = () => {
         setActionSuccess(res.message || 'Boleto desbloqueado exitosamente.');
         setIsUnblockModalOpen(false);
         await loadTickets();
-        setSelectedTicket((prev) => prev ? { ...prev, status: 'available' } : null);
+        setSelectedTicket((prev) => (prev ? { ...prev, status: 'available' } : null));
       } else {
         setActionError(res.error || 'No se pudo desbloquear el boleto.');
       }
@@ -261,7 +273,9 @@ export const TicketsView: React.FC = () => {
       created_at: selectedTicket.orders.created_at,
       updated_at: selectedTicket.orders.created_at,
       buyers: selectedTicket.buyers,
-      tickets: [{ id: selectedTicket.id, number: selectedTicket.number, status: selectedTicket.status }],
+      tickets: [
+        { id: selectedTicket.id, number: selectedTicket.number, status: selectedTicket.status },
+      ],
     };
     setSelectedOrderForReview(orderData);
     setIsOrderReviewModalOpen(true);
@@ -276,7 +290,11 @@ export const TicketsView: React.FC = () => {
             ? `Inventario en vivo, ventas y bloqueos para: ${selectedRaffle.title}`
             : 'Inventario en vivo, consulta de compradores, trazabilidad de órdenes y gestión segura de bloqueos.'
         }
-        badge={selectedRaffle ? `${ticketCounts.totalCount} Boletos (${selectedRaffle.status})` : `${ticketCounts.totalCount} Boletos`}
+        badge={
+          selectedRaffle
+            ? `${ticketCounts.totalCount} Boletos (${selectedRaffle.status})`
+            : `${ticketCounts.totalCount} Boletos`
+        }
         actions={
           <button
             type="button"
@@ -292,12 +310,29 @@ export const TicketsView: React.FC = () => {
 
       {/* Alerta de Éxito Global */}
       {actionSuccess && (
-        <div style={{ padding: '0.85rem 1.25rem', backgroundColor: 'rgba(16, 185, 129, 0.15)', border: '1px solid #10b981', borderRadius: 'var(--radius-md, 10px)', color: '#34d399', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.875rem', fontWeight: 600 }}>
+        <div
+          style={{
+            padding: '0.85rem 1.25rem',
+            backgroundColor: 'rgba(16, 185, 129, 0.15)',
+            border: '1px solid #10b981',
+            borderRadius: 'var(--radius-md, 10px)',
+            color: '#34d399',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            fontSize: '0.875rem',
+            fontWeight: 600,
+          }}
+        >
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <CheckCircle2 size={18} />
             <span>{actionSuccess}</span>
           </div>
-          <button type="button" onClick={() => setActionSuccess(null)} style={{ background: 'none', border: 'none', color: '#34d399', cursor: 'pointer' }}>
+          <button
+            type="button"
+            onClick={() => setActionSuccess(null)}
+            style={{ background: 'none', border: 'none', color: '#34d399', cursor: 'pointer' }}
+          >
             <X size={16} />
           </button>
         </div>
@@ -319,7 +354,10 @@ export const TicketsView: React.FC = () => {
         <div className={styles.metricCard}>
           <div className={styles.metricHeader}>
             <span className={styles.metricLabel}>Disponibles</span>
-            <div className={styles.metricIcon} style={{ color: '#34d399', backgroundColor: 'rgba(16, 185, 129, 0.15)' }}>
+            <div
+              className={styles.metricIcon}
+              style={{ color: '#34d399', backgroundColor: 'rgba(16, 185, 129, 0.15)' }}
+            >
               <Ticket size={20} />
             </div>
           </div>
@@ -332,7 +370,10 @@ export const TicketsView: React.FC = () => {
         <div className={styles.metricCard}>
           <div className={styles.metricHeader}>
             <span className={styles.metricLabel}>En Reserva Temporal</span>
-            <div className={styles.metricIcon} style={{ color: '#fbbf24', backgroundColor: 'rgba(245, 158, 11, 0.15)' }}>
+            <div
+              className={styles.metricIcon}
+              style={{ color: '#fbbf24', backgroundColor: 'rgba(245, 158, 11, 0.15)' }}
+            >
               <Clock size={20} />
             </div>
           </div>
@@ -345,7 +386,10 @@ export const TicketsView: React.FC = () => {
         <div className={styles.metricCard}>
           <div className={styles.metricHeader}>
             <span className={styles.metricLabel}>Vendidos / Pagados</span>
-            <div className={styles.metricIcon} style={{ color: '#60a5fa', backgroundColor: 'rgba(59, 130, 246, 0.15)' }}>
+            <div
+              className={styles.metricIcon}
+              style={{ color: '#60a5fa', backgroundColor: 'rgba(59, 130, 246, 0.15)' }}
+            >
               <CheckCircle2 size={20} />
             </div>
           </div>
@@ -358,7 +402,10 @@ export const TicketsView: React.FC = () => {
         <div className={styles.metricCard}>
           <div className={styles.metricHeader}>
             <span className={styles.metricLabel}>Bloqueados</span>
-            <div className={styles.metricIcon} style={{ color: '#cbd5e1', backgroundColor: 'rgba(148, 163, 184, 0.15)' }}>
+            <div
+              className={styles.metricIcon}
+              style={{ color: '#cbd5e1', backgroundColor: 'rgba(148, 163, 184, 0.15)' }}
+            >
               <Lock size={20} />
             </div>
           </div>
@@ -386,7 +433,14 @@ export const TicketsView: React.FC = () => {
         </div>
 
         <div className={styles.filterControls}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-secondary, #9cb5ab)' }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              color: 'var(--text-secondary, #9cb5ab)',
+            }}
+          >
             <Filter size={16} />
             <span style={{ fontSize: '0.85rem' }}>Estado:</span>
           </div>
@@ -431,10 +485,19 @@ export const TicketsView: React.FC = () => {
 
       {/* SECCIÓN PRINCIPAL: MATRIZ O TABLA */}
       <div className={styles.cardSection}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginBottom: '1rem',
+          }}
+        >
           <h2 className={styles.sectionTitle} style={{ margin: 0 }}>
             {viewMode === 'grid' ? 'Matriz General de Boletos' : 'Inventario Detallado de Boletos'}{' '}
-            <span style={{ fontSize: '0.9rem', color: 'var(--text-muted, #5e7a6f)', fontWeight: 500 }}>
+            <span
+              style={{ fontSize: '0.9rem', color: 'var(--text-muted, #5e7a6f)', fontWeight: 500 }}
+            >
               ({totalFilteredCount} boletos encontrados)
             </span>
           </h2>
@@ -495,7 +558,8 @@ export const TicketsView: React.FC = () => {
             {/* Paginación para Vista de Matriz */}
             <div className={styles.paginationBar} style={{ marginTop: '1.5rem' }}>
               <div className={styles.paginationInfo}>
-                Mostrando <strong>{tickets.length}</strong> de <strong>{totalFilteredCount}</strong> boletos
+                Mostrando <strong>{tickets.length}</strong> de <strong>{totalFilteredCount}</strong>{' '}
+                boletos
               </div>
               <div className={styles.paginationControls}>
                 <button
@@ -554,7 +618,14 @@ export const TicketsView: React.FC = () => {
                 <tbody>
                   {tickets.map((t) => (
                     <tr key={t.id || t.number}>
-                      <td style={{ fontFamily: 'var(--font-mono, monospace)', fontWeight: 700, fontSize: '1.05rem', color: '#f59e0b' }}>
+                      <td
+                        style={{
+                          fontFamily: 'var(--font-mono, monospace)',
+                          fontWeight: 700,
+                          fontSize: '1.05rem',
+                          color: '#f59e0b',
+                        }}
+                      >
                         {formatTicketNumber(t.number)}
                       </td>
                       <td>
@@ -582,15 +653,26 @@ export const TicketsView: React.FC = () => {
                       <td>
                         {t.orders ? (
                           <div>
-                            <span style={{ fontFamily: 'var(--font-mono, monospace)', fontWeight: 700, color: '#f59e0b', fontSize: '0.85rem' }}>
+                            <span
+                              style={{
+                                fontFamily: 'var(--font-mono, monospace)',
+                                fontWeight: 700,
+                                color: '#f59e0b',
+                                fontSize: '0.85rem',
+                              }}
+                            >
                               {t.orders.reference}
                             </span>
-                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted, #5e7a6f)' }}>
+                            <div
+                              style={{ fontSize: '0.75rem', color: 'var(--text-muted, #5e7a6f)' }}
+                            >
                               Total: {formatCOP(t.orders.total_amount)} ({t.orders.status})
                             </div>
                           </div>
                         ) : (
-                          <span style={{ color: 'var(--text-muted, #5e7a6f)', fontSize: '0.8rem' }}>Sin orden</span>
+                          <span style={{ color: 'var(--text-muted, #5e7a6f)', fontSize: '0.8rem' }}>
+                            Sin orden
+                          </span>
                         )}
                       </td>
                       <td>
@@ -599,29 +681,48 @@ export const TicketsView: React.FC = () => {
                             <div style={{ fontWeight: 600, color: 'var(--text-primary, #f3f7f5)' }}>
                               {t.buyers.full_name}
                             </div>
-                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted, #5e7a6f)' }}>
+                            <div
+                              style={{ fontSize: '0.75rem', color: 'var(--text-muted, #5e7a6f)' }}
+                            >
                               Doc: {maskDocumentId(t.buyers.document_id)}
                             </div>
                           </div>
                         ) : (
-                          <span style={{ color: 'var(--text-muted, #5e7a6f)', fontSize: '0.8rem' }}>-</span>
+                          <span style={{ color: 'var(--text-muted, #5e7a6f)', fontSize: '0.8rem' }}>
+                            -
+                          </span>
                         )}
                       </td>
                       <td>
                         {t.buyers ? (
-                          <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary, #9cb5ab)' }}>
+                          <div
+                            style={{ fontSize: '0.8rem', color: 'var(--text-secondary, #9cb5ab)' }}
+                          >
                             <div>{t.buyers.phone}</div>
-                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted, #5e7a6f)' }}>{t.buyers.email}</div>
+                            <div
+                              style={{ fontSize: '0.75rem', color: 'var(--text-muted, #5e7a6f)' }}
+                            >
+                              {t.buyers.email}
+                            </div>
                           </div>
                         ) : (
-                          <span style={{ color: 'var(--text-muted, #5e7a6f)', fontSize: '0.8rem' }}>-</span>
+                          <span style={{ color: 'var(--text-muted, #5e7a6f)', fontSize: '0.8rem' }}>
+                            -
+                          </span>
                         )}
                       </td>
                       <td style={{ fontSize: '0.8rem', color: 'var(--text-muted, #5e7a6f)' }}>
                         {t.reserved_at ? new Date(t.reserved_at).toLocaleString('es-CO') : '-'}
                       </td>
                       <td style={{ textAlign: 'right' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '0.4rem' }}>
+                        <div
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'flex-end',
+                            gap: '0.4rem',
+                          }}
+                        >
                           <button
                             type="button"
                             className={styles.btnSecondary}
@@ -648,7 +749,12 @@ export const TicketsView: React.FC = () => {
                               type="button"
                               disabled
                               className={styles.btnSecondary}
-                              style={{ padding: '0.3rem 0.6rem', fontSize: '0.75rem', opacity: 0.4, cursor: 'not-allowed' }}
+                              style={{
+                                padding: '0.3rem 0.6rem',
+                                fontSize: '0.75rem',
+                                opacity: 0.4,
+                                cursor: 'not-allowed',
+                              }}
                               title="No se puede bloquear un boleto vendido con orden pagada"
                             >
                               <ShieldCheck size={13} />
@@ -677,7 +783,8 @@ export const TicketsView: React.FC = () => {
             {/* Paginación de Tabla */}
             <div className={styles.paginationBar}>
               <div className={styles.paginationInfo}>
-                Mostrando <strong>{tickets.length}</strong> de <strong>{totalFilteredCount}</strong> boletos filtrados
+                Mostrando <strong>{tickets.length}</strong> de <strong>{totalFilteredCount}</strong>{' '}
+                boletos filtrados
               </div>
               <div className={styles.paginationControls}>
                 <button
@@ -726,9 +833,31 @@ export const TicketsView: React.FC = () => {
       {isDetailModalOpen && selectedTicket && (
         <div className={styles.adminModalBackdrop} onClick={handleCloseDetail}>
           <div className={styles.adminModalCard} onClick={(e) => e.stopPropagation()}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--border-subtle, rgba(156, 181, 171, 0.15))', paddingBottom: '1rem' }}>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                borderBottom: '1px solid var(--border-subtle, rgba(156, 181, 171, 0.15))',
+                paddingBottom: '1rem',
+              }}
+            >
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                <div style={{ width: 44, height: 44, borderRadius: 'var(--radius-md, 10px)', backgroundColor: 'rgba(245, 158, 11, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#f59e0b', fontSize: '1.25rem', fontWeight: 800, fontFamily: 'var(--font-mono, monospace)' }}>
+                <div
+                  style={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: 'var(--radius-md, 10px)',
+                    backgroundColor: 'rgba(245, 158, 11, 0.15)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#f59e0b',
+                    fontSize: '1.25rem',
+                    fontWeight: 800,
+                    fontFamily: 'var(--font-mono, monospace)',
+                  }}
+                >
                   {formatTicketNumber(selectedTicket.number)}
                 </div>
                 <div>
@@ -762,7 +891,12 @@ export const TicketsView: React.FC = () => {
               <button
                 type="button"
                 onClick={handleCloseDetail}
-                style={{ background: 'none', border: 'none', color: 'var(--text-muted, #5e7a6f)', cursor: 'pointer' }}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: 'var(--text-muted, #5e7a6f)',
+                  cursor: 'pointer',
+                }}
               >
                 <X size={20} />
               </button>
@@ -770,24 +904,68 @@ export const TicketsView: React.FC = () => {
 
             {/* Mensaje de error / éxito si existe */}
             {actionError && (
-              <div style={{ padding: '0.75rem 1rem', backgroundColor: 'rgba(239, 68, 68, 0.15)', border: '1px solid #ef4444', borderRadius: 'var(--radius-md, 10px)', color: '#f87171', fontSize: '0.85rem' }}>
+              <div
+                style={{
+                  padding: '0.75rem 1rem',
+                  backgroundColor: 'rgba(239, 68, 68, 0.15)',
+                  border: '1px solid #ef4444',
+                  borderRadius: 'var(--radius-md, 10px)',
+                  color: '#f87171',
+                  fontSize: '0.85rem',
+                }}
+              >
                 {actionError}
               </div>
             )}
 
             {/* SECCIÓN: ORDEN ASOCIADA */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--color-brand-accent, #f59e0b)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              <span
+                style={{
+                  fontSize: '0.8rem',
+                  fontWeight: 700,
+                  color: 'var(--color-brand-accent, #f59e0b)',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                }}
+              >
                 Orden de Compra
               </span>
               {selectedTicket.orders ? (
-                <div style={{ backgroundColor: 'var(--bg-main, #0a1410)', border: '1px solid var(--border-subtle, rgba(156, 181, 171, 0.2))', borderRadius: 'var(--radius-md, 10px)', padding: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
+                <div
+                  style={{
+                    backgroundColor: 'var(--bg-main, #0a1410)',
+                    border: '1px solid var(--border-subtle, rgba(156, 181, 171, 0.2))',
+                    borderRadius: 'var(--radius-md, 10px)',
+                    padding: '1rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    flexWrap: 'wrap',
+                    gap: '0.75rem',
+                  }}
+                >
                   <div>
-                    <div style={{ fontFamily: 'var(--font-mono, monospace)', fontWeight: 700, color: '#f59e0b', fontSize: '1rem' }}>
+                    <div
+                      style={{
+                        fontFamily: 'var(--font-mono, monospace)',
+                        fontWeight: 700,
+                        color: '#f59e0b',
+                        fontSize: '1rem',
+                      }}
+                    >
                       {selectedTicket.orders.reference}
                     </div>
-                    <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary, #9cb5ab)', marginTop: '0.2rem' }}>
-                      Estado: <strong>{selectedTicket.orders.status}</strong> • Total: <strong>{formatCOP(selectedTicket.orders.total_amount)}</strong> • Boletos en orden: {selectedTicket.orders.ticket_count}
+                    <div
+                      style={{
+                        fontSize: '0.8rem',
+                        color: 'var(--text-secondary, #9cb5ab)',
+                        marginTop: '0.2rem',
+                      }}
+                    >
+                      Estado: <strong>{selectedTicket.orders.status}</strong> • Total:{' '}
+                      <strong>{formatCOP(selectedTicket.orders.total_amount)}</strong> • Boletos en
+                      orden: {selectedTicket.orders.ticket_count}
                     </div>
                   </div>
                   <button
@@ -801,7 +979,15 @@ export const TicketsView: React.FC = () => {
                   </button>
                 </div>
               ) : (
-                <div style={{ padding: '0.85rem', backgroundColor: 'var(--bg-main, #0a1410)', borderRadius: 'var(--radius-md, 10px)', color: 'var(--text-muted, #5e7a6f)', fontSize: '0.85rem' }}>
+                <div
+                  style={{
+                    padding: '0.85rem',
+                    backgroundColor: 'var(--bg-main, #0a1410)',
+                    borderRadius: 'var(--radius-md, 10px)',
+                    color: 'var(--text-muted, #5e7a6f)',
+                    fontSize: '0.85rem',
+                  }}
+                >
                   Este boleto no está asociado a ninguna orden actualmente.
                 </div>
               )}
@@ -809,18 +995,30 @@ export const TicketsView: React.FC = () => {
 
             {/* SECCIÓN: DATOS DEL COMPRADOR */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--color-brand-accent, #f59e0b)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              <span
+                style={{
+                  fontSize: '0.8rem',
+                  fontWeight: 700,
+                  color: 'var(--color-brand-accent, #f59e0b)',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                }}
+              >
                 Datos del Comprador
               </span>
               {selectedTicket.buyers ? (
                 <div className={styles.ticketDetailGrid}>
                   <div className={styles.ticketDetailGroup}>
                     <span className={styles.ticketDetailLabel}>Nombre Completo</span>
-                    <span className={styles.ticketDetailValue}>{selectedTicket.buyers.full_name}</span>
+                    <span className={styles.ticketDetailValue}>
+                      {selectedTicket.buyers.full_name}
+                    </span>
                   </div>
                   <div className={styles.ticketDetailGroup}>
                     <span className={styles.ticketDetailLabel}>Documento</span>
-                    <span className={styles.ticketDetailValue}>{maskDocumentId(selectedTicket.buyers.document_id)}</span>
+                    <span className={styles.ticketDetailValue}>
+                      {maskDocumentId(selectedTicket.buyers.document_id)}
+                    </span>
                   </div>
                   <div className={styles.ticketDetailGroup}>
                     <span className={styles.ticketDetailLabel}>Teléfono</span>
@@ -828,33 +1026,82 @@ export const TicketsView: React.FC = () => {
                   </div>
                   <div className={styles.ticketDetailGroup}>
                     <span className={styles.ticketDetailLabel}>Correo Electrónico</span>
-                    <span className={styles.ticketDetailValue} style={{ wordBreak: 'break-all' }}>{selectedTicket.buyers.email}</span>
+                    <span className={styles.ticketDetailValue} style={{ wordBreak: 'break-all' }}>
+                      {selectedTicket.buyers.email}
+                    </span>
                   </div>
                 </div>
               ) : (
-                <div style={{ padding: '0.85rem', backgroundColor: 'var(--bg-main, #0a1410)', borderRadius: 'var(--radius-md, 10px)', color: 'var(--text-muted, #5e7a6f)', fontSize: '0.85rem' }}>
+                <div
+                  style={{
+                    padding: '0.85rem',
+                    backgroundColor: 'var(--bg-main, #0a1410)',
+                    borderRadius: 'var(--radius-md, 10px)',
+                    color: 'var(--text-muted, #5e7a6f)',
+                    fontSize: '0.85rem',
+                  }}
+                >
                   Sin comprador asignado.
                 </div>
               )}
             </div>
 
             {/* SECCIÓN: ACCIONES ADMINISTRATIVAS */}
-            <div style={{ borderTop: '1px solid var(--border-subtle, rgba(156, 181, 171, 0.15))', paddingTop: '1rem', marginTop: '0.5rem' }}>
-              <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-secondary, #9cb5ab)', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '0.75rem' }}>
+            <div
+              style={{
+                borderTop: '1px solid var(--border-subtle, rgba(156, 181, 171, 0.15))',
+                paddingTop: '1rem',
+                marginTop: '0.5rem',
+              }}
+            >
+              <span
+                style={{
+                  fontSize: '0.8rem',
+                  fontWeight: 700,
+                  color: 'var(--text-secondary, #9cb5ab)',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                  display: 'block',
+                  marginBottom: '0.75rem',
+                }}
+              >
                 Acciones Administrativas
               </span>
 
               {selectedTicket.status === 'sold' ? (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.85rem 1rem', backgroundColor: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.3)', borderRadius: 'var(--radius-md, 10px)', color: '#93c5fd', fontSize: '0.85rem' }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.75rem',
+                    padding: '0.85rem 1rem',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    border: '1px solid rgba(59, 130, 246, 0.3)',
+                    borderRadius: 'var(--radius-md, 10px)',
+                    color: '#93c5fd',
+                    fontSize: '0.85rem',
+                  }}
+                >
                   <ShieldCheck size={20} style={{ flexShrink: 0 }} />
                   <div>
-                    <strong>Boleto Vendido y Protegido:</strong> Este número se encuentra vinculado a una orden pagada y confirmada. No se permite modificación ni bloqueo manual para proteger la transparencia y legalidad del sorteo.
+                    <strong>Boleto Vendido y Protegido:</strong> Este número se encuentra vinculado
+                    a una orden pagada y confirmada. No se permite modificación ni bloqueo manual
+                    para proteger la transparencia y legalidad del sorteo.
                   </div>
                 </div>
               ) : selectedTicket.status === 'blocked' ? (
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '1rem',
+                    flexWrap: 'wrap',
+                  }}
+                >
                   <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary, #9cb5ab)' }}>
-                    El boleto está bloqueado. Puedes habilitarlo para que vuelva a estar disponible en el checkout.
+                    El boleto está bloqueado. Puedes habilitarlo para que vuelva a estar disponible
+                    en el checkout.
                   </span>
                   <button
                     type="button"
@@ -866,7 +1113,15 @@ export const TicketsView: React.FC = () => {
                   </button>
                 </div>
               ) : (
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '1rem',
+                    flexWrap: 'wrap',
+                  }}
+                >
                   <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary, #9cb5ab)' }}>
                     {selectedTicket.status === 'reserved'
                       ? 'El boleto está en reserva temporal. Al bloquearlo, se cancelará su disponibilidad para compra.'
@@ -891,10 +1146,29 @@ export const TicketsView: React.FC = () => {
       {/* MODAL 2: CONFIRMACIÓN DE BLOQUEO DE BOLETO                                */}
       {/* ========================================================================= */}
       {isBlockModalOpen && selectedTicket && (
-        <div className={styles.adminModalBackdrop} onClick={() => !isProcessingAction && setIsBlockModalOpen(false)}>
-          <div className={styles.adminModalCard} style={{ maxWidth: '520px' }} onClick={(e) => e.stopPropagation()}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#f87171' }}>
-              <div style={{ width: 40, height: 40, borderRadius: '50%', backgroundColor: 'rgba(239, 68, 68, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div
+          className={styles.adminModalBackdrop}
+          onClick={() => !isProcessingAction && setIsBlockModalOpen(false)}
+        >
+          <div
+            className={styles.adminModalCard}
+            style={{ maxWidth: '520px' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div
+              style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#f87171' }}
+            >
+              <div
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: '50%',
+                  backgroundColor: 'rgba(239, 68, 68, 0.15)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
                 <AlertTriangle size={22} />
               </div>
               <div>
@@ -907,18 +1181,49 @@ export const TicketsView: React.FC = () => {
               </div>
             </div>
 
-            <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary, #9cb5ab)', margin: '0.5rem 0 0 0', lineHeight: 1.5 }}>
-              Al bloquear el boleto <strong>#{formatTicketNumber(selectedTicket.number)}</strong>, este dejará de estar disponible para compra pública y cualquier reserva temporal asociada será cancelada.
+            <p
+              style={{
+                fontSize: '0.875rem',
+                color: 'var(--text-secondary, #9cb5ab)',
+                margin: '0.5rem 0 0 0',
+                lineHeight: 1.5,
+              }}
+            >
+              Al bloquear el boleto <strong>#{formatTicketNumber(selectedTicket.number)}</strong>,
+              este dejará de estar disponible para compra pública y cualquier reserva temporal
+              asociada será cancelada.
             </p>
 
             {actionError && (
-              <div style={{ padding: '0.75rem 1rem', backgroundColor: 'rgba(239, 68, 68, 0.15)', border: '1px solid #ef4444', borderRadius: 'var(--radius-md, 10px)', color: '#f87171', fontSize: '0.85rem' }}>
+              <div
+                style={{
+                  padding: '0.75rem 1rem',
+                  backgroundColor: 'rgba(239, 68, 68, 0.15)',
+                  border: '1px solid #ef4444',
+                  borderRadius: 'var(--radius-md, 10px)',
+                  color: '#f87171',
+                  fontSize: '0.85rem',
+                }}
+              >
                 {actionError}
               </div>
             )}
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '0.5rem' }}>
-              <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary, #9cb5ab)' }}>
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.5rem',
+                marginTop: '0.5rem',
+              }}
+            >
+              <label
+                style={{
+                  fontSize: '0.8rem',
+                  fontWeight: 600,
+                  color: 'var(--text-secondary, #9cb5ab)',
+                }}
+              >
                 Motivo del Bloqueo <span style={{ color: '#ef4444' }}>*</span>
               </label>
               <select
@@ -945,7 +1250,17 @@ export const TicketsView: React.FC = () => {
               )}
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '0.75rem', borderTop: '1px solid var(--border-subtle, rgba(156, 181, 171, 0.15))', paddingTop: '1rem', marginTop: '0.5rem' }}>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'flex-end',
+                gap: '0.75rem',
+                borderTop: '1px solid var(--border-subtle, rgba(156, 181, 171, 0.15))',
+                paddingTop: '1rem',
+                marginTop: '0.5rem',
+              }}
+            >
               <button
                 type="button"
                 className={styles.btnSecondary}
@@ -972,10 +1287,29 @@ export const TicketsView: React.FC = () => {
       {/* MODAL 3: CONFIRMACIÓN DE DESBLOQUEO DE BOLETO                             */}
       {/* ========================================================================= */}
       {isUnblockModalOpen && selectedTicket && (
-        <div className={styles.adminModalBackdrop} onClick={() => !isProcessingAction && setIsUnblockModalOpen(false)}>
-          <div className={styles.adminModalCard} style={{ maxWidth: '520px' }} onClick={(e) => e.stopPropagation()}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#10b981' }}>
-              <div style={{ width: 40, height: 40, borderRadius: '50%', backgroundColor: 'rgba(16, 185, 129, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div
+          className={styles.adminModalBackdrop}
+          onClick={() => !isProcessingAction && setIsUnblockModalOpen(false)}
+        >
+          <div
+            className={styles.adminModalCard}
+            style={{ maxWidth: '520px' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div
+              style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#10b981' }}
+            >
+              <div
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: '50%',
+                  backgroundColor: 'rgba(16, 185, 129, 0.15)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
                 <Unlock size={22} />
               </div>
               <div>
@@ -988,18 +1322,50 @@ export const TicketsView: React.FC = () => {
               </div>
             </div>
 
-            <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary, #9cb5ab)', margin: '0.5rem 0 0 0', lineHeight: 1.5 }}>
-              ¿Deseas desbloquear el boleto <strong>#{formatTicketNumber(selectedTicket.number)}</strong>? Este volverá a estar en estado <strong>disponible</strong> para que cualquier comprador pueda seleccionarlo y reservarlo.
+            <p
+              style={{
+                fontSize: '0.875rem',
+                color: 'var(--text-secondary, #9cb5ab)',
+                margin: '0.5rem 0 0 0',
+                lineHeight: 1.5,
+              }}
+            >
+              ¿Deseas desbloquear el boleto{' '}
+              <strong>#{formatTicketNumber(selectedTicket.number)}</strong>? Este volverá a estar en
+              estado <strong>disponible</strong> para que cualquier comprador pueda seleccionarlo y
+              reservarlo.
             </p>
 
             {actionError && (
-              <div style={{ padding: '0.75rem 1rem', backgroundColor: 'rgba(239, 68, 68, 0.15)', border: '1px solid #ef4444', borderRadius: 'var(--radius-md, 10px)', color: '#f87171', fontSize: '0.85rem' }}>
+              <div
+                style={{
+                  padding: '0.75rem 1rem',
+                  backgroundColor: 'rgba(239, 68, 68, 0.15)',
+                  border: '1px solid #ef4444',
+                  borderRadius: 'var(--radius-md, 10px)',
+                  color: '#f87171',
+                  fontSize: '0.85rem',
+                }}
+              >
                 {actionError}
               </div>
             )}
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', marginTop: '0.5rem' }}>
-              <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary, #9cb5ab)' }}>
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.4rem',
+                marginTop: '0.5rem',
+              }}
+            >
+              <label
+                style={{
+                  fontSize: '0.8rem',
+                  fontWeight: 600,
+                  color: 'var(--text-secondary, #9cb5ab)',
+                }}
+              >
                 Motivo / Nota de Auditoría
               </label>
               <input
@@ -1011,7 +1377,17 @@ export const TicketsView: React.FC = () => {
               />
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '0.75rem', borderTop: '1px solid var(--border-subtle, rgba(156, 181, 171, 0.15))', paddingTop: '1rem', marginTop: '0.5rem' }}>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'flex-end',
+                gap: '0.75rem',
+                borderTop: '1px solid var(--border-subtle, rgba(156, 181, 171, 0.15))',
+                paddingTop: '1rem',
+                marginTop: '0.5rem',
+              }}
+            >
               <button
                 type="button"
                 className={styles.btnSecondary}

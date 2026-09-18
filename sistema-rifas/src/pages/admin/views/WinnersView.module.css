@@ -66,13 +66,19 @@
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 0 20px rgba(245, 158, 11, 0.08);
-  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow:
+    0 10px 25px -5px rgba(0, 0, 0, 0.5),
+    0 0 20px rgba(245, 158, 11, 0.08);
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
 }
 
 .winnerCard:hover {
   border-color: rgba(245, 158, 11, 0.5);
-  box-shadow: 0 14px 30px -5px rgba(0, 0, 0, 0.6), 0 0 25px rgba(245, 158, 11, 0.15);
+  box-shadow:
+    0 14px 30px -5px rgba(0, 0, 0, 0.6),
+    0 0 25px rgba(245, 158, 11, 0.15);
 }
 
 .winnerCardHeader {
@@ -307,4 +313,3 @@
   align-items: center;
   gap: 0.6rem;
 }
-

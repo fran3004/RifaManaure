@@ -212,7 +212,8 @@
     flex-direction: column;
   }
 
-  .btnPrimary, .btnSecondary {
+  .btnPrimary,
+  .btnSecondary {
     width: 100%;
   }
 
@@ -220,4 +221,3 @@
     grid-template-columns: 1fr;
   }
 }
-

@@ -80,7 +80,14 @@ export const AdminRaffleProvider: React.FC<{ children: React.ReactNode }> = ({ c
       setSelectedRaffleId,
       reloadRaffles,
     }),
-    [selectedRaffleId, selectedRaffle, raffles, isLoadingRaffles, setSelectedRaffleId, reloadRaffles]
+    [
+      selectedRaffleId,
+      selectedRaffle,
+      raffles,
+      isLoadingRaffles,
+      setSelectedRaffleId,
+      reloadRaffles,
+    ]
   );
 
   return <AdminRaffleContext.Provider value={value}>{children}</AdminRaffleContext.Provider>;
@@ -93,4 +100,3 @@ export function useAdminRaffle(): AdminRaffleContextValue {
   }
   return context;
 }
-

@@ -1,9 +1,9 @@
 /**
  * Servicio de Correo Electrónico Transaccional de "Manaure Vive"
- * 
+ *
  * ARQUITECTURA:
  * React/Vite -> Supabase Edge Function (send-transactional-email) -> Resend API -> Email Comprador
- * 
+ *
  * NOTA DE SEGURIDAD:
  * - Resend es el proveedor exclusivo de email.
  * - No contiene API keys ni secretos en frontend.
@@ -151,4 +151,3 @@ export async function getOrderEmailLogs(orderId: string): Promise<NotificationLo
     return [];
   }
 }
-

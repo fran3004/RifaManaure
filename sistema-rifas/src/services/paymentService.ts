@@ -186,10 +186,7 @@ export async function deletePaymentAccount(
   id: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const { error } = await supabase
-      .from('payment_accounts')
-      .delete()
-      .eq('id', id);
+    const { error } = await supabase.from('payment_accounts').delete().eq('id', id);
 
     if (error) {
       return { success: false, error: error.message };
@@ -240,7 +237,8 @@ export function validateProofFile(file: File): { valid: boolean; error?: string 
   if (file.type && !ALLOWED_PROOF_MIME_TYPES.includes(file.type.toLowerCase())) {
     return {
       valid: false,
-      error: 'Tipo de archivo no válido. Solo se admiten imágenes (JPG, PNG, WEBP) o documentos PDF.',
+      error:
+        'Tipo de archivo no válido. Solo se admiten imágenes (JPG, PNG, WEBP) o documentos PDF.',
     };
   }
 
@@ -566,10 +564,8 @@ export async function fetchAdminOrdersPaginated(
   const to = from + pageSize - 1;
 
   try {
-    let query = supabase
-      .from('orders')
-      .select(
-        `
+    let query = supabase.from('orders').select(
+      `
         *,
         buyers:buyer_id (
           id,
@@ -585,8 +581,8 @@ export async function fetchAdminOrdersPaginated(
           status
         )
       `,
-        { count: 'exact' }
-      );
+      { count: 'exact' }
+    );
 
     // Filtrar por rifa activa si se especifica
     if (raffleId) {
@@ -679,7 +675,8 @@ export async function fetchAdminOrders(
   try {
     let query = supabase
       .from('orders')
-      .select(`
+      .select(
+        `
         *,
         buyers:buyer_id (
           id,
@@ -694,7 +691,8 @@ export async function fetchAdminOrders(
           number,
           status
         )
-      `)
+      `
+      )
       .order('created_at', { ascending: false });
 
     if (raffleId) {
@@ -786,10 +784,17 @@ export async function fetchAdminDashboardMetrics(
         refundedOrdersCount: Number(raw.refundedOrdersCount ?? raw.refunded_orders_count ?? 0),
         totalOrdersCount: Number(raw.totalOrdersCount ?? raw.total_orders_count ?? 0),
         confirmedMoney: Number(raw.confirmedMoney ?? raw.confirmed_money ?? 0),
-        pendingVerificationMoney: Number(raw.pendingVerificationMoney ?? raw.pending_verification_money ?? 0),
+        pendingVerificationMoney: Number(
+          raw.pendingVerificationMoney ?? raw.pending_verification_money ?? 0
+        ),
         totalBuyersCount: Number(raw.totalBuyersCount ?? raw.total_buyers_count ?? 0),
-        totalCollected: Number(raw.totalCollected ?? raw.total_collected ?? raw.confirmedMoney ?? 0),
-        ordersByStatus: (raw.ordersByStatus || raw.orders_by_status || {}) as Record<string, number>,
+        totalCollected: Number(
+          raw.totalCollected ?? raw.total_collected ?? raw.confirmedMoney ?? 0
+        ),
+        ordersByStatus: (raw.ordersByStatus || raw.orders_by_status || {}) as Record<
+          string,
+          number
+        >,
       };
     }
 
@@ -821,8 +826,9 @@ export async function fetchAdminDashboardMetrics(
       else if (t.status === 'blocked') ticketsBlocked++;
     });
 
-    const totalTickets = (ticketsData && ticketsData.length > 0) ? ticketsData.length : 1000;
-    const percentageSold = totalTickets > 0 ? Number(((ticketsSold / totalTickets) * 100).toFixed(2)) : 0;
+    const totalTickets = ticketsData && ticketsData.length > 0 ? ticketsData.length : 1000;
+    const percentageSold =
+      totalTickets > 0 ? Number(((ticketsSold / totalTickets) * 100).toFixed(2)) : 0;
 
     let ordersQuery = supabase.from('orders').select('status, total_amount');
     if (raffleId) ordersQuery = ordersQuery.eq('raffle_id', raffleId);
@@ -858,7 +864,8 @@ export async function fetchAdminDashboardMetrics(
 
     return {
       totalTickets,
-      ticketsAvailable: ticketsAvailable || (totalTickets - ticketsSold - ticketsReserved - ticketsBlocked),
+      ticketsAvailable:
+        ticketsAvailable || totalTickets - ticketsSold - ticketsReserved - ticketsBlocked,
       ticketsReserved,
       ticketsSold,
       ticketsBlocked,
@@ -921,12 +928,23 @@ export async function cancelOrder(
     // Fallback directo
     await supabase
       .from('orders')
-      .update({ status: 'cancelled', rejection_reason: reason, updated_at: new Date().toISOString() })
+      .update({
+        status: 'cancelled',
+        rejection_reason: reason,
+        updated_at: new Date().toISOString(),
+      })
       .eq('id', orderId);
 
     await supabase
       .from('tickets')
-      .update({ status: 'available', reserved_at: null, reservation_expires_at: null, buyer_id: null, order_id: null, updated_at: new Date().toISOString() })
+      .update({
+        status: 'available',
+        reserved_at: null,
+        reservation_expires_at: null,
+        buyer_id: null,
+        order_id: null,
+        updated_at: new Date().toISOString(),
+      })
       .eq('order_id', orderId);
 
     return { success: true, message: 'Orden cancelada.' };
@@ -974,9 +992,7 @@ export async function fetchAuditLogsPaginated(
   const to = from + pageSize - 1;
 
   try {
-    let query = supabase
-      .from('audit_logs')
-      .select('*', { count: 'exact' });
+    let query = supabase.from('audit_logs').select('*', { count: 'exact' });
 
     // Filtrar por rifa activa si aplica
     if (raffleId) {
@@ -989,9 +1005,7 @@ export async function fetchAuditLogsPaginated(
       const orderIds = (raffleOrders || []).map((o) => o.id);
       const matchIds = [raffleId, ...orderIds];
 
-      query = query.or(
-        `entity_id.in.(${matchIds.join(',')}),details->>raffle_id.eq.${raffleId}`
-      );
+      query = query.or(`entity_id.in.(${matchIds.join(',')}),details->>raffle_id.eq.${raffleId}`);
     }
 
     if (actionFilter && actionFilter !== 'ALL') {
@@ -1050,20 +1064,22 @@ export async function fetchAuditLogs(
 
 export interface AdminTicketWithDetails extends TicketRow {
   buyers?: Pick<BuyerRow, 'id' | 'full_name' | 'document_id' | 'phone' | 'email' | 'city'> | null;
-  orders?: (Pick<
-    OrderRow,
-    | 'id'
-    | 'reference'
-    | 'status'
-    | 'total_amount'
-    | 'ticket_count'
-    | 'payment_method'
-    | 'receipt_url'
-    | 'created_at'
-  > & {
-    status: PaymentStatus;
-    payment_method: PaymentMethod;
-  }) | null;
+  orders?:
+    | (Pick<
+        OrderRow,
+        | 'id'
+        | 'reference'
+        | 'status'
+        | 'total_amount'
+        | 'ticket_count'
+        | 'payment_method'
+        | 'receipt_url'
+        | 'created_at'
+      > & {
+        status: PaymentStatus;
+        payment_method: PaymentMethod;
+      })
+    | null;
 }
 
 export interface FetchAdminTicketsParams {
@@ -1095,9 +1111,7 @@ export interface AdminTicketCounts {
  */
 export async function fetchAdminTicketCounts(raffleId?: string | null): Promise<AdminTicketCounts> {
   try {
-    let query = supabase
-      .from('tickets')
-      .select('status');
+    let query = supabase.from('tickets').select('status');
 
     if (raffleId) {
       query = query.eq('raffle_id', raffleId);
@@ -1106,7 +1120,13 @@ export async function fetchAdminTicketCounts(raffleId?: string | null): Promise<
     const { data, error } = await query;
 
     if (error || !data) {
-      return { totalCount: 1000, availableCount: 0, reservedCount: 0, soldCount: 0, blockedCount: 0 };
+      return {
+        totalCount: 1000,
+        availableCount: 0,
+        reservedCount: 0,
+        soldCount: 0,
+        blockedCount: 0,
+      };
     }
 
     let availableCount = 0;
@@ -1153,10 +1173,8 @@ export async function fetchAdminTicketsPaginated(
   const to = from + pageSize - 1;
 
   try {
-    let query = supabase
-      .from('tickets')
-      .select(
-        `
+    let query = supabase.from('tickets').select(
+      `
         id,
         raffle_id,
         number,
@@ -1186,8 +1204,8 @@ export async function fetchAdminTicketsPaginated(
           created_at
         )
       `,
-        { count: 'exact' }
-      );
+      { count: 'exact' }
+    );
 
     // Filtrar por rifa activa si se especifica
     if (raffleId) {
@@ -1210,11 +1228,7 @@ export async function fetchAdminTicketsPaginated(
             `full_name.ilike.%${cleanTerm}%,document_id.ilike.%${cleanTerm}%,phone.ilike.%${cleanTerm}%,email.ilike.%${cleanTerm}%`
           )
           .limit(150),
-        supabase
-          .from('orders')
-          .select('id')
-          .ilike('reference', `%${cleanTerm}%`)
-          .limit(150),
+        supabase.from('orders').select('id').ilike('reference', `%${cleanTerm}%`).limit(150),
       ]);
 
       const buyerIds = (matchedBuyers || []).map((b) => b.id);
@@ -1279,7 +1293,8 @@ export async function fetchAdminTicketsWithDetails(): Promise<AdminTicketWithDet
   try {
     const { data, error } = await supabase
       .from('tickets')
-      .select(`
+      .select(
+        `
         id,
         raffle_id,
         number,
@@ -1308,7 +1323,8 @@ export async function fetchAdminTicketsWithDetails(): Promise<AdminTicketWithDet
           receipt_url,
           created_at
         )
-      `)
+      `
+      )
       .order('number', { ascending: true });
 
     if (error) {
@@ -1344,7 +1360,12 @@ export async function adminBlockTicket(
     });
 
     if (!error && data) {
-      const res = data as { success: boolean; message?: string; error?: string; ticket_number?: string };
+      const res = data as {
+        success: boolean;
+        message?: string;
+        error?: string;
+        ticket_number?: string;
+      };
       if (res.success) {
         return {
           success: true,
@@ -1438,7 +1459,12 @@ export async function adminUnblockTicket(
     });
 
     if (!error && data) {
-      const res = data as { success: boolean; message?: string; error?: string; ticket_number?: string };
+      const res = data as {
+        success: boolean;
+        message?: string;
+        error?: string;
+        ticket_number?: string;
+      };
       if (res.success) {
         return {
           success: true,
@@ -1460,7 +1486,10 @@ export async function adminUnblockTicket(
     }
 
     if (ticket.status !== 'blocked') {
-      return { success: false, error: `El boleto no está bloqueado (estado actual: ${ticket.status}).` };
+      return {
+        success: false,
+        error: `El boleto no está bloqueado (estado actual: ${ticket.status}).`,
+      };
     }
 
     await supabase
@@ -1511,5 +1540,3 @@ export async function triggerReleaseExpiredReservations(): Promise<number> {
     return 0;
   }
 }
-
-

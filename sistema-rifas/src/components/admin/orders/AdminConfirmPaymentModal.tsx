@@ -120,7 +120,9 @@ export const AdminConfirmPaymentModal: React.FC<AdminConfirmPaymentModalProps> =
           <div className={styles.warningNotice}>
             <AlertCircle size={18} style={{ flexShrink: 0, marginTop: '2px' }} />
             <div>
-              Al confirmar, los boletos se marcarán como <strong>VENDIDOS</strong> permanentemente, se emitirá el registro de auditoría en la base de datos y se despacharán las notificaciones transaccionales automáticas al comprador.
+              Al confirmar, los boletos se marcarán como <strong>VENDIDOS</strong> permanentemente,
+              se emitirá el registro de auditoría en la base de datos y se despacharán las
+              notificaciones transaccionales automáticas al comprador.
             </div>
           </div>
         </div>
@@ -149,4 +151,3 @@ export const AdminConfirmPaymentModal: React.FC<AdminConfirmPaymentModalProps> =
     </div>
   );
 };
-

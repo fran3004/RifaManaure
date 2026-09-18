@@ -1,6 +1,6 @@
 /**
  * Servicio desacoplado para la integración y comunicación mediante WhatsApp.
- * 
+ *
  * NOTA DE ARQUITECTURA:
  * - WhatsApp actúa exclusivamente como canal de comunicación y notificación.
  * - No es ni reemplaza una pasarela de pagos.
@@ -116,7 +116,8 @@ export class WhatsAppBusinessCloudProvider implements WhatsAppProvider {
     } catch (err) {
       return {
         success: false,
-        error: err instanceof Error ? err.message : 'Error al enviar mensaje directo por WhatsApp API',
+        error:
+          err instanceof Error ? err.message : 'Error al enviar mensaje directo por WhatsApp API',
       };
     }
   }
@@ -156,4 +157,3 @@ export function openWhatsApp(phone: string, message: string): void {
     window.open(link, '_blank', 'noopener,noreferrer');
   }
 }
-

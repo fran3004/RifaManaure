@@ -60,17 +60,11 @@ export const ToastNotification: React.FC<ToastNotificationProps> = ({ toast, onC
   return (
     <div className={styles.toastContainer} aria-live="assertive" role="alert">
       <div className={`${styles.toastCard} ${getCardTypeClass()}`}>
-        <div className={styles.iconWrapper}>
-          {renderIcon()}
-        </div>
+        <div className={styles.iconWrapper}>{renderIcon()}</div>
 
         <div className={styles.contentWrapper}>
-          <h4 className={styles.toastTitle}>
-            {toast.title}
-          </h4>
-          <p className={styles.toastMessage}>
-            {toast.message}
-          </p>
+          <h4 className={styles.toastTitle}>{toast.title}</h4>
+          <p className={styles.toastMessage}>{toast.message}</p>
         </div>
 
         <button

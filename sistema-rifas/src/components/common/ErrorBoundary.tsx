@@ -77,7 +77,8 @@ export class ErrorBoundary extends Component<Props, State> {
               marginBottom: '1.5rem',
             }}
           >
-            Ocurrió una eventualidad inesperada al inicializar este módulo. Puedes intentar recargar la página.
+            Ocurrió una eventualidad inesperada al inicializar este módulo. Puedes intentar recargar
+            la página.
           </p>
           <button
             type="button"

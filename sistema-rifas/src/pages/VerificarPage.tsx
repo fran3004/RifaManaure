@@ -41,7 +41,9 @@ export const VerificarPage: React.FC = () => {
 
     const query = searchQuery.trim();
     if (!query) {
-      setErrorMsg('Por favor ingresa un número de referencia (ej. MV-...) o tu cédula de ciudadanía.');
+      setErrorMsg(
+        'Por favor ingresa un número de referencia (ej. MV-...) o tu cédula de ciudadanía.'
+      );
       return;
     }
 
@@ -62,7 +64,9 @@ export const VerificarPage: React.FC = () => {
       }
     } catch (err) {
       console.error('Error al consultar boletos:', err);
-      setErrorMsg('Ocurrió un problema de conexión al verificar los datos. Por favor intenta nuevamente.');
+      setErrorMsg(
+        'Ocurrió un problema de conexión al verificar los datos. Por favor intenta nuevamente.'
+      );
       setOrders([]);
     } finally {
       setIsLoading(false);
@@ -96,7 +100,8 @@ export const VerificarPage: React.FC = () => {
             </div>
             <h1 className={styles.title}>Verificación de Boletos y Órdenes</h1>
             <p className={styles.subtitle}>
-              Consulta en tiempo real el estado oficial de tus boletos y órdenes de compra en la plataforma <strong>Manaure Vive</strong> de forma 100% segura y privada.
+              Consulta en tiempo real el estado oficial de tus boletos y órdenes de compra en la
+              plataforma <strong>Manaure Vive</strong> de forma 100% segura y privada.
             </p>
           </div>
 
@@ -121,7 +126,8 @@ export const VerificarPage: React.FC = () => {
                 </button>
               </div>
               <span className={styles.searchHint}>
-                Puedes ingresar tu número de cédula completo o la referencia que recibiste al completar el pedido.
+                Puedes ingresar tu número de cédula completo o la referencia que recibiste al
+                completar el pedido.
               </span>
               {errorMsg && (
                 <p className={styles.errorText}>
@@ -149,17 +155,40 @@ export const VerificarPage: React.FC = () => {
                         <div className={styles.orderRefGroup}>
                           <span className={styles.orderRefLabel}>Referencia de Orden</span>
                           <span className={styles.orderRefValue}>{ord.reference}</span>
-                          <span className={styles.orderDate}>Registrada el {formatDate(ord.createdAt)}</span>
+                          <span className={styles.orderDate}>
+                            Registrada el {formatDate(ord.createdAt)}
+                          </span>
                         </div>
 
                         <div style={{ textAlign: 'right' }}>
-                          <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-muted, #5e7a6f)', fontWeight: 600, display: 'block' }}>
+                          <span
+                            style={{
+                              fontSize: '0.75rem',
+                              textTransform: 'uppercase',
+                              letterSpacing: '0.05em',
+                              color: 'var(--text-muted, #5e7a6f)',
+                              fontWeight: 600,
+                              display: 'block',
+                            }}
+                          >
                             Comprador Registrado
                           </span>
-                          <span style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-primary, #f3f7f5)' }}>
+                          <span
+                            style={{
+                              fontSize: '1.05rem',
+                              fontWeight: 700,
+                              color: 'var(--text-primary, #f3f7f5)',
+                            }}
+                          >
                             {ord.maskedBuyerName}
                           </span>
-                          <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary, #9cb5ab)', display: 'block' }}>
+                          <span
+                            style={{
+                              fontSize: '0.8rem',
+                              color: 'var(--text-secondary, #9cb5ab)',
+                              display: 'block',
+                            }}
+                          >
                             Doc: {ord.maskedDocumentId}
                           </span>
                         </div>
@@ -172,9 +201,12 @@ export const VerificarPage: React.FC = () => {
                             <CheckCircle2 size={24} color="#10b981" />
                           </div>
                           <div style={{ flex: 1 }}>
-                            <h3 className={styles.statusTitle}>Pago Confirmado y Boletos Garantizados</h3>
+                            <h3 className={styles.statusTitle}>
+                              Pago Confirmado y Boletos Garantizados
+                            </h3>
                             <p className={styles.statusDescription}>
-                              Tu pago ha sido verificado y aprobado oficialmente. Tus números están asegurados e inscritos en la base de datos oficial del sorteo.
+                              Tu pago ha sido verificado y aprobado oficialmente. Tus números están
+                              asegurados e inscritos en la base de datos oficial del sorteo.
                             </p>
                             <div className={styles.receiptActionWrapper}>
                               <button
@@ -206,14 +238,21 @@ export const VerificarPage: React.FC = () => {
                       )}
 
                       {isPendingVerification && (
-                        <div className={`${styles.statusBanner} ${styles.statusBannerPendingVerification}`}>
+                        <div
+                          className={`${styles.statusBanner} ${styles.statusBannerPendingVerification}`}
+                        >
                           <div className={styles.statusIconWrapper}>
                             <Clock size={24} color="#f59e0b" />
                           </div>
                           <div>
-                            <h3 className={styles.statusTitle}>Comprobante en Proceso de Verificación</h3>
+                            <h3 className={styles.statusTitle}>
+                              Comprobante en Proceso de Verificación
+                            </h3>
                             <p className={styles.statusDescription}>
-                              Recibimos tu comprobante de pago manual. Nuestro equipo administrativo está validando la transferencia con la entidad bancaria. Tus números permanecen <strong>protegidos y apartados</strong> a tu nombre durante este proceso.
+                              Recibimos tu comprobante de pago manual. Nuestro equipo administrativo
+                              está validando la transferencia con la entidad bancaria. Tus números
+                              permanecen <strong>protegidos y apartados</strong> a tu nombre durante
+                              este proceso.
                             </p>
                           </div>
                         </div>
@@ -229,11 +268,19 @@ export const VerificarPage: React.FC = () => {
                             <p className={styles.statusDescription}>
                               El comprobante enviado no pudo ser verificado.
                               {ord.rejectionReason && (
-                                <span style={{ display: 'block', marginTop: '0.35rem', fontWeight: 600, color: '#fee2e2' }}>
+                                <span
+                                  style={{
+                                    display: 'block',
+                                    marginTop: '0.35rem',
+                                    fontWeight: 600,
+                                    color: '#fee2e2',
+                                  }}
+                                >
                                   Motivo indicado: {ord.rejectionReason}
                                 </span>
                               )}
-                              Por favor comunícate de inmediato con nuestro canal oficial de soporte para revisar tu caso.
+                              Por favor comunícate de inmediato con nuestro canal oficial de soporte
+                              para revisar tu caso.
                             </p>
                           </div>
                         </div>
@@ -247,7 +294,9 @@ export const VerificarPage: React.FC = () => {
                           <div>
                             <h3 className={styles.statusTitle}>Reserva Temporal Activa</h3>
                             <p className={styles.statusDescription}>
-                              Tu orden está en proceso de reserva. Recuerda subir tu comprobante de transferencia antes de que finalice el tiempo límite para evitar que los números sean liberados.
+                              Tu orden está en proceso de reserva. Recuerda subir tu comprobante de
+                              transferencia antes de que finalice el tiempo límite para evitar que
+                              los números sean liberados.
                             </p>
                           </div>
                         </div>
@@ -261,7 +310,8 @@ export const VerificarPage: React.FC = () => {
                           <div>
                             <h3 className={styles.statusTitle}>Orden Expirada o Cancelada</h3>
                             <p className={styles.statusDescription}>
-                              El tiempo límite de 10 minutos para adjuntar el comprobante concluyó y los números fueron liberados nuevamente para la venta pública.
+                              El tiempo límite de 10 minutos para adjuntar el comprobante concluyó y
+                              los números fueron liberados nuevamente para la venta pública.
                             </p>
                           </div>
                         </div>
@@ -275,19 +325,34 @@ export const VerificarPage: React.FC = () => {
                         </div>
                         <div className={styles.raffleInfoGroup}>
                           <span className={styles.raffleInfoLabel}>Lotería de Juego</span>
-                          <span className={styles.raffleInfoValue}>{ord.raffle.lotteryReference}</span>
+                          <span className={styles.raffleInfoValue}>
+                            {ord.raffle.lotteryReference}
+                          </span>
                         </div>
                         <div className={styles.raffleInfoGroup}>
                           <span className={styles.raffleInfoLabel}>Fecha del Sorteo</span>
                           <span className={styles.raffleInfoValue}>
-                            <Calendar size={13} style={{ display: 'inline', marginRight: '0.3rem', verticalAlign: 'text-bottom' }} />
-                            {ord.raffle.drawDate ? formatDate(ord.raffle.drawDate) : 'Fecha oficial según cronograma'}
+                            <Calendar
+                              size={13}
+                              style={{
+                                display: 'inline',
+                                marginRight: '0.3rem',
+                                verticalAlign: 'text-bottom',
+                              }}
+                            />
+                            {ord.raffle.drawDate
+                              ? formatDate(ord.raffle.drawDate)
+                              : 'Fecha oficial según cronograma'}
                           </span>
                         </div>
                         <div className={styles.raffleInfoGroup}>
                           <span className={styles.raffleInfoLabel}>Total de la Orden</span>
-                          <span className={styles.raffleInfoValue} style={{ color: 'var(--color-brand-accent, #f59e0b)' }}>
-                            {formatCOP(ord.totalAmount)} ({ord.ticketCount} {ord.ticketCount === 1 ? 'boleto' : 'boletos'})
+                          <span
+                            className={styles.raffleInfoValue}
+                            style={{ color: 'var(--color-brand-accent, #f59e0b)' }}
+                          >
+                            {formatCOP(ord.totalAmount)} ({ord.ticketCount}{' '}
+                            {ord.ticketCount === 1 ? 'boleto' : 'boletos'})
                           </span>
                         </div>
                       </div>
@@ -296,7 +361,14 @@ export const VerificarPage: React.FC = () => {
                       <div className={styles.ticketsSection}>
                         <div className={styles.ticketsSectionHeader}>
                           <h4 className={styles.ticketsSectionTitle}>
-                            <Ticket size={16} style={{ display: 'inline', marginRight: '0.4rem', verticalAlign: 'text-bottom' }} />
+                            <Ticket
+                              size={16}
+                              style={{
+                                display: 'inline',
+                                marginRight: '0.4rem',
+                                verticalAlign: 'text-bottom',
+                              }}
+                            />
                             Números Asignados ({ord.tickets.length})
                           </h4>
                           <span style={{ fontSize: '0.8rem', color: 'var(--text-muted, #5e7a6f)' }}>
@@ -315,17 +387,17 @@ export const VerificarPage: React.FC = () => {
                                   t.status === 'sold'
                                     ? styles.ticketChipSold
                                     : t.status === 'blocked'
-                                    ? styles.ticketChipBlocked
-                                    : styles.ticketChipPending
+                                      ? styles.ticketChipBlocked
+                                      : styles.ticketChipPending
                                 }`}
                               >
                                 {t.status === 'sold'
                                   ? 'Confirmado'
                                   : isPendingVerification
-                                  ? 'En Verificación'
-                                  : t.status === 'blocked'
-                                  ? 'Bloqueado'
-                                  : 'Apartado'}
+                                    ? 'En Verificación'
+                                    : t.status === 'blocked'
+                                      ? 'Bloqueado'
+                                      : 'Apartado'}
                               </span>
                             </div>
                           ))}
@@ -334,7 +406,9 @@ export const VerificarPage: React.FC = () => {
 
                       {/* Callout de Soporte si la orden fue rechazada o tiene dudas */}
                       <div className={styles.supportCallout}>
-                        <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary, #9cb5ab)' }}>
+                        <span
+                          style={{ fontSize: '0.85rem', color: 'var(--text-secondary, #9cb5ab)' }}
+                        >
                           ¿Tienes alguna duda sobre tu orden <strong>{ord.reference}</strong>?
                         </span>
                         <a
@@ -362,7 +436,10 @@ export const VerificarPage: React.FC = () => {
                     No se encontraron órdenes para &quot;{searchedTerm}&quot;
                   </h3>
                   <p className={styles.emptyText}>
-                    Verifica que hayas ingresado correctamente tu número de cédula completo o la referencia exacta de tu orden (ej. <strong>MV-L8X9...</strong>). Si acabas de realizar el pago, recuerda que la asignación se refleja de inmediato una vez registrada.
+                    Verifica que hayas ingresado correctamente tu número de cédula completo o la
+                    referencia exacta de tu orden (ej. <strong>MV-L8X9...</strong>). Si acabas de
+                    realizar el pago, recuerda que la asignación se refleja de inmediato una vez
+                    registrada.
                   </p>
                   <a
                     href={createWhatsAppLink(

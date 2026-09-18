@@ -1,15 +1,15 @@
 /**
  * Servicio desacoplado para la generación, despacho y trazabilidad de notificaciones de órdenes.
- * 
+ *
  * Canales soportados:
  * - whatsapp
  * - email
- * 
+ *
  * Tipos soportados:
  * - payment_received
  * - payment_approved
  * - payment_rejected
- * 
+ *
  * Estados soportados:
  * - pending
  * - sent
@@ -18,7 +18,11 @@
 
 import { supabase } from '@/lib/supabase';
 import { formatCOP, formatTicketNumber } from '@/lib/utils';
-import { createWhatsAppLink, getWhatsAppProvider, type WhatsAppSendResult } from './whatsappService';
+import {
+  createWhatsAppLink,
+  getWhatsAppProvider,
+  type WhatsAppSendResult,
+} from './whatsappService';
 import {
   sendPaymentReceivedEmail,
   sendPaymentApprovedEmail,
@@ -109,9 +113,7 @@ export async function recordNotificationLog(
 ): Promise<NotificationLogRow | null> {
   try {
     const normalizedType = normalizeEventType(input.eventType);
-    const key =
-      input.idempotencyKey ||
-      `${input.channel}-${normalizedType}/${input.orderId}`;
+    const key = input.idempotencyKey || `${input.channel}-${normalizedType}/${input.orderId}`;
 
     const { data: existing } = await supabase
       .from('notification_logs')
@@ -180,7 +182,9 @@ export async function getOrderNotificationLogs(orderId: string): Promise<Notific
  */
 export function buildReceiptReceivedMessage(data: OrderNotificationData): string {
   const formattedTickets = data.ticketNumbers.map((n) => formatTicketNumber(n)).join(', ');
-  const verifyLink = data.verifyUrl || (typeof window !== 'undefined' ? `${window.location.origin}/verificar` : '/verificar');
+  const verifyLink =
+    data.verifyUrl ||
+    (typeof window !== 'undefined' ? `${window.location.origin}/verificar` : '/verificar');
 
   return (
     `¡Hola ${data.buyerName}! 👋\n\n` +
@@ -202,7 +206,9 @@ export function buildReceiptReceivedMessage(data: OrderNotificationData): string
  */
 export function buildPaymentApprovedMessage(data: OrderNotificationData): string {
   const formattedTickets = data.ticketNumbers.map((n) => formatTicketNumber(n)).join(', ');
-  const verifyLink = data.verifyUrl || (typeof window !== 'undefined' ? `${window.location.origin}/verificar` : '/verificar');
+  const verifyLink =
+    data.verifyUrl ||
+    (typeof window !== 'undefined' ? `${window.location.origin}/verificar` : '/verificar');
 
   let message =
     `¡Hola ${data.buyerName}! 👋\n\n` +
@@ -232,7 +238,9 @@ export function buildPaymentApprovedMessage(data: OrderNotificationData): string
  * 3. Plantilla: PAGO RECHAZADO (Comprobante no válido / Boletos liberados)
  */
 export function buildPaymentRejectedMessage(data: OrderNotificationData): string {
-  const reason = data.rejectionReason?.trim() || 'Comprobante no legible o no coincide con los valores en cuenta.';
+  const reason =
+    data.rejectionReason?.trim() ||
+    'Comprobante no legible o no coincide con los valores en cuenta.';
 
   return (
     `Hola ${data.buyerName}.\n\n` +
@@ -274,7 +282,8 @@ export function generateOrderNotification(
 
   const provider = getWhatsAppProvider(providerId);
   const whatsAppLink = createWhatsAppLink(data.buyerPhone, messageText);
-  const isApiConfigured = provider.isConfigured() && typeof provider.sendDirectMessage === 'function';
+  const isApiConfigured =
+    provider.isConfigured() && typeof provider.sendDirectMessage === 'function';
 
   return {
     type,
@@ -283,16 +292,17 @@ export function generateOrderNotification(
     whatsAppLink,
     targetPhone: data.buyerPhone,
     isApiConfigured,
-    sendDirectly: isApiConfigured && provider.sendDirectMessage
-      ? () => provider.sendDirectMessage!(data.buyerPhone, messageText)
-      : undefined,
+    sendDirectly:
+      isApiConfigured && provider.sendDirectMessage
+        ? () => provider.sendDirectMessage!(data.buyerPhone, messageText)
+        : undefined,
   };
 }
 
 /**
  * Orquestador central de notificaciones:
  * Dispara notificaciones según la preferencia de contacto registrada por el comprador (whatsapp, email, both).
- * 
+ *
  * REGLA CRÍTICA:
  * Si el envío de correo o WhatsApp falla, NUNCA revierte la transacción de venta en base de datos.
  * Registra el resultado en notification_logs para trazabilidad y permite reintento posterior.
@@ -311,13 +321,22 @@ export async function dispatchOrderNotifications(
       if (normalizedType === 'payment_approved') {
         emailResult = await sendPaymentApprovedEmail(options.orderId);
       } else if (normalizedType === 'payment_rejected') {
-        emailResult = await sendPaymentRejectedEmail(options.orderId, options.notificationData.rejectionReason);
+        emailResult = await sendPaymentRejectedEmail(
+          options.orderId,
+          options.notificationData.rejectionReason
+        );
       } else {
         emailResult = await sendPaymentReceivedEmail(options.orderId);
       }
     } catch (emailErr) {
-      console.warn('Aviso: Falló el envío de correo transaccional pero la venta no se revierte:', emailErr);
-      const errMsg = emailErr instanceof Error ? emailErr.message : 'Error inesperado al enviar correo transaccional.';
+      console.warn(
+        'Aviso: Falló el envío de correo transaccional pero la venta no se revierte:',
+        emailErr
+      );
+      const errMsg =
+        emailErr instanceof Error
+          ? emailErr.message
+          : 'Error inesperado al enviar correo transaccional.';
       emailResult = {
         success: false,
         error: errMsg,
@@ -349,7 +368,9 @@ export async function dispatchOrderNotifications(
       options.notificationData
     );
 
-    const hasPhone = Boolean(options.notificationData.buyerPhone && options.notificationData.buyerPhone.trim().length >= 7);
+    const hasPhone = Boolean(
+      options.notificationData.buyerPhone && options.notificationData.buyerPhone.trim().length >= 7
+    );
 
     // Registrar en trazabilidad el despacho de WhatsApp
     void recordNotificationLog({
@@ -358,7 +379,9 @@ export async function dispatchOrderNotifications(
       eventType: normalizedType,
       recipient: options.notificationData.buyerPhone || 'Sin teléfono',
       status: hasPhone ? 'sent' : 'failed',
-      errorMessage: hasPhone ? null : 'El comprador no tiene un número de celular válido registrado para WhatsApp.',
+      errorMessage: hasPhone
+        ? null
+        : 'El comprador no tiene un número de celular válido registrado para WhatsApp.',
       attempts: 1,
       metadata: {
         buyer_name: options.notificationData.buyerName,
@@ -399,8 +422,8 @@ export async function retryNotification(
       normalizedType === 'payment_approved'
         ? 'PAYMENT_APPROVED'
         : normalizedType === 'payment_rejected'
-        ? 'PAYMENT_REJECTED'
-        : 'PAYMENT_RECEIVED';
+          ? 'PAYMENT_REJECTED'
+          : 'PAYMENT_RECEIVED';
 
     const result = await retryOrderEmail(orderId, emailUpperType, data?.reason);
     return {
@@ -456,5 +479,3 @@ export async function retryNotification(
 
   return { success: false, error: 'Canal no soportado' };
 }
-
-

@@ -296,16 +296,16 @@ const EditRaffleForm: React.FC<{
                 className={styles.select}
                 value={status}
                 onChange={(e) =>
-                  setStatus(
-                    e.target.value as 'draft' | 'active' | 'paused' | 'closed' | 'finished'
-                  )
+                  setStatus(e.target.value as 'draft' | 'active' | 'paused' | 'closed' | 'finished')
                 }
                 disabled={isSubmitting}
               >
                 <option value="active">🟢 Activa (Abierta para compras públicas)</option>
                 <option value="paused">🟡 Pausada (Ventas temporalmente suspendidas)</option>
                 <option value="draft">⚪ Borrador (Oculta al público)</option>
-                <option value="finished">🔵 Finalizada (Sorteo realizado / Ganador premiado)</option>
+                <option value="finished">
+                  🔵 Finalizada (Sorteo realizado / Ganador premiado)
+                </option>
                 <option value="closed">🔒 Cerrada (Ventas concluidas antes del sorteo)</option>
               </select>
 
@@ -324,8 +324,8 @@ const EditRaffleForm: React.FC<{
                 <div className={`${styles.statusNotice} ${styles.statusNoticePaused}`}>
                   <Info size={16} style={{ flexShrink: 0, marginTop: 2 }} />
                   <span>
-                    <strong>Sorteo Pausado:</strong> La página pública mostrará un banner informativo
-                    de pausa y bloqueará la selección de boletos y el botón de checkout.
+                    <strong>Sorteo Pausado:</strong> La página pública mostrará un banner
+                    informativo de pausa y bloqueará la selección de boletos y el botón de checkout.
                   </span>
                 </div>
               )}

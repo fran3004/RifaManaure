@@ -41,7 +41,10 @@ export const SystemSettingsProvider: React.FC<{ children: React.ReactNode }> = (
               setSettings(fresh);
             }
           } catch (err) {
-            console.warn('[SystemSettingsProvider] Error al refrescar configuración en tiempo real:', err);
+            console.warn(
+              '[SystemSettingsProvider] Error al refrescar configuración en tiempo real:',
+              err
+            );
           }
         }
       )
@@ -54,9 +57,7 @@ export const SystemSettingsProvider: React.FC<{ children: React.ReactNode }> = (
   }, []);
 
   return (
-    <SystemSettingsContext.Provider value={settings}>
-      {children}
-    </SystemSettingsContext.Provider>
+    <SystemSettingsContext.Provider value={settings}>{children}</SystemSettingsContext.Provider>
   );
 };
 

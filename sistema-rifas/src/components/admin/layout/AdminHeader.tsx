@@ -11,7 +11,8 @@ interface AdminHeaderProps {
 
 export const AdminHeader: React.FC<AdminHeaderProps> = ({ onToggleSidebar }) => {
   const { user, adminProfile, signOut } = useAuth();
-  const { selectedRaffleId, selectedRaffle, raffles, isLoadingRaffles, setSelectedRaffleId } = useAdminRaffle();
+  const { selectedRaffleId, selectedRaffle, raffles, isLoadingRaffles, setSelectedRaffleId } =
+    useAdminRaffle();
 
   return (
     <header className={styles.header}>
@@ -68,10 +69,10 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({ onToggleSidebar }) => 
                     selectedRaffle.status === 'active'
                       ? styles.statusDotActive
                       : selectedRaffle.status === 'paused'
-                      ? styles.statusDotPaused
-                      : selectedRaffle.status === 'finished'
-                      ? styles.statusDotFinished
-                      : styles.statusDotDefault
+                        ? styles.statusDotPaused
+                        : selectedRaffle.status === 'finished'
+                          ? styles.statusDotFinished
+                          : styles.statusDotDefault
                   }`}
                   title={`Estado: ${selectedRaffle.status}`}
                 />
@@ -94,9 +95,7 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({ onToggleSidebar }) => 
         <div className={styles.userBadge}>
           <Shield size={14} color="var(--color-brand-accent, #f59e0b)" />
           <span className={styles.userEmail}>{user?.email}</span>
-          <span className={styles.roleTag}>
-            {adminProfile?.role || 'admin'}
-          </span>
+          <span className={styles.roleTag}>{adminProfile?.role || 'admin'}</span>
         </div>
 
         <button
@@ -112,4 +111,3 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({ onToggleSidebar }) => 
     </header>
   );
 };
-

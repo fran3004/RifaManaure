@@ -40,7 +40,9 @@ const RafflesView = lazy(() =>
   import('@/pages/admin/views/RafflesView').then((m) => ({ default: m.RafflesView }))
 );
 const PaymentAccountsView = lazy(() =>
-  import('@/pages/admin/views/PaymentAccountsView').then((m) => ({ default: m.PaymentAccountsView }))
+  import('@/pages/admin/views/PaymentAccountsView').then((m) => ({
+    default: m.PaymentAccountsView,
+  }))
 );
 const PartnersView = lazy(() =>
   import('@/pages/admin/views/PartnersView').then((m) => ({ default: m.PartnersView }))

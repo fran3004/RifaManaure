@@ -21,24 +21,27 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   // Valida si el usuario actual tiene permisos de administrador activos
-  const verifyAdmin = useCallback(async (currentUser: User | null): Promise<AdminUserRow | null> => {
-    if (!currentUser) {
-      setAdminProfile(null);
-      setIsAdmin(false);
-      return null;
-    }
+  const verifyAdmin = useCallback(
+    async (currentUser: User | null): Promise<AdminUserRow | null> => {
+      if (!currentUser) {
+        setAdminProfile(null);
+        setIsAdmin(false);
+        return null;
+      }
 
-    const profile = await checkAdminAuthorization(currentUser.id, currentUser.email || '');
-    if (profile && profile.is_active) {
-      setAdminProfile(profile);
-      setIsAdmin(true);
-      return profile;
-    } else {
-      setAdminProfile(null);
-      setIsAdmin(false);
-      return null;
-    }
-  }, []);
+      const profile = await checkAdminAuthorization(currentUser.id, currentUser.email || '');
+      if (profile && profile.is_active) {
+        setAdminProfile(profile);
+        setIsAdmin(true);
+        return profile;
+      } else {
+        setAdminProfile(null);
+        setIsAdmin(false);
+        return null;
+      }
+    },
+    []
+  );
 
   const refreshAdminStatus = useCallback(async () => {
     if (user) {
@@ -52,7 +55,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     const initAuth = async () => {
       try {
-        const { data: { session: currentSession }, error } = await supabase.auth.getSession();
+        const {
+          data: { session: currentSession },
+          error,
+        } = await supabase.auth.getSession();
         if (error) {
           console.error('Error al obtener sesión inicial de Supabase Auth:', error);
         }
@@ -81,25 +87,25 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     void initAuth();
 
     // Escuchar cambios de estado en Supabase Auth
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, newSession) => {
-        if (!isMounted) return;
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, newSession) => {
+      if (!isMounted) return;
 
-        if (event === 'SIGNED_OUT' || !newSession?.user) {
-          setSession(null);
-          setUser(null);
-          setAdminProfile(null);
-          setIsAdmin(false);
-          setIsLoading(false);
-          return;
-        }
-
-        setSession(newSession);
-        setUser(newSession.user);
-        await verifyAdmin(newSession.user);
+      if (event === 'SIGNED_OUT' || !newSession?.user) {
+        setSession(null);
+        setUser(null);
+        setAdminProfile(null);
+        setIsAdmin(false);
         setIsLoading(false);
+        return;
       }
-    );
+
+      setSession(newSession);
+      setUser(newSession.user);
+      await verifyAdmin(newSession.user);
+      setIsLoading(false);
+    });
 
     return () => {
       isMounted = false;
@@ -107,7 +113,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     };
   }, [verifyAdmin]);
 
-  const signIn = async (email: string, pass: string): Promise<{ success: boolean; error?: string }> => {
+  const signIn = async (
+    email: string,
+    pass: string
+  ): Promise<{ success: boolean; error?: string }> => {
     setIsLoading(true);
     try {
       const result = await signInAdmin(email, pass);
@@ -161,4 +170,3 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     </AuthContext.Provider>
   );
 };
-

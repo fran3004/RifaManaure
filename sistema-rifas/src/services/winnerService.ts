@@ -39,7 +39,8 @@ export async function getWinners(raffleId?: string | null): Promise<WinnerWithDe
   try {
     let query = supabase
       .from('winners')
-      .select(`
+      .select(
+        `
         *,
         raffle:raffles (
           id,
@@ -61,7 +62,8 @@ export async function getWinners(raffleId?: string | null): Promise<WinnerWithDe
           created_at,
           total_amount
         )
-      `)
+      `
+      )
       .order('draw_date', { ascending: false });
 
     if (raffleId) {
@@ -85,13 +87,12 @@ export async function getWinners(raffleId?: string | null): Promise<WinnerWithDe
 /**
  * Obtener el ganador oficial de una rifa específica si ya fue registrado.
  */
-export async function getWinnerForRaffle(
-  raffleId: string
-): Promise<WinnerWithDetails | null> {
+export async function getWinnerForRaffle(raffleId: string): Promise<WinnerWithDetails | null> {
   try {
     const { data, error } = await supabase
       .from('winners')
-      .select(`
+      .select(
+        `
         *,
         raffle:raffles (
           id,
@@ -113,7 +114,8 @@ export async function getWinnerForRaffle(
           created_at,
           total_amount
         )
-      `)
+      `
+      )
       .eq('raffle_id', raffleId)
       .order('draw_date', { ascending: false })
       .limit(1)
@@ -173,7 +175,6 @@ export function maskPhone(phone?: string | null): string {
   return `${clean.slice(0, 3)} *** **${clean.slice(-2)}`;
 }
 
-
 /**
  * Buscar un boleto vendido para previsualizar al ganador antes de registrar el sorteo.
  */
@@ -191,7 +192,8 @@ export async function searchWinningTicketCandidate(
 
     const { data, error } = await supabase
       .from('tickets')
-      .select(`
+      .select(
+        `
         id,
         number,
         status,
@@ -220,7 +222,8 @@ export async function searchWinningTicketCandidate(
           email,
           city
         )
-      `)
+      `
+      )
       .eq('raffle_id', raffleId)
       .or(`number.eq.${cleanNum},number.eq.${paddedNum}`)
       .maybeSingle();
@@ -230,7 +233,10 @@ export async function searchWinningTicketCandidate(
     }
 
     if (!data) {
-      return { success: false, error: `El boleto "${cleanNum}" no existe en la emisión de esta rifa.` };
+      return {
+        success: false,
+        error: `El boleto "${cleanNum}" no existe en la emisión de esta rifa.`,
+      };
     }
 
     if (data.status !== 'sold') {
@@ -245,13 +251,20 @@ export async function searchWinningTicketCandidate(
     }
 
     // Resolver comprador (desde el ticket o la orden)
-    type RawBuyer = Pick<BuyerRow, 'id' | 'full_name' | 'document_id' | 'phone' | 'email' | 'city'> | null;
-    type RawOrder = (Pick<OrderRow, 'id' | 'reference' | 'status' | 'total_amount' | 'created_at'> & {
-      buyer: RawBuyer;
-    }) | null;
+    type RawBuyer = Pick<
+      BuyerRow,
+      'id' | 'full_name' | 'document_id' | 'phone' | 'email' | 'city'
+    > | null;
+    type RawOrder =
+      | (Pick<OrderRow, 'id' | 'reference' | 'status' | 'total_amount' | 'created_at'> & {
+          buyer: RawBuyer;
+        })
+      | null;
 
     const rawOrder = (Array.isArray(data.order) ? data.order[0] : data.order) as RawOrder;
-    const directBuyer = (Array.isArray(data.direct_buyer) ? data.direct_buyer[0] : data.direct_buyer) as RawBuyer;
+    const directBuyer = (
+      Array.isArray(data.direct_buyer) ? data.direct_buyer[0] : data.direct_buyer
+    ) as RawBuyer;
     const resolvedBuyer = directBuyer || rawOrder?.buyer;
 
     if (!resolvedBuyer || !rawOrder) {
@@ -375,9 +388,7 @@ export async function uploadWinnerActDocument(
       return { success: false, error: uploadError.message };
     }
 
-    const { data: publicData } = supabase.storage
-      .from('winner-documents')
-      .getPublicUrl(filePath);
+    const { data: publicData } = supabase.storage.from('winner-documents').getPublicUrl(filePath);
 
     return { success: true, url: publicData.publicUrl };
   } catch (err) {
@@ -421,9 +432,7 @@ export async function uploadWinnerDeliveryPhoto(
       return { success: false, error: uploadError.message };
     }
 
-    const { data: publicData } = supabase.storage
-      .from('winner-documents')
-      .getPublicUrl(filePath);
+    const { data: publicData } = supabase.storage.from('winner-documents').getPublicUrl(filePath);
 
     return { success: true, url: publicData.publicUrl };
   } catch (err) {
@@ -433,4 +442,3 @@ export async function uploadWinnerDeliveryPhoto(
     };
   }
 }
-

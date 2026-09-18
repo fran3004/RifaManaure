@@ -9,9 +9,8 @@ export const GaleriaPremio: React.FC = () => {
   const [filtroActivo, setFiltroActivo] = useState<CategoriaFiltro>('todas');
   const [fotoSeleccionadaIndex, setFotoSeleccionadaIndex] = useState<number | null>(null);
 
-  const fotosFiltradas = filtroActivo === 'todas'
-    ? fotos
-    : fotos.filter((f) => f.experiencia === filtroActivo);
+  const fotosFiltradas =
+    filtroActivo === 'todas' ? fotos : fotos.filter((f) => f.experiencia === filtroActivo);
 
   const handleOpenLightbox = (index: number) => {
     setFotoSeleccionadaIndex(index);
@@ -23,16 +22,12 @@ export const GaleriaPremio: React.FC = () => {
 
   const handlePrev = useCallback(() => {
     if (fotoSeleccionadaIndex === null) return;
-    setFotoSeleccionadaIndex((prev) =>
-      prev === 0 ? fotosFiltradas.length - 1 : (prev ?? 0) - 1
-    );
+    setFotoSeleccionadaIndex((prev) => (prev === 0 ? fotosFiltradas.length - 1 : (prev ?? 0) - 1));
   }, [fotoSeleccionadaIndex, fotosFiltradas.length]);
 
   const handleNext = useCallback(() => {
     if (fotoSeleccionadaIndex === null) return;
-    setFotoSeleccionadaIndex((prev) =>
-      prev === fotosFiltradas.length - 1 ? 0 : (prev ?? 0) + 1
-    );
+    setFotoSeleccionadaIndex((prev) => (prev === fotosFiltradas.length - 1 ? 0 : (prev ?? 0) + 1));
   }, [fotoSeleccionadaIndex, fotosFiltradas.length]);
 
   // Soporte para teclado (Esc, Flechas)
@@ -64,7 +59,8 @@ export const GaleriaPremio: React.FC = () => {
             Explora los paisajes que <span className="highlight-text">podrías vivir</span>
           </h2>
           <p className={styles.subtitle}>
-            Fotos auténticas de las rutas, el glamping y las actividades extremas en Manaure y la Serranía del Perijá.
+            Fotos auténticas de las rutas, el glamping y las actividades extremas en Manaure y la
+            Serranía del Perijá.
           </p>
 
           {/* Filtros por Categoría */}
@@ -164,11 +160,7 @@ export const GaleriaPremio: React.FC = () => {
             <div className={styles.lightboxImageWrapper}>
               <picture>
                 <source srcSet={fotoActual.full} type="image/webp" />
-                <img
-                  src={fotoActual.fullJpg}
-                  alt={fotoActual.alt}
-                  className={styles.lightboxImg}
-                />
+                <img src={fotoActual.fullJpg} alt={fotoActual.alt} className={styles.lightboxImg} />
               </picture>
               <div className={styles.lightboxCaption}>
                 <p>{fotoActual.alt}</p>
@@ -192,4 +184,3 @@ export const GaleriaPremio: React.FC = () => {
     </section>
   );
 };
-

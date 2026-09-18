@@ -85,8 +85,8 @@ export const FilaAliados: React.FC = () => {
           logoSrcSet: hasCustomLogo
             ? undefined
             : localAsset
-            ? `${localAsset.grid} 400w, ${localAsset.grid2x} 800w`
-            : undefined,
+              ? `${localAsset.grid} 400w, ${localAsset.grid2x} 800w`
+              : undefined,
           instagramUrl,
         };
       });
@@ -278,11 +278,15 @@ export const FilaAliados: React.FC = () => {
           </div>
           <h2 className={styles.title}>Nuestros Aliados Oficiales</h2>
           <p className={styles.subtitle}>
-            Empresas, operadores turísticos y restaurantes locales que hacen posible el premio y respaldan este sorteo. Haz clic en cualquier logo para abrir su Instagram oficial.
+            Empresas, operadores turísticos y restaurantes locales que hacen posible el premio y
+            respaldan este sorteo. Haz clic en cualquier logo para abrir su Instagram oficial.
           </p>
           <div className={styles.interactionHint}>
             <MoveHorizontal size={14} />
-            <span>Desplazamiento automático continuo · Arrastra con el ratón o pulsa sobre un logo para visitar su Instagram</span>
+            <span>
+              Desplazamiento automático continuo · Arrastra con el ratón o pulsa sobre un logo para
+              visitar su Instagram
+            </span>
           </div>
         </div>
       </div>
@@ -350,7 +354,10 @@ export const FilaAliados: React.FC = () => {
                     />
                   ) : (
                     <div className={styles.placeholderLogo}>
-                      <Handshake size={36} style={{ color: 'var(--color-brand-accent, #f59e0b)' }} />
+                      <Handshake
+                        size={36}
+                        style={{ color: 'var(--color-brand-accent, #f59e0b)' }}
+                      />
                     </div>
                   )}
                 </div>

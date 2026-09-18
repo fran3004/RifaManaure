@@ -1,6 +1,15 @@
 import React from 'react';
 import { fotosParaHero } from '@/assets/assets';
-import { Ticket, Sparkles, Trophy, Calendar, ShieldCheck, MapPin, AlertCircle, PauseCircle } from 'lucide-react';
+import {
+  Ticket,
+  Sparkles,
+  Trophy,
+  Calendar,
+  ShieldCheck,
+  MapPin,
+  AlertCircle,
+  PauseCircle,
+} from 'lucide-react';
 import { formatCOP } from '@/lib/utils';
 import { useTicketCart } from '@/context/useTicketCart';
 import styles from './HeroRifa.module.css';
@@ -16,7 +25,7 @@ function formatDrawDate(dateString?: string | null): string {
   try {
     const date = new Date(dateString);
     if (isNaN(date.getTime())) return dateString;
-    
+
     const formatted = date.toLocaleDateString('es-CO', {
       day: 'numeric',
       month: 'long',
@@ -36,9 +45,11 @@ export const HeroRifa: React.FC<HeroRifaProps> = ({
 }) => {
   const { raffle, unitPrice } = useTicketCart();
 
-  const ticketPrice = propTicketPrice ?? (raffle?.ticket_price ? Number(raffle.ticket_price) : unitPrice);
+  const ticketPrice =
+    propTicketPrice ?? (raffle?.ticket_price ? Number(raffle.ticket_price) : unitPrice);
   const drawDateFormatted = propDrawDate ?? formatDrawDate(raffle?.draw_date);
-  const lotteryReference = propLottery ?? (raffle?.lottery_reference || 'Lotería de Santander (3 cifras)');
+  const lotteryReference =
+    propLottery ?? (raffle?.lottery_reference || 'Lotería de Santander (3 cifras)');
   const isPaused = raffle?.status === 'paused';
   const isClosed = raffle?.status === 'closed' || raffle?.status === 'finished';
 
@@ -70,19 +81,35 @@ export const HeroRifa: React.FC<HeroRifaProps> = ({
       <div className={`container ${styles.contentContainer}`}>
         {/* Badge superior con estado de la rifa */}
         {isPaused ? (
-          <div className={styles.badge} style={{ borderColor: '#f59e0b', background: 'rgba(245, 158, 11, 0.15)', color: '#fbbf24' }}>
+          <div
+            className={styles.badge}
+            style={{
+              borderColor: '#f59e0b',
+              background: 'rgba(245, 158, 11, 0.15)',
+              color: '#fbbf24',
+            }}
+          >
             <PauseCircle size={16} className={styles.badgeIcon} />
             <span>Sorteo Temporalmente Pausado</span>
           </div>
         ) : isClosed ? (
-          <div className={styles.badge} style={{ borderColor: '#64748b', background: 'rgba(100, 116, 139, 0.15)', color: '#94a3b8' }}>
+          <div
+            className={styles.badge}
+            style={{
+              borderColor: '#64748b',
+              background: 'rgba(100, 116, 139, 0.15)',
+              color: '#94a3b8',
+            }}
+          >
             <AlertCircle size={16} className={styles.badgeIcon} />
             <span>Edición Finalizada</span>
           </div>
         ) : (
           <div className={styles.badge}>
             <Sparkles size={16} className={styles.badgeIcon} />
-            <span>{raffle?.title ? 'Sorteo Oficial Activo' : 'Gran Rifa Ecoturística Oficial 2026'}</span>
+            <span>
+              {raffle?.title ? 'Sorteo Oficial Activo' : 'Gran Rifa Ecoturística Oficial 2026'}
+            </span>
           </div>
         )}
 
@@ -92,7 +119,8 @@ export const HeroRifa: React.FC<HeroRifaProps> = ({
             raffle.title
           ) : (
             <>
-              Gana una experiencia <span className="highlight-text">todo incluido</span> en Manaure, Balcón del Cesar
+              Gana una experiencia <span className="highlight-text">todo incluido</span> en Manaure,
+              Balcón del Cesar
             </>
           )}
         </h1>
@@ -115,7 +143,8 @@ export const HeroRifa: React.FC<HeroRifaProps> = ({
               className={styles.btnPrimary}
               style={isPaused || isClosed ? { opacity: 0.6, cursor: 'not-allowed' } : undefined}
             >
-              <Ticket size={20} /> {isPaused ? 'Ventas Pausadas' : isClosed ? 'Sorteo Finalizado' : 'Elegir mis Boletos'}
+              <Ticket size={20} />{' '}
+              {isPaused ? 'Ventas Pausadas' : isClosed ? 'Sorteo Finalizado' : 'Elegir mis Boletos'}
             </a>
             <a href="#premio" className={styles.btnSecondary}>
               <MapPin size={20} /> Conocer el Premio

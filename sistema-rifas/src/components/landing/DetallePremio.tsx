@@ -28,27 +28,42 @@ const experiencias: ExperienciaCard[] = [
     icon: <Sparkles size={24} />,
     title: 'Tour en Cuatrimoto por Trochas',
     partner: 'Cuatri Tours Manaure',
-    description: 'Recorrido guiado en cuatrimotos todoterreno por caminos veredales y miradores panorámicos de la Serranía.',
+    description:
+      'Recorrido guiado en cuatrimotos todoterreno por caminos veredales y miradores panorámicos de la Serranía.',
     imageSlug: 'cuatrimoto-flota',
-    features: ['Equipamiento de seguridad incluido', 'Guía turístico certificado', 'Paradas en miradores fotográficos'],
+    features: [
+      'Equipamiento de seguridad incluido',
+      'Guía turístico certificado',
+      'Paradas en miradores fotográficos',
+    ],
   },
   {
     id: 'glamping',
     icon: <Flame size={24} />,
     title: 'Noche de Glamping & Fogata',
     partner: 'Mashiramo Glamping / Villa Adelaida',
-    description: 'Alojamiento exclusivo bajo las estrellas con fogata privada en mirador y desayuno campestre.',
+    description:
+      'Alojamiento exclusivo bajo las estrellas con fogata privada en mirador y desayuno campestre.',
     imageSlug: 'fogata-casa-de-vidrio',
-    features: ['Cama King-size & Jacuzzi', 'Fogata con malvaviscos y vino', 'Vista panorámica nocturna'],
+    features: [
+      'Cama King-size & Jacuzzi',
+      'Fogata con malvaviscos y vino',
+      'Vista panorámica nocturna',
+    ],
   },
   {
     id: 'parapente',
     icon: <Wind size={24} />,
     title: 'Vuelo en Parapente Tándem',
     partner: 'Manaure Aventura',
-    description: 'Experiencia inolvidable de vuelo libre sobre el valle de Manaure con piloto profesional certificado.',
+    description:
+      'Experiencia inolvidable de vuelo libre sobre el valle de Manaure con piloto profesional certificado.',
     imageSlug: 'parapente-bandera',
-    features: ['Pilotos con licencia FAI/Aeroclub', 'Grabación de video en vuelo', 'Charla técnica y seguros'],
+    features: [
+      'Pilotos con licencia FAI/Aeroclub',
+      'Grabación de video en vuelo',
+      'Charla técnica y seguros',
+    ],
   },
   {
     id: 'paramo',
@@ -57,31 +72,44 @@ const experiencias: ExperienciaCard[] = [
     partner: 'Los Pinos Manaure & Metallura',
     description: 'Caminata ecológica por el ecosistema de frailejones y lagunas de alta montaña.',
     imageSlug: 'serrania-perija-laguna',
-    features: ['Avistamiento de aves endémicas', 'Interpretación ambiental', 'Refrigerio de montaña'],
+    features: [
+      'Avistamiento de aves endémicas',
+      'Interpretación ambiental',
+      'Refrigerio de montaña',
+    ],
   },
   {
     id: 'gastronomia',
     icon: <Utensils size={24} />,
     title: 'Tour Gastronómico Local',
     partner: 'La Casa de las Arepas & Absolom',
-    description: 'Degustación de arepas típicas rellenas, dulces tradicionales de mora y café de altura cosechado en Perijá.',
+    description:
+      'Degustación de arepas típicas rellenas, dulces tradicionales de mora y café de altura cosechado en Perijá.',
     imageSlug: 'serrania-perija-panoramica',
-    features: ['Almuerzo típico completo', 'Degustación de postres de mora', 'Café especial de origen'],
+    features: [
+      'Almuerzo típico completo',
+      'Degustación de postres de mora',
+      'Café especial de origen',
+    ],
   },
   {
     id: 'fotografia',
     icon: <Camera size={24} />,
     title: 'Registro Fotográfico Pro',
     partner: 'PHOTours',
-    description: 'Acompañamiento audiovisual durante las actividades para que te lleves recuerdos inolvidables en alta resolución.',
+    description:
+      'Acompañamiento audiovisual durante las actividades para que te lleves recuerdos inolvidables en alta resolución.',
     imageSlug: 'cuatrimoto-mirador',
-    features: ['Galería digital entregada en 48h', 'Edición profesional de color', 'Reel editado para redes sociales'],
+    features: [
+      'Galería digital entregada en 48h',
+      'Edición profesional de color',
+      'Reel editado para redes sociales',
+    ],
   },
 ];
 
 export const DetallePremio: React.FC = () => {
-  const getFoto = (slug: string) =>
-    fotos.find((f) => f.slug === slug) || fotos[0];
+  const getFoto = (slug: string) => fotos.find((f) => f.slug === slug) || fotos[0];
 
   return (
     <section id="premio" className={styles.premioSection}>
@@ -96,7 +124,8 @@ export const DetallePremio: React.FC = () => {
             ¿Qué incluye el <span className="highlight-text">Premio Mayor</span>?
           </h2>
           <p className={styles.subtitle}>
-            Una vivencia integral que reúne la mejor hotelería campestre, aventura extrema y la riqueza cultural y gastronómica de Manaure.
+            Una vivencia integral que reúne la mejor hotelería campestre, aventura extrema y la
+            riqueza cultural y gastronómica de Manaure.
           </p>
         </div>
 
@@ -148,4 +177,3 @@ export const DetallePremio: React.FC = () => {
     </section>
   );
 };
-

@@ -106,7 +106,8 @@ export const SelectorBoletos: React.FC = () => {
             Elige tus <span className="highlight-text">Números de la Suerte</span>
           </h2>
           <p className={styles.subtitle}>
-            Haz clic en los números que deseas comprar o usa el botón de selección aleatoria. Valor por boleto: <strong>{formatCOP(unitPrice)}</strong>.
+            Haz clic en los números que deseas comprar o usa el botón de selección aleatoria. Valor
+            por boleto: <strong>{formatCOP(unitPrice)}</strong>.
           </p>
 
           {/* Banner de Sorteo Pausado */}
@@ -132,7 +133,8 @@ export const SelectorBoletos: React.FC = () => {
                   Sorteo Temporalmente Pausado
                 </strong>
                 <span>
-                  La venta y reserva de boletos se encuentra pausada por el equipo administrativo. No se admiten nuevas compras en este momento.
+                  La venta y reserva de boletos se encuentra pausada por el equipo administrativo.
+                  No se admiten nuevas compras en este momento.
                 </span>
               </div>
             </div>
@@ -161,7 +163,8 @@ export const SelectorBoletos: React.FC = () => {
                   Edición de Rifa Concluida
                 </strong>
                 <span>
-                  Esta edición ha finalizado. Puedes consultar tus números ganadores en la sección de verificación.
+                  Esta edición ha finalizado. Puedes consultar tus números ganadores en la sección
+                  de verificación.
                 </span>
               </div>
             </div>
@@ -171,10 +174,14 @@ export const SelectorBoletos: React.FC = () => {
           <div className={styles.statsStrip}>
             <div className={styles.statItem}>
               <span className={styles.statDotAvailable} />
-              <span><strong>{stats.available}</strong> Disponibles</span>
+              <span>
+                <strong>{stats.available}</strong> Disponibles
+              </span>
             </div>
             <div className={styles.statItem}>
-              <span className={isMaxLimitReached ? styles.statDotSelectedMax : styles.statDotSelected} />
+              <span
+                className={isMaxLimitReached ? styles.statDotSelectedMax : styles.statDotSelected}
+              />
               <span>
                 <strong>{selectedTickets.length}</strong>
                 {maxTicketsPerBuyer ? `/${maxTicketsPerBuyer}` : ''} Seleccionados
@@ -182,11 +189,15 @@ export const SelectorBoletos: React.FC = () => {
             </div>
             <div className={styles.statItem}>
               <span className={styles.statDotReserved} />
-              <span><strong>{stats.reserved}</strong> En Reserva</span>
+              <span>
+                <strong>{stats.reserved}</strong> En Reserva
+              </span>
             </div>
             <div className={styles.statItem}>
               <span className={styles.statDotSold} />
-              <span><strong>{stats.sold}</strong> Vendidos</span>
+              <span>
+                <strong>{stats.sold}</strong> Vendidos
+              </span>
             </div>
           </div>
         </div>
@@ -254,11 +265,7 @@ export const SelectorBoletos: React.FC = () => {
               +10
             </button>
             {selectedTickets.length > 0 && (
-              <button
-                type="button"
-                className={styles.clearBtn}
-                onClick={clearSelection}
-              >
+              <button type="button" className={styles.clearBtn} onClick={clearSelection}>
                 <RotateCcw size={14} /> Limpiar
               </button>
             )}
@@ -380,11 +387,14 @@ export const SelectorBoletos: React.FC = () => {
           <div className={`container ${styles.cartContainer}`}>
             <div className={styles.cartInfo}>
               <div className={styles.cartCountBadge}>
-                <span>{selectedTickets.length}</span> {selectedTickets.length === 1 ? 'Boleto' : 'Boletos'}
+                <span>{selectedTickets.length}</span>{' '}
+                {selectedTickets.length === 1 ? 'Boleto' : 'Boletos'}
               </div>
               {isMaxLimitReached && (
                 <div className={styles.limitReachedBadge}>
-                  <span>Límite ({maxTicketsPerBuyer}/{maxTicketsPerBuyer})</span>
+                  <span>
+                    Límite ({maxTicketsPerBuyer}/{maxTicketsPerBuyer})
+                  </span>
                 </div>
               )}
               <div className={styles.cartNumbersList}>
@@ -402,11 +412,7 @@ export const SelectorBoletos: React.FC = () => {
                 <strong className={styles.cartTotalValue}>{formatCOP(totalAmount)}</strong>
               </div>
 
-              <button
-                type="button"
-                className={styles.checkoutBtn}
-                onClick={openCheckout}
-              >
+              <button type="button" className={styles.checkoutBtn} onClick={openCheckout}>
                 <span>Comprar Ahora</span>
                 <ArrowRight size={18} />
               </button>

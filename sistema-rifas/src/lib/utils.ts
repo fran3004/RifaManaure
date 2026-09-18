@@ -60,10 +60,7 @@ export function createWhatsAppLink(phone: string, message: string): string {
 /**
  * Genera N números aleatorios dentro de un rango sin repeticiones.
  */
-export function getRandomTicketNumbers(
-  availableNumbers: string[],
-  count: number
-): string[] {
+export function getRandomTicketNumbers(availableNumbers: string[], count: number): string[] {
   if (availableNumbers.length <= count) {
     return [...availableNumbers];
   }

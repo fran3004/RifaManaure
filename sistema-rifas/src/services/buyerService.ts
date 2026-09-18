@@ -176,7 +176,8 @@ export async function fetchBuyerOrdersHistory(buyerId: string): Promise<{
     // 1. Consultar órdenes del comprador
     const { data: ordersData, error: ordersError } = await supabase
       .from('orders')
-      .select(`
+      .select(
+        `
         id,
         reference,
         total_amount,
@@ -193,7 +194,8 @@ export async function fetchBuyerOrdersHistory(buyerId: string): Promise<{
           title,
           draw_date
         )
-      `)
+      `
+      )
       .eq('buyer_id', buyerId)
       .order('created_at', { ascending: false });
 
@@ -227,11 +229,14 @@ export async function fetchBuyerOrdersHistory(buyerId: string): Promise<{
     });
 
     interface RawOrderWithRaffle extends OrderRow {
-      raffles?: {
-        id: string;
-        title: string;
-        draw_date: string;
-      } | Array<{ id: string; title: string; draw_date: string }> | null;
+      raffles?:
+        | {
+            id: string;
+            title: string;
+            draw_date: string;
+          }
+        | Array<{ id: string; title: string; draw_date: string }>
+        | null;
     }
 
     const rawOrders = (ordersData || []) as unknown as RawOrderWithRaffle[];
@@ -259,7 +264,8 @@ export async function fetchBuyerOrdersHistory(buyerId: string): Promise<{
 
     return { success: true, orders };
   } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : 'Error inesperado al consultar historial de órdenes.';
+    const msg =
+      err instanceof Error ? err.message : 'Error inesperado al consultar historial de órdenes.';
     return { success: false, orders: [], error: msg };
   }
 }
@@ -286,7 +292,10 @@ export async function updateBuyerAdmin(
 
     if (error) {
       console.error('[buyerService] Error en admin_update_buyer:', error);
-      return { success: false, error: error.message || 'Error al actualizar comprador en el servidor.' };
+      return {
+        success: false,
+        error: error.message || 'Error al actualizar comprador en el servidor.',
+      };
     }
 
     const res = data as {
@@ -301,7 +310,10 @@ export async function updateBuyerAdmin(
     };
 
     if (!res?.success) {
-      return { success: false, error: res?.error || 'No fue posible actualizar los datos del comprador.' };
+      return {
+        success: false,
+        error: res?.error || 'No fue posible actualizar los datos del comprador.',
+      };
     }
 
     return {
@@ -322,4 +334,3 @@ export async function updateBuyerAdmin(
     return { success: false, error: msg };
   }
 }
-
