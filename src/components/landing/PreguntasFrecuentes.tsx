@@ -1,51 +1,65 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { HelpCircle, ChevronDown } from 'lucide-react';
 import { SectionHeader } from '@/components/public/ui';
+import { getCachedFaqs, getPublicFaqs } from '@/services/faqService';
+import type { FaqItem } from '@/types/raffle.types';
 import styles from './PreguntasFrecuentes.module.css';
 
-interface FaqItem {
-  question: string;
-  answer: string;
-}
-
-const faqs: FaqItem[] = [
-  {
-    question: '¿Cómo se determina el número ganador del sorteo?',
-    answer:
-      'El ganador se define de manera 100% transparente con las 3 últimas cifras del Premio Mayor de la Lotería de Santander en la fecha estipulada del sorteo. No usamos tómbolas internas ni software opaco; los resultados son públicos y auditables por cualquier participante.',
-  },
-  {
-    question: '¿Qué incluye exactamente el paquete para 2 personas?',
-    answer:
-      'Incluye 3 días y 2 noches en Glamping de lujo con fogata y desayuno campestre, tour guiado en cuatrimotos todoterreno, vuelo tándem en parapente con registro en video, expedición ecológica a la Serranía del Perijá, almuerzo típico tradicional y sesión de fotos profesional.',
-  },
-  {
-    question: '¿Cómo y cuándo recibo la confirmación de mis boletos?',
-    answer:
-      'Inmediatamente después de confirmar tu pago en la pasarela o validar tu comprobante, el sistema te muestra tu certificado digital de compra. Además, puedes consultar en cualquier momento tus boletos activos ingresando tu número de cédula en la sección "Consultar Boletos".',
-  },
-  {
-    question: '¿Qué vigencia tiene el premio y cómo se coordina la fecha del viaje?',
-    answer:
-      'El ganador tendrá hasta 6 meses a partir de la fecha del sorteo para coordinar su viaje en la fecha de su preferencia (sujeto a disponibilidad y previa reserva de 15 días con los operadores turísticos de Manaure Vive).',
-  },
-  {
-    question: '¿Puedo transferir o ceder el premio a un familiar o amigo?',
-    answer:
-      'Sí. Si eres el titular del boleto ganador y deseas obsequiar o ceder la experiencia a otra persona, podrás hacerlo mediante notificación formal por WhatsApp y correo electrónico con copia de tu documento de identidad.',
-  },
-  {
-    question: '¿Cuáles son los métodos de pago disponibles?',
-    answer:
-      'Aceptamos pagos en línea mediante PSE, tarjetas de crédito/débito (Visa, Mastercard, American Express), y transferencias directas desde Nequi, Daviplata y Bancolombia.',
-  },
-];
-
 export const PreguntasFrecuentes: React.FC = () => {
+  // Inicialización sincrónica desde caché o respaldo local: elimina completamente el FOUC
+  const [faqs, setFaqs] = useState<FaqItem[]>(() => getCachedFaqs());
   const [openIndex, setOpenIndex] = useState<number | null>(0);
+  const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
+
+  // Revalidación en segundo plano desde Supabase (cache-first)
+  useEffect(() => {
+    let isMounted = true;
+    getPublicFaqs().then((data) => {
+      if (isMounted && data && data.length > 0) {
+        setFaqs(data);
+      }
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const toggleIndex = (index: number) => {
-    setOpenIndex(openIndex === index ? null : index);
+    setOpenIndex((prev) => (prev === index ? null : index));
+  };
+
+  // Navegación por teclado según el estándar WAI-ARIA Accordion
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>, index: number) => {
+    const total = faqs.length;
+    if (total === 0) return;
+
+    switch (e.key) {
+      case 'ArrowDown': {
+        e.preventDefault();
+        const nextIndex = (index + 1) % total;
+        buttonRefs.current[nextIndex]?.focus();
+        break;
+      }
+      case 'ArrowUp': {
+        e.preventDefault();
+        const prevIndex = (index - 1 + total) % total;
+        buttonRefs.current[prevIndex]?.focus();
+        break;
+      }
+      case 'Home': {
+        e.preventDefault();
+        buttonRefs.current[0]?.focus();
+        break;
+      }
+      case 'End': {
+        e.preventDefault();
+        buttonRefs.current[total - 1]?.focus();
+        break;
+      }
+      default:
+        break;
+    }
   };
 
   return (
@@ -59,19 +73,26 @@ export const PreguntasFrecuentes: React.FC = () => {
           subtitle="Todo lo que necesitas saber sobre la mecánica del sorteo, medios de pago y entrega del premio."
         />
 
-        <div className={styles.accordionContainer}>
+        <div className={styles.accordionContainer} role="presentation">
           {faqs.map((faq, index) => {
             const isOpen = openIndex === index;
             const questionId = `faq-btn-${index}`;
-            const answerId = `faq-answer-${index}`;
+            const answerId = `faq-panel-${index}`;
 
             return (
-              <div key={index} className={`${styles.faqCard} ${isOpen ? styles.faqCardOpen : ''}`}>
+              <div
+                key={faq.id || `faq-${index}`}
+                className={`${styles.faqCard} ${isOpen ? styles.faqCardOpen : ''}`}
+              >
                 <button
+                  ref={(el) => {
+                    buttonRefs.current[index] = el;
+                  }}
                   id={questionId}
                   type="button"
                   className={styles.questionBtn}
                   onClick={() => toggleIndex(index)}
+                  onKeyDown={(e) => handleKeyDown(e, index)}
                   aria-expanded={isOpen}
                   aria-controls={answerId}
                 >
@@ -83,16 +104,21 @@ export const PreguntasFrecuentes: React.FC = () => {
                   />
                 </button>
 
-                {isOpen && (
-                  <div
-                    id={answerId}
-                    className={styles.answerContainer}
-                    role="region"
-                    aria-labelledby={questionId}
-                  >
-                    <p className={styles.answerText}>{faq.answer}</p>
+                {/* El contenido permanece en el DOM: animado con CSS grid rows e inert cuando está cerrado */}
+                <div
+                  id={answerId}
+                  className={`${styles.accordionPanel} ${isOpen ? styles.accordionPanelOpen : ''}`}
+                  role="region"
+                  aria-labelledby={questionId}
+                  inert={!isOpen}
+                >
+                  <div className={styles.accordionInner}>
+                    <div className={styles.panelDivider} aria-hidden="true" />
+                    <div className={styles.answerContainer}>
+                      <p className={styles.answerText}>{faq.answer}</p>
+                    </div>
                   </div>
-                )}
+                </div>
               </div>
             );
           })}

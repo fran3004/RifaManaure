@@ -3,7 +3,6 @@ import { useTicketCart } from '@/context/useTicketCart';
 import {
   X,
   ShieldCheck,
-  CreditCard,
   QrCode,
   CheckCircle2,
   Clock,
@@ -866,7 +865,7 @@ export const ModalCheckout: React.FC = () => {
                       {/* Entidad y Tipo */}
                       <div className={styles.accountOptionHeader}>
                         <div className={styles.accountEntityRow}>
-                          <CreditCard size={18} className={styles.accountIcon} aria-hidden="true" />
+                          <Building2 size={18} className={styles.accountIcon} aria-hidden="true" />
                           <span className={styles.accountEntityName}>{acc.bank_name}</span>
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>

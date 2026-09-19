@@ -65,25 +65,36 @@ export const TerminosPage: React.FC = () => {
             <section className={styles.section} id="entrega">
               <h2>3. Descripción y Entrega del Premio</h2>
               <p>
-                El premio consiste en un paquete turístico para dos (2) personas adultas que
-                incluye:
+                El premio consiste en el <strong>Tour Vive Manaure de 3 días y 2 noches para la pareja (2 personas)</strong> que incluye:
               </p>
               <ul className={styles.bulletList}>
                 <li>
                   <CheckCircle2 size={16} className={styles.bulletIcon} />
-                  <span>Hospedaje de 3 días y 2 noches en Glamping / Cabaña campestre.</span>
+                  <span>Viaje pago ida y vuelta desde tu lugar de residencia hasta Manaure - Cesar.</span>
                 </li>
                 <li>
                   <CheckCircle2 size={16} className={styles.bulletIcon} />
-                  <span>Tour en cuatrimoto todoterreno guiado con equipo de seguridad.</span>
+                  <span>Hospedaje en los mejores hoteles / glamping y noche romántica.</span>
                 </li>
                 <li>
                   <CheckCircle2 size={16} className={styles.bulletIcon} />
-                  <span>Vuelo en parapente tándem con registro audiovisual.</span>
+                  <span>Alimentación completa (desayunos, almuerzos campestres y cenas típicas).</span>
                 </li>
                 <li>
                   <CheckCircle2 size={16} className={styles.bulletIcon} />
-                  <span>Alimentación completa (desayunos y almuerzos típicos de la región).</span>
+                  <span>Experiencia en cuatrimoto por trochas con equipamiento y guía.</span>
+                </li>
+                <li>
+                  <CheckCircle2 size={16} className={styles.bulletIcon} />
+                  <span>Vuelo libre en parapente tándem con piloto profesional.</span>
+                </li>
+                <li>
+                  <CheckCircle2 size={16} className={styles.bulletIcon} />
+                  <span>Ruta a la Casa de Vidrio en la Serranía de Perijá con fogata nocturna.</span>
+                </li>
+                <li>
+                  <CheckCircle2 size={16} className={styles.bulletIcon} />
+                  <span>Registro fotográfico profesional de la experiencia.</span>
                 </li>
               </ul>
               <p>

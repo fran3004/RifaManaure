@@ -113,3 +113,21 @@ export interface PublicPrizeData {
   settings: PrizeSettingsRow;
   experiences: PrizeExperienceRow[];
 }
+
+export type FaqItemRow = Database['public']['Tables']['faq_items']['Row'];
+export type FaqItemInsert = Database['public']['Tables']['faq_items']['Insert'];
+export type FaqItemUpdate = Database['public']['Tables']['faq_items']['Update'];
+
+export interface FaqItem {
+  id?: string;
+  question: string;
+  answer: string;
+  sort_order?: number;
+  is_published?: boolean;
+}
+
+export interface FaqCachePayload {
+  version: number;
+  timestamp: number;
+  data: FaqItem[];
+}
