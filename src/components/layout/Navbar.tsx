@@ -48,13 +48,13 @@ export const Navbar: React.FC = () => {
         </Link>
 
         {/* Enlaces de escritorio */}
-        <nav className={styles.desktopNav}>
+        <nav className={styles.desktopNav} aria-label="Principal">
           <a
             href="/#premio"
             className={styles.navLink}
             onClick={(e) => handleSectionClick(e, 'premio')}
           >
-            <Compass size={16} /> El Premio
+            <Compass size={16} aria-hidden="true" /> El Premio
           </a>
           <a
             href="/#galeria"
@@ -71,17 +71,17 @@ export const Navbar: React.FC = () => {
             Aliados
           </a>
           <a href="/#faq" className={styles.navLink} onClick={(e) => handleSectionClick(e, 'faq')}>
-            <HelpCircle size={16} /> Preguntas
+            <HelpCircle size={16} aria-hidden="true" /> Preguntas
           </a>
           <Link to="/verificar" className={styles.verifyLink} onClick={closeMenu}>
-            <ShieldCheck size={16} /> Consultar Boletos
+            <ShieldCheck size={16} aria-hidden="true" /> Consultar Boletos
           </Link>
           <a
             href="/#boletos"
             className={styles.ctaButton}
             onClick={(e) => handleSectionClick(e, 'boletos')}
           >
-            <Ticket size={18} /> Comprar Boletos
+            <Ticket size={18} aria-hidden="true" /> Comprar Boletos
           </a>
         </nav>
 
@@ -90,53 +90,59 @@ export const Navbar: React.FC = () => {
           type="button"
           className={styles.menuToggle}
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          aria-label={mobileMenuOpen ? 'Cerrar menú' : 'Abrir menú de navegación'}
+          aria-expanded={mobileMenuOpen}
+          aria-controls="mobile-menu-drawer"
+          aria-label={mobileMenuOpen ? 'Cerrar menú de navegación' : 'Abrir menú de navegación'}
         >
-          {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          {mobileMenuOpen ? <X size={24} aria-hidden="true" /> : <Menu size={24} aria-hidden="true" />}
         </button>
       </div>
 
       {/* Menú Móvil Desplegable con animación */}
-      <div className={`${styles.mobileMenu} ${mobileMenuOpen ? styles.mobileMenuOpen : ''}`}>
-          <a
-            href="/#premio"
-            className={styles.mobileNavLink}
-            onClick={(e) => handleSectionClick(e, 'premio')}
-          >
-            <Compass size={18} /> El Premio
-          </a>
-          <a
-            href="/#galeria"
-            className={styles.mobileNavLink}
-            onClick={(e) => handleSectionClick(e, 'galeria')}
-          >
-            Galería de Fotos
-          </a>
-          <a
-            href="/#aliados"
-            className={styles.mobileNavLink}
-            onClick={(e) => handleSectionClick(e, 'aliados')}
-          >
-            Aliados Estratégicos
-          </a>
-          <a
-            href="/#faq"
-            className={styles.mobileNavLink}
-            onClick={(e) => handleSectionClick(e, 'faq')}
-          >
-            <HelpCircle size={18} /> Preguntas Frecuentes
-          </a>
-          <Link to="/verificar" className={styles.mobileVerifyLink} onClick={closeMenu}>
-            <ShieldCheck size={18} /> Consultar mis Boletos
-          </Link>
-          <a
-            href="/#boletos"
-            className={styles.mobileCtaButton}
-            onClick={(e) => handleSectionClick(e, 'boletos')}
-          >
-            <Ticket size={20} /> Elegir Boletos
-          </a>
-        </div>
+      <nav
+        id="mobile-menu-drawer"
+        className={`${styles.mobileMenu} ${mobileMenuOpen ? styles.mobileMenuOpen : ''}`}
+        aria-label="Navegación móvil"
+      >
+        <a
+          href="/#premio"
+          className={styles.mobileNavLink}
+          onClick={(e) => handleSectionClick(e, 'premio')}
+        >
+          <Compass size={18} aria-hidden="true" /> El Premio
+        </a>
+        <a
+          href="/#galeria"
+          className={styles.mobileNavLink}
+          onClick={(e) => handleSectionClick(e, 'galeria')}
+        >
+          Galería de Fotos
+        </a>
+        <a
+          href="/#aliados"
+          className={styles.mobileNavLink}
+          onClick={(e) => handleSectionClick(e, 'aliados')}
+        >
+          Aliados Estratégicos
+        </a>
+        <a
+          href="/#faq"
+          className={styles.mobileNavLink}
+          onClick={(e) => handleSectionClick(e, 'faq')}
+        >
+          <HelpCircle size={18} aria-hidden="true" /> Preguntas Frecuentes
+        </a>
+        <Link to="/verificar" className={styles.mobileVerifyLink} onClick={closeMenu}>
+          <ShieldCheck size={18} aria-hidden="true" /> Consultar mis Boletos
+        </Link>
+        <a
+          href="/#boletos"
+          className={styles.mobileCtaButton}
+          onClick={(e) => handleSectionClick(e, 'boletos')}
+        >
+          <Ticket size={20} aria-hidden="true" /> Elegir Boletos
+        </a>
+      </nav>
     </header>
   );
 };

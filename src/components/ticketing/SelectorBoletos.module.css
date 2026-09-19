@@ -145,9 +145,10 @@
   transition: border-color var(--transition-fast);
 }
 
-.searchInput:focus {
-  outline: none;
-  border-color: var(--color-brand-accent);
+.searchInput:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-color: var(--brand-primary);
 }
 
 .clearSearchBtn {
@@ -155,7 +156,12 @@
   right: 0.75rem;
   font-size: 0.75rem;
   color: var(--text-muted);
-  padding: 0.2rem 0.5rem;
+  padding: 0.4rem 0.6rem;
+  min-height: 44px;
+  min-width: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   background-color: var(--bg-main);
   border-radius: var(--radius-sm);
 }
@@ -179,6 +185,11 @@
 
 .randomBtn {
   padding: 0.5rem 0.9rem;
+  min-height: 44px;
+  min-width: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border-radius: var(--radius-md);
   background-color: var(--bg-surface-elevated);
   border: 1px solid var(--border-subtle);
@@ -198,7 +209,8 @@
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  padding: 0.5rem 0.75rem;
+  padding: 0.5rem 0.85rem;
+  min-height: 44px;
   border-radius: var(--radius-md);
   background-color: var(--brand-coral-soft);
   border: 1px solid var(--color-danger);
@@ -225,6 +237,10 @@
 
 .rangeBtn {
   padding: 0.45rem 0.9rem;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border-radius: var(--radius-sm);
   background-color: var(--bg-surface-elevated);
   border: 1px solid var(--border-subtle);
@@ -253,7 +269,11 @@
 }
 
 .filterTag {
-  padding: 0.35rem 0.75rem;
+  padding: 0.45rem 0.85rem;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border-radius: var(--radius-full);
   background: none;
   border: 1px solid var(--border-subtle);

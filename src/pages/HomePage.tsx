@@ -20,11 +20,14 @@ export const HomePage: React.FC = () => {
   return (
     <TicketCartProvider>
       <div className="landing-layout" data-theme="public">
-        <a href="#contenido-principal" className="skip-to-content">
-          Ir al contenido principal
+        <a href="#contenido-principal" className="skipLink">
+          Saltar al contenido
+        </a>
+        <a href="#boletos" className="skipLink">
+          Ir a la selección de boletos
         </a>
         <Navbar />
-        <main id="contenido-principal">
+        <main id="contenido-principal" tabIndex={-1}>
           <HeroRifa />
           <DetallePremio />
           <SelectorBoletos />

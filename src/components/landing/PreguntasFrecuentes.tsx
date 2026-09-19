@@ -48,14 +48,14 @@ export const PreguntasFrecuentes: React.FC = () => {
   };
 
   return (
-    <section id="faq" className={styles.faqSection}>
+    <section id="faq" className={styles.faqSection} aria-labelledby="titulo-faq">
       <div className="container">
         <div className={styles.header}>
           <div className={styles.badge}>
-            <HelpCircle size={16} />
+            <HelpCircle size={16} aria-hidden="true" />
             <span>Transparencia y Legalidad</span>
           </div>
-          <h2 className={styles.title}>Preguntas Frecuentes</h2>
+          <h2 id="titulo-faq" className={styles.title}>Preguntas Frecuentes</h2>
           <p className={styles.subtitle}>
             Todo lo que necesitas saber sobre la mecánica del sorteo, medios de pago y entrega del
             premio.
@@ -65,23 +65,34 @@ export const PreguntasFrecuentes: React.FC = () => {
         <div className={styles.accordionContainer}>
           {faqs.map((faq, index) => {
             const isOpen = openIndex === index;
+            const questionId = `faq-btn-${index}`;
+            const answerId = `faq-answer-${index}`;
+
             return (
               <div key={index} className={`${styles.faqCard} ${isOpen ? styles.faqCardOpen : ''}`}>
                 <button
+                  id={questionId}
                   type="button"
                   className={styles.questionBtn}
                   onClick={() => toggleIndex(index)}
                   aria-expanded={isOpen}
+                  aria-controls={answerId}
                 >
                   <span className={styles.questionText}>{faq.question}</span>
                   <ChevronDown
                     size={20}
+                    aria-hidden="true"
                     className={`${styles.chevron} ${isOpen ? styles.chevronRotated : ''}`}
                   />
                 </button>
 
                 {isOpen && (
-                  <div className={styles.answerContainer}>
+                  <div
+                    id={answerId}
+                    className={styles.answerContainer}
+                    role="region"
+                    aria-labelledby={questionId}
+                  >
                     <p className={styles.answerText}>{faq.answer}</p>
                   </div>
                 )}

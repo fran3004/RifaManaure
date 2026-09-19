@@ -119,12 +119,17 @@
   text-align: center;
   background: transparent;
   border: none;
-  padding: 0;
+  padding: 0.5rem 0.25rem;
   text-decoration: none;
   color: inherit;
   cursor: pointer;
-  outline: none;
+  border-radius: var(--radius-md);
   transition: transform 250ms ease;
+}
+
+.aliadoItem:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 4px;
 }
 
 /* Contenedor del logotipo: completamente transparente en reposo (solo se ven logo y texto) */

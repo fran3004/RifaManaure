@@ -48,7 +48,11 @@
 }
 
 .filterBtn {
-  padding: 0.6rem 1.2rem;
+  padding: 0.6rem 1.25rem;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border-radius: var(--radius-full);
   background-color: var(--bg-surface-elevated);
   border: 1px solid var(--border-subtle);
@@ -204,6 +208,13 @@
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-full);
   padding: 0.4rem;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   transition: all var(--transition-fast);
 }
 
@@ -221,6 +232,13 @@
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-full);
   padding: 0.6rem;
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  min-height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   transition: all var(--transition-fast);
 }
 

@@ -100,6 +100,17 @@ export const GanadorShowcase: React.FC<GanadorShowcaseProps> = ({ winner }) => {
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
 
+    // Verificar preferencia de movimiento reducido
+    const prefersReducedMotion =
+      typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (prefersReducedMotion) {
+      return () => {
+        window.removeEventListener('resize', resizeCanvas);
+      };
+    }
+
     // Lanzar primer estallido de confeti
     burstConfetti();
     const secondBurstTimer = setTimeout(() => {
@@ -145,7 +156,7 @@ export const GanadorShowcase: React.FC<GanadorShowcaseProps> = ({ winner }) => {
       animationFrameRef.current = requestAnimationFrame(renderLoop);
     };
 
-    renderLoop();
+    animationFrameRef.current = requestAnimationFrame(renderLoop);
 
     return () => {
       isRunning = false;
@@ -170,20 +181,20 @@ export const GanadorShowcase: React.FC<GanadorShowcaseProps> = ({ winner }) => {
   };
 
   return (
-    <section id="boletos" className={styles.celebrationSection} aria-label="Ganador Oficial">
-      <canvas ref={canvasRef} className={styles.confettiCanvas} />
+    <section id="boletos" className={styles.celebrationSection} aria-labelledby="titulo-ganador">
+      <canvas ref={canvasRef} className={styles.confettiCanvas} aria-hidden="true" />
 
       <div className={styles.container}>
         {/* Badge Superior Brillante */}
         <div className={styles.headerBadge}>
-          <Sparkles size={16} />
+          <Sparkles size={16} aria-hidden="true" />
           <span>Sorteo Oficial Concluido con Éxito</span>
-          <Sparkles size={16} />
+          <Sparkles size={16} aria-hidden="true" />
         </div>
 
         {/* Título Principal */}
         <div className={styles.titleGroup}>
-          <h2 className={styles.mainTitle}>
+          <h2 id="titulo-ganador" className={styles.mainTitle}>
             ¡Tenemos un <span className={styles.goldenHighlight}>Ganador Oficial</span>!
           </h2>
           <p className={styles.subtitle}>
@@ -197,14 +208,14 @@ export const GanadorShowcase: React.FC<GanadorShowcaseProps> = ({ winner }) => {
           {/* Trofeo y Número Ganador */}
           <div className={styles.trophyDisplay}>
             <div className={styles.trophyIconContainer}>
-              <Trophy size={46} />
+              <Trophy size={46} aria-hidden="true" />
             </div>
 
             <div className={styles.ticketPresentation}>
               <span className={styles.ticketPresentationLabel}>Número del Boleto Premiado</span>
               <div className={styles.hugeTicketNumber}>#{winner.ticket_number}</div>
               <div className={styles.lotteryMetaPill}>
-                <Award size={16} color="#fbbf24" />
+                <Award size={16} aria-hidden="true" color="#fbbf24" />
                 <span>
                   Sorteo con la{' '}
                   <strong>{winner.raffle?.lottery_reference || 'Lotería Oficial'}</strong> • Premio
@@ -218,17 +229,17 @@ export const GanadorShowcase: React.FC<GanadorShowcaseProps> = ({ winner }) => {
           <div className={styles.winnerInfoGrid}>
             <div className={styles.infoItem}>
               <span className={styles.infoLabel}>
-                <User size={14} color="#10b981" /> Ganador Acreditado
+                <User size={14} aria-hidden="true" color="#10b981" /> Ganador Acreditado
               </span>
               <span className={styles.infoValue}>{maskBuyerName(winner.buyer?.full_name)}</span>
               <span className={styles.infoSub}>
-                <CheckCircle size={13} /> {maskDocumentId(winner.buyer?.document_id)}
+                <CheckCircle size={13} aria-hidden="true" /> {maskDocumentId(winner.buyer?.document_id)}
               </span>
             </div>
 
             <div className={styles.infoItem}>
               <span className={styles.infoLabel}>
-                <MapPin size={14} color="#f59e0b" /> Procedencia
+                <MapPin size={14} aria-hidden="true" color="#f59e0b" /> Procedencia
               </span>
               <span className={styles.infoValue}>
                 {winner.buyer?.city || 'Manaure (Balcón del Cesar)'}
@@ -240,7 +251,7 @@ export const GanadorShowcase: React.FC<GanadorShowcaseProps> = ({ winner }) => {
 
             <div className={styles.infoItem}>
               <span className={styles.infoLabel}>
-                <Calendar size={14} color="#3b82f6" /> Fecha del Sorteo
+                <Calendar size={14} aria-hidden="true" color="#3b82f6" /> Fecha del Sorteo
               </span>
               <span className={styles.infoValue}>{formatDate(winner.draw_date)}</span>
               <span className={styles.infoSub} style={{ color: '#93c5fd' }}>
@@ -258,9 +269,9 @@ export const GanadorShowcase: React.FC<GanadorShowcaseProps> = ({ winner }) => {
                 rel="noopener noreferrer"
                 className={styles.actButton}
               >
-                <FileText size={20} />
+                <FileText size={20} aria-hidden="true" />
                 <span>Consultar Acta Oficial de Adjudicación (PDF)</span>
-                <ExternalLink size={16} />
+                <ExternalLink size={16} aria-hidden="true" />
               </a>
             )}
 
@@ -276,6 +287,7 @@ export const GanadorShowcase: React.FC<GanadorShowcaseProps> = ({ winner }) => {
                       rel="noopener noreferrer"
                       className={styles.photoThumb}
                       title={`Ver foto de entrega #${pIdx + 1}`}
+                      aria-label={`Ver fotografía de entrega #${pIdx + 1}`}
                     >
                       <img src={photoUrl} alt={`Foto entrega ${pIdx + 1}`} />
                     </a>
@@ -287,7 +299,12 @@ export const GanadorShowcase: React.FC<GanadorShowcaseProps> = ({ winner }) => {
 
           {/* Botón para festejar y relanzar confeti */}
           <div>
-            <button type="button" onClick={burstConfetti} className={styles.btnConfetti}>
+            <button
+              type="button"
+              onClick={burstConfetti}
+              className={styles.btnConfetti}
+              aria-label="Celebrar de nuevo y lanzar animación de confeti"
+            >
               <span>🎉 ¡Celebrar de Nuevo!</span>
             </button>
           </div>
@@ -295,11 +312,11 @@ export const GanadorShowcase: React.FC<GanadorShowcaseProps> = ({ winner }) => {
 
         {/* Aviso de Próxima Edición */}
         <div className={styles.nextEditionNotice}>
-          <Compass size={32} className={styles.noticeIcon} />
+          <Compass size={32} aria-hidden="true" className={styles.noticeIcon} />
           <div>
-            <h4 className={styles.noticeTitle}>
+            <h3 className={styles.noticeTitle}>
               ¡Pronto una Nueva Aventura Ecoturística en Manaure!
-            </h4>
+            </h3>
             <p className={styles.noticeDesc}>
               Esta edición del sorteo ha concluido exitosamente. Nuestro equipo está preparando la
               siguiente edición con más experiencias únicas en el Balcón del Cesar. Tan pronto se

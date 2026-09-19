@@ -100,23 +100,34 @@ export const DigitalReceiptModal: React.FC<DigitalReceiptModalProps> = ({
 
   return (
     <div className={styles.modalBackdrop} onClick={onClose}>
-      <div className={styles.modalCard} onClick={(e) => e.stopPropagation()}>
+      <div
+        className={styles.modalCard}
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-receipt-title"
+      >
         {/* Cabecera */}
         <div className={styles.modalHeader}>
           <div className={styles.modalTitleGroup}>
             <div className={styles.modalTitleIcon}>
-              <ShieldCheck size={24} />
+              <ShieldCheck size={24} aria-hidden="true" />
             </div>
             <div>
-              <h3 className={styles.modalTitle}>Comprobante Digital Oficial</h3>
+              <h3 id="modal-receipt-title" className={styles.modalTitle}>Comprobante Digital Oficial</h3>
               <p className={styles.modalSubtitle}>
                 Orden: <strong>{receiptData.orderReference}</strong> •{' '}
                 {receiptData.ticketNumbers.length} Boletos
               </p>
             </div>
           </div>
-          <button type="button" className={styles.closeBtn} onClick={onClose}>
-            <X size={22} />
+          <button
+            type="button"
+            className={styles.closeBtn}
+            onClick={onClose}
+            aria-label="Cerrar comprobante digital"
+          >
+            <X size={22} aria-hidden="true" />
           </button>
         </div>
 
@@ -138,7 +149,7 @@ export const DigitalReceiptModal: React.FC<DigitalReceiptModalProps> = ({
           ) : previewUrl ? (
             <img
               src={previewUrl}
-              alt={`Comprobante ${receiptData.orderReference}`}
+              alt={`Comprobante digital para la orden ${receiptData.orderReference}`}
               className={styles.previewImage}
             />
           ) : null}
@@ -146,7 +157,7 @@ export const DigitalReceiptModal: React.FC<DigitalReceiptModalProps> = ({
 
         {/* Mensaje de Seguridad */}
         <div className={styles.securityNotice}>
-          <CheckCircle2 size={18} style={{ flexShrink: 0, color: '#34d399' }} />
+          <CheckCircle2 size={18} style={{ flexShrink: 0, color: '#34d399' }} aria-hidden="true" />
           <div>
             <strong>Documento Oficial Autenticado:</strong> Este comprobante certifica la
             titularidad oficial de los números adquiridos ante la plataforma{' '}
@@ -163,7 +174,7 @@ export const DigitalReceiptModal: React.FC<DigitalReceiptModalProps> = ({
             onClick={() => void handleDownloadImage()}
             disabled={isGenerating || Boolean(errorMsg)}
           >
-            <Smartphone size={18} />
+            <Smartphone size={18} aria-hidden="true" />
             <span>Descargar Imagen (PNG)</span>
           </button>
 
@@ -174,7 +185,7 @@ export const DigitalReceiptModal: React.FC<DigitalReceiptModalProps> = ({
             onClick={() => void handlePrintPdf()}
             disabled={isGenerating || Boolean(errorMsg)}
           >
-            <FileText size={18} />
+            <FileText size={18} aria-hidden="true" />
             <span>Guardar como PDF</span>
           </button>
 
@@ -185,7 +196,7 @@ export const DigitalReceiptModal: React.FC<DigitalReceiptModalProps> = ({
             rel="noopener noreferrer"
             className={styles.btnShareWhatsApp}
           >
-            <MessageCircle size={18} />
+            <MessageCircle size={18} aria-hidden="true" />
             <span>Compartir por WhatsApp</span>
           </a>
         </div>
@@ -211,10 +222,11 @@ export const DigitalReceiptModal: React.FC<DigitalReceiptModalProps> = ({
               display: 'inline-flex',
               alignItems: 'center',
               gap: '0.4rem',
-              padding: '0.25rem 0.5rem',
+              padding: '0.5rem 0.75rem',
+              minHeight: '44px',
             }}
           >
-            {copiedLink ? <Check size={14} /> : <Copy size={14} />}
+            {copiedLink ? <Check size={14} aria-hidden="true" /> : <Copy size={14} aria-hidden="true" />}
             <span>
               {copiedLink
                 ? '¡Texto del comprobante copiado!'

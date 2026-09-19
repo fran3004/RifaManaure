@@ -204,3 +204,70 @@
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
+
+/* --- Skip Links para Accesibilidad con Teclado --- */
+[data-theme="public"] .skipLink {
+  position: absolute;
+  top: -1000px;
+  left: 1rem;
+  z-index: calc(var(--z-lightbox) + 100);
+  padding: 0.75rem 1.25rem;
+  background-color: var(--brand-deep);
+  color: var(--text-on-dark);
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 0.95rem;
+  border-radius: var(--radius-md);
+  border: 2px solid var(--brand-accent);
+  box-shadow: var(--shadow-lg);
+  text-decoration: none;
+}
+
+[data-theme="public"] .skipLink:focus,
+[data-theme="public"] .skipLink:focus-visible {
+  top: 1rem;
+  outline: 3px solid var(--focus-ring-on-dark);
+  outline-offset: 3px;
+}
+
+/* --- Foco Visible Global (3px con contraste accesible) --- */
+[data-theme="public"] :focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 3px;
+}
+
+/* Foco en superficies oscuras (Hero, Footer, Lightbox, Carrito, Modales, Ganador) */
+[data-theme="public"] footer :focus-visible,
+[data-theme="public"] [class*="heroSection"] :focus-visible,
+[data-theme="public"] [class*="footer"] :focus-visible,
+[data-theme="public"] [class*="lightbox"] :focus-visible,
+[data-theme="public"] [class*="floatingCart"] :focus-visible,
+[data-theme="public"] [class*="modalBackdrop"] :focus-visible,
+[data-theme="public"] [class*="modalCard"] :focus-visible,
+[data-theme="public"] [class*="celebrationSection"] :focus-visible,
+[data-theme="public"] [data-surface="dark"] :focus-visible {
+  outline: 3px solid var(--focus-ring-on-dark);
+  outline-offset: 3px;
+}
+
+[data-theme="public"] :focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* --- Desplazamiento Seguro con Navbar Fijo --- */
+[data-theme="public"] section[id],
+[data-theme="public"] [id="contenido-principal"] {
+  scroll-margin-top: calc(var(--navbar-h) + 16px);
+}
+
+/* --- Accesibilidad: Movimiento Reducido --- */
+@media (prefers-reduced-motion: reduce) {
+  [data-theme="public"],
+  [data-theme="public"] * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+

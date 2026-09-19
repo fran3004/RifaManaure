@@ -137,6 +137,15 @@ export const FilaAliados: React.FC = () => {
     const track = trackRef.current;
     if (!track || infiniteList.length === 0) return;
 
+    // Verificar preferencia de movimiento reducido
+    const prefersReducedMotion =
+      typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (prefersReducedMotion) {
+      return;
+    }
+
     // Sincronizar posición inicial acumulada
     scrollPosRef.current = track.scrollLeft;
 
@@ -292,20 +301,20 @@ export const FilaAliados: React.FC = () => {
   };
 
   return (
-    <section id="aliados" className={styles.aliadosSection}>
+    <section id="aliados" className={styles.aliadosSection} aria-labelledby="titulo-aliados">
       <div className="container">
         <div className={styles.header}>
           <div className={styles.badge}>
-            <Handshake size={16} />
+            <Handshake size={16} aria-hidden="true" />
             <span>Red de Convenios y Turismo Local</span>
           </div>
-          <h2 className={styles.title}>Nuestros Aliados Oficiales</h2>
+          <h2 id="titulo-aliados" className={styles.title}>Nuestros Aliados Oficiales</h2>
           <p className={styles.subtitle}>
             Empresas, operadores turísticos y restaurantes locales que hacen posible el premio y
             respaldan este sorteo. Haz clic en cualquier logo para abrir su Instagram oficial.
           </p>
           <div className={styles.interactionHint}>
-            <MoveHorizontal size={14} />
+            <MoveHorizontal size={14} aria-hidden="true" />
             <span>
               Desplazamiento automático continuo · Arrastra con el ratón o pulsa sobre un logo para
               visitar su Instagram
@@ -379,6 +388,7 @@ export const FilaAliados: React.FC = () => {
                     <div className={styles.placeholderLogo}>
                       <Handshake
                         size={36}
+                        aria-hidden="true"
                         style={{ color: 'var(--color-brand-accent, #f59e0b)' }}
                       />
                     </div>

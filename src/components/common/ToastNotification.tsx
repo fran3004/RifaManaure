@@ -32,14 +32,14 @@ export const ToastNotification: React.FC<ToastNotificationProps> = ({ toast, onC
   const renderIcon = () => {
     switch (toast.type) {
       case 'warning':
-        return <ShieldAlert size={22} />;
+        return <ShieldAlert size={22} aria-hidden="true" />;
       case 'error':
-        return <XCircle size={22} />;
+        return <XCircle size={22} aria-hidden="true" />;
       case 'success':
-        return <CheckCircle2 size={22} />;
+        return <CheckCircle2 size={22} aria-hidden="true" />;
       case 'info':
       default:
-        return <Info size={22} />;
+        return <Info size={22} aria-hidden="true" />;
     }
   };
 
@@ -73,7 +73,7 @@ export const ToastNotification: React.FC<ToastNotificationProps> = ({ toast, onC
           className={styles.closeButton}
           aria-label="Cerrar notificación"
         >
-          <X size={18} />
+          <X size={18} aria-hidden="true" />
         </button>
 
         <div

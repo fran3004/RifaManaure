@@ -49,14 +49,14 @@ export const Footer: React.FC = () => {
             del Cesar, impulsando el desarrollo de operadores y emprendimientos locales.
           </p>
           <div className={styles.location}>
-            <MapPin size={16} className={styles.locIcon} />
+            <MapPin size={16} aria-hidden="true" className={styles.locIcon} />
             <span>Manaure Balcón del Cesar, Colombia</span>
           </div>
         </div>
 
         {/* Columna 2: Navegación Rápida */}
         <div className={styles.linksCol}>
-          <h4 className={styles.colTitle}>Navegación</h4>
+          <h3 className={styles.colTitle}>Navegación</h3>
           <ul className={styles.linkList}>
             <li>
               <a href="/#premio" onClick={(e) => handleSectionClick(e, 'premio')}>
@@ -91,7 +91,7 @@ export const Footer: React.FC = () => {
 
         {/* Columna 3: Legal y Transparencia */}
         <div className={styles.legalCol}>
-          <h4 className={styles.colTitle}>Transparencia y Legalidad</h4>
+          <h3 className={styles.colTitle}>Transparencia y Legalidad</h3>
           <ul className={styles.linkList}>
             <li>
               <Link to="/terminos">Términos y Condiciones del Sorteo</Link>
@@ -111,16 +111,18 @@ export const Footer: React.FC = () => {
               target="_blank"
               rel="noopener noreferrer"
               className={styles.whatsappBtn}
+              aria-label={`Contactar por WhatsApp: ${formatPhoneNumber(whatsappNumber)}`}
             >
-              <MessageCircle size={18} />
+              <MessageCircle size={18} aria-hidden="true" />
               <span>WhatsApp: {formatPhoneNumber(whatsappNumber)}</span>
             </a>
             {supportEmail && (
               <a
                 href={`mailto:${supportEmail}?subject=${encodeURIComponent('Consulta Gran Rifa Ecoturística Manaure Vive')}`}
                 className={styles.emailSupportLink}
+                aria-label={`Enviar correo a ${supportEmail}`}
               >
-                <Mail size={15} />
+                <Mail size={15} aria-hidden="true" />
                 <span>{supportEmail}</span>
               </a>
             )}
@@ -137,12 +139,12 @@ export const Footer: React.FC = () => {
             </span>
           </div>
           <div className={styles.guaranteeNote}>
-            <ShieldCheck size={16} />
+            <ShieldCheck size={16} aria-hidden="true" />
             <span>Sorteo auditable con Lotería Oficial de Santander</span>
           </div>
           <div className={styles.madeWith}>
             <span>
-              Hecho con <Heart size={14} className={styles.heartIcon} /> para el turismo de Colombia
+              Hecho con <Heart size={14} aria-hidden="true" className={styles.heartIcon} /> para el turismo de Colombia
             </span>
           </div>
         </div>

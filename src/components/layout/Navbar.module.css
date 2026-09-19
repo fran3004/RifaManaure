@@ -51,6 +51,8 @@
   font-size: 0.925rem;
   font-weight: 500;
   color: var(--text-secondary);
+  padding: 0.5rem 0.25rem;
+  min-height: 44px;
   transition: color var(--transition-fast);
 }
 
@@ -64,7 +66,8 @@
   gap: 0.4rem;
   font-size: 0.9rem;
   font-weight: 600;
-  padding: 0.45rem 0.9rem;
+  padding: 0.5rem 1rem;
+  min-height: 44px;
   border-radius: var(--radius-full);
   background-color: var(--bg-surface-elevated);
   border: 1px solid var(--border-subtle);
@@ -82,7 +85,8 @@
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.55rem 1.25rem;
+  padding: 0.6rem 1.35rem;
+  min-height: 44px;
   border-radius: var(--radius-full);
   background: linear-gradient(135deg, var(--brand-accent) 0%, var(--brand-accent-strong) 100%);
   color: var(--text-inverse);
@@ -101,6 +105,9 @@
   display: none;
   color: var(--text-primary);
   padding: 0.5rem;
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: var(--radius-sm);
 }
 
 .mobileMenu {
@@ -137,6 +144,7 @@
     font-weight: 500;
     color: var(--text-secondary);
     padding: 0.5rem 0;
+    min-height: 44px;
   }
 
   .mobileVerifyLink {
@@ -145,6 +153,7 @@
     justify-content: center;
     gap: 0.5rem;
     padding: 0.75rem;
+    min-height: 44px;
     border-radius: var(--radius-md);
     background-color: var(--bg-surface-elevated);
     color: var(--text-primary);
@@ -157,6 +166,7 @@
     justify-content: center;
     gap: 0.5rem;
     padding: 0.85rem;
+    min-height: 48px;
     border-radius: var(--radius-md);
     background: linear-gradient(135deg, var(--brand-accent) 0%, var(--brand-accent-strong) 100%);
     color: var(--text-inverse);

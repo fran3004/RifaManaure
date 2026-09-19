@@ -26,8 +26,8 @@ export const FloatingWhatsAppBtn: React.FC<FloatingWhatsAppBtnProps> = ({
     >
       <span className={styles.tooltip}>¿Tienes dudas? ¡Escríbenos!</span>
       <div className={styles.floatingBtn}>
-        <div className={styles.pulseRing} />
-        <MessageCircle size={30} strokeWidth={2.2} />
+        <div className={styles.pulseRing} aria-hidden="true" />
+        <MessageCircle size={30} strokeWidth={2.2} aria-hidden="true" />
       </div>
     </a>
   );

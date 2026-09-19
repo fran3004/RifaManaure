@@ -20,24 +20,24 @@ import styles from './DetallePremio.module.css';
 function renderExperienceIcon(iconName: string): React.ReactNode {
   switch (iconName) {
     case 'Flame':
-      return <Flame size={24} />;
+      return <Flame size={24} aria-hidden="true" />;
     case 'Wind':
-      return <Wind size={24} />;
+      return <Wind size={24} aria-hidden="true" />;
     case 'Mountain':
-      return <Mountain size={24} />;
+      return <Mountain size={24} aria-hidden="true" />;
     case 'Utensils':
-      return <Utensils size={24} />;
+      return <Utensils size={24} aria-hidden="true" />;
     case 'Camera':
-      return <Camera size={24} />;
+      return <Camera size={24} aria-hidden="true" />;
     case 'Tent':
-      return <Tent size={24} />;
+      return <Tent size={24} aria-hidden="true" />;
     case 'Compass':
-      return <Compass size={24} />;
+      return <Compass size={24} aria-hidden="true" />;
     case 'Heart':
-      return <Heart size={24} />;
+      return <Heart size={24} aria-hidden="true" />;
     case 'Sparkles':
     default:
-      return <Sparkles size={24} />;
+      return <Sparkles size={24} aria-hidden="true" />;
   }
 }
 
@@ -84,15 +84,15 @@ export const DetallePremio: React.FC = () => {
   };
 
   return (
-    <section id="premio" className={styles.premioSection}>
+    <section id="premio" className={styles.premioSection} aria-labelledby="titulo-premio">
       <div className="container">
         {/* Cabecera de la Sección */}
         <div className={styles.header}>
           <div className={styles.badge}>
-            <Users size={16} />
+            <Users size={16} aria-hidden="true" />
             <span>{settings.badge_text}</span>
           </div>
-          <h2 className={styles.title}>{renderSectionTitle(settings.title)}</h2>
+          <h2 id="titulo-premio" className={styles.title}>{renderSectionTitle(settings.title)}</h2>
           <p className={styles.subtitle}>{settings.subtitle}</p>
         </div>
 
@@ -144,7 +144,7 @@ export const DetallePremio: React.FC = () => {
                     <ul className={styles.featureList}>
                       {featuresList.map((feat, idx) => (
                         <li key={idx} className={styles.featureItem}>
-                          <CheckCircle2 size={16} className={styles.checkIcon} />
+                          <CheckCircle2 size={16} aria-hidden="true" className={styles.checkIcon} />
                           <span>{feat}</span>
                         </li>
                       ))}

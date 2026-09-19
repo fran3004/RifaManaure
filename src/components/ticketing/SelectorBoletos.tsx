@@ -94,15 +94,15 @@ export const SelectorBoletos: React.FC = () => {
   }
 
   return (
-    <section id="boletos" className={styles.section}>
+    <section id="boletos" className={styles.section} aria-labelledby="titulo-boletos">
       <div className="container">
         {/* Cabecera del Selector */}
         <div className={styles.header}>
           <div className={styles.badge}>
-            <Ticket size={16} />
+            <Ticket size={16} aria-hidden="true" />
             <span>Matriz de Boletos Oficial (000 - 999)</span>
           </div>
-          <h2 className={styles.title}>
+          <h2 id="titulo-boletos" className={styles.title}>
             Elige tus <span className="highlight-text">Números de la Suerte</span>
           </h2>
           <p className={styles.subtitle}>
@@ -127,7 +127,7 @@ export const SelectorBoletos: React.FC = () => {
                 textAlign: 'left',
               }}
             >
-              <Clock size={20} style={{ flexShrink: 0, color: '#f59e0b' }} />
+              <Clock size={20} aria-hidden="true" style={{ flexShrink: 0, color: '#f59e0b' }} />
               <div>
                 <strong style={{ display: 'block', color: '#fde68a', marginBottom: '0.2rem' }}>
                   Sorteo Temporalmente Pausado
@@ -157,7 +157,7 @@ export const SelectorBoletos: React.FC = () => {
                 textAlign: 'left',
               }}
             >
-              <Lock size={20} style={{ flexShrink: 0, color: '#94a3b8' }} />
+              <Lock size={20} aria-hidden="true" style={{ flexShrink: 0, color: '#94a3b8' }} />
               <div>
                 <strong style={{ display: 'block', color: '#f1f5f9', marginBottom: '0.2rem' }}>
                   Edición de Rifa Concluida
@@ -173,7 +173,7 @@ export const SelectorBoletos: React.FC = () => {
           {/* Estadísticas de Disponibilidad */}
           <div className={styles.statsStrip}>
             <div className={styles.statItem}>
-              <span className={styles.statDotAvailable} />
+              <span className={styles.statDotAvailable} aria-hidden="true" />
               <span>
                 <strong>{stats.available}</strong> Disponibles
               </span>
@@ -181,6 +181,7 @@ export const SelectorBoletos: React.FC = () => {
             <div className={styles.statItem}>
               <span
                 className={isMaxLimitReached ? styles.statDotSelectedMax : styles.statDotSelected}
+                aria-hidden="true"
               />
               <span>
                 <strong>{selectedTickets.length}</strong>
@@ -188,13 +189,13 @@ export const SelectorBoletos: React.FC = () => {
               </span>
             </div>
             <div className={styles.statItem}>
-              <span className={styles.statDotReserved} />
+              <span className={styles.statDotReserved} aria-hidden="true" />
               <span>
                 <strong>{stats.reserved}</strong> En Reserva
               </span>
             </div>
             <div className={styles.statItem}>
-              <span className={styles.statDotSold} />
+              <span className={styles.statDotSold} aria-hidden="true" />
               <span>
                 <strong>{stats.sold}</strong> Vendidos
               </span>
@@ -206,7 +207,7 @@ export const SelectorBoletos: React.FC = () => {
         <div className={styles.controlPanel}>
           {/* Buscador */}
           <div className={styles.searchBox}>
-            <Search size={18} className={styles.searchIcon} />
+            <Search size={18} aria-hidden="true" className={styles.searchIcon} />
             <input
               type="text"
               placeholder="Buscar número (ej: 045, 777)"
@@ -215,12 +216,14 @@ export const SelectorBoletos: React.FC = () => {
               className={styles.searchInput}
               maxLength={3}
               disabled={!isRaffleActive}
+              aria-label="Buscar número de boleto"
             />
             {searchTerm && (
               <button
                 type="button"
                 onClick={() => setSearchTerm('')}
                 className={styles.clearSearchBtn}
+                aria-label="Borrar término de búsqueda"
               >
                 Limpiar
               </button>
@@ -230,13 +233,14 @@ export const SelectorBoletos: React.FC = () => {
           {/* Botones de Azar */}
           <div className={styles.randomButtons}>
             <span className={styles.randomLabel}>
-              <Dices size={16} /> Azar:
+              <Dices size={16} aria-hidden="true" /> Azar:
             </span>
             <button
               type="button"
               className={styles.randomBtn}
               onClick={() => selectRandomTickets(1)}
               disabled={!isRaffleActive}
+              aria-label="Seleccionar 1 boleto al azar"
             >
               +1
             </button>
@@ -245,6 +249,7 @@ export const SelectorBoletos: React.FC = () => {
               className={styles.randomBtn}
               onClick={() => selectRandomTickets(2)}
               disabled={!isRaffleActive}
+              aria-label="Seleccionar 2 boletos al azar"
             >
               +2
             </button>
@@ -253,6 +258,7 @@ export const SelectorBoletos: React.FC = () => {
               className={styles.randomBtn}
               onClick={() => selectRandomTickets(5)}
               disabled={!isRaffleActive}
+              aria-label="Seleccionar 5 boletos al azar"
             >
               +5
             </button>
@@ -261,12 +267,18 @@ export const SelectorBoletos: React.FC = () => {
               className={styles.randomBtn}
               onClick={() => selectRandomTickets(10)}
               disabled={!isRaffleActive}
+              aria-label="Seleccionar 10 boletos al azar"
             >
               +10
             </button>
             {selectedTickets.length > 0 && (
-              <button type="button" className={styles.clearBtn} onClick={clearSelection}>
-                <RotateCcw size={14} /> Limpiar
+              <button
+                type="button"
+                className={styles.clearBtn}
+                onClick={clearSelection}
+                aria-label="Limpiar selección de boletos"
+              >
+                <RotateCcw size={14} aria-hidden="true" /> Limpiar
               </button>
             )}
           </div>
@@ -290,7 +302,7 @@ export const SelectorBoletos: React.FC = () => {
 
             {/* Filtros Rápidos */}
             <div className={styles.filterGroup}>
-              <Filter size={14} />
+              <Filter size={14} aria-hidden="true" />
               <button
                 type="button"
                 className={`${styles.filterTag} ${filterType === 'all' ? styles.filterTagActive : ''}`}
@@ -355,9 +367,9 @@ export const SelectorBoletos: React.FC = () => {
                   aria-label={`Boleto número ${ticket.number}, estado: ${statusLabel}`}
                 >
                   <span className={styles.ticketNumber}>{ticket.number}</span>
-                  {isSelected && <CheckCircle size={12} className={styles.ticketIcon} />}
-                  {isReserved && !isSelected && <Clock size={12} className={styles.ticketIcon} />}
-                  {isSold && !isSelected && <Lock size={12} className={styles.ticketIcon} />}
+                  {isSelected && <CheckCircle size={12} aria-hidden="true" className={styles.ticketIcon} />}
+                  {isReserved && !isSelected && <Clock size={12} aria-hidden="true" className={styles.ticketIcon} />}
+                  {isSold && !isSelected && <Lock size={12} aria-hidden="true" className={styles.ticketIcon} />}
                 </button>
               );
             })}
@@ -414,7 +426,7 @@ export const SelectorBoletos: React.FC = () => {
 
               <button type="button" className={styles.checkoutBtn} onClick={openCheckout}>
                 <span>Comprar Ahora</span>
-                <ArrowRight size={18} />
+                <ArrowRight size={18} aria-hidden="true" />
               </button>
             </div>
           </div>

@@ -47,15 +47,15 @@ export const GaleriaPremio: React.FC = () => {
     fotoSeleccionadaIndex !== null ? fotosFiltradas[fotoSeleccionadaIndex] : undefined;
 
   return (
-    <section id="galeria" className={styles.galeriaSection}>
+    <section id="galeria" className={styles.galeriaSection} aria-labelledby="titulo-galeria">
       <div className="container">
         {/* Cabecera */}
         <div className={styles.header}>
           <div className={styles.badge}>
-            <Image size={16} />
+            <Image size={16} aria-hidden="true" />
             <span>Fotografías Reales del Destino</span>
           </div>
-          <h2 className={styles.title}>
+          <h2 id="titulo-galeria" className={styles.title}>
             Explora los paisajes que <span className="highlight-text">podrías vivir</span>
           </h2>
           <p className={styles.subtitle}>
@@ -127,7 +127,7 @@ export const GaleriaPremio: React.FC = () => {
                 />
               </picture>
               <div className={styles.itemOverlay}>
-                <Maximize2 size={24} className={styles.zoomIcon} />
+                <Maximize2 size={24} aria-hidden="true" className={styles.zoomIcon} />
                 <span className={styles.itemCaption}>{foto.alt}</span>
               </div>
             </div>
@@ -137,24 +137,30 @@ export const GaleriaPremio: React.FC = () => {
 
       {/* Visor Lightbox Modal */}
       {fotoActual && (
-        <div className={styles.lightboxBackdrop} onClick={handleCloseLightbox}>
+        <div
+          className={styles.lightboxBackdrop}
+          onClick={handleCloseLightbox}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Visor de fotografía ampliada"
+        >
           <div className={styles.lightboxContent} onClick={(e) => e.stopPropagation()}>
             <button
               type="button"
               className={styles.closeBtn}
               onClick={handleCloseLightbox}
-              aria-label="Cerrar visor"
+              aria-label="Cerrar visor de fotografía"
             >
-              <X size={26} />
+              <X size={26} aria-hidden="true" />
             </button>
 
             <button
               type="button"
               className={`${styles.navArrow} ${styles.prevArrow}`}
               onClick={handlePrev}
-              aria-label="Foto anterior"
+              aria-label="Ver fotografía anterior"
             >
-              <ChevronLeft size={32} />
+              <ChevronLeft size={32} aria-hidden="true" />
             </button>
 
             <div className={styles.lightboxImageWrapper}>
@@ -174,9 +180,9 @@ export const GaleriaPremio: React.FC = () => {
               type="button"
               className={`${styles.navArrow} ${styles.nextArrow}`}
               onClick={handleNext}
-              aria-label="Foto siguiente"
+              aria-label="Ver fotografía siguiente"
             >
-              <ChevronRight size={32} />
+              <ChevronRight size={32} aria-hidden="true" />
             </button>
           </div>
         </div>

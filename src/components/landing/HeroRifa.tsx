@@ -63,7 +63,7 @@ export const HeroRifa: React.FC<HeroRifaProps> = ({
   };
 
   return (
-    <section className={styles.heroSection}>
+    <section className={styles.heroSection} aria-label="Introducción al Gran Sorteo Ecoturístico">
       {/* Fondo de pantalla completa con <picture> optimizado */}
       <div className={styles.bgWrapper}>
         <picture>
@@ -94,7 +94,7 @@ export const HeroRifa: React.FC<HeroRifaProps> = ({
               color: '#fbbf24',
             }}
           >
-            <PauseCircle size={16} className={styles.badgeIcon} />
+            <PauseCircle size={16} aria-hidden="true" className={styles.badgeIcon} />
             <span>Sorteo Temporalmente Pausado</span>
           </div>
         ) : isClosed ? (
@@ -106,12 +106,12 @@ export const HeroRifa: React.FC<HeroRifaProps> = ({
               color: '#94a3b8',
             }}
           >
-            <AlertCircle size={16} className={styles.badgeIcon} />
+            <AlertCircle size={16} aria-hidden="true" className={styles.badgeIcon} />
             <span>Edición Finalizada</span>
           </div>
         ) : (
           <div className={styles.badge}>
-            <Sparkles size={16} className={styles.badgeIcon} />
+            <Sparkles size={16} aria-hidden="true" className={styles.badgeIcon} />
             <span>
               {raffle?.status === 'active' ? 'Sorteo Oficial Activo' : 'Gran Sorteo Manaure Vive'}
             </span>
@@ -152,11 +152,11 @@ export const HeroRifa: React.FC<HeroRifaProps> = ({
               className={styles.btnPrimary}
               style={isPaused || isClosed ? { opacity: 0.6, cursor: 'not-allowed' } : undefined}
             >
-              <Ticket size={20} />{' '}
+              <Ticket size={20} aria-hidden="true" />{' '}
               {isPaused ? 'Ventas Pausadas' : isClosed ? 'Sorteo Finalizado' : 'Elegir mis Boletos'}
             </a>
             <a href="#premio" className={styles.btnSecondary}>
-              <MapPin size={20} /> Conocer el Premio
+              <MapPin size={20} aria-hidden="true" /> Conocer el Premio
             </a>
           </div>
         </div>
@@ -165,7 +165,7 @@ export const HeroRifa: React.FC<HeroRifaProps> = ({
         <div className={styles.trustGrid}>
           <div className={styles.trustItem}>
             <div className={styles.trustIconWrapper}>
-              <Trophy size={20} />
+              <Trophy size={20} aria-hidden="true" />
             </div>
             <div>
               <strong className={styles.trustTitle}>Premio Mayor Exclusivo</strong>
@@ -175,7 +175,7 @@ export const HeroRifa: React.FC<HeroRifaProps> = ({
 
           <div className={styles.trustItem}>
             <div className={styles.trustIconWrapper}>
-              <Calendar size={20} />
+              <Calendar size={20} aria-hidden="true" />
             </div>
             <div>
               <strong className={styles.trustTitle}>Fecha del Sorteo</strong>
@@ -185,7 +185,7 @@ export const HeroRifa: React.FC<HeroRifaProps> = ({
 
           <div className={styles.trustItem}>
             <div className={styles.trustIconWrapper}>
-              <ShieldCheck size={20} />
+              <ShieldCheck size={20} aria-hidden="true" />
             </div>
             <div>
               <strong className={styles.trustTitle}>Transparencia Garantizada</strong>

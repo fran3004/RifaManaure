@@ -413,13 +413,19 @@ export const ModalCheckout: React.FC = () => {
 
   return (
     <div className={styles.modalBackdrop} onClick={handleClose}>
-      <div className={styles.modalCard} onClick={(e) => e.stopPropagation()}>
+      <div
+        className={styles.modalCard}
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-checkout-title"
+      >
         {/* Barra Superior del Modal */}
         <div className={styles.modalHeader}>
           <div className={styles.modalTitleBox}>
-            <ShieldCheck size={22} className={styles.shieldIcon} />
+            <ShieldCheck size={22} className={styles.shieldIcon} aria-hidden="true" />
             <div>
-              <h3 className={styles.modalTitle}>Checkout Seguro</h3>
+              <h3 id="modal-checkout-title" className={styles.modalTitle}>Checkout Seguro</h3>
               <span className={styles.modalSub}>Gran Rifa Ecoturística Manaure Vive</span>
             </div>
           </div>
@@ -429,7 +435,7 @@ export const ModalCheckout: React.FC = () => {
             className={styles.closeBtn}
             aria-label="Cerrar ventana de compra"
           >
-            <X size={20} />
+            <X size={20} aria-hidden="true" />
           </button>
         </div>
 
@@ -477,7 +483,7 @@ export const ModalCheckout: React.FC = () => {
         {/* ========================================================================= */}
         {hasReservationError && (
           <div className={styles.errorState}>
-            <AlertCircle size={48} className={styles.errorBigIcon} />
+            <AlertCircle size={48} className={styles.errorBigIcon} aria-hidden="true" />
             <h4 style={{ color: '#f3f7f5', margin: 0 }}>No pudimos completar la reserva</h4>
             <p style={{ color: '#9cb5ab', margin: 0 }}>
               {errorMessage || 'Ocurrió un problema temporal al procesar tus boletos.'}
@@ -594,7 +600,7 @@ export const ModalCheckout: React.FC = () => {
             {/* Canal Oficial de Notificación */}
             <div className={styles.contactPreferenceContainer}>
               <label className={styles.contactPreferenceTitle}>
-                <Bell size={15} color="#f59e0b" />
+                <Bell size={15} color="#f59e0b" aria-hidden="true" />
                 Canal oficial de confirmación
               </label>
               <div className={styles.contactPreferenceGrid} style={{ gridTemplateColumns: '1fr' }}>
@@ -602,7 +608,7 @@ export const ModalCheckout: React.FC = () => {
                   className={`${styles.contactOptionCard} ${styles.contactOptionCardSelected}`}
                   style={{ cursor: 'default' }}
                 >
-                  <MessageCircle size={20} className={styles.contactOptionIcon} />
+                  <MessageCircle size={20} className={styles.contactOptionIcon} aria-hidden="true" />
                   <span className={styles.contactOptionLabel}>
                     WhatsApp Oficial (Confirmación y enlace de verificación)
                   </span>
@@ -632,7 +638,7 @@ export const ModalCheckout: React.FC = () => {
               </button>
               <button type="submit" className={styles.btnNext}>
                 <span>Continuar a Resumen de Números</span>
-                <ChevronRight size={18} />
+                <ChevronRight size={18} aria-hidden="true" />
               </button>
             </div>
           </form>
@@ -662,7 +668,7 @@ export const ModalCheckout: React.FC = () => {
             <div className={styles.ticketsGridBig}>
               {selectedTickets.map((num) => (
                 <div key={num} className={styles.ticketChipBig}>
-                  <Ticket size={18} color="#f59e0b" style={{ marginBottom: '4px' }} />
+                  <Ticket size={18} color="#f59e0b" style={{ marginBottom: '4px' }} aria-hidden="true" />
                   <span className={styles.ticketChipNumber}>{formatTicketNumber(num)}</span>
                   <span className={styles.ticketChipLabel}>Boleto</span>
                 </div>
@@ -695,12 +701,12 @@ export const ModalCheckout: React.FC = () => {
 
             <div className={styles.stepNavigation}>
               <button type="button" onClick={() => setCurrentStep(1)} className={styles.btnBack}>
-                <ChevronLeft size={18} />
+                <ChevronLeft size={18} aria-hidden="true" />
                 <span>Atrás: Datos</span>
               </button>
               <button type="button" onClick={() => setCurrentStep(3)} className={styles.btnNext}>
                 <span>Continuar a Total a Pagar</span>
-                <ChevronRight size={18} />
+                <ChevronRight size={18} aria-hidden="true" />
               </button>
             </div>
           </div>
@@ -743,7 +749,7 @@ export const ModalCheckout: React.FC = () => {
             </div>
 
             <div className={styles.reservationNotice}>
-              <Clock size={20} style={{ flexShrink: 0, marginTop: '2px' }} />
+              <Clock size={20} style={{ flexShrink: 0, marginTop: '2px' }} aria-hidden="true" />
               <div>
                 <strong style={{ display: 'block', color: '#f3f7f5', marginBottom: '0.2rem' }}>
                   Bloqueo atómico de números:
@@ -761,7 +767,7 @@ export const ModalCheckout: React.FC = () => {
                 className={styles.btnBack}
                 disabled={isReserving}
               >
-                <ChevronLeft size={18} />
+                <ChevronLeft size={18} aria-hidden="true" />
                 <span>Atrás: Números</span>
               </button>
 
@@ -779,7 +785,7 @@ export const ModalCheckout: React.FC = () => {
                 ) : (
                   <>
                     <span>Confirmar Reserva y Ver Cuentas</span>
-                    <ChevronRight size={18} />
+                    <ChevronRight size={18} aria-hidden="true" />
                   </>
                 )}
               </button>
@@ -794,7 +800,7 @@ export const ModalCheckout: React.FC = () => {
           <div className={styles.stepContent}>
             {/* Banner de Reserva Exitosa */}
             <div className={styles.timerBanner}>
-              <Clock size={20} className={styles.timerIcon} />
+              <Clock size={20} className={styles.timerIcon} aria-hidden="true" />
               <div>
                 <strong>Boletos Reservados: {formatTimer(timeLeftSeconds)}</strong>
                 <p>
@@ -813,7 +819,7 @@ export const ModalCheckout: React.FC = () => {
                   className={styles.copyBtn}
                   onClick={() => copyToClipboard(orderReference, 'ref')}
                 >
-                  {copiedKey === 'ref' ? <Check size={16} /> : <Copy size={16} />}
+                  {copiedKey === 'ref' ? <Check size={16} aria-hidden="true" /> : <Copy size={16} aria-hidden="true" />}
                   <span>{copiedKey === 'ref' ? 'Copiado' : 'Copiar'}</span>
                 </button>
               </div>
@@ -822,7 +828,7 @@ export const ModalCheckout: React.FC = () => {
             {/* Cuentas de Transferencia */}
             <div className={styles.bankAccounts}>
               <h5 className={styles.bankTitle}>
-                <QrCode size={18} color="var(--color-brand-accent, #f59e0b)" />
+                <QrCode size={18} color="var(--color-brand-accent, #f59e0b)" aria-hidden="true" />
                 Realiza tu pago mediante una de las siguientes opciones.
               </h5>
 
@@ -832,6 +838,7 @@ export const ModalCheckout: React.FC = () => {
                     size={20}
                     color="#f59e0b"
                     style={{ flexShrink: 0, marginTop: '2px' }}
+                    aria-hidden="true"
                   />
                   <div>
                     <strong style={{ display: 'block', color: '#f3f7f5', fontSize: '0.9rem' }}>
@@ -859,13 +866,13 @@ export const ModalCheckout: React.FC = () => {
                       {/* Entidad y Tipo */}
                       <div className={styles.accountOptionHeader}>
                         <div className={styles.accountEntityRow}>
-                          <CreditCard size={18} className={styles.accountIcon} />
+                          <CreditCard size={18} className={styles.accountIcon} aria-hidden="true" />
                           <span className={styles.accountEntityName}>{acc.bank_name}</span>
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                           {isSelected && (
                             <span className={styles.selectAccountBadge}>
-                              <Check size={12} /> Seleccionada
+                              <Check size={12} aria-hidden="true" /> Seleccionada
                             </span>
                           )}
                           <span className={styles.accountTypeBadge}>
@@ -889,7 +896,7 @@ export const ModalCheckout: React.FC = () => {
                           }}
                           title="Copiar número de cuenta"
                         >
-                          {copiedKey === acc.id ? <Check size={14} /> : <Copy size={14} />}
+                          {copiedKey === acc.id ? <Check size={14} aria-hidden="true" /> : <Copy size={14} aria-hidden="true" />}
                           <span>{copiedKey === acc.id ? 'Copiado' : 'Copiar número'}</span>
                         </button>
                       </div>
@@ -919,13 +926,13 @@ export const ModalCheckout: React.FC = () => {
 
             <div className={styles.stepNavigation}>
               <button type="button" onClick={() => setCurrentStep(3)} className={styles.btnBack}>
-                <ChevronLeft size={18} />
+                <ChevronLeft size={18} aria-hidden="true" />
                 <span>Atrás: Total</span>
               </button>
 
               <button type="button" onClick={() => setCurrentStep(5)} className={styles.btnNext}>
                 <span>Continuar a Instrucciones</span>
-                <ChevronRight size={18} />
+                <ChevronRight size={18} aria-hidden="true" />
               </button>
             </div>
           </div>
@@ -1007,13 +1014,13 @@ export const ModalCheckout: React.FC = () => {
 
             <div className={styles.stepNavigation}>
               <button type="button" onClick={() => setCurrentStep(4)} className={styles.btnBack}>
-                <ChevronLeft size={18} />
+                <ChevronLeft size={18} aria-hidden="true" />
                 <span>Atrás: Cuentas</span>
               </button>
 
               <button type="button" onClick={() => setCurrentStep(6)} className={styles.btnNext}>
                 <span>Proceder a Subir Comprobante</span>
-                <ChevronRight size={18} />
+                <ChevronRight size={18} aria-hidden="true" />
               </button>
             </div>
           </div>
@@ -1029,7 +1036,7 @@ export const ModalCheckout: React.FC = () => {
             <div className={styles.receiptUploadSection}>
               {!receiptPreview ? (
                 <div className={styles.dropzone} onClick={() => fileInputRef.current?.click()}>
-                  <FileImage size={32} color="#9cb5ab" />
+                  <FileImage size={32} color="#9cb5ab" aria-hidden="true" />
                   <p className={styles.dropzoneText}>
                     Haz clic aquí para seleccionar tu comprobante
                   </p>
@@ -1053,7 +1060,7 @@ export const ModalCheckout: React.FC = () => {
                           border: '1px solid rgba(156, 181, 171, 0.2)',
                         }}
                       >
-                        <FileText size={24} color="#f59e0b" />
+                        <FileText size={24} color="#f59e0b" aria-hidden="true" />
                       </div>
                     ) : (
                       <img
@@ -1074,8 +1081,9 @@ export const ModalCheckout: React.FC = () => {
                     className={styles.removeImgBtn}
                     onClick={handleRemoveReceipt}
                     title="Eliminar y seleccionar otro comprobante"
+                    aria-label="Eliminar y seleccionar otro comprobante"
                   >
-                    <X size={18} />
+                    <X size={18} aria-hidden="true" />
                   </button>
                 </div>
               )}
@@ -1107,16 +1115,7 @@ export const ModalCheckout: React.FC = () => {
                   placeholder="Ej: 987654321 o CUS / Código de transferencia"
                   value={paymentReferenceInput}
                   onChange={(e) => setPaymentReferenceInput(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '0.65rem 0.85rem',
-                    backgroundColor: 'var(--bg-main, #0a1410)',
-                    border: '1px solid var(--border-subtle, rgba(156, 181, 171, 0.2))',
-                    borderRadius: 'var(--radius-md, 10px)',
-                    color: '#ffffff',
-                    fontSize: '0.85rem',
-                    outline: 'none',
-                  }}
+                  className={styles.input}
                 />
               </div>
 
@@ -1130,7 +1129,7 @@ export const ModalCheckout: React.FC = () => {
                     gap: '0.4rem',
                   }}
                 >
-                  <AlertCircle size={16} />
+                  <AlertCircle size={16} aria-hidden="true" />
                   <span>{errorMessage}</span>
                 </div>
               )}
@@ -1143,7 +1142,7 @@ export const ModalCheckout: React.FC = () => {
                 className={styles.btnBack}
                 disabled={isSubmittingProof}
               >
-                <ChevronLeft size={18} />
+                <ChevronLeft size={18} aria-hidden="true" />
                 <span>Atrás: Instrucciones</span>
               </button>
 
@@ -1160,7 +1159,7 @@ export const ModalCheckout: React.FC = () => {
                   </>
                 ) : (
                   <>
-                    <ShieldCheck size={18} />
+                    <ShieldCheck size={18} aria-hidden="true" />
                     <span>Confirmar y Enviar Comprobante</span>
                   </>
                 )}
@@ -1175,19 +1174,19 @@ export const ModalCheckout: React.FC = () => {
         {!hasReservationError && currentStep === 7 && (
           <div className={styles.successState}>
             <div className={styles.successIconWrapper}>
-              <CheckCircle2 size={42} />
+              <CheckCircle2 size={42} aria-hidden="true" />
             </div>
 
             {/* Mensajes explícitos requeridos */}
             <h4 className={styles.successTitle}>Tu pedido ha sido recibido.</h4>
 
             <span className={styles.statusBadgePending}>
-              <Clock size={14} />
+              <Clock size={14} aria-hidden="true" />
               Pendiente de verificación
             </span>
 
             <div className={styles.confirmationNoticeBanner}>
-              <AlertCircle size={20} style={{ flexShrink: 0 }} />
+              <AlertCircle size={20} style={{ flexShrink: 0 }} aria-hidden="true" />
               <div>
                 <strong>Tu pago será verificado manualmente.</strong>
                 <p style={{ margin: '0.2rem 0 0', fontSize: '0.8rem', color: '#fef3c7' }}>
@@ -1204,6 +1203,7 @@ export const ModalCheckout: React.FC = () => {
                   <Hash
                     size={14}
                     style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }}
+                    aria-hidden="true"
                   />
                   Número de Orden:
                 </span>
@@ -1219,7 +1219,7 @@ export const ModalCheckout: React.FC = () => {
                     className={styles.copyBtn}
                     style={{ marginLeft: '8px', padding: '0.2rem 0.5rem', fontSize: '0.75rem' }}
                   >
-                    {copiedKey === 'confirm_ref' ? <Check size={12} /> : <Copy size={12} />}
+                    {copiedKey === 'confirm_ref' ? <Check size={12} aria-hidden="true" /> : <Copy size={12} aria-hidden="true" />}
                     <span>{copiedKey === 'confirm_ref' ? 'Copiado' : 'Copiar'}</span>
                   </button>
                 </span>
@@ -1230,6 +1230,7 @@ export const ModalCheckout: React.FC = () => {
                   <Ticket
                     size={14}
                     style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }}
+                    aria-hidden="true"
                   />
                   Números Seleccionados:
                 </span>
@@ -1261,6 +1262,7 @@ export const ModalCheckout: React.FC = () => {
                   <Receipt
                     size={14}
                     style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }}
+                    aria-hidden="true"
                   />
                   Total Liquidado:
                 </span>
@@ -1277,6 +1279,7 @@ export const ModalCheckout: React.FC = () => {
                   <Clock
                     size={14}
                     style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }}
+                    aria-hidden="true"
                   />
                   Estado de la Orden:
                 </span>
@@ -1295,7 +1298,7 @@ export const ModalCheckout: React.FC = () => {
                       fontWeight: 700,
                     }}
                   >
-                    <Clock size={12} /> Pendiente de verificación
+                    <Clock size={12} aria-hidden="true" /> Pendiente de verificación
                   </span>
                 </span>
               </div>
@@ -1305,6 +1308,7 @@ export const ModalCheckout: React.FC = () => {
                   <Calendar
                     size={14}
                     style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }}
+                    aria-hidden="true"
                   />
                   Fecha y Hora:
                 </span>
@@ -1318,6 +1322,7 @@ export const ModalCheckout: React.FC = () => {
                   <Building2
                     size={14}
                     style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }}
+                    aria-hidden="true"
                   />
                   Método de Pago:
                 </span>
@@ -1331,6 +1336,7 @@ export const ModalCheckout: React.FC = () => {
                   <Bell
                     size={14}
                     style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }}
+                    aria-hidden="true"
                   />
                   Canal de Notificación:
                 </span>
@@ -1351,7 +1357,7 @@ export const ModalCheckout: React.FC = () => {
             <div className={styles.confirmationActions}>
               <div className={styles.confirmationActionsGrid}>
                 <a href="/verificar" className={styles.btnActionPrimary}>
-                  <Search size={16} />
+                  <Search size={16} aria-hidden="true" />
                   <span>Consultar mis Boletos</span>
                 </a>
 
@@ -1361,7 +1367,7 @@ export const ModalCheckout: React.FC = () => {
                   rel="noopener noreferrer"
                   className={styles.btnActionWhatsapp}
                 >
-                  <MessageCircle size={16} />
+                  <MessageCircle size={16} aria-hidden="true" />
                   <span>Soporte por WhatsApp</span>
                 </a>
               </div>
