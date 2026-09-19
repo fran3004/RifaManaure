@@ -97,8 +97,8 @@ const CreateRaffleForm: React.FC<{
       return;
     }
 
-    if (totalTickets < 10 || totalTickets > 10000) {
-      setErrorMessage('La emisión de boletos debe estar entre 10 y 10.000 boletos.');
+    if (!totalTickets || totalTickets <= 0) {
+      setErrorMessage('La emisión total de boletos debe ser mayor a 0.');
       return;
     }
 
@@ -245,11 +245,14 @@ const CreateRaffleForm: React.FC<{
                 <input
                   type="number"
                   className={styles.input}
-                  value={totalTickets}
-                  onChange={(e) => setTotalTickets(Math.max(10, Number(e.target.value)))}
-                  step={100}
-                  min={10}
-                  max={10000}
+                  value={totalTickets || ''}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setTotalTickets(val === '' ? 0 : parseInt(val, 10) || 0);
+                  }}
+                  step="1"
+                  min="1"
+                  placeholder="Ej. 1000"
                   required
                   disabled={isSubmitting}
                 />
@@ -266,10 +269,14 @@ const CreateRaffleForm: React.FC<{
                 <input
                   type="number"
                   className={styles.input}
-                  value={ticketPrice}
-                  onChange={(e) => setTicketPrice(Math.max(0, Number(e.target.value)))}
-                  step={1000}
-                  min={1000}
+                  value={ticketPrice || ''}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setTicketPrice(val === '' ? 0 : Math.max(0, Number(val)));
+                  }}
+                  step="any"
+                  min="1"
+                  placeholder="Ej. 25000"
                   required
                   disabled={isSubmitting}
                 />
@@ -332,10 +339,13 @@ const CreateRaffleForm: React.FC<{
                 <input
                   type="number"
                   className={styles.input}
-                  value={maxTicketsPerBuyer}
-                  onChange={(e) => setMaxTicketsPerBuyer(Math.max(1, Number(e.target.value)))}
+                  value={maxTicketsPerBuyer || ''}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setMaxTicketsPerBuyer(val === '' ? 0 : parseInt(val, 10) || 0);
+                  }}
                   min={1}
-                  max={200}
+                  placeholder="Ej. 50"
                   required
                   disabled={isSubmitting}
                 />

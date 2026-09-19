@@ -5236,8 +5236,8 @@ BEGIN
         RETURN jsonb_build_object('success', false, 'error', 'El precio del boleto debe ser mayor a 0 COP.');
     END IF;
 
-    IF p_total_tickets IS NULL OR p_total_tickets < 10 OR p_total_tickets > 10000 THEN
-        RETURN jsonb_build_object('success', false, 'error', 'La emisión total de boletos debe estar entre 10 y 10.000 boletos.');
+    IF p_total_tickets IS NULL OR p_total_tickets <= 0 THEN
+        RETURN jsonb_build_object('success', false, 'error', 'La emisión total de boletos debe ser mayor a 0.');
     END IF;
 
     IF p_max_tickets_per_buyer IS NULL OR p_max_tickets_per_buyer <= 0 THEN
@@ -5290,11 +5290,8 @@ BEGIN
     )
     RETURNING * INTO v_new_raffle;
 
-    IF p_total_tickets > 1000 THEN
-        v_pad_length := 4;
-    ELSE
-        v_pad_length := 3;
-    END IF;
+    -- Cálculo dinámico de dígitos de relleno (mínimo 3 dígitos ej. 000..999, o 4 dígitos para >= 1000)
+    v_pad_length := GREATEST(LENGTH((p_total_tickets - 1)::TEXT), 3);
 
     INSERT INTO public.tickets (raffle_id, number, status)
     SELECT
