@@ -35,16 +35,6 @@
   box-shadow: 0 8px 16px -4px rgba(16, 185, 129, 0.4);
 }
 
-.logoBadgeImg {
-  display: block;
-  width: 64px;
-  height: 64px;
-  border-radius: 1rem;
-  margin: 0 auto 1.25rem auto;
-  box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.5);
-  object-fit: cover;
-}
-
 .title {
   font-size: 1.5rem;
   font-weight: 700;

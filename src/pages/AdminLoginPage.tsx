@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '@/context/useAuth';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
-import { Mail, Lock, Eye, EyeOff, AlertCircle, ArrowLeft } from 'lucide-react';
+import { Shield, Mail, Lock, Eye, EyeOff, AlertCircle, ArrowLeft } from 'lucide-react';
 import styles from './AdminLoginPage.module.css';
 
 export const AdminLoginPage: React.FC = () => {
@@ -60,13 +60,9 @@ export const AdminLoginPage: React.FC = () => {
     <div className={styles.pageContainer}>
       <div className={styles.loginCard}>
         <div className={styles.brandHeader}>
-          <img
-            src="/favicon.svg"
-            alt="Logo oficial Manaure Vive"
-            width={64}
-            height={64}
-            className={styles.logoBadgeImg}
-          />
+          <div className={styles.logoBadge}>
+            <Shield size={28} />
+          </div>
           <h1 className={styles.title}>Panel Administrativo</h1>
           <p className={styles.subtitle}>Manaure Vive • Acceso Restringido</p>
         </div>

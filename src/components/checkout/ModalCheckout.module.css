@@ -60,15 +60,6 @@
   gap: 0.75rem;
 }
 
-.checkoutBrandLogo {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  object-fit: cover;
-  flex-shrink: 0;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
-}
-
 .shieldIcon {
   color: var(--color-brand-accent, #f59e0b);
 }
