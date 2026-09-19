@@ -130,9 +130,10 @@
 .bottomBar {
   border-top: 1px solid var(--border-subtle);
   background-color: rgba(10, 30, 19, 0.95);
-  padding: 1.5rem 0;
+  padding: 1.5rem 0 calc(1.5rem + var(--cart-h, 0px) + env(safe-area-inset-bottom, 0px));
   font-size: 0.825rem;
   color: var(--text-on-dark-muted);
+  transition: padding-bottom var(--transition-fast, 150ms ease);
 }
 
 .bottomContainer {

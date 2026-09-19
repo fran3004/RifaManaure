@@ -1,12 +1,16 @@
 .floatingBtnContainer {
   position: fixed;
-  bottom: 2rem;
+  bottom: calc(2rem + var(--cart-h, 0px));
   right: 2rem;
   z-index: var(--z-whatsapp);
   display: flex;
   align-items: center;
   gap: 0.75rem;
   text-decoration: none;
+  transition:
+    bottom var(--transition-fast, 150ms ease),
+    transform 200ms ease,
+    box-shadow 200ms ease;
 }
 
 .pulseRing {
@@ -73,6 +77,12 @@
   transform: translateX(0);
 }
 
+.floatingBtnContainer:focus-visible {
+  outline: 3px solid var(--focus-ring-on-dark);
+  outline-offset: 3px;
+  border-radius: 50%;
+}
+
 @keyframes pulse {
   0% {
     transform: scale(1);
@@ -90,7 +100,7 @@
 
 @media (max-width: 640px) {
   .floatingBtnContainer {
-    bottom: 1.25rem;
+    bottom: calc(1.25rem + var(--cart-h, 0px) + env(safe-area-inset-bottom, 0px));
     right: 1.25rem;
   }
 
@@ -101,5 +111,17 @@
 
   .tooltip {
     display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pulseRing {
+    animation: none;
+  }
+
+  .floatingBtnContainer,
+  .floatingBtn {
+    transition: none;
+    transform: none;
   }
 }

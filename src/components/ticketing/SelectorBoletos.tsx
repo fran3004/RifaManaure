@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { useTicketCart } from '@/context/useTicketCart';
 import {
   Ticket,
@@ -9,6 +9,9 @@ import {
   Clock,
   Lock,
   ArrowRight,
+  X,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 import { formatCOP, formatTicketNumber } from '@/lib/utils';
 import { SectionHeader, Button } from '@/components/public/ui';
@@ -50,6 +53,44 @@ export const SelectorBoletos: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<FilterType>('all');
   const [selectedRange, setSelectedRange] = useState<number>(0);
+  const [isMobileListOpen, setIsMobileListOpen] = useState(false);
+
+  const cartRef = useRef<HTMLElement>(null);
+
+  // Coordinación dinámica de la variable CSS --cart-h
+  useEffect(() => {
+    if (selectedTickets.length === 0) {
+      document.documentElement.style.setProperty('--cart-h', '0px');
+      setIsMobileListOpen(false);
+      return;
+    }
+
+    const updateCartHeight = () => {
+      if (cartRef.current) {
+        const height = cartRef.current.offsetHeight;
+        // Se agregan 16px para el margen flotante sobre la parte inferior
+        document.documentElement.style.setProperty('--cart-h', `${height + 16}px`);
+      }
+    };
+
+    updateCartHeight();
+
+    let observer: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== 'undefined' && cartRef.current) {
+      observer = new ResizeObserver(() => {
+        updateCartHeight();
+      });
+      observer.observe(cartRef.current);
+    }
+
+    window.addEventListener('resize', updateCartHeight);
+
+    return () => {
+      if (observer) observer.disconnect();
+      window.removeEventListener('resize', updateCartHeight);
+      document.documentElement.style.setProperty('--cart-h', '0px');
+    };
+  }, [selectedTickets.length, isMobileListOpen]);
 
   // Boletos filtrados
   const filteredTickets = useMemo(() => {
@@ -423,39 +464,121 @@ export const SelectorBoletos: React.FC = () => {
 
       {/* Barra de Carrito Flotante Inferior */}
       {selectedTickets.length > 0 && (
-        <aside className={styles.floatingCart} aria-label="Resumen de compra">
-          <div className={`container ${styles.cartContainer}`}>
-            <div className={styles.cartInfo}>
-              <div className={styles.cartCountBadge}>
-                <span>{selectedTickets.length}</span>{' '}
-                {selectedTickets.length === 1 ? 'Boleto' : 'Boletos'}
+        <aside
+          ref={cartRef}
+          className={styles.floatingCart}
+          aria-label="Resumen de boletos seleccionados y compra"
+        >
+          {/* Panel desplegable de boletos para móvil */}
+          {isMobileListOpen && (
+            <div id="mobile-cart-tickets" className={styles.mobilePanel}>
+              <div className={styles.mobilePanelHeader}>
+                <span className={styles.mobilePanelTitle}>
+                  Boletos seleccionados ({selectedTickets.length}
+                  {maxTicketsPerBuyer ? `/${maxTicketsPerBuyer}` : ''}):
+                </span>
+                <button
+                  type="button"
+                  className={styles.closePanelBtn}
+                  onClick={() => setIsMobileListOpen(false)}
+                  aria-label="Cerrar lista de boletos"
+                >
+                  <ChevronDown size={18} aria-hidden="true" />
+                </button>
               </div>
-              {isMaxLimitReached && (
-                <div className={styles.limitReachedBadge}>
-                  <span>
-                    Límite ({maxTicketsPerBuyer}/{maxTicketsPerBuyer})
-                  </span>
-                </div>
-              )}
-              <div className={styles.cartNumbersList}>
+              <div className={styles.mobileChipsGrid}>
                 {selectedTickets.map((num) => (
-                  <span key={num} className={styles.miniTag}>
-                    {num}
+                  <span key={num} className={styles.ticketChip}>
+                    <span className={styles.ticketChipNum}>{num}</span>
+                    <button
+                      type="button"
+                      className={styles.removeTicketBtn}
+                      onClick={() => toggleTicketSelection(num)}
+                      aria-label={`Quitar boleto ${num}`}
+                      title={`Quitar boleto ${num}`}
+                    >
+                      <X size={13} aria-hidden="true" />
+                    </button>
                   </span>
                 ))}
               </div>
             </div>
+          )}
 
-            <div className={styles.cartCheckout}>
-              <div className={styles.cartTotalBox}>
-                <span className={styles.cartTotalLabel}>Total a Pagar:</span>
-                <strong className={styles.cartTotalValue}>{formatCOP(totalAmount)}</strong>
+          <div className={styles.cartContainer}>
+            {/* Resumen a la izquierda */}
+            <div className={styles.cartSummary} aria-live="polite" aria-atomic="true">
+              <div className={styles.cartCountRow}>
+                <span className={styles.cartCountBadge}>
+                  {selectedTickets.length} {selectedTickets.length === 1 ? 'Boleto' : 'Boletos'}
+                </span>
+                {isMaxLimitReached && (
+                  <span className={styles.limitReachedBadge}>
+                    Límite ({maxTicketsPerBuyer})
+                  </span>
+                )}
+                {/* Botón de alternar lista de boletos en móvil */}
+                <button
+                  type="button"
+                  className={styles.mobileToggleBtn}
+                  onClick={() => setIsMobileListOpen((prev) => !prev)}
+                  aria-expanded={isMobileListOpen}
+                  aria-controls="mobile-cart-tickets"
+                  aria-label={
+                    isMobileListOpen
+                      ? 'Ocultar boletos seleccionados'
+                      : `Ver ${selectedTickets.length} boletos seleccionados`
+                  }
+                >
+                  <span>{isMobileListOpen ? 'Ocultar' : `Ver (${selectedTickets.length})`}</span>
+                  {isMobileListOpen ? (
+                    <ChevronDown size={14} aria-hidden="true" />
+                  ) : (
+                    <ChevronUp size={14} aria-hidden="true" />
+                  )}
+                </button>
               </div>
 
-              <button type="button" className={styles.checkoutBtn} onClick={openCheckout}>
-                <span>Comprar Ahora</span>
-                <ArrowRight size={18} aria-hidden="true" />
-              </button>
+              <div className={styles.cartTotalBox}>
+                <span className={styles.cartTotalLabel}>Total:</span>
+                <strong className={styles.cartTotalValue}>{formatCOP(totalAmount)}</strong>
+              </div>
+            </div>
+
+            {/* Chips en el centro con scroll horizontal y máscara (Escritorio ≥ 768px) */}
+            <div
+              className={styles.cartNumbersList}
+              role="region"
+              aria-label="Lista de boletos seleccionados"
+            >
+              {selectedTickets.map((num) => (
+                <span key={num} className={styles.ticketChip}>
+                  <span className={styles.ticketChipNum}>{num}</span>
+                  <button
+                    type="button"
+                    className={styles.removeTicketBtn}
+                    onClick={() => toggleTicketSelection(num)}
+                    aria-label={`Quitar boleto ${num}`}
+                    title={`Quitar boleto ${num}`}
+                  >
+                    <X size={12} aria-hidden="true" />
+                  </button>
+                </span>
+              ))}
+            </div>
+
+            {/* CTA a la derecha */}
+            <div className={styles.cartActions}>
+              <Button
+                type="button"
+                variant="accent"
+                size="md"
+                className={styles.checkoutBtn}
+                onClick={openCheckout}
+                rightIcon={<ArrowRight size={18} aria-hidden="true" />}
+              >
+                Comprar Ahora
+              </Button>
             </div>
           </div>
         </aside>
