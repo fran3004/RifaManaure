@@ -1,4 +1,7 @@
 import React from 'react';
+import '@fontsource-variable/playfair-display';
+import '@fontsource-variable/outfit';
+import '@fontsource-variable/jetbrains-mono';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { TicketCartProvider } from '@/context/TicketCartContext';
 import { Navbar } from '@/components/layout/Navbar';

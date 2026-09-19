@@ -9,6 +9,11 @@
 [data-theme="public"] {
   color-scheme: light;
 
+  /* --- Tipografías Oficiales --- */
+  --font-heading: 'Playfair Display Variable', Georgia, 'Times New Roman', serif;
+  --font-sans: 'Outfit Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, 'SF Mono', Consolas, monospace;
+
   /* --- Fondos y Superficies --- */
   --bg-page: #F4EFE4;
   --bg-surface: #FBF8F1;
@@ -124,6 +129,11 @@
   --transition-normal: var(--transition-base);
   --transition-slow: 400ms cubic-bezier(0.2, 0.7, 0.2, 1);
 
+  /* --- Configuración Base del Contenedor Raíz Público --- */
+  font-family: var(--font-sans);
+  font-weight: 400;
+  line-height: 1.65;
+  font-size: 1rem;
   background-color: var(--bg-page);
   color: var(--text-primary);
   min-height: 100vh;
@@ -137,4 +147,60 @@
   [data-theme="public"] {
     --navbar-h: 64px;
   }
+}
+
+/* --- Escala Tipográfica en Ámbito Público --- */
+[data-theme="public"] h1 {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: clamp(2.4rem, 5.2vw, 4rem);
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+  color: var(--text-primary);
+}
+
+[data-theme="public"] h2 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: clamp(1.9rem, 3.6vw, 2.75rem);
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+  color: var(--text-primary);
+}
+
+[data-theme="public"] h3 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: clamp(1.35rem, 2.5vw, 1.5rem);
+  line-height: 1.2;
+  color: var(--text-primary);
+}
+
+[data-theme="public"] p {
+  font-family: var(--font-sans);
+  font-weight: 400;
+  line-height: 1.65;
+  max-width: 65ch;
+}
+
+[data-theme="public"] small {
+  font-size: 0.875rem;
+}
+
+[data-theme="public"] .badgeLabel,
+[data-theme="public"] .tagLabel {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+[data-theme="public"] .font-mono,
+[data-theme="public"] [data-mono] {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
 }

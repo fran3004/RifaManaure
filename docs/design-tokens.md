@@ -17,6 +17,22 @@ Este documento especifica el sistema de diseño del tema público nuevo (Crema c
 | `--bg-surface-elevated` | `var(--bg-card)` | Alias de retrocompatibilidad |
 | `--bg-surface-glass` | `rgba(251, 248, 241, 0.92)` | Fondo translúcido con desenfoque (`backdrop-filter`) |
 
+### Tipografías Oficiales (Autohospedadas @fontsource-variable)
+| Token | Familia / Fallbacks | Pesos | Uso |
+| :--- | :--- | :--- | :--- |
+| `--font-heading` | `'Playfair Display Variable', Georgia, 'Times New Roman', serif` | 700, 800 | Títulos h1, h2, h3 de impacto editorial |
+| `--font-sans` | `'Outfit Variable', system-ui, -apple-system, 'Segoe UI', sans-serif` | 400, 500, 600, 700 | Cuerpo de texto, botones, navegación e interfaz |
+| `--font-mono` | `'JetBrains Mono Variable', ui-monospace, 'SF Mono', Consolas, monospace` | 600, 700 | Números de boleto, códigos de verificación, `tabular-nums` |
+
+### Escala Tipográfica Pública
+- **h1 (Hero)**: Playfair Display 800 · `clamp(2.4rem, 5.2vw, 4rem)` · `line-height: 1.05` · `letter-spacing: -0.01em` · `text-wrap: balance`
+- **h2 (Secciones)**: Playfair Display 700 · `clamp(1.9rem, 3.6vw, 2.75rem)` · `line-height: 1.15` · `letter-spacing: -0.01em` · `text-wrap: balance`
+- **h3 (Tarjetas)**: Playfair Display 700 · `clamp(1.35rem, 2.5vw, 1.5rem)` · `line-height: 1.2`
+- **Cuerpo (Párrafos)**: Outfit Variable 400 · `1rem / 1.65` · `max-width: 65ch`
+- **Texto pequeño (`small`)**: `0.875rem` (mínimo informativo permitido)
+- **Etiquetas / Badges (`.badgeLabel`)**: Outfit Variable 600 · `0.75rem` · mayúsculas · `letter-spacing: 0.08em`
+- **Mono / Boletos (`.font-mono`)**: JetBrains Mono Variable 700 · `font-variant-numeric: tabular-nums`
+
 ### Jerarquía Tipográfica y Textos
 | Token | Valor Hex | Rol / Uso |
 | :--- | :--- | :--- |

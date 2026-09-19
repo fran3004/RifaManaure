@@ -4,15 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <!-- Preconnect para carga rápida de fuentes y API -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-
-    <!-- Tipografías oficiales: Inter (cuerpo) + Outfit (headings) -->
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap"
-      rel="stylesheet"
-    />
+    <!-- Preconnect y DNS-Prefetch para optimizar consultas a Supabase -->
+    <link rel="preconnect" href="%VITE_SUPABASE_URL%" crossorigin />
+    <link rel="dns-prefetch" href="%VITE_SUPABASE_URL%" />
 
     <!-- Título Principal Oficial -->
     <title>Manaure Vive | Gran Sorteo Ecoturístico y Aventura en el Perijá</title>
@@ -78,8 +72,8 @@
     <link rel="manifest" href="/site.webmanifest?v=2" />
 
     <!-- Tema y Color de Navegador Móvil -->
-    <meta name="theme-color" content="#0a1410" />
-    <meta name="msapplication-TileColor" content="#0a1410" />
+    <meta name="theme-color" content="#1B4A2E" />
+    <meta name="msapplication-TileColor" content="#1B4A2E" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Manaure Vive" />
