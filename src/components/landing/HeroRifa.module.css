@@ -111,11 +111,9 @@
 
 .ctaBox {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 1.5rem 2rem;
-  padding: 1.25rem 1.5rem;
+  flex-direction: column;
+  gap: 1.15rem;
+  padding: 1.35rem 1.5rem;
   background-color: rgba(251, 248, 241, 0.96);
   border-radius: var(--radius-xl, 28px);
   border: 1px solid var(--border-subtle, #DCD5C4);
@@ -124,6 +122,15 @@
   -webkit-backdrop-filter: blur(12px);
   max-width: 740px;
   margin-bottom: 3rem;
+}
+
+.ctaMainRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1.5rem 2rem;
+  width: 100%;
 }
 
 .priceTag {
@@ -163,6 +170,115 @@
   white-space: nowrap;
 }
 
+/* --- Bloque de Prueba Social --- */
+.socialProofWrapper {
+  width: 100%;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--border-subtle, #DCD5C4);
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.socialProofHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.socialProofText {
+  font-family: var(--font-sans, 'Outfit Variable', sans-serif);
+  font-size: 0.875rem;
+  color: var(--text-secondary, #41564A);
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+.socialProofText strong {
+  font-weight: 700;
+  color: var(--text-primary, #16261C);
+}
+
+.almostSoldOutBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-family: var(--font-sans, 'Outfit Variable', sans-serif);
+  font-size: 0.825rem;
+  font-weight: 700;
+  color: var(--brand-coral, #B23A09);
+  line-height: 1.2;
+}
+
+.progressTrack {
+  height: 8px;
+  border-radius: var(--radius-full, 999px);
+  background-color: var(--border-subtle, #DCD5C4);
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  width: 100%;
+}
+
+.progressSold {
+  height: 100%;
+  background-color: var(--brand-primary, #1B4A2E);
+  border-radius: var(--radius-full, 999px) 0 0 var(--radius-full, 999px);
+  transition: width var(--transition-base, 250ms ease);
+}
+
+.progressReserved {
+  height: 100%;
+  background-color: var(--brand-coral-soft, #FBE9E1);
+  border-left: 1px solid rgba(178, 58, 9, 0.3);
+  border-right: 1px solid rgba(178, 58, 9, 0.3);
+  transition: width var(--transition-base, 250ms ease);
+}
+
+.socialProofEarly {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-sans, 'Outfit Variable', sans-serif);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--brand-primary, #1B4A2E);
+  padding: 0.2rem 0;
+}
+
+.earlyIcon {
+  color: var(--brand-accent-strong, #8A5200);
+  flex-shrink: 0;
+}
+
+.socialProofSkeleton {
+  width: 100%;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--border-subtle, #DCD5C4);
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.skeletonProgressText {
+  width: 180px;
+  height: 16px;
+  border-radius: var(--radius-sm, 10px);
+  background: rgba(27, 74, 46, 0.08);
+  animation: heroShimmerPulse 1.6s ease-in-out infinite;
+}
+
+.skeletonProgressBar {
+  width: 100%;
+  height: 8px;
+  border-radius: var(--radius-full, 999px);
+  background: rgba(27, 74, 46, 0.08);
+  animation: heroShimmerPulse 1.6s ease-in-out infinite;
+}
+
+/* --- Trust Grid --- */
 .trustGrid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -229,7 +345,7 @@
 
 /* --- Responsive (< 900px) --- */
 @media (max-width: 899px) {
-  .ctaBox {
+  .ctaMainRow {
     flex-direction: column;
     align-items: flex-start;
     gap: 1.25rem;
@@ -328,10 +444,14 @@
   .bgImage,
   .badge,
   .trustItem,
+  .progressSold,
+  .progressReserved,
   .skeletonBadge,
   .skeletonTitle,
   .skeletonSubtitle,
-  .skeletonPrice {
+  .skeletonPrice,
+  .skeletonProgressText,
+  .skeletonProgressBar {
     animation: none !important;
     transition: none !important;
     transform: none !important;

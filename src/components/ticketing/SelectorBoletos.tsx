@@ -31,6 +31,7 @@ export const SelectorBoletos: React.FC = () => {
     raffle,
     winner,
     tickets,
+    ticketStats: stats,
     selectedTickets,
     isLoading,
     unitPrice,
@@ -51,14 +52,6 @@ export const SelectorBoletos: React.FC = () => {
   const [filterType, setFilterType] = useState<FilterType>('all');
   const [selectedRange, setSelectedRange] = useState<number>(0);
 
-  // Estadísticas en tiempo real
-  const stats = useMemo(() => {
-    const total = tickets.length || 1000;
-    const available = tickets.filter((t) => t.status === 'available').length;
-    const reserved = tickets.filter((t) => t.status === 'reserved').length;
-    const sold = tickets.filter((t) => t.status === 'sold').length;
-    return { total, available, reserved, sold };
-  }, [tickets]);
 
   // Boletos filtrados
   const filteredTickets = useMemo(() => {

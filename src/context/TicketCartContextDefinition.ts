@@ -5,12 +5,14 @@ import type {
   WinnerWithDetails,
   SystemSettingsRow,
 } from '@/types/raffle.types';
+import type { TicketStats } from '@/config/ticketSocialProof';
 
 export interface TicketCartContextType {
   raffle: RaffleRow | null;
   winner: WinnerWithDetails | null;
   systemSettings: SystemSettingsRow | null;
   tickets: TicketRow[];
+  ticketStats: TicketStats;
   selectedTickets: string[];
   isLoading: boolean;
   unitPrice: number;

@@ -9,9 +9,12 @@ import {
   MapPin,
   AlertCircle,
   PauseCircle,
+  Flame,
 } from 'lucide-react';
 import { formatCOP } from '@/lib/utils';
 import { useTicketCart } from '@/context/useTicketCart';
+import { useTicketStats } from '@/hooks/useTicketStats';
+import { formatTicketCount } from '@/config/ticketSocialProof';
 import { Button } from '@/components/public/ui/Button';
 import styles from './HeroRifa.module.css';
 
@@ -45,6 +48,7 @@ export const HeroRifa: React.FC<HeroRifaProps> = ({
   lotteryReference: propLottery,
 }) => {
   const { raffle, unitPrice, isLoading } = useTicketCart();
+  const stats = useTicketStats();
 
   const isPaused = raffle?.status === 'paused';
   const isClosed = raffle?.status === 'closed' || raffle?.status === 'finished';
@@ -131,48 +135,104 @@ export const HeroRifa: React.FC<HeroRifaProps> = ({
           </p>
         )}
 
-        {/* Tarjeta de Precios y CTAs */}
+        {/* Tarjeta de Precios, CTAs y Progreso Real de Boletos */}
         <div className={styles.ctaBox}>
-          <div className={styles.priceTag}>
-            <span className={styles.priceLabel}>Valor por Boleto</span>
-            {isColdLoading || ticketPrice <= 0 ? (
-              <div className={styles.skeletonPrice} aria-hidden="true" />
-            ) : (
-              <strong className={styles.priceValue}>{formatCOP(ticketPrice)}</strong>
-            )}
+          <div className={styles.ctaMainRow}>
+            <div className={styles.priceTag}>
+              <span className={styles.priceLabel}>Valor por Boleto</span>
+              {isColdLoading || ticketPrice <= 0 ? (
+                <div className={styles.skeletonPrice} aria-hidden="true" />
+              ) : (
+                <strong className={styles.priceValue}>{formatCOP(ticketPrice)}</strong>
+              )}
+            </div>
+
+            <div className={styles.ctaActions}>
+              <Button
+                as="a"
+                href="#boletos"
+                variant="primary"
+                size="lg"
+                leftIcon={<Ticket size={20} aria-hidden="true" />}
+                disabled={isPaused || isClosed}
+                className={styles.ctaBtnPrimary}
+                onClick={(e) => {
+                  if (isPaused || isClosed) {
+                    e.preventDefault();
+                    return;
+                  }
+                  handleScrollTo(e, 'boletos');
+                }}
+              >
+                {isPaused ? 'Sorteo pausado' : isClosed ? 'Sorteo finalizado' : 'Elegir mis Boletos'}
+              </Button>
+              <Button
+                as="a"
+                href="#premio"
+                variant="accent"
+                size="lg"
+                leftIcon={<MapPin size={20} aria-hidden="true" />}
+                className={styles.ctaBtnSecondary}
+                onClick={(e) => handleScrollTo(e, 'premio')}
+              >
+                Conocer el Premio
+              </Button>
+            </div>
           </div>
 
-          <div className={styles.ctaActions}>
-            <Button
-              as="a"
-              href="#boletos"
-              variant="primary"
-              size="lg"
-              leftIcon={<Ticket size={20} aria-hidden="true" />}
-              disabled={isPaused || isClosed}
-              className={styles.ctaBtnPrimary}
-              onClick={(e) => {
-                if (isPaused || isClosed) {
-                  e.preventDefault();
-                  return;
-                }
-                handleScrollTo(e, 'boletos');
-              }}
-            >
-              {isPaused ? 'Sorteo pausado' : isClosed ? 'Sorteo finalizado' : 'Elegir mis Boletos'}
-            </Button>
-            <Button
-              as="a"
-              href="#premio"
-              variant="accent"
-              size="lg"
-              leftIcon={<MapPin size={20} aria-hidden="true" />}
-              className={styles.ctaBtnSecondary}
-              onClick={(e) => handleScrollTo(e, 'premio')}
-            >
-              Conocer el Premio
-            </Button>
-          </div>
+          {/* Bloque de Prueba Social Real */}
+          {stats.isLoading ? (
+            <div className={styles.socialProofSkeleton} aria-hidden="true">
+              <div className={styles.skeletonProgressText} />
+              <div className={styles.skeletonProgressBar} />
+            </div>
+          ) : stats.hasError || stats.total === 0 ? null : (
+            <div className={styles.socialProofWrapper}>
+              {stats.isEarlyStage ? (
+                <div className={styles.socialProofEarly}>
+                  <Sparkles size={16} aria-hidden="true" className={styles.earlyIcon} />
+                  <span>¡Sé de los primeros en participar!</span>
+                </div>
+              ) : (
+                <>
+                  <div className={styles.socialProofHeader}>
+                    <span className={styles.socialProofText}>
+                      <strong>{formatTicketCount(stats.sold)}</strong> de{' '}
+                      {formatTicketCount(stats.total)} boletos vendidos
+                    </span>
+                    {stats.isAlmostSoldOut && (
+                      <span className={styles.almostSoldOutBadge}>
+                        <Flame size={14} aria-hidden="true" /> ¡Últimos boletos disponibles!
+                      </span>
+                    )}
+                  </div>
+
+                  <div
+                    className={styles.progressTrack}
+                    role="progressbar"
+                    aria-valuemin={0}
+                    aria-valuemax={stats.total}
+                    aria-valuenow={stats.sold}
+                    aria-label={`Progreso del sorteo: ${formatTicketCount(stats.sold)} de ${formatTicketCount(stats.total)} boletos vendidos`}
+                  >
+                    <div
+                      className={styles.progressSold}
+                      style={{ width: `${Math.min(stats.percentageSold, 100)}%` }}
+                    />
+                    {stats.percentageReserved > 0 && (
+                      <div
+                        className={styles.progressReserved}
+                        style={{
+                          width: `${Math.min(stats.percentageReserved, 100 - stats.percentageSold)}%`,
+                        }}
+                        title={`${formatTicketCount(stats.reserved)} boletos reservados`}
+                      />
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Franja de Métricas y Transparencia (Trust Grid con solape inferior) */}

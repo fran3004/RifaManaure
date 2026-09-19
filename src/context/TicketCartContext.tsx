@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import type { TicketRow, RaffleRow, WinnerWithDetails } from '@/types/raffle.types';
 import { getActiveRaffle, getTickets } from '@/services/ticketService';
 import { getWinnerForRaffle } from '@/services/winnerService';
 import { useSystemSettings } from '@/hooks/useSystemSettings';
 import { supabase } from '@/lib/supabase';
 import { getRandomTicketNumbers } from '@/lib/utils';
+import { calculateTicketStats } from '@/config/ticketSocialProof';
 import { TicketCartContext } from './TicketCartContextDefinition';
 import { ToastNotification, type ToastItem } from '@/components/common/ToastNotification';
 
@@ -50,6 +51,11 @@ export const TicketCartProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     systemSettings?.max_tickets_per_buyer ?? raffle?.max_tickets_per_buyer ?? 20;
   const unitPrice = raffle?.ticket_price ? Number(raffle.ticket_price) : 0;
   const totalAmount = selectedTickets.length * unitPrice;
+
+  // Estadísticas unificadas y reactivas en tiempo real derivadas del listado de boletos
+  const ticketStats = useMemo(() => {
+    return calculateTicketStats(tickets);
+  }, [tickets]);
 
   const showToast = useCallback(
     (
@@ -365,6 +371,7 @@ export const TicketCartProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         winner,
         systemSettings,
         tickets,
+        ticketStats,
         selectedTickets,
         isLoading,
         unitPrice,
