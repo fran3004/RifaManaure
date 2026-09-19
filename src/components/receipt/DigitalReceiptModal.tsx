@@ -6,16 +6,7 @@ import {
   getWhatsAppShareText,
   type DigitalReceiptData,
 } from '@/services/receiptGeneratorService';
-import {
-  X,
-  FileText,
-  MessageCircle,
-  ShieldCheck,
-  CheckCircle2,
-  Copy,
-  Check,
-  Smartphone,
-} from 'lucide-react';
+import { X, FileText, MessageCircle, CheckCircle2, Copy, Check, Smartphone } from 'lucide-react';
 import styles from './DigitalReceiptModal.module.css';
 
 interface DigitalReceiptModalProps {
@@ -105,7 +96,13 @@ export const DigitalReceiptModal: React.FC<DigitalReceiptModalProps> = ({
         <div className={styles.modalHeader}>
           <div className={styles.modalTitleGroup}>
             <div className={styles.modalTitleIcon}>
-              <ShieldCheck size={24} />
+              <img
+                src="/favicon.svg"
+                alt="Logo oficial Manaure Vive"
+                width={36}
+                height={36}
+                className={styles.receiptBrandLogo}
+              />
             </div>
             <div>
               <h3 className={styles.modalTitle}>Comprobante Digital Oficial</h3>

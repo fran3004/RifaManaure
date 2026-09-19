@@ -84,4 +84,3 @@ describe('prizeService - Gestión del Premio Mayor', () => {
     expect(retrieved.experiences).toHaveLength(DEFAULT_PRIZE_EXPERIENCES.length);
   });
 });
-

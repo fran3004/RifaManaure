@@ -1,29 +1,46 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
-  <defs>
-    <linearGradient id="mvGoldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#fbbf24" />
-      <stop offset="100%" stop-color="#d97706" />
-    </linearGradient>
-    <linearGradient id="mvGreenGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#34d399" />
-      <stop offset="100%" stop-color="#059669" />
-    </linearGradient>
-  </defs>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
 
-  <!-- Background Base -->
-  <rect width="64" height="64" rx="16" fill="#0a1410" />
-  <rect width="60" height="60" x="2" y="2" rx="14" fill="none" stroke="url(#mvGoldGrad)" stroke-width="2" opacity="0.85" />
+<defs>
+  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#1c6b3c"/><stop offset="0.55" stop-color="#0d4a2b"/><stop offset="1" stop-color="#062a1a"/>
+  </linearGradient>
+  <radialGradient id="sun" cx="0.45" cy="0.42" r="0.6">
+    <stop offset="0" stop-color="#fff3a3"/><stop offset="0.45" stop-color="#fdc02e"/><stop offset="1" stop-color="#f47a12"/>
+  </radialGradient>
+  <linearGradient id="gHead" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#6fd23a"/><stop offset="1" stop-color="#1f9d3f"/>
+  </linearGradient>
+  <linearGradient id="gBody" x1="0.1" y1="0" x2="0.9" y2="1">
+    <stop offset="0" stop-color="#22a447"/><stop offset="0.6" stop-color="#63c832"/><stop offset="1" stop-color="#d7e02a"/>
+  </linearGradient>
+  <linearGradient id="gThroat" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#ffd23f"/><stop offset="1" stop-color="#ff9f1c"/>
+  </linearGradient>
+  <linearGradient id="fGreen" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#0d7a6a"/><stop offset="1" stop-color="#34c759"/></linearGradient>
+  <linearGradient id="fTeal" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#0b4f8a"/><stop offset="1" stop-color="#1fa3b8"/></linearGradient>
+  <linearGradient id="fRed" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#ff5a1f"/><stop offset="1" stop-color="#e0142f"/></linearGradient>
+  <linearGradient id="fRed2" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#ff8a1f"/><stop offset="1" stop-color="#ee2b2b"/></linearGradient>
+  <linearGradient id="fOr" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#ffb61f"/><stop offset="1" stop-color="#f26a12"/></linearGradient>
+  <linearGradient id="fYel" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#ffd83a"/><stop offset="1" stop-color="#ff9a1f"/></linearGradient>
+</defs>
+<clipPath id="clip"><rect width="512" height="512" rx="112"/></clipPath><g clip-path="url(#clip)">
+<rect width="512" height="512" rx="112" fill="url(#bg)"/>
 
-  <!-- Mountain Silhouettes (Serranía del Perijá) -->
-  <path d="M12 44 L28 20 L40 34 L48 24 L54 44 Z" fill="url(#mvGreenGrad)" opacity="0.9" />
-  <path d="M22 44 L34 26 L44 44 Z" fill="#064e3b" opacity="0.75" />
+  <circle cx="170" cy="214" r="112" fill="#0a3d24"/>
+  <circle cx="170" cy="214" r="112" fill="none" stroke="#fbb324" stroke-width="22"/>
 
-  <!-- Hummingbird / Sun Emblem (Manaure Vive) -->
-  <circle cx="20" cy="18" r="4.5" fill="url(#mvGoldGrad)" />
-  
-  <!-- Stylized MV Wings / Ascending Curve -->
-  <path d="M20 22 C26 24 38 28 48 20 C42 27 34 32 20 30 Z" fill="url(#mvGoldGrad)" />
-
-  <!-- Base Accent line -->
-  <path d="M16 47 L48 47" stroke="url(#mvGoldGrad)" stroke-width="2.5" stroke-linecap="round" />
+<g transform="translate(-29.20 -49.90) scale(1.15)">
+<path transform="translate(312,352) rotate(104)" d="M0,0 C24.6,-32.0 80.6,-27.2 112.0,0 C80.6,27.2 24.6,32.0 0,0 Z" fill="#e11d2e" stroke="#ffffff" stroke-width="0" stroke-linejoin="round" />
+<path transform="translate(312,352) rotate(72)" d="M0,0 C25.5,-32.0 83.5,-27.2 116.0,0 C83.5,27.2 25.5,32.0 0,0 Z" fill="#2563eb" stroke="#ffffff" stroke-width="0" stroke-linejoin="round" />
+<path transform="translate(288,270) rotate(-66)" d="M0,0 C45.1,-62.0 147.6,-52.7 205.0,0 C147.6,52.7 45.1,62.0 0,0 Z" fill="#22c55e" stroke="#ffffff" stroke-width="0" stroke-linejoin="round" />
+<path transform="translate(288,270) rotate(-34)" d="M0,0 C46.2,-64.0 151.2,-54.4 210.0,0 C151.2,54.4 46.2,64.0 0,0 Z" fill="#e11d2e" stroke="#ffffff" stroke-width="0" stroke-linejoin="round" />
+<path transform="translate(288,270) rotate(-4)" d="M0,0 C42.9,-60.0 140.4,-51.0 195.0,0 C140.4,51.0 42.9,60.0 0,0 Z" fill="#f97316" stroke="#ffffff" stroke-width="0" stroke-linejoin="round" />
+<path transform="translate(288,270) rotate(24)" d="M0,0 C33.0,-50.0 108.0,-42.5 150.0,0 C108.0,42.5 33.0,50.0 0,0 Z" fill="#fbbf24" stroke="#ffffff" stroke-width="0" stroke-linejoin="round" />
+<ellipse cx="262" cy="305" rx="98" ry="56" transform="rotate(50 262 305)" fill="url(#gBody)" stroke="#ffffff" stroke-width="0"/>
+<path d="M180 196 L34 166 L184 246 Z" fill="#f4efd6" stroke="#ffffff" stroke-width="0" stroke-linejoin="round"/>
+<circle cx="207" cy="222" r="55" fill="url(#gHead)" stroke="#ffffff" stroke-width="0"/>
+<path d="M160 218 C160 196 182 186 200 196 C196 218 206 240 224 254 C196 272 162 250 160 218 Z" fill="url(#gThroat)"/>
+<circle cx="214" cy="211" r="13" fill="#0b0f0d"/>
+</g>
+</g>
 </svg>

@@ -12,7 +12,6 @@ import {
   Trophy,
   History,
   Settings,
-  Shield,
   X,
   LogOut,
   Users,
@@ -42,9 +41,13 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({ isOpen, onClose }) =
       {/* Encabezado con Logo de Marca */}
       <div className={styles.brandArea}>
         <Link to="/admin" className={styles.brandLink} onClick={handleLinkClick}>
-          <div className={styles.brandIcon}>
-            <Shield size={22} />
-          </div>
+          <img
+            src="/favicon.svg"
+            alt="Logo oficial Manaure Vive"
+            width={38}
+            height={38}
+            className={styles.brandLogoImg}
+          />
           <div className={styles.brandText}>
             <span className={styles.brandName}>Manaure Vive</span>
             <span className={styles.brandTag}>Panel Admin</span>

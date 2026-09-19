@@ -417,7 +417,13 @@ export const ModalCheckout: React.FC = () => {
         {/* Barra Superior del Modal */}
         <div className={styles.modalHeader}>
           <div className={styles.modalTitleBox}>
-            <ShieldCheck size={22} className={styles.shieldIcon} />
+            <img
+              src="/favicon.svg"
+              alt="Manaure Vive"
+              width={32}
+              height={32}
+              className={styles.checkoutBrandLogo}
+            />
             <div>
               <h3 className={styles.modalTitle}>Checkout Seguro</h3>
               <span className={styles.modalSub}>Gran Rifa Ecoturística Manaure Vive</span>
