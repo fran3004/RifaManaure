@@ -1,0 +1,44 @@
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2, 8px);
+  padding: 0.35rem 0.95rem;
+  border-radius: var(--radius-full, 999px);
+  font-family: var(--font-sans, sans-serif);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  width: fit-content;
+  white-space: nowrap;
+  box-sizing: border-box;
+  transition: all var(--transition-fast, 150ms ease);
+}
+
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Variantes */
+.soft {
+  background-color: var(--brand-accent-soft, #FDF1D8);
+  border: 1px solid rgba(245, 166, 35, 0.55);
+  color: var(--brand-accent-strong, #8A5200);
+}
+
+.dark {
+  background-color: rgba(15, 46, 29, 0.78);
+  border: 1px solid var(--brand-accent, #F5A623);
+  color: var(--brand-accent, #F5A623);
+}
+
+.accent {
+  background-color: var(--brand-accent, #F5A623);
+  border: 1px solid var(--brand-accent, #F5A623);
+  color: var(--brand-deep, #0F2E1D); /* NUNCA blanco */
+}
+

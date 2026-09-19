@@ -15,6 +15,7 @@ import {
   Compass,
   Heart,
 } from 'lucide-react';
+import { SectionHeader } from '@/components/public/ui';
 import styles from './DetallePremio.module.css';
 
 function renderExperienceIcon(iconName: string): React.ReactNode {
@@ -87,14 +88,13 @@ export const DetallePremio: React.FC = () => {
     <section id="premio" className={styles.premioSection} aria-labelledby="titulo-premio">
       <div className="container">
         {/* Cabecera de la Sección */}
-        <div className={styles.header}>
-          <div className={styles.badge}>
-            <Users size={16} aria-hidden="true" />
-            <span>{settings.badge_text}</span>
-          </div>
-          <h2 id="titulo-premio" className={styles.title}>{renderSectionTitle(settings.title)}</h2>
-          <p className={styles.subtitle}>{settings.subtitle}</p>
-        </div>
+        <SectionHeader
+          id="titulo-premio"
+          badge={settings.badge_text}
+          icon={<Users size={16} aria-hidden="true" />}
+          title={renderSectionTitle(settings.title)}
+          subtitle={settings.subtitle}
+        />
 
         {/* Grilla de Experiencias */}
         <div className={styles.grid}>

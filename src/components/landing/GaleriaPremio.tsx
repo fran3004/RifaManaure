@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { fotos, type Foto } from '@/assets/assets';
 import { Image, X, ChevronLeft, ChevronRight, Maximize2 } from 'lucide-react';
+import { SectionHeader } from '@/components/public/ui';
 import styles from './GaleriaPremio.module.css';
 
 type CategoriaFiltro = 'todas' | 'cuatrimoto' | 'parapente' | 'serrania' | 'fogata';
@@ -50,19 +51,17 @@ export const GaleriaPremio: React.FC = () => {
     <section id="galeria" className={styles.galeriaSection} aria-labelledby="titulo-galeria">
       <div className="container">
         {/* Cabecera */}
-        <div className={styles.header}>
-          <div className={styles.badge}>
-            <Image size={16} aria-hidden="true" />
-            <span>Fotografías Reales del Destino</span>
-          </div>
-          <h2 id="titulo-galeria" className={styles.title}>
-            Explora los paisajes que <span className="highlight-text">podrías vivir</span>
-          </h2>
-          <p className={styles.subtitle}>
-            Fotos auténticas de las rutas, el glamping y las actividades extremas en Manaure y la
-            Serranía del Perijá.
-          </p>
-
+        <SectionHeader
+          id="titulo-galeria"
+          badge="Fotografías Reales del Destino"
+          icon={<Image size={16} aria-hidden="true" />}
+          title={
+            <>
+              Explora los paisajes que <span className="highlight-text">podrías vivir</span>
+            </>
+          }
+          subtitle="Fotos auténticas de las rutas, el glamping y las actividades extremas en Manaure y la Serranía del Perijá."
+        >
           {/* Filtros por Categoría */}
           <div className={styles.filterTabs}>
             <button
@@ -101,7 +100,7 @@ export const GaleriaPremio: React.FC = () => {
               Glamping & Fogata
             </button>
           </div>
-        </div>
+        </SectionHeader>
 
         {/* Grilla de Galería */}
         <div className={styles.galleryGrid}>

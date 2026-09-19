@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { HelpCircle, ChevronDown } from 'lucide-react';
+import { SectionHeader } from '@/components/public/ui';
 import styles from './PreguntasFrecuentes.module.css';
 
 interface FaqItem {
@@ -50,17 +51,13 @@ export const PreguntasFrecuentes: React.FC = () => {
   return (
     <section id="faq" className={styles.faqSection} aria-labelledby="titulo-faq">
       <div className="container">
-        <div className={styles.header}>
-          <div className={styles.badge}>
-            <HelpCircle size={16} aria-hidden="true" />
-            <span>Transparencia y Legalidad</span>
-          </div>
-          <h2 id="titulo-faq" className={styles.title}>Preguntas Frecuentes</h2>
-          <p className={styles.subtitle}>
-            Todo lo que necesitas saber sobre la mecánica del sorteo, medios de pago y entrega del
-            premio.
-          </p>
-        </div>
+        <SectionHeader
+          id="titulo-faq"
+          badge="Transparencia y Legalidad"
+          icon={<HelpCircle size={16} aria-hidden="true" />}
+          title="Preguntas Frecuentes"
+          subtitle="Todo lo que necesitas saber sobre la mecánica del sorteo, medios de pago y entrega del premio."
+        />
 
         <div className={styles.accordionContainer}>
           {faqs.map((faq, index) => {

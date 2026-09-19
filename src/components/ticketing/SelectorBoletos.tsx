@@ -12,6 +12,7 @@ import {
   Filter,
 } from 'lucide-react';
 import { formatCOP, formatTicketNumber } from '@/lib/utils';
+import { SectionHeader } from '@/components/public/ui';
 import { GanadorShowcase } from './GanadorShowcase';
 import styles from './SelectorBoletos.module.css';
 
@@ -97,19 +98,22 @@ export const SelectorBoletos: React.FC = () => {
     <section id="boletos" className={styles.section} aria-labelledby="titulo-boletos">
       <div className="container">
         {/* Cabecera del Selector */}
-        <div className={styles.header}>
-          <div className={styles.badge}>
-            <Ticket size={16} aria-hidden="true" />
-            <span>Matriz de Boletos Oficial (000 - 999)</span>
-          </div>
-          <h2 id="titulo-boletos" className={styles.title}>
-            Elige tus <span className="highlight-text">Números de la Suerte</span>
-          </h2>
-          <p className={styles.subtitle}>
-            Haz clic en los números que deseas comprar o usa el botón de selección aleatoria. Valor
-            por boleto: <strong>{unitPrice > 0 ? formatCOP(unitPrice) : '...'}</strong>.
-          </p>
-
+        <SectionHeader
+          id="titulo-boletos"
+          badge="Matriz de Boletos Oficial (000 - 999)"
+          icon={<Ticket size={16} aria-hidden="true" />}
+          title={
+            <>
+              Elige tus <span className="highlight-text">Números de la Suerte</span>
+            </>
+          }
+          subtitle={
+            <>
+              Haz clic en los números que deseas comprar o usa el botón de selección aleatoria. Valor
+              por boleto: <strong>{unitPrice > 0 ? formatCOP(unitPrice) : '...'}</strong>.
+            </>
+          }
+        >
           {/* Banner de Sorteo Pausado */}
           {isRafflePaused && (
             <div
@@ -201,7 +205,7 @@ export const SelectorBoletos: React.FC = () => {
               </span>
             </div>
           </div>
-        </div>
+        </SectionHeader>
 
         {/* Barra de Control, Búsqueda y Botones de la Suerte */}
         <div className={styles.controlPanel}>

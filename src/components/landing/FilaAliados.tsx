@@ -3,6 +3,7 @@ import { aliados as fallbackAliados } from '@/assets/assets';
 import { getActivePartners } from '@/services/partnerService';
 import type { PartnerRow } from '@/types/raffle.types';
 import { Handshake, MoveHorizontal } from 'lucide-react';
+import { SectionHeader } from '@/components/public/ui';
 import styles from './FilaAliados.module.css';
 
 // Enlaces directos a las cuentas oficiales de Instagram de los aliados
@@ -303,16 +304,13 @@ export const FilaAliados: React.FC = () => {
   return (
     <section id="aliados" className={styles.aliadosSection} aria-labelledby="titulo-aliados">
       <div className="container">
-        <div className={styles.header}>
-          <div className={styles.badge}>
-            <Handshake size={16} aria-hidden="true" />
-            <span>Red de Convenios y Turismo Local</span>
-          </div>
-          <h2 id="titulo-aliados" className={styles.title}>Nuestros Aliados Oficiales</h2>
-          <p className={styles.subtitle}>
-            Empresas, operadores turísticos y restaurantes locales que hacen posible el premio y
-            respaldan este sorteo. Haz clic en cualquier logo para abrir su Instagram oficial.
-          </p>
+        <SectionHeader
+          id="titulo-aliados"
+          badge="Red de Convenios y Turismo Local"
+          icon={<Handshake size={16} aria-hidden="true" />}
+          title="Nuestros Aliados Oficiales"
+          subtitle="Empresas, operadores turísticos y restaurantes locales que hacen posible el premio y respaldan este sorteo. Haz clic en cualquier logo para abrir su Instagram oficial."
+        >
           <div className={styles.interactionHint}>
             <MoveHorizontal size={14} aria-hidden="true" />
             <span>
@@ -320,7 +318,7 @@ export const FilaAliados: React.FC = () => {
               visitar su Instagram
             </span>
           </div>
-        </div>
+        </SectionHeader>
       </div>
 
       {/* Contenedor del Carrusel en Fila Única sin barras de scroll */}

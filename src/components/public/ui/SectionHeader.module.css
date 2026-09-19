@@ -1,0 +1,56 @@
+.header {
+  margin: 0 auto 3.5rem;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.center {
+  align-items: center;
+  text-align: center;
+  max-width: 800px;
+}
+
+.left {
+  align-items: flex-start;
+  text-align: left;
+  max-width: 800px;
+}
+
+.badgeWrapper {
+  margin-bottom: 1.25rem;
+}
+
+.title {
+  font-family: var(--font-heading, 'Playfair Display Variable', Georgia, serif);
+  font-size: clamp(1.85rem, 3.5vw, 2.6rem);
+  font-weight: 800;
+  line-height: 1.2;
+  color: var(--text-primary, #16261C);
+  margin: 0 0 1rem 0;
+  letter-spacing: -0.02em;
+}
+
+.tone-dark .title {
+  color: var(--text-on-dark, #EEF4EF);
+}
+
+.subtitle {
+  font-family: var(--font-sans, 'Outfit Variable', sans-serif);
+  font-size: clamp(0.95rem, 1.5vw, 1.1rem);
+  color: var(--text-secondary, #41564A);
+  line-height: 1.6;
+  max-width: 60ch;
+  margin: 0;
+}
+
+.tone-dark .subtitle {
+  color: var(--text-on-dark-muted, #B9CDBF);
+}
+
+@media (max-width: 768px) {
+  .header {
+    margin-bottom: 2.5rem;
+  }
+}
+
