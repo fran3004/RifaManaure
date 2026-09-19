@@ -1,109 +1,132 @@
 .galeriaSection {
-  padding: 6rem 0;
-  background-color: var(--bg-surface);
-  border-top: 1px solid var(--border-subtle);
+  padding: clamp(4rem, 8vw, 7rem) 0;
+  background-color: var(--bg-page);
+  position: relative;
 }
 
+/* --- Filtros por Categoría como Chips --- */
 .filterTabs {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 0.6rem;
-  margin-top: 1.5rem;
+  gap: 0.5rem;
+  margin-top: 1.75rem;
 }
 
-.filterBtn {
-  padding: 0.6rem 1.25rem;
+.filterChip {
+  padding: 0.5rem 1.15rem;
   min-height: 44px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border-radius: var(--radius-full);
-  background-color: var(--bg-surface-elevated);
+  background-color: var(--bg-card);
   border: 1px solid var(--border-subtle);
-  color: var(--text-secondary);
+  color: var(--brand-primary);
+  font-family: var(--font-sans);
   font-size: 0.875rem;
   font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
   transition: all var(--transition-fast);
 }
 
-.filterBtn:hover {
-  color: var(--text-primary);
-  border-color: var(--text-muted);
+.filterChip:hover:not(.filterChipActive) {
+  background-color: var(--bg-surface);
+  border-color: var(--brand-primary);
 }
 
-.filterActive {
-  background-color: var(--color-brand-primary-light);
-  border-color: var(--color-brand-accent);
-  color: var(--color-brand-accent);
+.filterChip:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
 }
 
+.filterChipActive {
+  background-color: var(--brand-primary);
+  border-color: var(--brand-primary);
+  color: #FFFFFF;
+  font-weight: 700;
+  box-shadow: var(--shadow-sm);
+}
+
+/* --- Grilla de Fotografías --- */
 .galleryGrid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 1.5rem;
+  margin-top: 2.5rem;
 }
 
 .galleryItem {
   position: relative;
   aspect-ratio: 3 / 2;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   overflow: hidden;
   cursor: pointer;
-  background-color: var(--bg-surface-elevated);
+  background-color: var(--bg-card);
   border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-sm);
+  padding: 0;
+  text-align: left;
+  display: block;
+  width: 100%;
+  transition: box-shadow var(--transition-fast), border-color var(--transition-fast);
+}
+
+.galleryItem:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 3px;
+  z-index: 2;
 }
 
 .galleryImage {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block;
   transition: transform var(--transition-normal);
+}
+
+.galleryItem:hover .galleryImage {
+  transform: scale(1.03);
 }
 
 .itemOverlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    0deg,
-    rgba(15, 46, 29, 0.9) 0%,
-    rgba(15, 46, 29, 0.2) 60%,
-    transparent 100%
-  );
+  background: var(--scrim-photo);
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
   padding: 1.25rem;
   opacity: 0;
   transition: opacity var(--transition-fast);
+  box-sizing: border-box;
 }
 
 .galleryItem:hover .itemOverlay,
-.galleryItem:focus .itemOverlay {
+.galleryItem:focus-visible .itemOverlay {
   opacity: 1;
 }
 
-.galleryItem:hover .galleryImage {
-  transform: scale(1.06);
-}
-
 .zoomIcon {
-  color: var(--color-brand-accent);
+  color: var(--brand-accent);
   margin-bottom: 0.5rem;
 }
 
 .itemCaption {
-  font-size: 0.875rem;
+  font-size: 0.9rem;
   font-weight: 600;
-  color: var(--text-primary);
-  line-height: 1.3;
+  color: #FFFFFF;
+  line-height: 1.35;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
 }
 
-/* --- Lightbox Modal --- */
+/* --- Lightbox Modal Accesible --- */
 .lightboxBackdrop {
   position: fixed;
   inset: 0;
-  z-index: var(--z-lightbox);
+  z-index: var(--z-lightbox, 1100);
   background-color: rgba(15, 46, 29, 0.94);
   backdrop-filter: blur(16px);
   display: flex;
@@ -111,6 +134,7 @@
   justify-content: center;
   padding: 1.5rem;
   animation: fadeIn 200ms ease;
+  box-sizing: border-box;
 }
 
 @keyframes fadeIn {
@@ -124,7 +148,7 @@
 
 .lightboxContent {
   position: relative;
-  max-width: 1200px;
+  max-width: 1100px;
   max-height: 90vh;
   width: 100%;
   display: flex;
@@ -137,42 +161,56 @@
   flex-direction: column;
   align-items: center;
   max-height: 85vh;
+  width: 100%;
 }
 
 .lightboxImg {
   max-width: 100%;
-  max-height: 75vh;
+  max-height: 72vh;
   object-fit: contain;
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-lg);
 }
 
 .lightboxCaption {
-  margin-top: 1rem;
+  margin-top: 0.75rem;
   display: flex;
+  align-items: center;
   justify-content: space-between;
+  gap: 1rem;
   width: 100%;
-  font-size: 0.95rem;
-  color: var(--text-primary);
-  background-color: rgba(15, 46, 29, 0.85);
-  padding: 0.75rem 1.25rem;
+  max-width: 800px;
+  font-size: 0.92rem;
+  color: var(--text-on-dark);
+  background-color: rgba(15, 46, 29, 0.9);
+  border: 1px solid rgba(245, 166, 35, 0.3);
+  padding: 0.65rem 1.25rem;
   border-radius: var(--radius-sm);
+  box-sizing: border-box;
 }
 
-.lightboxCaption span {
-  color: var(--color-brand-accent);
+.lightboxAlt {
+  margin: 0;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.lightboxCounter {
+  color: var(--brand-accent);
+  font-family: var(--font-mono);
   font-weight: 700;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 }
 
 .closeBtn {
   position: absolute;
-  top: -2.5rem;
+  top: -2.75rem;
   right: 0;
-  color: var(--text-primary);
-  background-color: var(--bg-surface-elevated);
-  border: 1px solid var(--border-subtle);
+  color: #FFFFFF;
+  background-color: rgba(15, 46, 29, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: var(--radius-full);
-  padding: 0.4rem;
   width: 44px;
   height: 44px;
   min-width: 44px;
@@ -180,23 +218,29 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
   transition: all var(--transition-fast);
 }
 
 .closeBtn:hover {
-  color: var(--color-brand-accent);
-  transform: scale(1.1);
+  background-color: var(--brand-primary);
+  border-color: var(--brand-accent);
+  color: var(--brand-accent);
+}
+
+.closeBtn:focus-visible {
+  outline: 3px solid var(--focus-ring-on-dark);
+  outline-offset: 2px;
 }
 
 .navArrow {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  color: var(--text-primary);
-  background-color: var(--bg-surface-glass);
-  border: 1px solid var(--border-subtle);
+  color: #FFFFFF;
+  background-color: rgba(15, 46, 29, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: var(--radius-full);
-  padding: 0.6rem;
   width: 48px;
   height: 48px;
   min-width: 48px;
@@ -204,25 +248,34 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
   transition: all var(--transition-fast);
+  z-index: 2;
 }
 
 .navArrow:hover {
-  background-color: var(--color-brand-primary-light);
-  color: var(--color-brand-accent);
+  background-color: var(--brand-primary);
+  border-color: var(--brand-accent);
+  color: var(--brand-accent);
+}
+
+.navArrow:focus-visible {
+  outline: 3px solid var(--focus-ring-on-dark);
+  outline-offset: 2px;
 }
 
 .prevArrow {
-  left: -1rem;
+  left: -1.25rem;
 }
 
 .nextArrow {
-  right: -1rem;
+  right: -1.25rem;
 }
 
 @media (max-width: 768px) {
   .galleryGrid {
     grid-template-columns: 1fr;
+    gap: 1rem;
   }
 
   .navArrow {
@@ -231,5 +284,35 @@
 
   .closeBtn {
     top: -3rem;
+  }
+
+  .lightboxContent {
+    max-height: 85vh;
+  }
+
+  .lightboxImg {
+    max-height: 65vh;
+  }
+
+  .lightboxCaption {
+    font-size: 0.85rem;
+    padding: 0.5rem 0.85rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lightboxBackdrop {
+    animation: none;
+  }
+
+  .galleryImage,
+  .galleryItem:hover .galleryImage {
+    transition: none;
+    transform: none;
+  }
+
+  .closeBtn,
+  .navArrow {
+    transition: none;
   }
 }
