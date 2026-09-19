@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { formatCOP } from '@/lib/utils';
 import { useTicketCart } from '@/context/useTicketCart';
+import { Button } from '@/components/public/ui/Button';
 import styles from './HeroRifa.module.css';
 
 interface HeroRifaProps {
@@ -62,6 +63,15 @@ export const HeroRifa: React.FC<HeroRifaProps> = ({
     alt: 'Cuatrimotos en Manaure Balcón del Cesar',
   };
 
+  const handleScrollTo = (e: React.MouseEvent<HTMLAnchorElement>, targetId: string) => {
+    e.preventDefault();
+    const el = document.getElementById(targetId);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      window.history.pushState(null, '', `/#${targetId}`);
+    }
+  };
+
   return (
     <section className={styles.heroSection} aria-label="Introducción al Gran Sorteo Ecoturístico">
       {/* Fondo de pantalla completa con <picture> optimizado */}
@@ -84,33 +94,19 @@ export const HeroRifa: React.FC<HeroRifaProps> = ({
       <div className={`container ${styles.contentContainer}`}>
         {/* Badge superior con estado de la rifa */}
         {isColdLoading ? (
-          <div className={styles.skeletonBadge} />
+          <div className={styles.skeletonBadge} aria-hidden="true" />
         ) : isPaused ? (
-          <div
-            className={styles.badge}
-            style={{
-              borderColor: '#f59e0b',
-              background: 'rgba(245, 158, 11, 0.15)',
-              color: '#fbbf24',
-            }}
-          >
+          <div className={`${styles.badge} ${styles.badgePaused}`} role="status">
             <PauseCircle size={16} aria-hidden="true" className={styles.badgeIcon} />
             <span>Sorteo Temporalmente Pausado</span>
           </div>
         ) : isClosed ? (
-          <div
-            className={styles.badge}
-            style={{
-              borderColor: '#64748b',
-              background: 'rgba(100, 116, 139, 0.15)',
-              color: '#94a3b8',
-            }}
-          >
+          <div className={`${styles.badge} ${styles.badgeClosed}`} role="status">
             <AlertCircle size={16} aria-hidden="true" className={styles.badgeIcon} />
             <span>Edición Finalizada</span>
           </div>
         ) : (
-          <div className={styles.badge}>
+          <div className={`${styles.badge} ${styles.badgeActive}`} role="status">
             <Sparkles size={16} aria-hidden="true" className={styles.badgeIcon} />
             <span>
               {raffle?.status === 'active' ? 'Sorteo Oficial Activo' : 'Gran Sorteo Manaure Vive'}
@@ -120,14 +116,14 @@ export const HeroRifa: React.FC<HeroRifaProps> = ({
 
         {/* Titular Impactante */}
         {isColdLoading ? (
-          <div className={styles.skeletonTitle} />
+          <div className={styles.skeletonTitle} aria-hidden="true" />
         ) : (
           <h1 className={styles.title}>{raffle?.title || 'Gran Rifa Ecoturística Manaure Vive'}</h1>
         )}
 
         {/* Subtítulo Descriptivo */}
         {isColdLoading ? (
-          <div className={styles.skeletonSubtitle} />
+          <div className={styles.skeletonSubtitle} aria-hidden="true" />
         ) : (
           <p className={styles.subtitle}>
             {raffle?.description ||
@@ -135,59 +131,77 @@ export const HeroRifa: React.FC<HeroRifaProps> = ({
           </p>
         )}
 
-        {/* Tarjeta de Precios y CTA */}
+        {/* Tarjeta de Precios y CTAs */}
         <div className={styles.ctaBox}>
           <div className={styles.priceTag}>
             <span className={styles.priceLabel}>Valor por Boleto</span>
             {isColdLoading || ticketPrice <= 0 ? (
-              <div className={styles.skeletonPrice} />
+              <div className={styles.skeletonPrice} aria-hidden="true" />
             ) : (
               <strong className={styles.priceValue}>{formatCOP(ticketPrice)}</strong>
             )}
           </div>
 
           <div className={styles.ctaActions}>
-            <a
+            <Button
+              as="a"
               href="#boletos"
-              className={styles.btnPrimary}
-              style={isPaused || isClosed ? { opacity: 0.6, cursor: 'not-allowed' } : undefined}
+              variant="primary"
+              size="lg"
+              leftIcon={<Ticket size={20} aria-hidden="true" />}
+              disabled={isPaused || isClosed}
+              className={styles.ctaBtnPrimary}
+              onClick={(e) => {
+                if (isPaused || isClosed) {
+                  e.preventDefault();
+                  return;
+                }
+                handleScrollTo(e, 'boletos');
+              }}
             >
-              <Ticket size={20} aria-hidden="true" />{' '}
-              {isPaused ? 'Ventas Pausadas' : isClosed ? 'Sorteo Finalizado' : 'Elegir mis Boletos'}
-            </a>
-            <a href="#premio" className={styles.btnSecondary}>
-              <MapPin size={20} aria-hidden="true" /> Conocer el Premio
-            </a>
+              {isPaused ? 'Sorteo pausado' : isClosed ? 'Sorteo finalizado' : 'Elegir mis Boletos'}
+            </Button>
+            <Button
+              as="a"
+              href="#premio"
+              variant="accent"
+              size="lg"
+              leftIcon={<MapPin size={20} aria-hidden="true" />}
+              className={styles.ctaBtnSecondary}
+              onClick={(e) => handleScrollTo(e, 'premio')}
+            >
+              Conocer el Premio
+            </Button>
           </div>
         </div>
 
-        {/* Franja de Métricas y Transparencia */}
+        {/* Franja de Métricas y Transparencia (Trust Grid con solape inferior) */}
         <div className={styles.trustGrid}>
           <div className={styles.trustItem}>
-            <div className={styles.trustIconWrapper}>
-              <Trophy size={20} aria-hidden="true" />
+            <div className={styles.trustIconWrapper} aria-hidden="true">
+              <Trophy size={22} className={styles.trustIcon} />
             </div>
-            <div>
+            <div className={styles.trustContent}>
               <strong className={styles.trustTitle}>Premio Mayor Exclusivo</strong>
               <span className={styles.trustSub}>Experiencia VIP para 2 personas</span>
             </div>
           </div>
 
           <div className={styles.trustItem}>
-            <div className={styles.trustIconWrapper}>
-              <Calendar size={20} aria-hidden="true" />
+            <div className={styles.trustIconWrapper} aria-hidden="true">
+              <Calendar size={22} className={styles.trustIcon} />
             </div>
-            <div>
+            <div className={styles.trustContent}>
               <strong className={styles.trustTitle}>Fecha del Sorteo</strong>
               <span className={styles.trustSub}>{drawDateFormatted}</span>
             </div>
           </div>
 
           <div className={styles.trustItem}>
-            <div className={styles.trustIconWrapper}>
-              <ShieldCheck size={20} aria-hidden="true" />
+            <div className={styles.trustIconWrapper} aria-hidden="true">
+              <ShieldCheck size={22} className={styles.trustIcon} />
             </div>
-            <div>
+            <div className={styles.trustContent}>
               <strong className={styles.trustTitle}>Transparencia Garantizada</strong>
               <span className={styles.trustSub}>Juega con {lotteryReference}</span>
             </div>
