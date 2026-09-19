@@ -57,7 +57,7 @@
 }
 
 .faqCard:hover {
-  border-color: rgba(245, 158, 11, 0.4);
+  border-color: var(--color-brand-accent);
 }
 
 .faqCardOpen {

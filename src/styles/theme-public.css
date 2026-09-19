@@ -1,0 +1,140 @@
+/**
+ * Sistema de Diseño - Tema Público Aislado: "Manaure Vive"
+ * Paleta: Crema cálido + Verde Bosque + Ámbar / Dorado
+ *
+ * Ámbito estricto: [data-theme="public"]
+ * Los estilos de :root permanecen intactos para proteger el panel administrativo.
+ */
+
+[data-theme="public"] {
+  color-scheme: light;
+
+  /* --- Fondos y Superficies --- */
+  --bg-page: #F4EFE4;
+  --bg-surface: #FBF8F1;
+  --bg-card: #FFFFFF;
+  --border-subtle: #DCD5C4;
+
+  /* Alias de compatibilidad existentes */
+  --bg-main: var(--bg-page);
+  --bg-surface-elevated: var(--bg-card);
+  --bg-surface-glass: rgba(251, 248, 241, 0.92);
+
+  /* --- Jerarquía Tipográfica y Textos --- */
+  --text-primary: #16261C;
+  --text-secondary: #41564A;
+  --text-muted: #5A6B5F;
+  --text-on-dark: #EEF4EF;
+  --text-on-dark-muted: #B9CDBF;
+  --text-inverse: #0F2E1D; /* Sobre ámbar siempre texto oscuro --brand-deep */
+
+  /* --- Identidad de Marca y Acentos --- */
+  --brand-primary: #1B4A2E;
+  --brand-primary-hover: #246A40;
+  --brand-deep: #0F2E1D;
+
+  --brand-accent: #F5A623;
+  --brand-accent-strong: #8A5200;
+  --brand-accent-soft: #FDF1D8;
+
+  --brand-coral: #B23A09;
+  --brand-coral-soft: #FBE9E1;
+
+  --color-danger: #B42318;
+  --state-sold: #5F6673;
+
+  /* --- Foco y Accesibilidad --- */
+  --focus-ring: #1B4A2E;
+  --focus-ring-on-dark: #F5A623;
+  --border-focus: var(--focus-ring);
+
+  /* --- Scrims y Filtros de Imagen --- */
+  --scrim-photo: linear-gradient(
+    to top,
+    rgba(15, 46, 29, 0.92),
+    rgba(15, 46, 29, 0.75) 45%,
+    rgba(15, 46, 29, 0.3)
+  );
+
+  /* --- Alias de Compatibilidad con Componentes Existentes --- */
+  --color-brand-primary: var(--brand-primary);
+  --color-brand-primary-light: var(--brand-primary-hover);
+  --color-brand-accent: var(--brand-accent);
+  --color-brand-accent-hover: var(--brand-accent-strong);
+  --color-brand-accent-soft: var(--brand-accent-soft);
+
+  /* --- Estados de Boletos (Paleta Clara) --- */
+  --ticket-available-bg: #FFFFFF;
+  --ticket-available-border: #DCD5C4;
+  --ticket-available-text: #16261C;
+  --ticket-available-hover-bg: #EDF5F0;
+  --ticket-available-hover-border: var(--brand-primary);
+
+  --ticket-selected-bg: #F5A623;
+  --ticket-selected-border: #8A5200;
+  --ticket-selected-text: #0F2E1D;
+
+  --ticket-reserved-bg: #FBE9E1;
+  --ticket-reserved-border: #B23A09;
+  --ticket-reserved-text: #8A5200;
+
+  --ticket-sold-bg: #E8ECE9;
+  --ticket-sold-border: #D0D7D2;
+  --ticket-sold-text: #5F6673;
+
+  /* --- Radios de Borde --- */
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+  --radius-full: 999px;
+
+  /* --- Sombras Cálidas (Base rgba(15,46,29,α), nunca negro puro) --- */
+  --shadow-sm: 0 2px 6px rgba(15, 46, 29, 0.08);
+  --shadow-md: 0 6px 16px rgba(15, 46, 29, 0.12);
+  --shadow-lg: 0 12px 32px rgba(15, 46, 29, 0.16);
+  --shadow-glow: 0 0 24px rgba(245, 166, 35, 0.35);
+  --shadow-glow-amber: 0 0 24px rgba(245, 166, 35, 0.35);
+
+  /* --- Escala de Espaciado (4px) --- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-24: 96px;
+
+  /* --- Capas (z-index con nombre) --- */
+  --z-navbar: 100;
+  --z-cart: 200;
+  --z-whatsapp: 300;
+  --z-modal: 1000;
+  --z-lightbox: 1100;
+
+  /* --- Alturas --- */
+  --navbar-h: 72px;
+
+  /* --- Transiciones Modernas con Easing (.2, .7, .2, 1) --- */
+  --transition-easing: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --transition-fast: 150ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  --transition-base: 250ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  --transition-normal: var(--transition-base);
+  --transition-slow: 400ms cubic-bezier(0.2, 0.7, 0.2, 1);
+
+  background-color: var(--bg-page);
+  color: var(--text-primary);
+  min-height: 100vh;
+  width: 100%;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+@media (max-width: 768px) {
+  [data-theme="public"] {
+    --navbar-h: 64px;
+  }
+}

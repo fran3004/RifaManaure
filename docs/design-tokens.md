@@ -1,0 +1,162 @@
+# Sistema de Diseño: Tokens y Reglas de Uso ("Manaure Vive")
+
+Este documento especifica el sistema de diseño del tema público nuevo (Crema cálido + Verde Bosque + Ámbar / Dorado) aislado bajo el selector `[data-theme="public"]`. El panel administrativo conserva sus tokens intactos en `:root`.
+
+---
+
+## 1. Tokens de Diseño (`[data-theme="public"]`)
+
+### Fondos y Superficies
+| Token | Valor Hex / Declaración | Rol / Uso |
+| :--- | :--- | :--- |
+| `--bg-page` | `#F4EFE4` | Fondo principal de la página (crema cálido) |
+| `--bg-surface` | `#FBF8F1` | Paneles, tarjetas secundarias y barras |
+| `--bg-card` | `#FFFFFF` | Tarjetas de boletos, modales y contenido elevado |
+| `--border-subtle` | `#DCD5C4` | Separadores, bordes de contenedor y divisores |
+| `--bg-main` | `var(--bg-page)` | Alias de retrocompatibilidad con componentes existentes |
+| `--bg-surface-elevated` | `var(--bg-card)` | Alias de retrocompatibilidad |
+| `--bg-surface-glass` | `rgba(251, 248, 241, 0.92)` | Fondo translúcido con desenfoque (`backdrop-filter`) |
+
+### Jerarquía Tipográfica y Textos
+| Token | Valor Hex | Rol / Uso |
+| :--- | :--- | :--- |
+| `--text-primary` | `#16261C` | Texto principal y encabezados sobre fondos claros |
+| `--text-secondary` | `#41564A` | Texto secundario, subtítulos y metadatos |
+| `--text-muted` | `#5A6B5F` | Etiquetas atenuadas, notas al pie (WCAG AA ≥ 4.5:1) |
+| `--text-on-dark` | `#EEF4EF` | Texto de alto contraste sobre fondos oscuros o bosque |
+| `--text-on-dark-muted` | `#B9CDBF` | Texto secundario sobre fondos oscuros o pie de página |
+| `--text-inverse` | `#0F2E1D` | Texto sobre botones ámbar / acento (nunca blanco) |
+
+### Identidad de Marca y Estados
+| Token | Valor Hex | Rol / Uso |
+| :--- | :--- | :--- |
+| `--brand-primary` | `#1B4A2E` | Verde bosque profundo corporativo |
+| `--brand-primary-hover` | `#246A40` | Estado interactivo hover de elementos verdes |
+| `--brand-deep` | `#0F2E1D` | Verde bosque noche (fondos de footer, texto sobre ámbar) |
+| `--brand-accent` | `#F5A623` | Ámbar dorado de acento para CTAs e insignias |
+| `--brand-accent-strong` | `#8A5200` | Ámbar oscuro legible como texto sobre fondo claro |
+| `--brand-accent-soft` | `#FDF1D8` | Fondo tintado cálido para badges de acento |
+| `--brand-coral` | `#B23A09` | Naranja/coral cálido para boletos reservados |
+| `--brand-coral-soft` | `#FBE9E1` | Fondo de aviso para boletos reservados o alertas |
+| `--color-danger` | `#B42318` | Rojo de error accesible |
+| `--state-sold` | `#5F6673` | Gris neutro para estado de boletos vendidos |
+| `--focus-ring` | `#1B4A2E` | Anillo de foco accesible sobre superficies claras |
+| `--focus-ring-on-dark` | `#F5A623` | Anillo de foco sobre superficies oscuras |
+| `--border-focus` | `var(--focus-ring)` | Alias de foco |
+
+### Scrims y Filtros de Fotografía
+| Token | Definición |
+| :--- | :--- |
+| `--scrim-photo` | `linear-gradient(to top, rgba(15,46,29,.92), rgba(15,46,29,.75) 45%, rgba(15,46,29,.3))` |
+
+### Radios de Borde
+| Token | Valor | Uso |
+| :--- | :--- | :--- |
+| `--radius-sm` | `10px` | Badges pequeños, inputs compactos |
+| `--radius-md` | `14px` | Botones estándar, tarjetas compactas |
+| `--radius-lg` | `20px` | Tarjetas principales, contenedores |
+| `--radius-xl` | `28px` | Modales y diálogos flotantes |
+| `--radius-full` | `999px` | Pastillas (pills) y botones redondeados |
+
+### Sombras Cálidas (Base `rgba(15, 46, 29, α)`, nunca negro puro)
+| Token | Valor | Uso |
+| :--- | :--- | :--- |
+| `--shadow-sm` | `0 2px 6px rgba(15, 46, 29, 0.08)` | Elevación sutil en cards de baja jerarquía |
+| `--shadow-md` | `0 6px 16px rgba(15, 46, 29, 0.12)` | Elementos interactivos hover, tooltips |
+| `--shadow-lg` | `0 12px 32px rgba(15, 46, 29, 0.16)` | Modales, barra flotante de carrito |
+| `--shadow-glow-amber` | `0 0 24px rgba(245, 166, 35, 0.35)` | Resplandor dorado para botón de checkout y boletos seleccionados |
+
+### Escala de Espaciado (Múltiplos de 4px)
+- `--space-1`: `4px`
+- `--space-2`: `8px`
+- `--space-3`: `12px`
+- `--space-4`: `16px`
+- `--space-6`: `24px`
+- `--space-8`: `32px`
+- `--space-12`: `48px`
+- `--space-16`: `64px`
+- `--space-24`: `96px`
+
+### Capas con Nombre (`z-index`)
+- `--z-navbar`: `100` (Navegación superior fija)
+- `--z-cart`: `200` (Barra inferior pegajosa del carrito)
+- `--z-whatsapp`: `300` (Botón flotante de WhatsApp)
+- `--z-modal`: `1000` (Checkout y modales de confirmación)
+- `--z-lightbox`: `1100` (Visor de imágenes en pantalla completa)
+
+> [!IMPORTANT]
+> El botón de WhatsApp (`--z-whatsapp: 300`) queda estrictamente por debajo de modales (`--z-modal: 1000`) y lightbox (`--z-lightbox: 1100`), evitando colisiones de accesibilidad en pantallas táctiles.
+
+### Alturas y Transiciones
+- `--navbar-h`: `72px` (escritorio), `64px` (móvil ≤ 768px).
+- `--transition-easing`: `cubic-bezier(0.2, 0.7, 0.2, 1)`.
+- `--transition-fast`: `150ms cubic-bezier(0.2, 0.7, 0.2, 1)`.
+- `--transition-base`: `250ms cubic-bezier(0.2, 0.7, 0.2, 1)`.
+
+---
+
+## 2. Reglas de Uso y Accesibilidad
+
+1. **Nunca texto blanco sobre fondo ámbar**:
+   - El contraste de blanco `#FFFFFF` sobre `--brand-accent` `#F5A623` es de **2.03:1** (falla crítica WCAG).
+   - Sobre fondos ámbar (`--brand-accent`) debe usarse **`--brand-deep` (`#0F2E1D`)** o **`--text-inverse`**, alcanzando un ratio de **7.25:1** (Cumple WCAG AAA).
+2. **Uso de Ámbar como Color de Texto**:
+   - Sobre superficies claras (`--bg-page`, `--bg-card`): Usar **`--brand-accent-strong` (`#8A5200`)** (Ratio ≥ 5.57:1).
+   - Sobre superficies oscuras (`--brand-deep`, fotografías con scrim): Usar **`--brand-accent` (`#F5A623`)** (Ratio ≥ 7.25:1).
+3. **Texto sobre fotografía**:
+   - Todo texto colocado sobre fotografía debe tener un scrim o fondo de contraste equivalente a un mínimo del **60 % de opacidad oscura** de verde bosque profundo (`rgba(15, 46, 29, 0.60)` o superior) o emplear `--scrim-photo`.
+4. **Contraste de Texto Atenuado (`--text-muted`)**:
+   - `--text-muted` (`#5A6B5F`) garantiza **4.95:1** sobre `--bg-page` y **5.67:1** sobre `--bg-card`, superando el umbral estricto de 4.5:1 para texto regular.
+
+---
+
+## 3. Matriz de Contraste Real (WCAG 2.1)
+
+| Texto | Fondo | Ratio de Contraste | Cumplimiento WCAG | Observación |
+| :--- | :--- | :--- | :--- | :--- |
+| `--text-primary` (`#16261C`) | `--bg-page` (`#F4EFE4`) | **13.79:1** | **AAA** | Texto de lectura principal |
+| `--text-primary` (`#16261C`) | `--bg-card` (`#FFFFFF`) | **15.81:1** | **AAA** | Tarjetas de boletos y modales |
+| `--text-primary` (`#16261C`) | `--bg-surface` (`#FBF8F1`) | **14.91:1** | **AAA** | Paneles y barras |
+| `--text-secondary` (`#41564A`) | `--bg-page` (`#F4EFE4`) | **6.90:1** | **AA** (Normal y Large) | Subtítulos y metadatos |
+| `--text-secondary` (`#41564A`) | `--bg-card` (`#FFFFFF`) | **7.91:1** | **AA** (Normal y Large) | Contenido secundario |
+| `--text-muted` (`#5A6B5F`) | `--bg-page` (`#F4EFE4`) | **4.95:1** | **AA** (Normal ≥ 4.5:1) | Requisito cumplido |
+| `--text-muted` (`#5A6B5F`) | `--bg-card` (`#FFFFFF`) | **5.67:1** | **AA** (Normal ≥ 4.5:1) | Requisito cumplido |
+| `--brand-deep` (`#0F2E1D`) | `--brand-accent` (`#F5A623`) | **7.25:1** | **AAA** | Botones de checkout y CTAs |
+| `--brand-accent-strong` (`#8A5200`) | `--bg-page` (`#F4EFE4`) | **5.57:1** | **AA** | Texto ámbar en claro |
+| `--brand-accent-strong` (`#8A5200`) | `--bg-card` (`#FFFFFF`) | **6.39:1** | **AA** | Texto ámbar en cards |
+| `--brand-accent` (`#F5A623`) | `--brand-deep` (`#0F2E1D`) | **7.25:1** | **AAA** | Acentos en pie de página |
+| `--text-on-dark` (`#EEF4EF`) | `--brand-deep` (`#0F2E1D`) | **13.17:1** | **AAA** | Texto en pie de página oscuro |
+| `--text-on-dark-muted` (`#B9CDBF`) | `--brand-deep` (`#0F2E1D`) | **8.78:1** | **AAA** | Texto secundario en footer |
+| Blanco (`#FFFFFF`) | `--brand-accent` (`#F5A623`) | *2.03:1* | **FALLA** (Prohibido) | Motivo de regla prohibitiva |
+
+---
+
+## 4. Tabla de Reemplazo: Valores Viejos → Tokens Nuevos
+
+| Valor Viejo Hardcodeado | Contexto de Uso | Token / Sustituto Nuevo |
+| :--- | :--- | :--- |
+| `rgba(10, 20, 16, 0.95)` | Navbar con scroll y fondo summary | `var(--bg-surface-glass)` |
+| `#f59e0b`, `#d97706` | Degradado de botones CTA | `linear-gradient(135deg, var(--brand-accent), var(--brand-accent-strong))` |
+| `rgba(245, 158, 11, 0.45)` | Sombra exterior en botones dorados | `var(--shadow-glow-amber)` |
+| `rgba(10, 20, 16, 0.70 - 0.88)` | Scrim sobre fotografía de Hero | `rgba(15, 46, 29, 0.72 - 0.88)` / `--scrim-photo` |
+| `rgba(245, 158, 11, 0.4)` | Bordes activos en cards y FAQ | `var(--color-brand-accent)` o `var(--border-focus)` |
+| `1000` | z-index de barra Navbar | `var(--z-navbar)` (100) |
+| `900` | z-index de sticky cart bar | `var(--z-cart)` (200) |
+| `950` | z-index botón flotante WhatsApp | `var(--z-whatsapp)` (300) |
+| `2100` | z-index de backdrop Checkout | `var(--z-modal)` (1000) |
+| `2000` | z-index de visor Lightbox | `var(--z-lightbox)` (1100) |
+| `#060e0a` | Fondo del Footer | `var(--brand-deep)` |
+| `#040907` | Fondo de bottomBar del Footer | `rgba(10, 30, 19, 0.95)` |
+| `#ef4444` | Icono corazón y estados de error | `var(--color-danger)` |
+| `#10b981` | Dot indicador de boleto disponible | `var(--brand-primary)` |
+| `#fbbf24` | Dot indicador seleccionado máx | `var(--brand-accent)` |
+| `#f97316` | Dot indicador reservado | `var(--brand-coral)` |
+| `#6b7280` | Dot indicador vendido | `var(--state-sold)` |
+| `#11281e`, `#1e4534`, `#e2f0ea` | Boleto disponible | `var(--ticket-available-bg/border/text)` |
+| `#2b1704`, `#78350f`, `#fb923c` | Boleto reservado | `var(--ticket-reserved-bg/border/text)` |
+| `#18201c`, `#25332d`, `#4b5e55` | Boleto vendido | `var(--ticket-sold-bg/border/text)` |
+| `rgba(0, 0, 0, 0.6)` | Sombras oscuras puras | `var(--shadow-lg)` (base verde bosque cálida) |
+
+### Casos Aislados Excluidos de Reemplazo
+- **Colores oficiales de marca WhatsApp**: `#25D366` y `#128C7E` se conservan en `FloatingWhatsAppBtn` y botón WhatsApp de soporte, por ser identidad oficial reconocida por el usuario.
+- **Color oficial de marca Instagram**: `#E1306C` en `FilaAliados` se conserva por identidad de marca de red social.

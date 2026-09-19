@@ -16,9 +16,12 @@ export const HomePage: React.FC = () => {
   useDocumentTitle('Gran Sorteo Ecoturístico y Aventura en el Perijá');
   return (
     <TicketCartProvider>
-      <div className="landing-layout">
+      <div className="landing-layout" data-theme="public">
+        <a href="#contenido-principal" className="skip-to-content">
+          Ir al contenido principal
+        </a>
         <Navbar />
-        <main>
+        <main id="contenido-principal">
           <HeroRifa />
           <DetallePremio />
           <SelectorBoletos />

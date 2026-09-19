@@ -97,8 +97,8 @@
   inset: 0;
   background: linear-gradient(
     0deg,
-    rgba(10, 20, 16, 0.9) 0%,
-    rgba(10, 20, 16, 0.2) 60%,
+    rgba(15, 46, 29, 0.9) 0%,
+    rgba(15, 46, 29, 0.2) 60%,
     transparent 100%
   );
   display: flex;
@@ -134,8 +134,8 @@
 .lightboxBackdrop {
   position: fixed;
   inset: 0;
-  z-index: 2000;
-  background-color: rgba(5, 10, 8, 0.95);
+  z-index: var(--z-lightbox);
+  background-color: rgba(15, 46, 29, 0.94);
   backdrop-filter: blur(16px);
   display: flex;
   align-items: center;
@@ -185,7 +185,7 @@
   width: 100%;
   font-size: 0.95rem;
   color: var(--text-primary);
-  background-color: rgba(17, 34, 28, 0.8);
+  background-color: rgba(15, 46, 29, 0.85);
   padding: 0.75rem 1.25rem;
   border-radius: var(--radius-sm);
 }

@@ -87,9 +87,9 @@
   left: 0.75rem;
   padding: 0.3rem 0.75rem;
   border-radius: var(--radius-sm);
-  background-color: rgba(10, 20, 16, 0.85);
+  background-color: rgba(15, 46, 29, 0.85);
   backdrop-filter: blur(8px);
-  border: 1px solid rgba(245, 158, 11, 0.4);
+  border: 1px solid var(--border-focus);
   color: var(--color-brand-accent);
   font-size: 0.75rem;
   font-weight: 700;

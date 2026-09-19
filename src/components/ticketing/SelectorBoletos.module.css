@@ -62,22 +62,22 @@
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background-color: #10b981;
+  background-color: var(--brand-primary);
 }
 
 .statDotSelected {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background-color: var(--color-brand-accent);
+  background-color: var(--brand-accent);
 }
 
 .statDotSelectedMax {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background-color: #fbbf24;
-  box-shadow: 0 0 8px rgba(251, 191, 36, 0.8);
+  background-color: var(--brand-accent);
+  box-shadow: var(--shadow-glow-amber);
   animation: pulseGlow 1.5s infinite alternate;
 }
 
@@ -96,14 +96,14 @@
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background-color: #f97316;
+  background-color: var(--brand-coral);
 }
 
 .statDotSold {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background-color: #6b7280;
+  background-color: var(--state-sold);
 }
 
 /* --- Panel de Control y Azar --- */
@@ -200,9 +200,9 @@
   gap: 0.35rem;
   padding: 0.5rem 0.75rem;
   border-radius: var(--radius-md);
-  background-color: rgba(239, 68, 68, 0.15);
-  border: 1px solid rgba(239, 68, 68, 0.4);
-  color: #ef4444;
+  background-color: var(--brand-coral-soft);
+  border: 1px solid var(--color-danger);
+  color: var(--color-danger);
   font-size: 0.8rem;
   font-weight: 600;
 }
@@ -293,39 +293,39 @@
 }
 
 .ticketAvailable {
-  background-color: #11281e;
-  border-color: #1e4534;
-  color: #e2f0ea;
+  background-color: var(--ticket-available-bg);
+  border-color: var(--ticket-available-border);
+  color: var(--ticket-available-text);
 }
 
 .ticketAvailable:hover {
   transform: translateY(-2px);
-  border-color: var(--color-brand-accent);
-  background-color: #17382a;
+  border-color: var(--ticket-available-hover-border);
+  background-color: var(--ticket-available-hover-bg);
 }
 
 .ticketSelected {
-  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-  border-color: #fbbf24;
-  color: #08120e;
-  box-shadow: 0 0 12px rgba(245, 158, 11, 0.4);
+  background: var(--ticket-selected-bg);
+  border-color: var(--ticket-selected-border);
+  color: var(--ticket-selected-text);
+  box-shadow: var(--shadow-glow-amber);
   transform: scale(1.04);
 }
 
 .ticketReserved {
-  background-color: #2b1704;
-  border-color: #78350f;
-  color: #fb923c;
+  background-color: var(--ticket-reserved-bg);
+  border-color: var(--ticket-reserved-border);
+  color: var(--ticket-reserved-text);
   cursor: not-allowed;
   opacity: 0.75;
 }
 
 .ticketSold {
-  background-color: #18201c;
-  border-color: #25332d;
-  color: #4b5e55;
+  background-color: var(--ticket-sold-bg);
+  border-color: var(--ticket-sold-border);
+  color: var(--ticket-sold-text);
   cursor: not-allowed;
-  opacity: 0.5;
+  opacity: 0.6;
   text-decoration: line-through;
 }
 
@@ -386,12 +386,12 @@
   bottom: 0;
   left: 0;
   right: 0;
-  z-index: 900;
-  background-color: rgba(10, 20, 16, 0.95);
+  z-index: var(--z-cart);
+  background-color: var(--bg-surface-glass);
   backdrop-filter: blur(16px);
   border-top: 2px solid var(--color-brand-accent);
   padding: 1rem 0;
-  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.6);
+  box-shadow: var(--shadow-lg);
   animation: slideUp 200ms ease;
 }
 
@@ -499,17 +499,17 @@
   gap: 0.6rem;
   padding: 0.85rem 1.6rem;
   border-radius: var(--radius-md);
-  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  background: linear-gradient(135deg, var(--brand-accent) 0%, var(--brand-accent-strong) 100%);
   color: var(--text-inverse);
   font-size: 1.05rem;
   font-weight: 800;
-  box-shadow: var(--shadow-glow);
+  box-shadow: var(--shadow-glow-amber);
   transition: all var(--transition-fast);
 }
 
 .checkoutBtn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 0 30px rgba(245, 158, 11, 0.55);
+  box-shadow: var(--shadow-glow-amber);
 }
 
 @media (max-width: 768px) {

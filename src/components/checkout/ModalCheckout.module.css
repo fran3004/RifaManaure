@@ -1,8 +1,8 @@
 .modalBackdrop {
   position: fixed;
   inset: 0;
-  z-index: 2100;
-  background-color: rgba(5, 12, 9, 0.92);
+  z-index: var(--z-modal);
+  background-color: rgba(15, 46, 29, 0.85);
   backdrop-filter: blur(14px);
   display: flex;
   align-items: center;

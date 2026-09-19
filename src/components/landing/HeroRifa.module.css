@@ -25,8 +25,8 @@
   inset: 0;
   background: linear-gradient(
     180deg,
-    rgba(10, 20, 16, 0.7) 0%,
-    rgba(10, 20, 16, 0.88) 60%,
+    rgba(15, 46, 29, 0.72) 0%,
+    rgba(15, 46, 29, 0.88) 60%,
     var(--bg-main) 100%
   );
 }
@@ -121,11 +121,11 @@
   gap: 0.6rem;
   padding: 0.9rem 1.6rem;
   border-radius: var(--radius-md);
-  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  background: linear-gradient(135deg, var(--brand-accent) 0%, var(--brand-accent-strong) 100%);
   color: var(--text-inverse);
   font-size: 1rem;
   font-weight: 700;
-  box-shadow: var(--shadow-glow);
+  box-shadow: var(--shadow-glow-amber);
   transition: all var(--transition-fast);
   flex: 1;
   min-width: 180px;
@@ -133,7 +133,7 @@
 
 .btnPrimary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 0 30px rgba(245, 158, 11, 0.45);
+  box-shadow: var(--shadow-glow-amber);
 }
 
 .btnSecondary {

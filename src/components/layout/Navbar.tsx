@@ -96,9 +96,8 @@ export const Navbar: React.FC = () => {
         </button>
       </div>
 
-      {/* Menú Móvil Desplegable */}
-      {mobileMenuOpen && (
-        <div className={styles.mobileMenu}>
+      {/* Menú Móvil Desplegable con animación */}
+      <div className={`${styles.mobileMenu} ${mobileMenuOpen ? styles.mobileMenuOpen : ''}`}>
           <a
             href="/#premio"
             className={styles.mobileNavLink}
@@ -138,7 +137,6 @@ export const Navbar: React.FC = () => {
             <Ticket size={20} /> Elegir Boletos
           </a>
         </div>
-      )}
     </header>
   );
 };
