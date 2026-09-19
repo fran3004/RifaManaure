@@ -1,16 +1,30 @@
-.floatingBtnContainer {
+.floatingBtnWrapper {
   position: fixed;
-  bottom: calc(2rem + var(--cart-h, 0px));
-  right: 2rem;
+  bottom: calc(20px + env(safe-area-inset-bottom, 0px) + var(--cart-h, 0px));
+  right: 20px;
   z-index: var(--z-whatsapp);
+  transition:
+    bottom var(--transition-base, 250ms ease),
+    opacity var(--transition-fast, 150ms ease),
+    visibility var(--transition-fast, 150ms ease);
+}
+
+.btnHidden {
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+.floatingBtnContainer {
   display: flex;
   align-items: center;
   gap: 0.75rem;
   text-decoration: none;
   transition:
-    bottom var(--transition-fast, 150ms ease),
-    transform 200ms ease,
-    box-shadow 200ms ease;
+    transform var(--transition-fast, 150ms ease),
+    box-shadow var(--transition-fast, 150ms ease);
+  position: relative;
+  border-radius: var(--radius-full);
 }
 
 .pulseRing {
@@ -20,15 +34,16 @@
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  background: rgba(37, 211, 102, 0.4);
-  animation: pulse 2.2s infinite cubic-bezier(0.4, 0, 0.6, 1);
+  background: rgba(37, 211, 102, 0.45);
+  animation: pulse 2.2s cubic-bezier(0.4, 0, 0.6, 1) 3;
+  animation-fill-mode: forwards;
   pointer-events: none;
 }
 
 .floatingBtn {
   position: relative;
-  width: 58px;
-  height: 58px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
   background: linear-gradient(135deg, #25d366 0%, #128c7e 100%);
   color: #ffffff;
@@ -36,92 +51,104 @@
   align-items: center;
   justify-content: center;
   box-shadow:
-    0 6px 20px rgba(37, 211, 102, 0.45),
-    0 2px 6px rgba(0, 0, 0, 0.3);
+    var(--shadow-lg, 0 12px 32px rgba(15, 46, 29, 0.16)),
+    0 4px 14px rgba(37, 211, 102, 0.45);
   transition:
-    transform 200ms ease,
-    box-shadow 200ms ease;
+    transform var(--transition-fast, 150ms ease),
+    box-shadow var(--transition-fast, 150ms ease);
+}
+
+.whatsappIcon {
+  color: #ffffff;
 }
 
 .floatingBtnContainer:hover .floatingBtn {
   transform: scale(1.08) translateY(-2px);
   box-shadow:
-    0 10px 25px rgba(37, 211, 102, 0.6),
-    0 4px 10px rgba(0, 0, 0, 0.4);
+    0 14px 32px rgba(37, 211, 102, 0.6),
+    0 6px 16px rgba(15, 46, 29, 0.25);
 }
 
 .floatingBtnContainer:active .floatingBtn {
   transform: scale(0.96);
 }
 
+.floatingBtnContainer:focus-visible {
+  outline: 3px solid var(--focus-ring-on-dark, #f5a623);
+  outline-offset: 4px;
+}
+
 .tooltip {
-  background: var(--brand-deep);
-  color: var(--text-on-dark);
-  border: 1px solid var(--border-subtle);
-  padding: 0.5rem 0.9rem;
+  background: var(--brand-deep, #0f2e1d);
+  color: var(--text-on-dark, #eef4ef);
+  border: 1px solid var(--border-subtle, #dcd5c4);
+  padding: 0.5rem 0.85rem;
   border-radius: var(--radius-full);
-  font-size: 0.85rem;
+  font-family: var(--font-sans, sans-serif);
+  font-size: 0.84rem;
   font-weight: 600;
   white-space: nowrap;
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-md, 0 6px 16px rgba(15, 46, 29, 0.12));
   opacity: 0;
   transform: translateX(8px);
+  pointer-events: none;
   transition:
     opacity 200ms ease,
     transform 200ms ease;
-  pointer-events: none;
 }
 
-.floatingBtnContainer:hover .tooltip {
+.floatingBtnContainer:hover .tooltip,
+.floatingBtnContainer:focus-visible .tooltip {
   opacity: 1;
   transform: translateX(0);
 }
 
-.floatingBtnContainer:focus-visible {
-  outline: 3px solid var(--focus-ring-on-dark);
-  outline-offset: 3px;
-  border-radius: 50%;
+.tooltipDismissed {
+  display: none !important;
+  opacity: 0 !important;
 }
 
 @keyframes pulse {
   0% {
     transform: scale(1);
-    opacity: 0.8;
+    opacity: 0.85;
   }
   70% {
-    transform: scale(1.55);
+    transform: scale(1.5);
     opacity: 0;
   }
   100% {
-    transform: scale(1.6);
+    transform: scale(1.55);
     opacity: 0;
   }
 }
 
 @media (max-width: 640px) {
-  .floatingBtnContainer {
-    bottom: calc(1.25rem + var(--cart-h, 0px) + env(safe-area-inset-bottom, 0px));
-    right: 1.25rem;
+  .floatingBtnWrapper {
+    bottom: calc(20px + env(safe-area-inset-bottom, 0px) + var(--cart-h, 0px));
+    right: 20px;
   }
 
   .floatingBtn {
-    width: 52px;
-    height: 52px;
+    width: 48px;
+    height: 48px;
   }
 
   .tooltip {
-    display: none;
+    display: none !important;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .pulseRing {
-    animation: none;
+    animation: none !important;
+    display: none !important;
   }
 
+  .floatingBtnWrapper,
   .floatingBtnContainer,
-  .floatingBtn {
-    transition: none;
-    transform: none;
+  .floatingBtn,
+  .tooltip {
+    transition: none !important;
   }
 }

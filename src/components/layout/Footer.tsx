@@ -4,6 +4,7 @@ import { logoPrincipalCompleto } from '@/assets/assets';
 import { ShieldCheck, MessageCircle, MapPin, Heart, Mail } from 'lucide-react';
 import { createWhatsAppLink, formatPhoneNumber } from '@/lib/utils';
 import { useSystemSettings } from '@/hooks/useSystemSettings';
+import { PAYMENT_METHODS } from '@/data/faqFallback';
 import styles from './Footer.module.css';
 
 export const Footer: React.FC = () => {
@@ -51,6 +52,21 @@ export const Footer: React.FC = () => {
           <div className={styles.location}>
             <MapPin size={16} aria-hidden="true" className={styles.locIcon} />
             <span>Manaure Balcón del Cesar, Colombia</span>
+          </div>
+
+          {/* Bloque Oficial de Métodos de Pago */}
+          <div className={styles.paymentMethodsBlock}>
+            <span className={styles.paymentTitle}>Métodos de Pago</span>
+            <div className={styles.paymentChipsList} aria-label="Métodos de pago autorizados">
+              {PAYMENT_METHODS.map((method) => (
+                <span key={method} className={styles.paymentChip}>
+                  {method}
+                </span>
+              ))}
+            </div>
+            <p className={styles.noCardsNotice}>
+              No recibimos pagos con tarjeta de crédito ni débito.
+            </p>
           </div>
         </div>
 

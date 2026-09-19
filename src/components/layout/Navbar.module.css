@@ -189,6 +189,10 @@
     display: none;
   }
 
+  .navbar:has(.mobileMenuOpen) {
+    z-index: 500;
+  }
+
   .menuToggle {
     display: inline-flex;
   }

@@ -1,6 +1,20 @@
 import type { FaqItem } from '@/types/raffle.types';
 
 /**
+ * Métodos de pago oficiales aceptados.
+ * Fuente única compartida entre el módulo de preguntas frecuentes y el pie de página.
+ */
+export const PAYMENT_METHODS = [
+  'Bre-B',
+  'Nequi',
+  'Daviplata',
+  'Bancolombia',
+  'Transferencias bancarias',
+] as const;
+
+export type PaymentMethodName = typeof PAYMENT_METHODS[number];
+
+/**
  * Respaldo local oficial de Preguntas Frecuentes.
  * Garantiza que la landing page nunca quede vacía en caso de problemas de red
  * o si la base de datos Supabase aún no tiene cargada la tabla faq_items.

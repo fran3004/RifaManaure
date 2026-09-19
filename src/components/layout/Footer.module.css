@@ -1,8 +1,21 @@
 .footer {
+  position: relative;
   background-color: var(--brand-deep);
-  border-top: 1px solid var(--border-subtle);
+  color: var(--text-on-dark);
   padding: 5rem 0 0;
-  color: var(--text-on-dark-muted);
+  overflow: hidden;
+}
+
+/* Filete decorativo superior ámbar a coral como remate */
+.footer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--brand-accent) 0%, var(--brand-coral) 100%);
+  z-index: 1;
 }
 
 .footerContainer {
@@ -27,7 +40,7 @@
 .brandDesc {
   font-size: 0.925rem;
   line-height: 1.6;
-  color: var(--text-secondary);
+  color: var(--text-on-dark-muted);
   max-width: 440px;
 }
 
@@ -36,19 +49,64 @@
   align-items: center;
   gap: 0.5rem;
   font-size: 0.85rem;
-  color: var(--color-brand-accent);
+  color: var(--brand-accent);
   font-weight: 500;
 }
 
 .locIcon {
-  color: var(--color-brand-accent);
+  color: var(--brand-accent);
+  flex-shrink: 0;
+}
+
+/* Bloque Oficial de Métodos de Pago */
+.paymentMethodsBlock {
+  margin-top: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.paymentTitle {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-on-dark);
+}
+
+.paymentChipsList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.paymentChip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.7rem;
+  background-color: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: var(--radius-full);
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-on-dark);
+  line-height: 1.4;
+}
+
+.noCardsNotice {
+  font-size: 0.8rem;
+  color: var(--brand-accent);
+  font-weight: 500;
+  margin: 0.2rem 0 0;
+  line-height: 1.4;
 }
 
 .colTitle {
   font-size: 1.05rem;
   font-weight: 700;
-  color: var(--text-primary);
+  color: var(--text-on-dark);
   margin-bottom: 1.25rem;
+  letter-spacing: -0.01em;
 }
 
 .linkList {
@@ -56,11 +114,14 @@
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  margin: 0;
+  padding: 0;
 }
 
 .linkList a {
   font-size: 0.9rem;
-  color: var(--text-secondary);
+  color: var(--text-on-dark-muted);
+  text-decoration: none;
   transition:
     color var(--transition-fast),
     transform var(--transition-fast);
@@ -68,8 +129,14 @@
 }
 
 .linkList a:hover {
-  color: var(--color-brand-accent);
+  color: var(--brand-accent);
   transform: translateX(4px);
+}
+
+.linkList a:focus-visible {
+  outline: 3px solid var(--focus-ring-on-dark);
+  outline-offset: 3px;
+  border-radius: var(--radius-sm);
 }
 
 .legalCol {
@@ -87,7 +154,7 @@
 .supportTitle {
   font-size: 0.8rem;
   font-weight: 600;
-  color: var(--text-muted);
+  color: var(--text-on-dark-muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -104,7 +171,13 @@
 }
 
 .emailSupportLink:hover {
-  color: var(--color-brand-accent);
+  color: var(--brand-accent);
+}
+
+.emailSupportLink:focus-visible {
+  outline: 3px solid var(--focus-ring-on-dark);
+  outline-offset: 3px;
+  border-radius: var(--radius-sm);
 }
 
 .whatsappBtn {
@@ -113,24 +186,35 @@
   gap: 0.6rem;
   padding: 0.75rem 1.25rem;
   border-radius: var(--radius-md);
-  background-color: #128c7e;
+  background-color: #0d705c;
   color: #ffffff;
   font-size: 0.9rem;
   font-weight: 600;
-  transition: all var(--transition-fast);
-  box-shadow: 0 4px 12px rgba(18, 140, 126, 0.3);
+  text-decoration: none;
+  transition:
+    background-color var(--transition-fast),
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast);
+  box-shadow: 0 4px 12px rgba(13, 112, 92, 0.35);
+  width: fit-content;
 }
 
 .whatsappBtn:hover {
   background-color: #075e54;
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(18, 140, 126, 0.45);
+  box-shadow: 0 6px 16px rgba(13, 112, 92, 0.5);
+  color: #ffffff;
+}
+
+.whatsappBtn:focus-visible {
+  outline: 3px solid var(--focus-ring-on-dark);
+  outline-offset: 3px;
 }
 
 .bottomBar {
-  border-top: 1px solid var(--border-subtle);
-  background-color: rgba(10, 30, 19, 0.95);
-  padding: 1.5rem 0 calc(1.5rem + var(--cart-h, 0px) + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: rgba(10, 30, 19, 0.98);
+  padding: 1.5rem 0 calc(2rem + var(--cart-h, 0px) + env(safe-area-inset-bottom, 0px));
   font-size: 0.825rem;
   color: var(--text-on-dark-muted);
   transition: padding-bottom var(--transition-fast, 150ms ease);
@@ -148,7 +232,7 @@
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  color: var(--color-brand-accent);
+  color: var(--brand-accent);
   font-weight: 600;
 }
 
@@ -159,7 +243,7 @@
 }
 
 .heartIcon {
-  color: var(--color-danger);
+  color: var(--brand-coral);
   display: inline;
   vertical-align: middle;
 }
