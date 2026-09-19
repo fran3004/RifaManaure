@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { aliados as fallbackAliados } from '@/assets/assets';
 import { getActivePartners } from '@/services/partnerService';
 import type { PartnerRow } from '@/types/raffle.types';
-import { Handshake, MoveHorizontal } from 'lucide-react';
+import { Handshake, MoveHorizontal, Pause, Play } from 'lucide-react';
 import { SectionHeader } from '@/components/public/ui';
 import styles from './FilaAliados.module.css';
 
@@ -17,7 +17,6 @@ const DEFAULT_INSTAGRAM_URLS: Record<string, string> = {
   metallura: 'https://www.instagram.com/metalluraturismo?stkn=ZDNlZDc0MzIxNw==',
   'manaure-aventura': 'https://www.instagram.com/manaureaventura?stkn=ZDNlZDc0MzIxNw==',
   coruscans: 'https://www.instagram.com/elcoruscans?stkn=ZDNlZDc0MzIxNw==',
-  // 'la-casa-de-las-arepas': pendiente por asignar
 };
 
 // Diccionario indexado de logos locales para fallback instantáneo
@@ -55,15 +54,33 @@ export const FilaAliados: React.FC = () => {
   const [partners, setPartners] = useState<PartnerRow[]>(cachedPartners);
   const [isLoadedFromDb, setIsLoadedFromDb] = useState<boolean>(() => cachedPartners.length > 0);
 
-  // Referencias para el carrusel continuo con acumulador de coma flotante y arrastre
+  // Estados de control de animación y accesibilidad
+  const [isPaused, setIsPaused] = useState(false);
+  const [isDraggingState, setIsDraggingState] = useState(false);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+
+  // Referencias para el bucle de animación sin lecturas de layout
+  const sectionRef = useRef<HTMLElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const scrollPosRef = useRef(0);
-  const isDraggingRef = useRef(false);
+  const oneSetWidthRef = useRef(0);
+  const rafIdRef = useRef<number | null>(null);
+
+  const isPausedRef = useRef(false);
   const isHoveredRef = useRef(false);
+  const isFocusedRef = useRef(false);
+  const isTabVisibleRef = useRef(true);
+  const isInViewportRef = useRef(false);
+
+  // Referencias para el arrastre
+  const isDraggingRef = useRef(false);
   const startXRef = useRef(0);
-  const scrollLeftRef = useRef(0);
+  const startPosRef = useRef(0);
   const dragDeltaRef = useRef(0);
-  const [isDraggingState, setIsDraggingState] = useState(false);
+
+  useEffect(() => {
+    isPausedRef.current = isPaused;
+  }, [isPaused]);
 
   useEffect(() => {
     let ignore = false;
@@ -92,7 +109,16 @@ export const FilaAliados: React.FC = () => {
     };
   }, []);
 
-  // Lista normalizada de aliados (prioriza datos de BD con fallback local e Instagram)
+  // Escuchar preferencia de movimiento reducido
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setPrefersReducedMotion(mediaQuery.matches);
+    const handler = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
+    mediaQuery.addEventListener('change', handler);
+    return () => mediaQuery.removeEventListener('change', handler);
+  }, []);
+
+  // Lista normalizada de aliados
   const displayList = useMemo(() => {
     if (isLoadedFromDb && partners.length > 0) {
       return partners.map((p) => {
@@ -127,72 +153,140 @@ export const FilaAliados: React.FC = () => {
     }));
   }, [isLoadedFromDb, partners]);
 
-  // Duplicamos la lista para crear un bucle infinito perfectamente fluido
+  // Duplicamos 3 veces la lista para el bucle continuo infinito
   const infiniteList = useMemo(() => {
     if (displayList.length === 0) return [];
     return [...displayList, ...displayList, ...displayList];
   }, [displayList]);
 
-  // Bucle continuo de animación suave con requestAnimationFrame y acumulador sub-píxel
+  // Medición de una sola copia fuera del bucle de animación para evitar layout reflows
+  const measureWidth = useCallback(() => {
+    if (trackRef.current && infiniteList.length > 0) {
+      oneSetWidthRef.current = trackRef.current.scrollWidth / 3;
+    }
+  }, [infiniteList.length]);
+
   useEffect(() => {
+    measureWidth();
+    window.addEventListener('resize', measureWidth);
+    return () => window.removeEventListener('resize', measureWidth);
+  }, [measureWidth]);
+
+  // Bucle de animación suave con translate3d, 0 lecturas de layout y 0% CPU inactivo
+  useEffect(() => {
+    const section = sectionRef.current;
     const track = trackRef.current;
-    if (!track || infiniteList.length === 0) return;
-
-    // Verificar preferencia de movimiento reducido
-    const prefersReducedMotion =
-      typeof window !== 'undefined' &&
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-    if (prefersReducedMotion) {
+    if (!section || !track || infiniteList.length === 0 || prefersReducedMotion) {
+      if (track && prefersReducedMotion) {
+        track.style.transform = 'none';
+      }
       return;
     }
 
-    // Sincronizar posición inicial acumulada
-    scrollPosRef.current = track.scrollLeft;
-
-    let animationFrameId: number;
     let lastTime = performance.now();
 
-    const scrollLoop = (currentTime: number) => {
+    const tick = (currentTime: number) => {
+      // Si la pestaña está oculta o el carrusel no está en el viewport, detenemos el scheduling
+      if (!isTabVisibleRef.current || !isInViewportRef.current) {
+        rafIdRef.current = null;
+        return;
+      }
+
       const deltaTime = Math.min(currentTime - lastTime, 64);
       lastTime = currentTime;
 
-      if (!isHoveredRef.current && !isDraggingRef.current) {
-        // Velocidad continua suave (~38 píxeles por segundo)
+      const isHalted =
+        isPausedRef.current ||
+        isHoveredRef.current ||
+        isFocusedRef.current ||
+        isDraggingRef.current;
+
+      if (!isHalted && oneSetWidthRef.current > 0) {
         const speed = 0.038 * deltaTime;
         scrollPosRef.current += speed;
 
-        // Bucle infinito: cuando avanza un tercio (una copia completa), rebobina sin salto
-        const oneSetWidth = track.scrollWidth / 3;
-        if (oneSetWidth > 0) {
-          if (scrollPosRef.current >= oneSetWidth * 2) {
-            scrollPosRef.current -= oneSetWidth;
-          } else if (scrollPosRef.current <= 0) {
-            scrollPosRef.current += oneSetWidth;
-          }
+        const oneSet = oneSetWidthRef.current;
+        if (scrollPosRef.current >= oneSet * 2) {
+          scrollPosRef.current -= oneSet;
+        } else if (scrollPosRef.current < oneSet) {
+          scrollPosRef.current += oneSet;
         }
-        track.scrollLeft = scrollPosRef.current;
+
+        track.style.transform = `translate3d(${-scrollPosRef.current}px, 0, 0)`;
       }
 
-      animationFrameId = requestAnimationFrame(scrollLoop);
+      rafIdRef.current = requestAnimationFrame(tick);
     };
 
-    animationFrameId = requestAnimationFrame(scrollLoop);
-    return () => cancelAnimationFrame(animationFrameId);
-  }, [infiniteList]);
+    const startLoop = () => {
+      if (
+        rafIdRef.current === null &&
+        isTabVisibleRef.current &&
+        isInViewportRef.current &&
+        !prefersReducedMotion
+      ) {
+        lastTime = performance.now();
+        rafIdRef.current = requestAnimationFrame(tick);
+      }
+    };
+
+    const stopLoop = () => {
+      if (rafIdRef.current !== null) {
+        cancelAnimationFrame(rafIdRef.current);
+        rafIdRef.current = null;
+      }
+    };
+
+    // IntersectionObserver: Detener RAF cuando sale del viewport
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        isInViewportRef.current = entry.isIntersecting;
+        if (entry.isIntersecting) {
+          startLoop();
+        } else {
+          stopLoop();
+        }
+      },
+      { threshold: 0.05 }
+    );
+    observer.observe(section);
+
+    // VisibilityChange: Detener RAF cuando la pestaña está oculta
+    const handleVisibilityChange = () => {
+      isTabVisibleRef.current = document.visibilityState === 'visible';
+      if (document.visibilityState === 'visible') {
+        startLoop();
+      } else {
+        stopLoop();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    // Inicializar posición
+    if (oneSetWidthRef.current > 0 && scrollPosRef.current === 0) {
+      scrollPosRef.current = oneSetWidthRef.current;
+      track.style.transform = `translate3d(${-scrollPosRef.current}px, 0, 0)`;
+    }
+
+    return () => {
+      stopLoop();
+      observer.disconnect();
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [infiniteList, prefersReducedMotion]);
 
   // ==========================================
-  // Manejadores de Arrastre con Ratón / Touch
+  // Manejadores de Arrastre con Ratón y Touch
   // ==========================================
   const handleMouseDown = (e: React.MouseEvent) => {
+    if (prefersReducedMotion) return;
     const track = trackRef.current;
     if (!track) return;
 
     isDraggingRef.current = true;
     setIsDraggingState(true);
-    startXRef.current = e.pageX - track.offsetLeft;
-    scrollLeftRef.current = track.scrollLeft;
-    scrollPosRef.current = track.scrollLeft;
+    startXRef.current = e.pageX;
+    startPosRef.current = scrollPosRef.current;
     dragDeltaRef.current = 0;
   };
 
@@ -201,34 +295,30 @@ export const FilaAliados: React.FC = () => {
     const track = trackRef.current;
     if (!track) return;
 
-    const currentX = e.pageX - track.offsetLeft;
-    const walk = (currentX - startXRef.current) * 1.15;
+    const currentX = e.pageX;
+    const diff = (currentX - startXRef.current) * 1.15;
     dragDeltaRef.current = Math.abs(currentX - startXRef.current);
-    const targetScroll = scrollLeftRef.current - walk;
-    track.scrollLeft = targetScroll;
-    scrollPosRef.current = track.scrollLeft;
 
-    // Normalizar bucle durante el arrastre manual
-    const oneSetWidth = track.scrollWidth / 3;
-    if (oneSetWidth > 0) {
-      if (track.scrollLeft >= oneSetWidth * 2) {
-        track.scrollLeft -= oneSetWidth;
-        scrollLeftRef.current -= oneSetWidth;
-        scrollPosRef.current = track.scrollLeft;
-      } else if (track.scrollLeft <= 0) {
-        track.scrollLeft += oneSetWidth;
-        scrollLeftRef.current += oneSetWidth;
-        scrollPosRef.current = track.scrollLeft;
+    let targetScroll = startPosRef.current - diff;
+    const oneSet = oneSetWidthRef.current;
+
+    if (oneSet > 0) {
+      if (targetScroll >= oneSet * 2) {
+        targetScroll -= oneSet;
+        startPosRef.current -= oneSet;
+      } else if (targetScroll < oneSet) {
+        targetScroll += oneSet;
+        startPosRef.current += oneSet;
       }
     }
+
+    scrollPosRef.current = targetScroll;
+    track.style.transform = `translate3d(${-targetScroll}px, 0, 0)`;
   };
 
   const handleMouseUp = () => {
     isDraggingRef.current = false;
     setIsDraggingState(false);
-    if (trackRef.current) {
-      scrollPosRef.current = trackRef.current.scrollLeft;
-    }
     setTimeout(() => {
       dragDeltaRef.current = 0;
     }, 80);
@@ -238,71 +328,65 @@ export const FilaAliados: React.FC = () => {
     isDraggingRef.current = false;
     setIsDraggingState(false);
     isHoveredRef.current = false;
-    if (trackRef.current) {
-      scrollPosRef.current = trackRef.current.scrollLeft;
-    }
   };
 
-  // Touch en dispositivos táctiles
   const handleTouchStart = (e: React.TouchEvent) => {
+    if (prefersReducedMotion || e.touches.length === 0) return;
     const track = trackRef.current;
-    if (!track || e.touches.length === 0) return;
+    if (!track) return;
 
     isDraggingRef.current = true;
     setIsDraggingState(true);
-    startXRef.current = e.touches[0].pageX - track.offsetLeft;
-    scrollLeftRef.current = track.scrollLeft;
-    scrollPosRef.current = track.scrollLeft;
+    startXRef.current = e.touches[0].pageX;
+    startPosRef.current = scrollPosRef.current;
     dragDeltaRef.current = 0;
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isDraggingRef.current) return;
+    if (!isDraggingRef.current || e.touches.length === 0) return;
     const track = trackRef.current;
-    if (!track || e.touches.length === 0) return;
+    if (!track) return;
 
-    const currentX = e.touches[0].pageX - track.offsetLeft;
-    const walk = (currentX - startXRef.current) * 1.15;
+    const currentX = e.touches[0].pageX;
+    const diff = (currentX - startXRef.current) * 1.15;
     dragDeltaRef.current = Math.abs(currentX - startXRef.current);
-    const targetScroll = scrollLeftRef.current - walk;
-    track.scrollLeft = targetScroll;
-    scrollPosRef.current = track.scrollLeft;
 
-    const oneSetWidth = track.scrollWidth / 3;
-    if (oneSetWidth > 0) {
-      if (track.scrollLeft >= oneSetWidth * 2) {
-        track.scrollLeft -= oneSetWidth;
-        scrollLeftRef.current -= oneSetWidth;
-        scrollPosRef.current = track.scrollLeft;
-      } else if (track.scrollLeft <= 0) {
-        track.scrollLeft += oneSetWidth;
-        scrollLeftRef.current += oneSetWidth;
-        scrollPosRef.current = track.scrollLeft;
+    let targetScroll = startPosRef.current - diff;
+    const oneSet = oneSetWidthRef.current;
+
+    if (oneSet > 0) {
+      if (targetScroll >= oneSet * 2) {
+        targetScroll -= oneSet;
+        startPosRef.current -= oneSet;
+      } else if (targetScroll < oneSet) {
+        targetScroll += oneSet;
+        startPosRef.current += oneSet;
       }
     }
+
+    scrollPosRef.current = targetScroll;
+    track.style.transform = `translate3d(${-targetScroll}px, 0, 0)`;
   };
 
   const handleTouchEnd = () => {
     isDraggingRef.current = false;
     setIsDraggingState(false);
-    if (trackRef.current) {
-      scrollPosRef.current = trackRef.current.scrollLeft;
-    }
     setTimeout(() => {
       dragDeltaRef.current = 0;
     }, 80);
   };
 
-  // Apertura de enlace de Instagram discriminando arrastre vs clic
-  const handleCardClick = (url: string | null) => {
-    if (dragDeltaRef.current > 6) return;
-    if (url) {
-      window.open(url, '_blank', 'noopener,noreferrer');
-    }
+  const togglePause = () => {
+    setIsPaused((prev) => !prev);
   };
 
   return (
-    <section id="aliados" className={styles.aliadosSection} aria-labelledby="titulo-aliados">
+    <section
+      ref={sectionRef}
+      id="aliados"
+      className={styles.aliadosSection}
+      aria-labelledby="titulo-aliados"
+    >
       <div className="container">
         <SectionHeader
           id="titulo-aliados"
@@ -311,24 +395,63 @@ export const FilaAliados: React.FC = () => {
           title="Nuestros Aliados Oficiales"
           subtitle="Empresas, operadores turísticos y restaurantes locales que hacen posible el premio y respaldan este sorteo. Haz clic en cualquier logo para abrir su Instagram oficial."
         >
-          <div className={styles.interactionHint}>
-            <MoveHorizontal size={14} aria-hidden="true" />
-            <span>
-              Desplazamiento automático continuo · Arrastra con el ratón o pulsa sobre un logo para
-              visitar su Instagram
-            </span>
+          {/* Barra de Controles: Guía de uso y botón accesible de Pausar / Reanudar */}
+          <div className={styles.controlsBar}>
+            <div className={styles.interactionHint}>
+              <MoveHorizontal size={14} aria-hidden="true" />
+              <span>
+                Arrastra para explorar o pulsa en cualquier logo para abrir su Instagram oficial
+              </span>
+            </div>
+
+            <button
+              type="button"
+              className={styles.pauseBtn}
+              onClick={togglePause}
+              aria-label={
+                isPaused ? 'Reanudar movimiento automático' : 'Pausar movimiento automático'
+              }
+              aria-pressed={isPaused}
+            >
+              {isPaused ? (
+                <>
+                  <Play size={15} aria-hidden="true" />
+                  <span>Reanudar</span>
+                </>
+              ) : (
+                <>
+                  <Pause size={15} aria-hidden="true" />
+                  <span>Pausar</span>
+                </>
+              )}
+            </button>
           </div>
         </SectionHeader>
       </div>
 
-      {/* Contenedor del Carrusel en Fila Única sin barras de scroll */}
-      <div className={styles.marqueeOuter}>
-        <div className={styles.fadeLeft} />
-        <div className={styles.fadeRight} />
-
+      {/* Contenedor del Carrusel con desvanecido CSS por mask-image */}
+      <div
+        className={styles.marqueeOuter}
+        onMouseEnter={() => {
+          isHoveredRef.current = true;
+        }}
+        onMouseLeave={() => {
+          isHoveredRef.current = false;
+        }}
+        onFocusCapture={() => {
+          isFocusedRef.current = true;
+        }}
+        onBlurCapture={(e) => {
+          if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+            isFocusedRef.current = false;
+          }
+        }}
+      >
         <div
           ref={trackRef}
-          className={`${styles.aliadosTrack} ${isDraggingState ? styles.isDragging : ''}`}
+          className={`${styles.aliadosTrack} ${isDraggingState ? styles.isDragging : ''} ${
+            prefersReducedMotion ? styles.reducedMotionTrack : ''
+          }`}
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
@@ -340,55 +463,74 @@ export const FilaAliados: React.FC = () => {
           {infiniteList.map((aliado, idx) => {
             const hasInstagram = Boolean(aliado.instagramUrl);
 
+            if (hasInstagram) {
+              return (
+                <a
+                  key={`${aliado.slug}-${idx}`}
+                  href={aliado.instagramUrl!}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={styles.aliadoItem}
+                  aria-label={`Visitar Instagram de ${aliado.name}`}
+                  onClick={(e) => {
+                    if (dragDeltaRef.current > 6) {
+                      e.preventDefault();
+                    }
+                  }}
+                >
+                  <div className={styles.logoTile}>
+                    {aliado.logoSrc ? (
+                      <img
+                        src={aliado.logoSrc}
+                        srcSet={aliado.logoSrcSet}
+                        sizes="120px"
+                        alt=""
+                        width={120}
+                        height={120}
+                        loading="lazy"
+                        className={styles.aliadoLogo}
+                        draggable={false}
+                      />
+                    ) : (
+                      <div className={styles.placeholderLogo}>
+                        <Handshake size={36} aria-hidden="true" />
+                      </div>
+                    )}
+                  </div>
+
+                  <strong className={styles.aliadoName} title={aliado.name}>
+                    {aliado.name}
+                  </strong>
+                  <span className={styles.aliadoCategory} title={aliado.category}>
+                    {aliado.category}
+                  </span>
+                  <span className="visually-hidden"> (se abre en una pestaña nueva)</span>
+                </a>
+              );
+            }
+
             return (
               <div
                 key={`${aliado.slug}-${idx}`}
-                className={styles.aliadoItem}
-                onClick={() => handleCardClick(aliado.instagramUrl)}
-                title={
-                  hasInstagram
-                    ? `Visitar Instagram de ${aliado.name}`
-                    : `${aliado.name} - Aliado Oficial`
-                }
-                role={hasInstagram ? 'link' : undefined}
-                tabIndex={hasInstagram ? 0 : undefined}
-                onMouseEnter={() => {
-                  isHoveredRef.current = true;
-                }}
-                onMouseLeave={() => {
-                  isHoveredRef.current = false;
-                }}
-                onKeyDown={(e) => {
-                  if (hasInstagram && (e.key === 'Enter' || e.key === ' ')) {
-                    e.preventDefault();
-                    window.open(aliado.instagramUrl!, '_blank', 'noopener,noreferrer');
-                  }
-                }}
+                className={`${styles.aliadoItem} ${styles.aliadoItemStatic}`}
+                aria-label={`${aliado.name} - Aliado oficial`}
               >
-                <div
-                  className={`${styles.logoCircle} ${
-                    hasInstagram ? styles.logoCircleHasInstagram : styles.logoCircleNoInstagram
-                  }`}
-                >
+                <div className={styles.logoTile}>
                   {aliado.logoSrc ? (
                     <img
                       src={aliado.logoSrc}
                       srcSet={aliado.logoSrcSet}
-                      sizes="135px"
-                      alt={`Logotipo oficial de ${aliado.name}`}
-                      width={135}
-                      height={135}
+                      sizes="120px"
+                      alt=""
+                      width={120}
+                      height={120}
                       loading="lazy"
                       className={styles.aliadoLogo}
                       draggable={false}
                     />
                   ) : (
                     <div className={styles.placeholderLogo}>
-                      <Handshake
-                        size={36}
-                        aria-hidden="true"
-                        style={{ color: 'var(--color-brand-accent, #f59e0b)' }}
-                      />
+                      <Handshake size={36} aria-hidden="true" />
                     </div>
                   )}
                 </div>

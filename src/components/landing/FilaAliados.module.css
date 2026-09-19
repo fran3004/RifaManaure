@@ -1,79 +1,108 @@
 .aliadosSection {
-  padding: 4.5rem 0 5.5rem 0;
-  background-color: var(--bg-main, #0a1410);
-  border-top: 1px solid var(--border-subtle, rgba(156, 181, 171, 0.15));
-  border-bottom: 1px solid var(--border-subtle, rgba(156, 181, 171, 0.15));
+  padding: clamp(4rem, 8vw, 7rem) 0;
+  background-color: var(--bg-surface);
+  border-top: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--border-subtle);
   position: relative;
   overflow: hidden;
+}
+
+/* --- Barra de Controles: Guía y Botón de Pausa --- */
+.controlsBar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 1.5rem;
 }
 
 .interactionHint {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  font-size: 0.82rem;
+  font-size: 0.85rem;
   font-weight: 500;
-  color: var(--text-muted);
-  background: var(--bg-surface);
+  color: var(--text-secondary);
+  background-color: var(--bg-card);
   border: 1px solid var(--border-subtle);
-  padding: 0.35rem 0.9rem;
+  padding: 0.45rem 1rem;
   border-radius: var(--radius-full);
-  margin-top: 1rem;
+  box-shadow: var(--shadow-sm);
 }
 
-/* Contenedor del carrusel con máscaras de desvanecimiento lateral */
+.pauseBtn {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0.5rem 1.15rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: var(--radius-full);
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  color: var(--brand-primary);
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-fast);
+}
+
+.pauseBtn:hover {
+  background-color: var(--bg-page);
+  border-color: var(--brand-primary);
+}
+
+.pauseBtn:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* --- Contenedor del Carrusel con Desvanecido CSS --- */
 .marqueeOuter {
   position: relative;
   width: 100%;
   overflow: hidden;
-  padding: 0.75rem 0;
+  padding: 1.5rem 0;
+  margin-top: 1rem;
+  mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    #000 8%,
+    #000 92%,
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    #000 8%,
+    #000 92%,
+    transparent 100%
+  );
 }
 
-.fadeLeft,
-.fadeRight {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 100px;
-  z-index: 10;
-  pointer-events: none;
-}
-
-.fadeLeft {
-  left: 0;
-  background: linear-gradient(to right, var(--bg-main) 20%, transparent 100%);
-}
-
-.fadeRight {
-  right: 0;
-  background: linear-gradient(to left, var(--bg-main) 20%, transparent 100%);
-}
-
-/* Pista de Aliados en fila única continua */
+/* Pista en Movimiento con translate3d y GPU */
 .aliadosTrack {
   display: flex;
   flex-direction: row;
   flex-wrap: nowrap;
-  gap: 2.75rem;
-  overflow-x: scroll;
-  overflow-y: hidden;
-  padding: 1.5rem 2rem 1.75rem 2rem;
+  gap: 2.25rem;
+  width: max-content;
+  will-change: transform;
   cursor: grab;
   user-select: none;
   -webkit-user-select: none;
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE y Edge */
-}
-
-.aliadosTrack::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Opera */
+  padding: 0.75rem 1.5rem;
 }
 
 .isDragging {
   cursor: grabbing !important;
 }
 
-/* Elemento individual de aliado: SIN recuadro contenedor */
+/* Elemento individual de aliado */
 .aliadoItem {
   flex: 0 0 170px;
   width: 170px;
@@ -83,12 +112,13 @@
   text-align: center;
   background: transparent;
   border: none;
-  padding: 0.5rem 0.25rem;
+  padding: 0.25rem;
   text-decoration: none;
   color: inherit;
   cursor: pointer;
   border-radius: var(--radius-md);
-  transition: transform 250ms ease;
+  transition: transform var(--transition-fast);
+  box-sizing: border-box;
 }
 
 .aliadoItem:focus-visible {
@@ -96,56 +126,54 @@
   outline-offset: 4px;
 }
 
-/* Contenedor del logotipo: completamente transparente en reposo (solo se ven logo y texto) */
-.logoCircle {
-  width: 135px;
-  height: 135px;
-  border-radius: 50%;
-  background: transparent;
-  border: 2px solid transparent; /* Invisible en reposo, evita saltos de píxeles al hacer hover */
-  box-shadow: none; /* Sin ningún sombreado en reposo */
+.aliadoItemStatic {
+  cursor: default;
+}
+
+/* Tesela blanca para que cualquier logo se lea nítido sobre el fondo crema */
+.logoTile {
+  width: 140px;
+  height: 140px;
+  border-radius: var(--radius-lg);
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-sm);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0.35rem;
+  padding: 1.1rem;
   position: relative;
-  transition: all 260ms cubic-bezier(0.4, 0, 0.2, 1);
+  transition:
+    transform var(--transition-fast),
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
+  box-sizing: border-box;
 }
 
-/* Efecto hover: El círculo que lo rodea SOLO aparece cuando pones el cursor encima */
-.aliadoItem:hover .logoCircleHasInstagram,
-.logoCircleHasInstagram:hover {
-  transform: translateY(-4px) scale(1.06);
+/* Efecto Instagram al hover y al recibir foco */
+.aliadoItem:hover .logoTile,
+.aliadoItem:focus-visible .logoTile {
+  transform: translateY(-4px) scale(1.04);
   border-color: #e1306c;
   box-shadow:
-    0 0 0 3px rgba(225, 48, 108, 0.85),
-    0 0 24px rgba(225, 48, 108, 0.45);
+    0 0 0 3px rgba(225, 48, 108, 0.45),
+    0 8px 24px rgba(225, 48, 108, 0.22);
 }
 
-/* Para aliados sin Instagram activo por ahora */
-.aliadoItem:hover .logoCircleNoInstagram,
-.logoCircleNoInstagram:hover {
-  transform: translateY(-4px) scale(1.04);
-  border-color: rgba(245, 158, 11, 0.8);
-  box-shadow:
-    0 0 0 3px rgba(245, 158, 11, 0.65),
-    0 0 20px rgba(245, 158, 11, 0.35);
-}
-
-/* Logotipo mucho más grande y sin ningún filtro distorsionante */
+/* Logotipo sin distorsiones ni filtros */
 .aliadoLogo {
-  max-width: 95%;
-  max-height: 95%;
+  max-width: 100%;
+  max-height: 100%;
   width: auto;
   height: auto;
   object-fit: contain;
   pointer-events: none;
-  filter: none !important; /* Limpio, sin sombreados */
-  transition: transform 250ms ease;
+  filter: none !important;
+  transition: transform var(--transition-fast);
 }
 
 .aliadoItem:hover .aliadoLogo {
-  transform: scale(1.06);
+  transform: scale(1.04);
 }
 
 .placeholderLogo {
@@ -154,13 +182,14 @@
   justify-content: center;
   width: 100%;
   height: 100%;
-  opacity: 0.8;
+  color: var(--brand-accent);
 }
 
 .aliadoName {
+  font-family: var(--font-sans);
   font-size: 0.95rem;
   font-weight: 700;
-  color: var(--text-primary, #f3f7f5);
+  color: var(--text-primary);
   margin-top: 0.85rem;
   line-height: 1.25;
   text-align: center;
@@ -170,16 +199,17 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
   max-width: 100%;
-  transition: color 200ms ease;
+  transition: color var(--transition-fast);
 }
 
 .aliadoItem:hover .aliadoName {
-  color: #ffffff;
+  color: var(--brand-primary);
 }
 
 .aliadoCategory {
-  font-size: 0.78rem;
-  color: var(--text-secondary, #9cb5ab);
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  color: var(--text-secondary);
   line-height: 1.25;
   margin-top: 0.25rem;
   text-align: center;
@@ -191,38 +221,91 @@
   max-width: 100%;
 }
 
+/* --- Adaptabilidad Responsive --- */
 @media (max-width: 768px) {
   .aliadosSection {
-    padding: 3.5rem 0 4.5rem 0;
+    padding: clamp(3rem, 6vw, 4.5rem) 0;
   }
 
-  .fadeLeft,
-  .fadeRight {
-    width: 45px;
+  .controlsBar {
+    flex-direction: column;
+    gap: 0.75rem;
   }
 
   .aliadosTrack {
-    gap: 2rem;
-    padding: 1rem 1.25rem 1.25rem 1.25rem;
+    gap: 1.5rem;
+    padding: 0.5rem 1rem;
   }
 
   .aliadoItem {
-    flex: 0 0 135px;
-    width: 135px;
+    flex: 0 0 145px;
+    width: 145px;
   }
 
-  .logoCircle {
-    width: 105px;
-    height: 105px;
-    padding: 0.25rem;
+  .logoTile {
+    width: 125px;
+    height: 125px;
+    padding: 0.85rem;
   }
 
   .aliadoName {
-    font-size: 0.85rem;
+    font-size: 0.875rem;
     margin-top: 0.65rem;
   }
 
   .aliadoCategory {
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .aliadoItem {
+    flex: 0 0 130px;
+    width: 130px;
+  }
+
+  .logoTile {
+    width: 112px;
+    height: 112px;
+    padding: 0.75rem;
+    border-radius: var(--radius-md);
+  }
+
+  .aliadoName {
+    font-size: 0.825rem;
+  }
+
+  .aliadoCategory {
     font-size: 0.72rem;
+  }
+}
+
+/* --- Movimiento Reducido --- */
+@media (prefers-reduced-motion: reduce) {
+  .marqueeOuter {
+    mask-image: none;
+    -webkit-mask-image: none;
+    overflow-x: auto;
+    scrollbar-width: thin;
+  }
+
+  .aliadosTrack,
+  .reducedMotionTrack {
+    transform: none !important;
+    will-change: auto;
+    scroll-snap-type: x mandatory;
+    cursor: default;
+  }
+
+  .aliadoItem {
+    scroll-snap-align: center;
+    transition: none;
+  }
+
+  .aliadoItem:hover .logoTile,
+  .aliadoItem:focus-visible .logoTile,
+  .aliadoItem:hover .aliadoLogo {
+    transform: none;
+    transition: none;
   }
 }
