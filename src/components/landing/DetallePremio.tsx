@@ -15,30 +15,30 @@ import {
   Compass,
   Heart,
 } from 'lucide-react';
-import { SectionHeader } from '@/components/public/ui';
+import { SectionHeader, Pill } from '@/components/public/ui';
 import styles from './DetallePremio.module.css';
 
 function renderExperienceIcon(iconName: string): React.ReactNode {
   switch (iconName) {
     case 'Flame':
-      return <Flame size={24} aria-hidden="true" />;
+      return <Flame size={22} aria-hidden="true" />;
     case 'Wind':
-      return <Wind size={24} aria-hidden="true" />;
+      return <Wind size={22} aria-hidden="true" />;
     case 'Mountain':
-      return <Mountain size={24} aria-hidden="true" />;
+      return <Mountain size={22} aria-hidden="true" />;
     case 'Utensils':
-      return <Utensils size={24} aria-hidden="true" />;
+      return <Utensils size={22} aria-hidden="true" />;
     case 'Camera':
-      return <Camera size={24} aria-hidden="true" />;
+      return <Camera size={22} aria-hidden="true" />;
     case 'Tent':
-      return <Tent size={24} aria-hidden="true" />;
+      return <Tent size={22} aria-hidden="true" />;
     case 'Compass':
-      return <Compass size={24} aria-hidden="true" />;
+      return <Compass size={22} aria-hidden="true" />;
     case 'Heart':
-      return <Heart size={24} aria-hidden="true" />;
+      return <Heart size={22} aria-hidden="true" />;
     case 'Sparkles':
     default:
-      return <Sparkles size={24} aria-hidden="true" />;
+      return <Sparkles size={22} aria-hidden="true" />;
   }
 }
 
@@ -96,15 +96,16 @@ export const DetallePremio: React.FC = () => {
           subtitle={settings.subtitle}
         />
 
-        {/* Grilla de Experiencias */}
+        {/* Grilla de Experiencias de Igual Altura */}
         <div className={styles.grid}>
-          {experiences.map((exp: PrizeExperienceRow) => {
+          {experiences.map((exp: PrizeExperienceRow, idx: number) => {
             const fotoObj = getFoto(exp.image_slug);
             const featuresList = Array.isArray(exp.features) ? (exp.features as string[]) : [];
 
             return (
               <article key={exp.id} className={styles.card}>
-                <div className={styles.imageWrapper}>
+                {/* Fondo de pantalla completa con <picture> y degradado oscuro continuo */}
+                <div className={styles.cardMedia}>
                   {exp.image_url ? (
                     <img
                       src={exp.image_url}
@@ -112,7 +113,7 @@ export const DetallePremio: React.FC = () => {
                       width={1200}
                       height={800}
                       loading="lazy"
-                      className={styles.image}
+                      className={styles.cardBgImage}
                     />
                   ) : (
                     <picture>
@@ -123,32 +124,45 @@ export const DetallePremio: React.FC = () => {
                         width={1200}
                         height={800}
                         loading="lazy"
-                        className={styles.image}
+                        className={styles.cardBgImage}
                       />
                     </picture>
                   )}
-                  <div className={styles.partnerTag}>
-                    <span>{exp.partner_name}</span>
+                  <div className={styles.cardScrim} />
+                </div>
+
+                {/* Barra superior con píldoras e icono decorativo */}
+                <div className={styles.cardTopBar}>
+                  <div className={styles.pillsGroup}>
+                    <Pill variant="dark">
+                      {exp.display_order ? `Experiencia 0${exp.display_order}` : `Experiencia 0${idx + 1}`}
+                    </Pill>
+                    {exp.partner_name && (
+                      <Pill variant="accent">{exp.partner_name}</Pill>
+                    )}
+                  </div>
+                  <div className={styles.topIconBox} aria-hidden="true">
+                    {renderExperienceIcon(exp.icon)}
                   </div>
                 </div>
 
-                <div className={styles.cardContent}>
-                  <div className={styles.cardHeader}>
-                    <div className={styles.iconBox}>{renderExperienceIcon(exp.icon)}</div>
-                    <h3 className={styles.cardTitle}>{exp.title}</h3>
-                  </div>
-
+                {/* Panel de contenido oscurecido para máxima legibilidad sobre cualquier fotografía */}
+                <div className={styles.contentPanel}>
+                  <h3 className={styles.cardTitle}>{exp.title}</h3>
                   <p className={styles.cardDescription}>{exp.description}</p>
 
                   {featuresList.length > 0 && (
-                    <ul className={styles.featureList}>
-                      {featuresList.map((feat, idx) => (
-                        <li key={idx} className={styles.featureItem}>
-                          <CheckCircle2 size={16} aria-hidden="true" className={styles.checkIcon} />
-                          <span>{feat}</span>
-                        </li>
-                      ))}
-                    </ul>
+                    <>
+                      <hr className={styles.divider} />
+                      <ul className={styles.featureList}>
+                        {featuresList.map((feat, fIdx) => (
+                          <li key={fIdx} className={styles.featureItem}>
+                            <CheckCircle2 size={18} aria-hidden="true" className={styles.checkIcon} />
+                            <span>{feat}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </>
                   )}
                 </div>
               </article>

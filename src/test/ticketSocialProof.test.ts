@@ -63,3 +63,4 @@ describe('Prueba Social y Estadísticas de Boletos (ticketSocialProof)', () => {
     expect(stats.isEarlyStage).toBe(true);
   });
 });
+

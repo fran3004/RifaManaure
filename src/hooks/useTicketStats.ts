@@ -23,3 +23,4 @@ export function useTicketStats(): UseTicketStatsReturn {
     hasError,
   };
 }
+

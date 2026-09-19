@@ -64,3 +64,4 @@ export function calculateTicketStats(tickets: Array<{ status: string }>): Ticket
 export function formatTicketCount(count: number): string {
   return new Intl.NumberFormat('es-CO').format(count);
 }
+
