@@ -1,26 +1,92 @@
 .section {
-  padding: 6rem 0 7rem;
-  background-color: var(--bg-main);
+  padding: clamp(4rem, 8vw, 7rem) 0;
+  background-color: var(--bg-surface);
   position: relative;
 }
 
-.statsStrip {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 1.5rem;
-  margin-top: 2rem;
-  padding: 1rem 1.5rem;
-  background-color: var(--bg-surface);
-  border: 1px solid var(--border-subtle);
+/* --- Banners de Estado del Sorteo --- */
+.pausedBanner {
+  background-color: var(--brand-accent-soft);
+  border: 1px solid rgba(245, 166, 35, 0.4);
+  color: var(--brand-accent-strong);
+  padding: 1rem 1.25rem;
   border-radius: var(--radius-md);
+  margin-top: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  font-size: 0.92rem;
+  text-align: left;
+}
+
+.closedBanner {
+  background-color: rgba(95, 102, 115, 0.1);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  padding: 1rem 1.25rem;
+  border-radius: var(--radius-md);
+  margin-top: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  font-size: 0.92rem;
+  text-align: left;
+}
+
+.bannerIcon {
+  flex-shrink: 0;
+}
+
+.bannerTitle {
+  display: block;
+  font-weight: 700;
+  margin-bottom: 0.2rem;
+  color: var(--text-primary);
+}
+
+.bannerMessage {
+  display: block;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+/* --- 1. Barra de Estadísticas --- */
+.statsStrip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1.75rem;
+  margin: 1.75rem auto 0;
+  padding: 0.75rem 2rem;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-sm);
 }
 
 .statItem {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.55rem;
   font-size: 0.875rem;
+}
+
+.statContent {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.35rem;
+}
+
+.statValue {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.statLabel {
+  font-weight: 500;
   color: var(--text-secondary);
 }
 
@@ -29,6 +95,7 @@
   height: 10px;
   border-radius: 50%;
   background-color: var(--brand-primary);
+  flex-shrink: 0;
 }
 
 .statDotSelected {
@@ -36,6 +103,7 @@
   height: 10px;
   border-radius: 50%;
   background-color: var(--brand-accent);
+  flex-shrink: 0;
 }
 
 .statDotSelectedMax {
@@ -45,6 +113,7 @@
   background-color: var(--brand-accent);
   box-shadow: var(--shadow-glow-amber);
   animation: pulseGlow 1.5s infinite alternate;
+  flex-shrink: 0;
 }
 
 @keyframes pulseGlow {
@@ -63,6 +132,7 @@
   height: 10px;
   border-radius: 50%;
   background-color: var(--brand-coral);
+  flex-shrink: 0;
 }
 
 .statDotSold {
@@ -70,20 +140,23 @@
   height: 10px;
   border-radius: 50%;
   background-color: var(--state-sold);
+  flex-shrink: 0;
 }
 
-/* --- Panel de Control y Azar --- */
+/* --- 2. Búsqueda y Azar --- */
 .controlPanel {
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 1.25rem;
-  background-color: var(--bg-surface);
+  background-color: var(--bg-card);
   border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
-  padding: 1.25rem;
-  margin-bottom: 1.5rem;
+  border-radius: var(--radius-xl);
+  padding: 1.25rem 1.5rem;
+  margin-top: 2.5rem;
+  margin-bottom: 1.75rem;
+  box-shadow: var(--shadow-sm);
 }
 
 .searchBox {
@@ -98,17 +171,24 @@
   position: absolute;
   left: 1rem;
   color: var(--text-muted);
+  pointer-events: none;
 }
 
 .searchInput {
   width: 100%;
-  padding: 0.75rem 1rem 0.75rem 2.75rem;
+  min-height: 44px;
+  padding: 0.65rem 1rem 0.65rem 2.75rem;
   border-radius: var(--radius-md);
-  background-color: var(--bg-surface-elevated);
+  background-color: var(--bg-surface);
   border: 1px solid var(--border-subtle);
   color: var(--text-primary);
+  font-family: var(--font-sans);
   font-size: 0.95rem;
-  transition: border-color var(--transition-fast);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.searchInput::placeholder {
+  color: var(--text-muted);
 }
 
 .searchInput:focus-visible {
@@ -119,24 +199,37 @@
 
 .clearSearchBtn {
   position: absolute;
-  right: 0.75rem;
+  right: 0.5rem;
   font-size: 0.75rem;
-  color: var(--text-muted);
-  padding: 0.4rem 0.6rem;
-  min-height: 44px;
-  min-width: 44px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  padding: 0.35rem 0.65rem;
+  min-height: 36px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background-color: var(--bg-main);
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.clearSearchBtn:hover {
+  background-color: var(--bg-surface);
+  color: var(--brand-primary);
+}
+
+.clearSearchBtn:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
 }
 
 .randomButtons {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 0.75rem;
 }
 
 .randomLabel {
@@ -144,49 +237,32 @@
   align-items: center;
   gap: 0.35rem;
   font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--color-brand-accent);
+  font-weight: 700;
+  color: var(--brand-accent-strong);
   margin-right: 0.25rem;
 }
 
-.randomBtn {
-  padding: 0.5rem 0.9rem;
-  min-height: 44px;
-  min-width: 44px;
-  display: inline-flex;
+.randomActionGroup {
+  display: flex;
   align-items: center;
-  justify-content: center;
-  border-radius: var(--radius-md);
-  background-color: var(--bg-surface-elevated);
-  border: 1px solid var(--border-subtle);
-  color: var(--text-primary);
-  font-weight: 700;
-  font-size: 0.875rem;
-  transition: all var(--transition-fast);
+  gap: 0.45rem;
 }
 
-.randomBtn:hover {
-  background-color: var(--color-brand-primary-light);
-  border-color: var(--color-brand-accent);
-  color: var(--color-brand-accent);
+.randomBtn {
+  min-height: 44px;
+  min-width: 44px;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 0.875rem;
 }
 
 .clearBtn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.5rem 0.85rem;
   min-height: 44px;
-  border-radius: var(--radius-md);
-  background-color: var(--brand-coral-soft);
-  border: 1px solid var(--color-danger);
-  color: var(--color-danger);
-  font-size: 0.8rem;
-  font-weight: 600;
+  font-size: 0.85rem;
 }
 
-/* --- Rango Tabs y Filtros --- */
-.rangeTabs {
+/* --- 3. Filtros (Chips/Píldoras) --- */
+.filterBar {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -195,125 +271,91 @@
   margin-bottom: 2rem;
 }
 
-.rangeButtons {
+.rangeChips {
   display: flex;
+  align-items: center;
   flex-wrap: wrap;
   gap: 0.5rem;
 }
 
-.rangeBtn {
-  padding: 0.45rem 0.9rem;
-  min-height: 44px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--radius-sm);
-  background-color: var(--bg-surface-elevated);
-  border: 1px solid var(--border-subtle);
-  color: var(--text-secondary);
-  font-size: 0.825rem;
-  font-weight: 600;
-  transition: all var(--transition-fast);
-}
-
-.rangeBtn:hover {
-  color: var(--text-primary);
-}
-
-.rangeBtnActive {
-  background-color: var(--color-brand-primary-light);
-  border-color: var(--color-brand-accent);
-  color: var(--color-brand-accent);
-  font-weight: 700;
-}
-
-.filterGroup {
+.statusChips {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 0.5rem;
-  color: var(--text-muted);
 }
 
-.filterTag {
-  padding: 0.45rem 0.85rem;
+.filterChip {
+  padding: 0.5rem 1rem;
   min-height: 44px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border-radius: var(--radius-full);
-  background: none;
+  background-color: var(--bg-card);
   border: 1px solid var(--border-subtle);
-  color: var(--text-secondary);
-  font-size: 0.8rem;
-  font-weight: 500;
+  color: var(--brand-primary);
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
   transition: all var(--transition-fast);
 }
 
-.filterTagActive {
-  background-color: var(--bg-surface-elevated);
-  border-color: var(--text-primary);
-  color: var(--text-primary);
+.filterChip:hover:not(.filterChipActive) {
+  background-color: var(--bg-surface);
+  border-color: var(--brand-primary);
 }
 
-/* --- Grilla de 1000 Boletos --- */
+.filterChip:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.filterChipActive {
+  background-color: var(--brand-primary);
+  border-color: var(--brand-primary);
+  color: #FFFFFF;
+  font-weight: 700;
+  box-shadow: var(--shadow-sm);
+}
+
+/* --- 4. Cuadrícula de Boletos --- */
 .ticketGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(62px, 1fr));
-  gap: 0.6rem;
+  grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
+  gap: 8px;
 }
 
 .ticketCard {
   aspect-ratio: 1;
+  min-height: 48px;
+  min-width: 48px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   border-radius: var(--radius-sm);
-  font-family: var(--font-mono);
+  font-family: var(--font-mono, 'JetBrains Mono Variable', monospace);
   font-size: 0.95rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   position: relative;
-  transition: all var(--transition-fast);
+  transition:
+    transform var(--transition-fast),
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
   cursor: pointer;
-  border: 1px solid transparent;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-.ticketAvailable {
-  background-color: var(--ticket-available-bg);
-  border-color: var(--ticket-available-border);
-  color: var(--ticket-available-text);
-}
-
-.ticketAvailable:hover {
-  transform: translateY(-2px);
-  border-color: var(--ticket-available-hover-border);
-  background-color: var(--ticket-available-hover-bg);
-}
-
-.ticketSelected {
-  background: var(--ticket-selected-bg);
-  border-color: var(--ticket-selected-border);
-  color: var(--ticket-selected-text);
-  box-shadow: var(--shadow-glow-amber);
-  transform: scale(1.04);
-}
-
-.ticketReserved {
-  background-color: var(--ticket-reserved-bg);
-  border-color: var(--ticket-reserved-border);
-  color: var(--ticket-reserved-text);
-  cursor: not-allowed;
-  opacity: 0.75;
-}
-
-.ticketSold {
-  background-color: var(--ticket-sold-bg);
-  border-color: var(--ticket-sold-border);
-  color: var(--ticket-sold-text);
-  cursor: not-allowed;
-  opacity: 0.6;
-  text-decoration: line-through;
+.ticketCard:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+  z-index: 2;
 }
 
 .ticketNumber {
@@ -322,10 +364,73 @@
 
 .ticketIcon {
   position: absolute;
-  bottom: 4px;
-  right: 4px;
+  bottom: 3px;
+  right: 3px;
 }
 
+/* Estados de Boletos */
+/* 1. Disponible */
+.ticketAvailable {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  color: var(--brand-primary);
+}
+
+.ticketAvailable:hover:not(:disabled) {
+  transform: translateY(-2px);
+  border-color: var(--brand-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+/* 2. Seleccionado */
+.ticketSelected {
+  background-color: var(--brand-accent);
+  border: 1.5px solid var(--brand-accent-strong);
+  color: var(--brand-deep); /* NUNCA blanco sobre ámbar */
+  box-shadow: var(--shadow-glow-amber);
+  transform: scale(1.04);
+}
+
+.ticketSelected .ticketIcon {
+  color: var(--brand-deep);
+}
+
+/* 3. En Reserva */
+.ticketReserved {
+  background-color: var(--brand-coral-soft);
+  border: 1.5px dashed var(--brand-coral);
+  color: var(--brand-coral);
+  cursor: not-allowed;
+  opacity: 0.85;
+}
+
+.ticketReserved .ticketIcon {
+  color: var(--brand-coral);
+}
+
+/* 4. Vendido */
+.ticketSold {
+  background-color: #E8ECE9;
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 4px,
+    rgba(95, 102, 115, 0.12) 4px,
+    rgba(95, 102, 115, 0.12) 6px
+  );
+  border: 1px solid var(--border-subtle);
+  color: var(--state-sold);
+  cursor: not-allowed;
+  opacity: 0.65;
+  text-decoration: line-through;
+  text-decoration-color: rgba(95, 102, 115, 0.4);
+}
+
+.ticketSold .ticketIcon {
+  color: var(--state-sold);
+}
+
+/* --- Estados Especiales: Carga y Vacío --- */
 .loadingBox {
   display: flex;
   flex-direction: column;
@@ -339,8 +444,8 @@
 .spinner {
   width: 36px;
   height: 36px;
-  border: 3px solid rgba(245, 158, 11, 0.2);
-  border-top-color: var(--color-brand-accent);
+  border: 3px solid rgba(27, 74, 46, 0.2);
+  border-top-color: var(--brand-primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -355,16 +460,60 @@
   text-align: center;
   padding: 4rem 1rem;
   color: var(--text-secondary);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
 }
 
-.resetFilterBtn {
-  margin-top: 1rem;
-  padding: 0.6rem 1.25rem;
-  border-radius: var(--radius-md);
-  background-color: var(--bg-surface-elevated);
+/* --- Leyenda Visual de Estados --- */
+.legendContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  margin-top: 2.25rem;
+  padding: 1rem 1.75rem;
+  background-color: var(--bg-card);
   border: 1px solid var(--border-subtle);
-  color: var(--color-brand-accent);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.legendBox {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono, 'JetBrains Mono Variable', monospace);
+  font-size: 0.75rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  position: relative;
+  box-sizing: border-box;
+  user-select: none;
+}
+
+.legendIcon {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+}
+
+.legendText {
   font-weight: 600;
+  color: var(--text-secondary);
 }
 
 /* --- Carrito Flotante Inferior --- */
@@ -374,9 +523,9 @@
   left: 0;
   right: 0;
   z-index: var(--z-cart);
-  background-color: var(--bg-surface-glass);
+  background-color: rgba(15, 46, 29, 0.96);
   backdrop-filter: blur(16px);
-  border-top: 2px solid var(--color-brand-accent);
+  border-top: 2px solid var(--brand-accent);
   padding: 1rem 0;
   box-shadow: var(--shadow-lg);
   animation: slideUp 200ms ease;
@@ -413,8 +562,8 @@
   gap: 0.4rem;
   padding: 0.4rem 0.8rem;
   border-radius: var(--radius-sm);
-  background-color: var(--color-brand-accent);
-  color: var(--text-inverse);
+  background-color: var(--brand-accent);
+  color: var(--brand-deep); /* NUNCA blanco sobre ámbar */
   font-weight: 800;
   font-size: 0.9rem;
   white-space: nowrap;
@@ -425,14 +574,13 @@
   align-items: center;
   gap: 0.35rem;
   padding: 0.35rem 0.75rem;
-  border-radius: 9999px;
-  background: rgba(245, 158, 11, 0.2);
-  border: 1px solid rgba(245, 158, 11, 0.45);
-  color: #fbbf24;
+  border-radius: var(--radius-full);
+  background: rgba(245, 166, 35, 0.2);
+  border: 1px solid rgba(245, 166, 35, 0.5);
+  color: var(--brand-accent);
   font-size: 0.8rem;
   font-weight: 700;
   white-space: nowrap;
-  letter-spacing: 0.01em;
 }
 
 .cartNumbersList {
@@ -447,9 +595,9 @@
 .miniTag {
   padding: 0.25rem 0.55rem;
   border-radius: var(--radius-sm);
-  background-color: var(--bg-surface-elevated);
-  border: 1px solid var(--color-brand-accent);
-  color: var(--color-brand-accent);
+  background-color: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--brand-accent);
+  color: var(--brand-accent);
   font-family: var(--font-mono);
   font-size: 0.825rem;
   font-weight: 700;
@@ -469,15 +617,17 @@
 
 .cartTotalLabel {
   font-size: 0.75rem;
-  color: var(--text-muted);
+  color: var(--text-on-dark-muted, #B9CDBF);
   text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .cartTotalValue {
   font-size: 1.5rem;
   font-weight: 800;
-  color: var(--color-brand-accent);
+  color: var(--brand-accent);
   line-height: 1.1;
+  font-family: var(--font-mono);
 }
 
 .checkoutBtn {
@@ -486,23 +636,68 @@
   gap: 0.6rem;
   padding: 0.85rem 1.6rem;
   border-radius: var(--radius-md);
-  background: linear-gradient(135deg, var(--brand-accent) 0%, var(--brand-accent-strong) 100%);
-  color: var(--text-inverse);
-  font-size: 1.05rem;
+  background-color: var(--brand-accent);
+  color: var(--brand-deep); /* NUNCA blanco sobre ámbar */
+  font-size: 1rem;
   font-weight: 800;
+  border: 1px solid var(--brand-accent-strong);
   box-shadow: var(--shadow-glow-amber);
+  cursor: pointer;
   transition: all var(--transition-fast);
 }
 
 .checkoutBtn:hover {
+  background-color: var(--brand-accent-hover);
   transform: translateY(-2px);
-  box-shadow: var(--shadow-glow-amber);
+}
+
+.checkoutBtn:focus-visible {
+  outline: 3px solid var(--focus-ring-on-dark);
+  outline-offset: 2px;
+}
+
+/* --- Adaptabilidad Responsive --- */
+@media (max-width: 900px) {
+  .filterBar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.85rem;
+  }
+
+  .rangeChips,
+  .statusChips {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 4px;
+    flex-wrap: nowrap;
+    mask-image: linear-gradient(to right, black 85%, transparent);
+    -webkit-mask-image: linear-gradient(to right, black 85%, transparent);
+  }
+
+  .rangeChips::-webkit-scrollbar,
+  .statusChips::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 @media (max-width: 768px) {
   .controlPanel {
     flex-direction: column;
     align-items: stretch;
+    gap: 1rem;
+    padding: 1rem;
+  }
+
+  .searchBox {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .randomButtons {
+    width: 100%;
+    justify-content: space-between;
+    flex-wrap: wrap;
   }
 
   .cartContainer {
@@ -518,5 +713,58 @@
   .checkoutBtn {
     flex: 1;
     justify-content: center;
+  }
+}
+
+@media (max-width: 640px) {
+  .statsStrip {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    width: 100%;
+    border-radius: var(--radius-lg);
+    padding: 1rem 1.25rem;
+    gap: 1rem;
+    box-sizing: border-box;
+  }
+
+  .ticketGrid {
+    grid-template-columns: repeat(auto-fill, minmax(48px, 1fr));
+    gap: 6px;
+  }
+
+  .ticketCard {
+    min-height: 48px;
+    min-width: 48px;
+    font-size: 0.85rem;
+  }
+
+  .legendContainer {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.85rem;
+    padding: 0.85rem 1rem;
+  }
+}
+
+/* --- Reducción de Movimiento --- */
+@media (prefers-reduced-motion: reduce) {
+  .statDotSelectedMax {
+    animation: none;
+  }
+
+  .floatingCart {
+    animation: none;
+  }
+
+  .ticketCard,
+  .ticketAvailable:hover,
+  .ticketSelected,
+  .checkoutBtn:hover {
+    transition: none;
+    transform: none;
+  }
+
+  .spinner {
+    animation-duration: 2s;
   }
 }

@@ -3,16 +3,15 @@ import { useTicketCart } from '@/context/useTicketCart';
 import {
   Ticket,
   Search,
-  Dices,
+  Sparkles,
   RotateCcw,
   CheckCircle,
   Clock,
   Lock,
   ArrowRight,
-  Filter,
 } from 'lucide-react';
 import { formatCOP, formatTicketNumber } from '@/lib/utils';
-import { SectionHeader } from '@/components/public/ui';
+import { SectionHeader, Button } from '@/components/public/ui';
 import { GanadorShowcase } from './GanadorShowcase';
 import styles from './SelectorBoletos.module.css';
 
@@ -51,7 +50,6 @@ export const SelectorBoletos: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<FilterType>('all');
   const [selectedRange, setSelectedRange] = useState<number>(0);
-
 
   // Boletos filtrados
   const filteredTickets = useMemo(() => {
@@ -93,43 +91,27 @@ export const SelectorBoletos: React.FC = () => {
         {/* Cabecera del Selector */}
         <SectionHeader
           id="titulo-boletos"
-          badge="Matriz de Boletos Oficial (000 - 999)"
+          badge="Tu Oportunidad"
           icon={<Ticket size={16} aria-hidden="true" />}
           title={
             <>
-              Elige tus <span className="highlight-text">Números de la Suerte</span>
+              Elige Tus <span className="highlight-text">Números de la Suerte</span>
             </>
           }
           subtitle={
             <>
-              Haz clic en los números que deseas comprar o usa el botón de selección aleatoria. Valor
+              Haz clic en los números que deseas comprar o usa la selección aleatoria. Valor
               por boleto: <strong>{unitPrice > 0 ? formatCOP(unitPrice) : '...'}</strong>.
             </>
           }
         >
           {/* Banner de Sorteo Pausado */}
           {isRafflePaused && (
-            <div
-              style={{
-                background: 'rgba(245, 158, 11, 0.1)',
-                border: '1px solid rgba(245, 158, 11, 0.3)',
-                color: '#fbbf24',
-                padding: '1rem 1.25rem',
-                borderRadius: '12px',
-                marginTop: '1rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.75rem',
-                fontSize: '0.92rem',
-                textAlign: 'left',
-              }}
-            >
-              <Clock size={20} aria-hidden="true" style={{ flexShrink: 0, color: '#f59e0b' }} />
+            <div className={styles.pausedBanner} role="status">
+              <Clock size={20} aria-hidden="true" className={styles.bannerIcon} />
               <div>
-                <strong style={{ display: 'block', color: '#fde68a', marginBottom: '0.2rem' }}>
-                  Sorteo Temporalmente Pausado
-                </strong>
-                <span>
+                <strong className={styles.bannerTitle}>Sorteo Temporalmente Pausado</strong>
+                <span className={styles.bannerMessage}>
                   La venta y reserva de boletos se encuentra pausada por el equipo administrativo.
                   No se admiten nuevas compras en este momento.
                 </span>
@@ -139,27 +121,11 @@ export const SelectorBoletos: React.FC = () => {
 
           {/* Banner de Sorteo Finalizado */}
           {isRaffleClosed && (
-            <div
-              style={{
-                background: 'rgba(100, 116, 139, 0.1)',
-                border: '1px solid rgba(100, 116, 139, 0.3)',
-                color: '#cbd5e1',
-                padding: '1rem 1.25rem',
-                borderRadius: '12px',
-                marginTop: '1rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.75rem',
-                fontSize: '0.92rem',
-                textAlign: 'left',
-              }}
-            >
-              <Lock size={20} aria-hidden="true" style={{ flexShrink: 0, color: '#94a3b8' }} />
+            <div className={styles.closedBanner} role="status">
+              <Lock size={20} aria-hidden="true" className={styles.bannerIcon} />
               <div>
-                <strong style={{ display: 'block', color: '#f1f5f9', marginBottom: '0.2rem' }}>
-                  Edición de Rifa Concluida
-                </strong>
-                <span>
+                <strong className={styles.bannerTitle}>Edición de Rifa Concluida</strong>
+                <span className={styles.bannerMessage}>
                   Esta edición ha finalizado. Puedes consultar tus números ganadores en la sección
                   de verificación.
                 </span>
@@ -167,12 +133,17 @@ export const SelectorBoletos: React.FC = () => {
             </div>
           )}
 
-          {/* Estadísticas de Disponibilidad */}
-          <div className={styles.statsStrip}>
+          {/* Barra de Estadísticas */}
+          <div
+            className={styles.statsStrip}
+            role="region"
+            aria-label="Estadísticas de disponibilidad de boletos"
+          >
             <div className={styles.statItem}>
               <span className={styles.statDotAvailable} aria-hidden="true" />
-              <span>
-                <strong>{stats.available}</strong> Disponibles
+              <span className={styles.statContent}>
+                <strong className={styles.statValue}>{stats.available}</strong>
+                <span className={styles.statLabel}>Disponibles</span>
               </span>
             </div>
             <div className={styles.statItem}>
@@ -180,32 +151,41 @@ export const SelectorBoletos: React.FC = () => {
                 className={isMaxLimitReached ? styles.statDotSelectedMax : styles.statDotSelected}
                 aria-hidden="true"
               />
-              <span>
-                <strong>{selectedTickets.length}</strong>
-                {maxTicketsPerBuyer ? `/${maxTicketsPerBuyer}` : ''} Seleccionados
+              <span className={styles.statContent}>
+                <strong className={styles.statValue}>
+                  {selectedTickets.length}
+                  {maxTicketsPerBuyer ? `/${maxTicketsPerBuyer}` : ''}
+                </strong>
+                <span className={styles.statLabel}>Seleccionados</span>
               </span>
             </div>
             <div className={styles.statItem}>
               <span className={styles.statDotReserved} aria-hidden="true" />
-              <span>
-                <strong>{stats.reserved}</strong> En Reserva
+              <span className={styles.statContent}>
+                <strong className={styles.statValue}>{stats.reserved}</strong>
+                <span className={styles.statLabel}>En reserva</span>
               </span>
             </div>
             <div className={styles.statItem}>
               <span className={styles.statDotSold} aria-hidden="true" />
-              <span>
-                <strong>{stats.sold}</strong> Vendidos
+              <span className={styles.statContent}>
+                <strong className={styles.statValue}>{stats.sold}</strong>
+                <span className={styles.statLabel}>Vendidos</span>
               </span>
             </div>
           </div>
         </SectionHeader>
 
-        {/* Barra de Control, Búsqueda y Botones de la Suerte */}
+        {/* Barra de Control, Búsqueda y Azar */}
         <div className={styles.controlPanel}>
           {/* Buscador */}
           <div className={styles.searchBox}>
+            <label htmlFor="busqueda-boletos" className="visually-hidden">
+              Buscar número de boleto
+            </label>
             <Search size={18} aria-hidden="true" className={styles.searchIcon} />
             <input
+              id="busqueda-boletos"
               type="text"
               placeholder="Buscar número (ej: 045, 777)"
               value={searchTerm}
@@ -229,95 +209,111 @@ export const SelectorBoletos: React.FC = () => {
 
           {/* Botones de Azar */}
           <div className={styles.randomButtons}>
-            <span className={styles.randomLabel}>
-              <Dices size={16} aria-hidden="true" /> Azar:
-            </span>
-            <button
-              type="button"
-              className={styles.randomBtn}
-              onClick={() => selectRandomTickets(1)}
-              disabled={!isRaffleActive}
-              aria-label="Seleccionar 1 boleto al azar"
-            >
-              +1
-            </button>
-            <button
-              type="button"
-              className={styles.randomBtn}
-              onClick={() => selectRandomTickets(2)}
-              disabled={!isRaffleActive}
-              aria-label="Seleccionar 2 boletos al azar"
-            >
-              +2
-            </button>
-            <button
-              type="button"
-              className={styles.randomBtn}
-              onClick={() => selectRandomTickets(5)}
-              disabled={!isRaffleActive}
-              aria-label="Seleccionar 5 boletos al azar"
-            >
-              +5
-            </button>
-            <button
-              type="button"
-              className={styles.randomBtn}
-              onClick={() => selectRandomTickets(10)}
-              disabled={!isRaffleActive}
-              aria-label="Seleccionar 10 boletos al azar"
-            >
-              +10
-            </button>
-            {selectedTickets.length > 0 && (
-              <button
+            <div className={styles.randomLabel}>
+              <Sparkles size={16} aria-hidden="true" />
+              <span>Azar:</span>
+            </div>
+            <div className={styles.randomActionGroup}>
+              <Button
                 type="button"
+                variant="secondary"
+                size="sm"
+                className={styles.randomBtn}
+                onClick={() => selectRandomTickets(1)}
+                disabled={!isRaffleActive || isMaxLimitReached}
+                aria-label="Seleccionar 1 boleto al azar"
+              >
+                +1
+              </Button>
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                className={styles.randomBtn}
+                onClick={() => selectRandomTickets(2)}
+                disabled={!isRaffleActive || isMaxLimitReached}
+                aria-label="Seleccionar 2 boletos al azar"
+              >
+                +2
+              </Button>
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                className={styles.randomBtn}
+                onClick={() => selectRandomTickets(5)}
+                disabled={!isRaffleActive || isMaxLimitReached}
+                aria-label="Seleccionar 5 boletos al azar"
+              >
+                +5
+              </Button>
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                className={styles.randomBtn}
+                onClick={() => selectRandomTickets(10)}
+                disabled={!isRaffleActive || isMaxLimitReached}
+                aria-label="Seleccionar 10 boletos al azar"
+              >
+                +10
+              </Button>
+            </div>
+            {selectedTickets.length > 0 && (
+              <Button
+                type="button"
+                variant="danger-soft"
+                size="sm"
                 className={styles.clearBtn}
                 onClick={clearSelection}
+                leftIcon={<RotateCcw size={14} aria-hidden="true" />}
                 aria-label="Limpiar selección de boletos"
               >
-                <RotateCcw size={14} aria-hidden="true" /> Limpiar
-              </button>
+                Limpiar
+              </Button>
             )}
           </div>
         </div>
 
-        {/* Pestañas de Rango de Boletos (Paginación por Bloques) */}
+        {/* Filtros de Rango y Disponibilidad como Chips */}
         {!searchTerm && (
-          <div className={styles.rangeTabs}>
-            <div className={styles.rangeButtons}>
+          <div className={styles.filterBar}>
+            <div className={styles.rangeChips} role="toolbar" aria-label="Filtrar por rango de boletos">
               {RANGES.map((r, idx) => (
                 <button
                   key={idx}
                   type="button"
-                  className={`${styles.rangeBtn} ${selectedRange === idx ? styles.rangeBtnActive : ''}`}
+                  className={`${styles.filterChip} ${selectedRange === idx ? styles.filterChipActive : ''}`}
                   onClick={() => setSelectedRange(idx)}
+                  aria-pressed={selectedRange === idx}
                 >
                   {r.label}
                 </button>
               ))}
             </div>
 
-            {/* Filtros Rápidos */}
-            <div className={styles.filterGroup}>
-              <Filter size={14} aria-hidden="true" />
+            <div className={styles.statusChips} role="toolbar" aria-label="Filtrar por disponibilidad">
               <button
                 type="button"
-                className={`${styles.filterTag} ${filterType === 'all' ? styles.filterTagActive : ''}`}
+                className={`${styles.filterChip} ${filterType === 'all' ? styles.filterChipActive : ''}`}
                 onClick={() => setFilterType('all')}
+                aria-pressed={filterType === 'all'}
               >
                 Todos
               </button>
               <button
                 type="button"
-                className={`${styles.filterTag} ${filterType === 'available' ? styles.filterTagActive : ''}`}
+                className={`${styles.filterChip} ${filterType === 'available' ? styles.filterChipActive : ''}`}
                 onClick={() => setFilterType('available')}
+                aria-pressed={filterType === 'available'}
               >
                 Solo Libres
               </button>
               <button
                 type="button"
-                className={`${styles.filterTag} ${filterType === 'selected' ? styles.filterTagActive : ''}`}
+                className={`${styles.filterChip} ${filterType === 'selected' ? styles.filterChipActive : ''}`}
                 onClick={() => setFilterType('selected')}
+                aria-pressed={filterType === 'selected'}
               >
                 Mis Boletos ({selectedTickets.length})
               </button>
@@ -340,17 +336,17 @@ export const SelectorBoletos: React.FC = () => {
               const isSold = ticket.status === 'sold';
 
               let ticketClass = styles.ticketAvailable;
-              let statusLabel = 'Disponible';
+              let statusLabel = 'disponible';
 
               if (isSelected) {
                 ticketClass = styles.ticketSelected;
-                statusLabel = 'Seleccionado';
+                statusLabel = 'seleccionado';
               } else if (isReserved) {
                 ticketClass = styles.ticketReserved;
-                statusLabel = 'En proceso de pago';
+                statusLabel = 'en reserva';
               } else if (isSold) {
                 ticketClass = styles.ticketSold;
-                statusLabel = 'Vendido';
+                statusLabel = 'vendido';
               }
 
               return (
@@ -360,34 +356,69 @@ export const SelectorBoletos: React.FC = () => {
                   className={`${styles.ticketCard} ${ticketClass}`}
                   onClick={() => toggleTicketSelection(ticket.number)}
                   disabled={(!isAvailable && !isSelected) || !isRaffleActive}
+                  aria-pressed={isSelected}
+                  aria-disabled={!isAvailable && !isSelected ? true : undefined}
                   title={`Número ${formatTicketNumber(ticket.number)} - ${statusLabel}`}
-                  aria-label={`Boleto número ${ticket.number}, estado: ${statusLabel}`}
+                  aria-label={`Boleto ${ticket.number}, ${statusLabel}`}
                 >
                   <span className={styles.ticketNumber}>{ticket.number}</span>
-                  {isSelected && <CheckCircle size={12} aria-hidden="true" className={styles.ticketIcon} />}
-                  {isReserved && !isSelected && <Clock size={12} aria-hidden="true" className={styles.ticketIcon} />}
-                  {isSold && !isSelected && <Lock size={12} aria-hidden="true" className={styles.ticketIcon} />}
+                  {isSelected && <CheckCircle size={11} aria-hidden="true" className={styles.ticketIcon} />}
+                  {isReserved && !isSelected && <Clock size={11} aria-hidden="true" className={styles.ticketIcon} />}
+                  {isSold && !isSelected && <Lock size={11} aria-hidden="true" className={styles.ticketIcon} />}
                 </button>
               );
             })}
           </div>
         )}
 
+        {/* Sin resultados */}
         {filteredTickets.length === 0 && !isLoading && (
           <div className={styles.emptyResults}>
             <p>No se encontraron boletos que coincidan con el filtro seleccionado.</p>
-            <button
+            <Button
               type="button"
-              className={styles.resetFilterBtn}
+              variant="secondary"
+              size="sm"
               onClick={() => {
                 setSearchTerm('');
                 setFilterType('all');
               }}
             >
               Restablecer filtros
-            </button>
+            </Button>
           </div>
         )}
+
+        {/* Leyenda Visual de Estados */}
+        <div className={styles.legendContainer} aria-label="Leyenda de estados de boletos">
+          <div className={styles.legendItem}>
+            <div className={`${styles.legendBox} ${styles.ticketAvailable}`} aria-hidden="true">
+              <span>042</span>
+            </div>
+            <span className={styles.legendText}>Disponible</span>
+          </div>
+          <div className={styles.legendItem}>
+            <div className={`${styles.legendBox} ${styles.ticketSelected}`} aria-hidden="true">
+              <span>042</span>
+              <CheckCircle size={10} aria-hidden="true" className={styles.legendIcon} />
+            </div>
+            <span className={styles.legendText}>Seleccionado</span>
+          </div>
+          <div className={styles.legendItem}>
+            <div className={`${styles.legendBox} ${styles.ticketReserved}`} aria-hidden="true">
+              <span>042</span>
+              <Clock size={10} aria-hidden="true" className={styles.legendIcon} />
+            </div>
+            <span className={styles.legendText}>En reserva</span>
+          </div>
+          <div className={styles.legendItem}>
+            <div className={`${styles.legendBox} ${styles.ticketSold}`} aria-hidden="true">
+              <span>042</span>
+              <Lock size={10} aria-hidden="true" className={styles.legendIcon} />
+            </div>
+            <span className={styles.legendText}>Vendido</span>
+          </div>
+        </div>
       </div>
 
       {/* Barra de Carrito Flotante Inferior */}
