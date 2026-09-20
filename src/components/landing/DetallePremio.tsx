@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { fotos } from '@/assets/assets';
 import { getCachedPrizeDetails, getPublicPrizeDetails } from '@/services/prizeService';
 import type { PublicPrizeData, PrizeExperienceRow } from '@/types/raffle.types';
 import {
@@ -18,6 +17,7 @@ import {
   MapPin,
 } from 'lucide-react';
 import { SectionHeader } from '@/components/public/ui';
+import { ResponsiveImage } from '@/components/common/ResponsiveImage';
 import styles from './DetallePremio.module.css';
 
 function renderExperienceIcon(iconName: string): React.ReactNode {
@@ -73,11 +73,21 @@ export const DetallePremio: React.FC = () => {
 
   const { settings, experiences } = prizeData;
 
-  const getFoto = (slug: string | null) => {
-    // Para cuatrimoto, 'cuatrimoto-ruta' ofrece un fondo de cordillera y naturaleza con óptimo contraste
-    const effectiveSlug = slug === 'cuatrimoto-flota' ? 'cuatrimoto-ruta' : slug;
-    if (!effectiveSlug) return fotos[0];
-    return fotos.find((f) => f.slug === effectiveSlug) || fotos[0];
+  const getEffectiveSlug = (slug: string | null, id: string): string => {
+    // Mapeo defensivo si Supabase tiene slugs obsoletos o parches temporales
+    if (id === 'exp-gastronomia' && (slug === 'serrania-perija-panoramica' || !slug)) {
+      return 'gastronomia-casa-arepas';
+    }
+    if (id === 'exp-fotografia' && (slug === 'cuatrimoto-mirador' || !slug)) {
+      return 'serrania-topiarios';
+    }
+    if (id === 'exp-cuatrimotos' && (slug === 'cuatrimoto-flota' || !slug)) {
+      return 'cuatrimoto-aventura-cordillera';
+    }
+    if (id === 'exp-glamping' && (!slug || slug === 'fogata-casa-de-vidrio')) {
+      return 'hospedaje-villa-adelaida';
+    }
+    return slug || 'cuatrimoto-aventura-cordillera';
   };
 
   const renderSectionTitle = (rawTitle: string) => {
@@ -109,7 +119,6 @@ export const DetallePremio: React.FC = () => {
         {/* Grilla de Experiencias de Igual Altura */}
         <div className={styles.grid}>
           {experiences.map((exp: PrizeExperienceRow, idx: number) => {
-            const fotoObj = getFoto(exp.image_slug);
             const featuresList = Array.isArray(exp.features) ? (exp.features as string[]) : [];
             const displayNum = exp.display_order
               ? exp.display_order < 10
@@ -128,23 +137,18 @@ export const DetallePremio: React.FC = () => {
                       width={1080}
                       height={1350}
                       loading="lazy"
+                      decoding="async"
                       className={styles.cardBgImage}
                     />
                   ) : (
-                    <picture>
-                      {fotoObj.movil && (
-                        <source srcSet={fotoObj.movil} type="image/webp" />
-                      )}
-                      <source srcSet={fotoObj.card} type="image/webp" />
-                      <img
-                        src={fotoObj.movilJpg || fotoObj.cardJpg}
-                        alt={fotoObj.alt}
-                        width={1080}
-                        height={1350}
-                        loading="lazy"
-                        className={styles.cardBgImage}
-                      />
-                    </picture>
+                    <ResponsiveImage
+                      id={getEffectiveSlug(exp.image_slug, exp.id)}
+                      ratio="4x5"
+                      role="tarjeta"
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 380px"
+                      imgClassName={styles.cardBgImage}
+                      alt={exp.title}
+                    />
                   )}
                   <div className={styles.cardScrim} />
                 </div>

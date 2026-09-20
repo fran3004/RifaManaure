@@ -1,10 +1,61 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { fotos, type Foto } from '@/assets/assets';
 import { Image, X, ChevronLeft, ChevronRight, Maximize2 } from 'lucide-react';
 import { SectionHeader } from '@/components/public/ui';
+import { ResponsiveImage } from '@/components/common/ResponsiveImage';
+import { imageManifest, type ImageEntry } from '@/types/image-manifest';
 import styles from './GaleriaPremio.module.css';
 
-type CategoriaFiltro = 'todas' | 'cuatrimoto' | 'parapente' | 'serrania' | 'fogata';
+type CategoriaFiltro =
+  | 'todas'
+  | 'cuatrimoto'
+  | 'parapente'
+  | 'serrania'
+  | 'hospedaje'
+  | 'gastronomia'
+  | 'fogata';
+
+export interface GaleriaItemConfig {
+  id: string;
+  category: 'cuatrimoto' | 'parapente' | 'serrania' | 'hospedaje' | 'gastronomia' | 'fogata';
+}
+
+/**
+ * 20 fotografías canónicas curadas sin escenas repetidas,
+ * ordenadas en una narrativa de 6 actos vivenciales para el turista.
+ */
+export const galeriaItems: GaleriaItemConfig[] = [
+  // 1. Llegada & Hospedaje Campestre
+  { id: 'hospedaje-villa-adelaida', category: 'hospedaje' },
+  { id: 'serrania-topiarios', category: 'serrania' },
+
+  // 2. Aventura Extrema en Cuatrimotos
+  { id: 'cuatrimoto-aventura-cordillera', category: 'cuatrimoto' },
+  { id: 'cuatrimoto-ruta', category: 'cuatrimoto' },
+  { id: 'cuatrimoto-mirador', category: 'cuatrimoto' },
+  { id: 'cuatrimoto-cumbre', category: 'cuatrimoto' },
+
+  // 3. Vuelo Libre en Parapente Tándem
+  { id: 'parapente-despegue-atardecer', category: 'parapente' },
+  { id: 'parapente-bandera', category: 'parapente' },
+  { id: 'parapente-vuelo', category: 'parapente' },
+  { id: 'parapente-tandem-canon', category: 'parapente' },
+
+  // 4. Expedición Natural: Serranía y Páramo
+  { id: 'serrania-perija-laguna', category: 'serrania' },
+  { id: 'serrania-perija-frailejones', category: 'serrania' },
+  { id: 'serrania-perija-cordillera', category: 'serrania' },
+  { id: 'serrania-pozo-cristalino', category: 'serrania' },
+  { id: 'serrania-los-pinos', category: 'serrania' },
+  { id: 'serrania-sabana-rubia', category: 'serrania' },
+
+  // 5. Gastronomía Tradicional Autóctona
+  { id: 'gastronomia-casa-arepas', category: 'gastronomia' },
+  { id: 'gastronomia-arepa', category: 'gastronomia' },
+  { id: 'gastronomia-plato', category: 'gastronomia' },
+
+  // 6. Noche Íntima & Fogata
+  { id: 'fogata-casa-de-vidrio', category: 'fogata' },
+];
 
 export const GaleriaPremio: React.FC = () => {
   const [filtroActivo, setFiltroActivo] = useState<CategoriaFiltro>('todas');
@@ -16,7 +67,9 @@ export const GaleriaPremio: React.FC = () => {
   const touchStartX = useRef<number | null>(null);
 
   const fotosFiltradas =
-    filtroActivo === 'todas' ? fotos : fotos.filter((f) => f.experiencia === filtroActivo);
+    filtroActivo === 'todas'
+      ? galeriaItems
+      : galeriaItems.filter((f) => f.category === filtroActivo);
 
   const handleOpenLightbox = (index: number, element?: HTMLElement) => {
     if (element) {
@@ -56,7 +109,6 @@ export const GaleriaPremio: React.FC = () => {
   // Foco inicial, Focus Trap y soporte de teclado (Esc, Flechas, Tab)
   useEffect(() => {
     if (fotoSeleccionadaIndex !== null) {
-      // Foco inicial en el botón cerrar
       closeBtnRef.current?.focus();
 
       const handleKeyDown = (e: KeyboardEvent) => {
@@ -76,7 +128,6 @@ export const GaleriaPremio: React.FC = () => {
           return;
         }
 
-        // Focus trap dentro del diálogo
         if (e.key === 'Tab' && dialogRef.current) {
           const focusableElements = dialogRef.current.querySelectorAll<HTMLElement>(
             'button:not([disabled]), [tabindex]:not([tabindex="-1"])'
@@ -105,7 +156,7 @@ export const GaleriaPremio: React.FC = () => {
     }
   }, [fotoSeleccionadaIndex, handleCloseLightbox, handlePrev, handleNext]);
 
-  // Precarga de la imagen anterior y siguiente
+  // Precarga de la imagen anterior y siguiente en resolución lightbox
   useEffect(() => {
     if (fotoSeleccionadaIndex === null || fotosFiltradas.length <= 1) return;
 
@@ -114,20 +165,23 @@ export const GaleriaPremio: React.FC = () => {
     const nextIndex =
       fotoSeleccionadaIndex === fotosFiltradas.length - 1 ? 0 : fotoSeleccionadaIndex + 1;
 
-    const preload = (src: string) => {
-      if (!src) return;
-      const img = new window.Image();
-      img.src = src;
+    const preload = (item?: GaleriaItemConfig) => {
+      if (!item) return;
+      const entry: ImageEntry | undefined = imageManifest[item.id];
+      if (!entry) return;
+      const v = entry.variants.find((x) => x.role === 'lightbox') || entry.variants[0];
+      if (v?.webp?.url) {
+        const imgWebp = new window.Image();
+        imgWebp.src = v.webp.url;
+      }
+      if (v?.jpg?.url) {
+        const imgJpg = new window.Image();
+        imgJpg.src = v.jpg.url;
+      }
     };
 
-    if (fotosFiltradas[prevIndex]) {
-      preload(fotosFiltradas[prevIndex].full);
-      preload(fotosFiltradas[prevIndex].fullJpg);
-    }
-    if (fotosFiltradas[nextIndex]) {
-      preload(fotosFiltradas[nextIndex].full);
-      preload(fotosFiltradas[nextIndex].fullJpg);
-    }
+    preload(fotosFiltradas[prevIndex]);
+    preload(fotosFiltradas[nextIndex]);
   }, [fotoSeleccionadaIndex, fotosFiltradas]);
 
   // Soporte táctil para deslizar (umbral 50 px)
@@ -148,8 +202,11 @@ export const GaleriaPremio: React.FC = () => {
     touchStartX.current = null;
   };
 
-  const fotoActual: Foto | undefined =
+  const fotoActualItem =
     fotoSeleccionadaIndex !== null ? fotosFiltradas[fotoSeleccionadaIndex] : undefined;
+  const fotoActualEntry: ImageEntry | undefined = fotoActualItem
+    ? imageManifest[fotoActualItem.id]
+    : undefined;
 
   return (
     <section id="galeria" className={styles.galeriaSection} aria-labelledby="titulo-galeria">
@@ -178,7 +235,7 @@ export const GaleriaPremio: React.FC = () => {
               onClick={() => setFiltroActivo('todas')}
               aria-pressed={filtroActivo === 'todas'}
             >
-              Todas ({fotos.length})
+              Todas ({galeriaItems.length})
             </button>
             <button
               type="button"
@@ -206,11 +263,27 @@ export const GaleriaPremio: React.FC = () => {
             </button>
             <button
               type="button"
+              className={`${styles.filterChip} ${filtroActivo === 'hospedaje' ? styles.filterChipActive : ''}`}
+              onClick={() => setFiltroActivo('hospedaje')}
+              aria-pressed={filtroActivo === 'hospedaje'}
+            >
+              Hospedaje & Glamping
+            </button>
+            <button
+              type="button"
+              className={`${styles.filterChip} ${filtroActivo === 'gastronomia' ? styles.filterChipActive : ''}`}
+              onClick={() => setFiltroActivo('gastronomia')}
+              aria-pressed={filtroActivo === 'gastronomia'}
+            >
+              Gastronomía
+            </button>
+            <button
+              type="button"
               className={`${styles.filterChip} ${filtroActivo === 'fogata' ? styles.filterChipActive : ''}`}
               onClick={() => setFiltroActivo('fogata')}
               aria-pressed={filtroActivo === 'fogata'}
             >
-              Glamping
+              Noche & Fogata
             </button>
           </div>
 
@@ -222,36 +295,39 @@ export const GaleriaPremio: React.FC = () => {
 
         {/* Grilla de Galería */}
         <div className={styles.galleryGrid}>
-          {fotosFiltradas.map((foto, index) => (
-            <button
-              key={foto.slug}
-              type="button"
-              className={styles.galleryItem}
-              onClick={(e) => handleOpenLightbox(index, e.currentTarget)}
-              aria-label={`Ver fotografía ampliada: ${foto.alt}`}
-            >
-              <picture>
-                <source srcSet={foto.card} type="image/webp" />
-                <img
-                  src={foto.cardJpg}
-                  alt=""
-                  width={1200}
-                  height={800}
-                  loading="lazy"
-                  className={styles.galleryImage}
+          {fotosFiltradas.map((item, index) => {
+            const entry = imageManifest[item.id];
+            const altText = entry?.alt || 'Fotografía de la experiencia en Manaure';
+            const captionText = entry?.caption || altText;
+
+            return (
+              <button
+                key={item.id}
+                type="button"
+                className={styles.galleryItem}
+                onClick={(e) => handleOpenLightbox(index, e.currentTarget)}
+                aria-label={`Ver fotografía ampliada: ${altText}`}
+              >
+                <ResponsiveImage
+                  id={item.id}
+                  ratio="3x2"
+                  role="galeria-thumb"
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  imgClassName={styles.galleryImage}
+                  alt={altText}
                 />
-              </picture>
-              <div className={styles.itemOverlay} aria-hidden="true">
-                <Maximize2 size={24} className={styles.zoomIcon} />
-                <span className={styles.itemCaption}>{foto.alt}</span>
-              </div>
-            </button>
-          ))}
+                <div className={styles.itemOverlay} aria-hidden="true">
+                  <Maximize2 size={24} className={styles.zoomIcon} />
+                  <span className={styles.itemCaption}>{captionText}</span>
+                </div>
+              </button>
+            );
+          })}
         </div>
       </div>
 
-      {/* Visor Lightbox Modal */}
-      {fotoActual && (
+      {/* Visor Lightbox Modal Accesible */}
+      {fotoActualItem && fotoActualEntry && (
         <div
           ref={dialogRef}
           className={styles.lightboxBackdrop}
@@ -283,16 +359,15 @@ export const GaleriaPremio: React.FC = () => {
             </button>
 
             <div className={styles.lightboxImageWrapper}>
-              <picture>
-                <source srcSet={fotoActual.full} type="image/webp" />
-                <img
-                  src={fotoActual.fullJpg}
-                  alt={fotoActual.alt}
-                  className={styles.lightboxImg}
-                />
-              </picture>
+              <ResponsiveImage
+                id={fotoActualItem.id}
+                role="lightbox"
+                sizes="(max-width: 1200px) 90vw, 1600px"
+                imgClassName={styles.lightboxImg}
+                alt={fotoActualEntry.alt}
+              />
               <div className={styles.lightboxCaption}>
-                <p className={styles.lightboxAlt}>{fotoActual.alt}</p>
+                <p className={styles.lightboxAlt}>{fotoActualEntry.caption || fotoActualEntry.alt}</p>
                 <span className={styles.lightboxCounter}>
                   {fotoSeleccionadaIndex! + 1} / {fotosFiltradas.length}
                 </span>

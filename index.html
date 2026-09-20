@@ -8,6 +8,28 @@
     <link rel="preconnect" href="%VITE_SUPABASE_URL%" crossorigin />
     <link rel="dns-prefetch" href="%VITE_SUPABASE_URL%" />
 
+    <!-- Preload del elemento LCP (Hero Slide 0: Serranía del Perijá) con dirección de arte -->
+    <link
+      rel="preload"
+      as="image"
+      type="image/webp"
+      href="/images/rifa/serrania/og-image--4x5-768w.webp"
+      imagesrcset="/images/rifa/serrania/og-image--4x5-640w.webp 640w, /images/rifa/serrania/og-image--4x5-768w.webp 768w"
+      imagesizes="100vw"
+      media="(max-width: 768px)"
+      fetchpriority="high"
+    />
+    <link
+      rel="preload"
+      as="image"
+      type="image/webp"
+      href="/images/rifa/serrania/og-image--16x9-1600w.webp"
+      imagesrcset="/images/rifa/serrania/og-image--16x9-640w.webp 640w, /images/rifa/serrania/og-image--16x9-1024w.webp 1024w, /images/rifa/serrania/og-image--16x9-1600w.webp 1600w, /images/rifa/serrania/og-image--16x9-1920w.webp 1920w"
+      imagesizes="100vw"
+      media="(min-width: 769px)"
+      fetchpriority="high"
+    />
+
     <!-- Título Principal Oficial -->
     <title>Manaure Vive | Gran Sorteo Ecoturístico y Aventura en el Perijá</title>
 
@@ -38,14 +60,14 @@
       property="og:description"
       content="Participa en el Gran Sorteo Oficial de Manaure Vive. Gana experiencias ecoturísticas inolvidables en la Serranía del Perijá: cuatrimotos, parapente, glamping y gastronomía local."
     />
-    <meta property="og:image" content="%VITE_SITE_URL%/og-image.jpg" />
-    <meta property="og:image:secure_url" content="%VITE_SITE_URL%/og-image.jpg" />
+    <meta property="og:image" content="%VITE_SITE_URL%/og-image-v2.jpg" />
+    <meta property="og:image:secure_url" content="%VITE_SITE_URL%/og-image-v2.jpg" />
     <meta property="og:image:type" content="image/jpeg" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta
       property="og:image:alt"
-      content="Gran Sorteo Ecoturístico Manaure Vive - Serranía del Perijá"
+      content="Vista panorámica de la Serranía del Perijá en Manaure Balcón del Cesar, Gran Sorteo Ecoturístico Manaure Vive"
     />
     <meta property="og:locale" content="es_CO" />
 
@@ -59,8 +81,8 @@
       name="twitter:description"
       content="Participa en el Gran Sorteo Oficial de Manaure Vive. Gana experiencias ecoturísticas inolvidables en la Serranía del Perijá."
     />
-    <meta name="twitter:image" content="%VITE_SITE_URL%/og-image.jpg" />
-    <meta name="twitter:image:alt" content="Gran Sorteo Ecoturístico Manaure Vive" />
+    <meta name="twitter:image" content="%VITE_SITE_URL%/og-image-v2.jpg" />
+    <meta name="twitter:image:alt" content="Vista panorámica de la Serranía del Perijá en Manaure Balcón del Cesar" />
 
     <!-- Branding Favicons y App Icons Oficiales para la Pestaña del Navegador -->
     <link rel="shortcut icon" href="/favicon.ico?v=2" />

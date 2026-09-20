@@ -90,92 +90,74 @@ export const aliados: Aliado[] = rawAliados.map(([slug, nombre, categoria]) => {
   };
 });
 
-// --- Glob imports para Imágenes ---
-const imgsHeroResp = import.meta.glob<string>('./imagenes/hero-responsive/*.webp', {
-  eager: true,
-  import: 'default',
-});
-const imgsHeroWebp = import.meta.glob<string>('./imagenes/hero-1920x1080/*.webp', {
-  eager: true,
-  import: 'default',
-});
-const imgsHeroJpg = import.meta.glob<string>('./imagenes/hero-1920x1080/*.jpg', {
-  eager: true,
-  import: 'default',
-});
+import { imageManifest, imageAliases, type ImageEntry } from '@/types/image-manifest';
 
-const imgsCardWebp = import.meta.glob<string>('./imagenes/card-1200x800/*.webp', {
-  eager: true,
-  import: 'default',
-});
-const imgsCardJpg = import.meta.glob<string>('./imagenes/card-1200x800/*.jpg', {
-  eager: true,
-  import: 'default',
-});
-
-const imgsThumbWebp = import.meta.glob<string>('./imagenes/thumb-600x400/*.webp', {
-  eager: true,
-  import: 'default',
-});
-const imgsThumbJpg = import.meta.glob<string>('./imagenes/thumb-600x400/*.jpg', {
-  eager: true,
-  import: 'default',
-});
-
-const imgsMovilWebp = import.meta.glob<string>('./imagenes/movil-1080x1350/*.webp', {
-  eager: true,
-  import: 'default',
-});
-const imgsMovilJpg = import.meta.glob<string>('./imagenes/movil-1080x1350/*.jpg', {
-  eager: true,
-  import: 'default',
-});
-
-const imgsFullWebp = import.meta.glob<string>('./imagenes/original-optimizado/*.webp', {
-  eager: true,
-  import: 'default',
-});
-const imgsFullJpg = import.meta.glob<string>('./imagenes/original-optimizado/*.jpg', {
-  eager: true,
-  import: 'default',
-});
-
+// --- Constructor de Foto conectado a los derivados optimizados de /images/rifa/ ---
 const crearFoto = (
   slug: string,
   alt: string,
   experiencia: Foto['experiencia'],
   heroExtendido = false
 ): Foto => {
-  const heroBase = imgsHeroWebp[`./imagenes/hero-1920x1080/${slug}.webp`] || '';
-  const h640 = imgsHeroResp[`./imagenes/hero-responsive/${slug}-640.webp`];
-  const h1024 = imgsHeroResp[`./imagenes/hero-responsive/${slug}-1024.webp`];
-  const h1600 = imgsHeroResp[`./imagenes/hero-responsive/${slug}-1600.webp`];
-  const h2000 = imgsHeroResp[`./imagenes/hero-responsive/${slug}-2000.webp`];
+  const canonicalId = imageAliases[slug] || slug;
+  const entry: ImageEntry | undefined = imageManifest[canonicalId];
 
-  const heroSrcSet = h640 && h1024 && h1600 && h2000
-    ? `${h640} 640w, ${h1024} 1024w, ${h1600} 1600w, ${h2000} 2000w`
-    : `${heroBase} 1920w`;
+  if (!entry) {
+    return {
+      slug,
+      alt,
+      experiencia,
+      heroExtendido,
+      hero: '',
+      heroJpg: '',
+      heroSrcSet: '',
+      card: '',
+      cardJpg: '',
+      thumb: '',
+      thumbJpg: '',
+      movil: '',
+      movilJpg: '',
+      full: '',
+      fullJpg: '',
+    };
+  }
+
+  const vHero = entry.variants.find((v) => v.role === 'hero-desktop') || entry.variants[0];
+  const vHeroResp = entry.variants.filter((v) => v.role === 'hero-desktop' || v.ratio === '16x9');
+  const h640 = vHeroResp.find((v) => v.width === 640)?.webp.url;
+  const h1024 = vHeroResp.find((v) => v.width === 1024)?.webp.url;
+  const h1600 = vHeroResp.find((v) => v.width === 1600)?.webp.url;
+  const h2000 = vHeroResp.find((v) => v.width >= 1920)?.webp.url;
+
+  const heroSrcSet = vHeroResp.length > 0
+    ? vHeroResp.map((v) => `${v.webp.url} ${v.width}w`).join(', ')
+    : `${vHero?.webp.url || ''} 1920w`;
+
+  const vCard = entry.variants.find((v) => v.role === 'tarjeta') || entry.variants[0];
+  const vThumb = entry.variants.find((v) => v.role === 'galeria-thumb') || entry.variants[0];
+  const vMovil = entry.variants.find((v) => v.role === 'hero-mobile') || entry.variants[0];
+  const vFull = entry.variants.find((v) => v.role === 'lightbox') || entry.variants[0];
 
   return {
     slug,
-    alt,
+    alt: alt || entry.alt,
     experiencia,
     heroExtendido,
-    hero: heroBase,
-    heroJpg: imgsHeroJpg[`./imagenes/hero-1920x1080/${slug}.jpg`] || '',
+    hero: vHero?.webp.url || '',
+    heroJpg: vHero?.jpg.url || '',
     hero640: h640,
     hero1024: h1024,
     hero1600: h1600,
     hero2000: h2000,
     heroSrcSet,
-    card: imgsCardWebp[`./imagenes/card-1200x800/${slug}.webp`] || '',
-    cardJpg: imgsCardJpg[`./imagenes/card-1200x800/${slug}.jpg`] || '',
-    thumb: imgsThumbWebp[`./imagenes/thumb-600x400/${slug}.webp`] || '',
-    thumbJpg: imgsThumbJpg[`./imagenes/thumb-600x400/${slug}.jpg`] || '',
-    movil: imgsMovilWebp[`./imagenes/movil-1080x1350/${slug}.webp`] || '',
-    movilJpg: imgsMovilJpg[`./imagenes/movil-1080x1350/${slug}.jpg`] || '',
-    full: imgsFullWebp[`./imagenes/original-optimizado/${slug}.webp`] || '',
-    fullJpg: imgsFullJpg[`./imagenes/original-optimizado/${slug}.jpg`] || '',
+    card: vCard?.webp.url || '',
+    cardJpg: vCard?.jpg.url || '',
+    thumb: vThumb?.webp.url || '',
+    thumbJpg: vThumb?.jpg.url || '',
+    movil: vMovil?.webp.url || '',
+    movilJpg: vMovil?.jpg.url || '',
+    full: vFull?.webp.url || '',
+    fullJpg: vFull?.jpg.url || '',
   };
 };
 
@@ -243,27 +225,53 @@ export interface HeroSlideFoto extends Foto {
   tituloExperiencia: string;
 }
 
-/** 5 fotografías estelares para el carrusel interactivo del Hero */
+/** 5 fotografías estelares aprobadas para el carrusel interactivo del Hero */
 export const fotosHeroCarousel: HeroSlideFoto[] = [
   {
-    ...fotos.find((f) => f.slug === 'serrania-perija-panoramica')!,
+    ...crearFoto(
+      'og-image',
+      'Majestuoso cañón montañoso y cordillera de la Serranía del Perijá bajo cielo azul despejado',
+      'serrania'
+    ),
+    slug: 'og-image',
     tituloExperiencia: 'Serranía del Perijá',
   },
   {
-    ...fotos.find((f) => f.slug === 'parapente-vuelo')!,
+    ...crearFoto(
+      'parapente-vuelo',
+      'Vuelo libre en parapente biplaza sobrevolando el valle verde de Manaure',
+      'parapente'
+    ),
+    slug: 'parapente-vuelo',
     tituloExperiencia: 'Vuelo en Parapente Tándem',
   },
   {
-    ...fotos.find((f) => f.slug === 'cuatrimoto-ruta')!,
+    ...crearFoto(
+      'cuatrimoto-aventura-cordillera',
+      'Caravana de cuatrimotos todoterreno recorriendo la cresta de la Serranía del Perijá',
+      'cuatrimoto'
+    ),
+    slug: 'cuatrimoto-aventura-cordillera',
     tituloExperiencia: 'Aventura en Cuatrimoto',
   },
   {
-    ...fotos.find((f) => f.slug === 'serrania-perija-laguna')!,
+    ...crearFoto(
+      'serrania-perija-laguna',
+      'Laguna de alta montaña reflejando el cielo andino y la vegetación de páramo',
+      'serrania'
+    ),
+    slug: 'serrania-perija-laguna',
     tituloExperiencia: 'Laguna Natural en Perijá',
   },
   {
-    ...fotos.find((f) => f.slug === 'fogata-casa-de-vidrio')!,
+    ...crearFoto(
+      'fogata-casa-de-vidrio',
+      'Fogata al atardecer en la terraza panorámica de la Casa de Vidrio',
+      'fogata'
+    ),
+    slug: 'fogata-casa-de-vidrio',
     tituloExperiencia: 'Fogata en la Casa de Vidrio',
   },
 ].filter((f): f is HeroSlideFoto => Boolean(f && f.slug));
+
 

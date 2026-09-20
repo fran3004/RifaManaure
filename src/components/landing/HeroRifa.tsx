@@ -17,6 +17,7 @@ import { useTicketCart } from '@/context/useTicketCart';
 import { useTicketStats } from '@/hooks/useTicketStats';
 import { formatTicketCount } from '@/config/ticketSocialProof';
 import { Button } from '@/components/public/ui/Button';
+import { ResponsiveImage } from '@/components/common/ResponsiveImage';
 import styles from './HeroRifa.module.css';
 
 interface HeroRifaProps {
@@ -164,29 +165,29 @@ export const HeroRifa: React.FC<HeroRifaProps> = ({
                 className={`${styles.slide} ${isActive ? styles.slideActive : ''}`}
                 aria-hidden={!isActive}
               >
-                <picture>
-                  {/* Para móvil (< 768px): carga la versión vertical nativa optimizada */}
-                  <source
-                    media="(max-width: 768px)"
-                    srcSet={foto.movil || foto.card}
-                    type="image/webp"
-                  />
-                  {/* Para pantallas grandes / escritorio: variantes srcset generadas */}
-                  <source
-                    srcSet={foto.heroSrcSet || foto.hero}
-                    sizes="100vw"
-                    type="image/webp"
-                  />
-                  <img
-                    src={foto.heroJpg || foto.cardJpg}
-                    alt={foto.alt}
-                    width={1920}
-                    height={1080}
-                    className={styles.slideImage}
-                    loading={index === 0 ? 'eager' : 'lazy'}
-                    fetchPriority={index === 0 ? 'high' : 'auto'}
-                  />
-                </picture>
+                <ResponsiveImage
+                  id={foto.slug}
+                  priority={index === 0}
+                  role="hero-desktop"
+                  ratio="16x9"
+                  sizes="100vw"
+                  artDirection={[
+                    {
+                      media: '(max-width: 768px)',
+                      role: 'hero-mobile',
+                      ratio: '4x5',
+                      sizes: '100vw',
+                    },
+                    {
+                      media: '(min-width: 769px)',
+                      role: 'hero-desktop',
+                      ratio: '16x9',
+                      sizes: '100vw',
+                    },
+                  ]}
+                  imgClassName={styles.slideImage}
+                  alt={foto.alt}
+                />
               </div>
             );
           })}
