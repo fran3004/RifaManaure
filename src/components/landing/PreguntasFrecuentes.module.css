@@ -115,9 +115,9 @@
 }
 
 /* Adaptación responsiva móvil */
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .faqSection {
-    padding: 4rem 0;
+    padding: 3.5rem 0;
   }
 
   .questionBtn {

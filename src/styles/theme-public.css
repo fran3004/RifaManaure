@@ -161,6 +161,10 @@
   [data-theme="public"] {
     --navbar-h: 64px;
   }
+
+  [data-theme="public"] .container {
+    width: min(1280px, 100% - 2rem);
+  }
 }
 
 /* --- Escala Tipográfica en Ámbito Público --- */

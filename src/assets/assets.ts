@@ -238,3 +238,32 @@ export const fotos: Foto[] = [
 
 /** Fotos nativas recomendadas para usar como fondo grande / hero de la rifa. */
 export const fotosParaHero = fotos.filter((f) => !f.heroExtendido);
+
+export interface HeroSlideFoto extends Foto {
+  tituloExperiencia: string;
+}
+
+/** 5 fotografías estelares para el carrusel interactivo del Hero */
+export const fotosHeroCarousel: HeroSlideFoto[] = [
+  {
+    ...fotos.find((f) => f.slug === 'serrania-perija-panoramica')!,
+    tituloExperiencia: 'Serranía del Perijá',
+  },
+  {
+    ...fotos.find((f) => f.slug === 'parapente-vuelo')!,
+    tituloExperiencia: 'Vuelo en Parapente Tándem',
+  },
+  {
+    ...fotos.find((f) => f.slug === 'cuatrimoto-ruta')!,
+    tituloExperiencia: 'Aventura en Cuatrimoto',
+  },
+  {
+    ...fotos.find((f) => f.slug === 'serrania-perija-laguna')!,
+    tituloExperiencia: 'Laguna Natural en Perijá',
+  },
+  {
+    ...fotos.find((f) => f.slug === 'fogata-casa-de-vidrio')!,
+    tituloExperiencia: 'Fogata en la Casa de Vidrio',
+  },
+].filter((f): f is HeroSlideFoto => Boolean(f && f.slug));
+

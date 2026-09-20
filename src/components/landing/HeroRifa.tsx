@@ -1,5 +1,5 @@
-import React from 'react';
-import { fotosParaHero } from '@/assets/assets';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { fotosHeroCarousel, type HeroSlideFoto } from '@/assets/assets';
 import {
   Ticket,
   Sparkles,
@@ -10,6 +10,7 @@ import {
   AlertCircle,
   PauseCircle,
   Flame,
+  Compass,
 } from 'lucide-react';
 import { formatCOP } from '@/lib/utils';
 import { useTicketCart } from '@/context/useTicketCart';
@@ -47,7 +48,7 @@ export const HeroRifa: React.FC<HeroRifaProps> = ({
   drawDateFormatted: propDrawDate,
   lotteryReference: propLottery,
 }) => {
-  const { raffle, unitPrice, isLoading } = useTicketCart();
+  const { raffle, unitPrice } = useTicketCart();
   const stats = useTicketStats();
 
   const isPaused = raffle?.status === 'paused';
@@ -59,12 +60,60 @@ export const HeroRifa: React.FC<HeroRifaProps> = ({
   const lotteryReference =
     propLottery ?? (raffle?.lottery_reference || 'Lotería de Santander (3 cifras)');
 
-  const isColdLoading = isLoading && !raffle;
+  // --- Estado del Carrusel de Fondo Automático ---
+  const slides: HeroSlideFoto[] = fotosHeroCarousel.length > 0 ? fotosHeroCarousel : [];
+  const [currentSlide, setCurrentSlide] = useState(0);
 
-  const heroImage = fotosParaHero[0] || {
-    hero: '',
-    heroJpg: '',
-    alt: 'Cuatrimotos en Manaure Balcón del Cesar',
+  // Referencias para gestos táctiles en móvil (swipe táctil opcional)
+  const touchStartXRef = useRef<number | null>(null);
+  const touchStartYRef = useRef<number | null>(null);
+
+  const goToNextSlide = useCallback(() => {
+    if (slides.length <= 1) return;
+    setCurrentSlide((prev) => (prev + 1) % slides.length);
+  }, [slides.length]);
+
+  const goToPrevSlide = useCallback(() => {
+    if (slides.length <= 1) return;
+    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
+  }, [slides.length]);
+
+  // Rotación continua y automática de fotos cada 4.5s
+  useEffect(() => {
+    if (slides.length <= 1) return;
+
+    // Respetar preferencia de movimiento reducido del sistema
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    if (mediaQuery.matches) return;
+
+    const interval = setInterval(() => {
+      goToNextSlide();
+    }, 4500);
+
+    return () => clearInterval(interval);
+  }, [slides.length, goToNextSlide]);
+
+  // Manejo de gestos táctiles (Swipe)
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartXRef.current = e.touches[0].clientX;
+    touchStartYRef.current = e.touches[0].clientY;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartXRef.current === null || touchStartYRef.current === null) return;
+    const deltaX = e.changedTouches[0].clientX - touchStartXRef.current;
+    const deltaY = e.changedTouches[0].clientY - touchStartYRef.current;
+
+    // Solo si el desplazamiento es predominantemente horizontal (> 40px)
+    if (Math.abs(deltaX) > 40 && Math.abs(deltaX) > Math.abs(deltaY)) {
+      if (deltaX < 0) {
+        goToNextSlide();
+      } else {
+        goToPrevSlide();
+      }
+    }
+    touchStartXRef.current = null;
+    touchStartYRef.current = null;
   };
 
   const handleScrollTo = (e: React.MouseEvent<HTMLAnchorElement>, targetId: string) => {
@@ -76,78 +125,126 @@ export const HeroRifa: React.FC<HeroRifaProps> = ({
     }
   };
 
+  // Renderizado tipográfico del título con acento en "Manaure Vive"
+  const rawTitle = raffle?.title || 'Gran Rifa Ecoturística Manaure Vive';
+  const renderTitleContent = () => {
+    const brandPhrase = 'Manaure Vive';
+    if (rawTitle.includes(brandPhrase)) {
+      const parts = rawTitle.split(brandPhrase);
+      const leadText = parts[0].trim();
+      const followText = parts.slice(1).join(brandPhrase).trim();
+      return (
+        <>
+          <span className={styles.titleLead}>{leadText}</span>{' '}
+          <span className={styles.titleAccent}>{brandPhrase}</span>
+          {followText ? ` ${followText}` : ''}
+        </>
+      );
+    }
+    return rawTitle;
+  };
+
+  const activePhoto = slides[currentSlide];
+
   return (
-    <section className={styles.heroSection} aria-label="Introducción al Gran Sorteo Ecoturístico">
-      {/* Fondo de pantalla completa con <picture> optimizado */}
+    <section
+      className={styles.heroSection}
+      aria-label="Introducción al Gran Sorteo Ecoturístico"
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+    >
+      {/* Fondo de pantalla completa con Carrusel Dinámico Responsive */}
       <div className={styles.bgWrapper}>
-        <picture>
-          <source
-            srcSet={heroImage.heroSrcSet || heroImage.hero}
-            sizes="100vw"
-            type="image/webp"
-          />
-          <img
-            src={heroImage.heroJpg}
-            alt={heroImage.alt}
-            width={1920}
-            height={1080}
-            className={styles.bgImage}
-            loading="eager"
-            fetchPriority="high"
-          />
-        </picture>
+        <div className={styles.sliderContainer} aria-hidden="true">
+          {slides.map((foto, index) => {
+            const isActive = index === currentSlide;
+            return (
+              <div
+                key={foto.slug}
+                className={`${styles.slide} ${isActive ? styles.slideActive : ''}`}
+                aria-hidden={!isActive}
+              >
+                <picture>
+                  {/* Para móvil (< 768px): carga la versión vertical nativa optimizada */}
+                  <source
+                    media="(max-width: 768px)"
+                    srcSet={foto.movil || foto.card}
+                    type="image/webp"
+                  />
+                  {/* Para pantallas grandes / escritorio: variantes srcset generadas */}
+                  <source
+                    srcSet={foto.heroSrcSet || foto.hero}
+                    sizes="100vw"
+                    type="image/webp"
+                  />
+                  <img
+                    src={foto.heroJpg || foto.cardJpg}
+                    alt={foto.alt}
+                    width={1920}
+                    height={1080}
+                    className={styles.slideImage}
+                    loading={index === 0 ? 'eager' : 'lazy'}
+                    fetchPriority={index === 0 ? 'high' : 'auto'}
+                  />
+                </picture>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Degradado cinematográfico que asegura alto contraste sin opacar los colores naturales */}
         <div className={styles.gradientOverlay} />
+
+        {/* Chip flotante con la experiencia activa en la fotografía */}
+        {activePhoto && (
+          <div className={styles.experienceChip} role="status" aria-live="polite">
+            <Compass size={14} className={styles.experienceIcon} aria-hidden="true" />
+            <span className={styles.experienceText}>{activePhoto.tituloExperiencia}</span>
+          </div>
+        )}
       </div>
 
       <div className={`container ${styles.contentContainer}`}>
-        {/* Badge superior con estado de la rifa */}
-        {isColdLoading ? (
-          <div className={styles.skeletonBadge} aria-hidden="true" />
-        ) : isPaused ? (
-          <div className={`${styles.badge} ${styles.badgePaused}`} role="status">
-            <PauseCircle size={16} aria-hidden="true" className={styles.badgeIcon} />
-            <span>Sorteo Temporalmente Pausado</span>
-          </div>
-        ) : isClosed ? (
-          <div className={`${styles.badge} ${styles.badgeClosed}`} role="status">
-            <AlertCircle size={16} aria-hidden="true" className={styles.badgeIcon} />
-            <span>Edición Finalizada</span>
-          </div>
-        ) : (
-          <div className={`${styles.badge} ${styles.badgeActive}`} role="status">
-            <Sparkles size={16} aria-hidden="true" className={styles.badgeIcon} />
-            <span>
-              {raffle?.status === 'active' ? 'Sorteo Oficial Activo' : 'Gran Sorteo Manaure Vive'}
-            </span>
-          </div>
-        )}
+        {/* Fila superior: Badge de estado */}
+        <div className={styles.topMetaRow}>
+          {isPaused ? (
+            <div className={`${styles.badge} ${styles.badgePaused}`} role="status">
+              <PauseCircle size={16} aria-hidden="true" className={styles.badgeIcon} />
+              <span>Sorteo Temporalmente Pausado</span>
+            </div>
+          ) : isClosed ? (
+            <div className={`${styles.badge} ${styles.badgeClosed}`} role="status">
+              <AlertCircle size={16} aria-hidden="true" className={styles.badgeIcon} />
+              <span>Edición Finalizada</span>
+            </div>
+          ) : (
+            <div className={`${styles.badge} ${styles.badgeActive}`} role="status">
+              <Sparkles size={16} aria-hidden="true" className={styles.badgeIcon} />
+              <span>
+                {raffle?.status === 'active' ? 'Sorteo Oficial Activo' : 'Gran Sorteo Manaure Vive'}
+              </span>
+            </div>
+          )}
+        </div>
 
-        {/* Titular Impactante */}
-        {isColdLoading ? (
-          <div className={styles.skeletonTitle} aria-hidden="true" />
-        ) : (
-          <h1 className={styles.title}>{raffle?.title || 'Gran Rifa Ecoturística Manaure Vive'}</h1>
-        )}
+        {/* Titular Impactante con Acento Dorado de Alto Contraste */}
+        <h1 className={styles.title}>{renderTitleContent()}</h1>
 
-        {/* Subtítulo Descriptivo */}
-        {isColdLoading ? (
-          <div className={styles.skeletonSubtitle} aria-hidden="true" />
-        ) : (
-          <p className={styles.subtitle}>
-            {raffle?.description ||
-              'Gana una experiencia ecoturística todo incluido para 2 personas en Manaure (Balcón del Cesar): Hospedaje en Glamping de lujo, Tour en Cuatrimoto por la Serranía del Perijá, Vuelo en Parapente, Cena Gourmet y Fotografía Profesional.'}
-          </p>
-        )}
+        {/* Subtítulo Descriptivo con Legibilidad Garantizada */}
+        <p className={styles.subtitle}>
+          {raffle?.description ||
+            'Gana una experiencia ecoturística todo incluido para 2 personas en Manaure (Balcón del Cesar): Hospedaje en Glamping de lujo, Tour en Cuatrimoto por la Serranía del Perijá, Vuelo en Parapente, Cena Gourmet y Fotografía Profesional.'}
+        </p>
 
         {/* Tarjeta de Precios, CTAs y Progreso Real de Boletos */}
         <div className={styles.ctaBox}>
           <div className={styles.ctaMainRow}>
             <div className={styles.priceTag}>
               <span className={styles.priceLabel}>Valor por Boleto</span>
-              {isColdLoading || ticketPrice <= 0 ? (
-                <div className={styles.skeletonPrice} aria-hidden="true" />
-              ) : (
+              {ticketPrice > 0 ? (
                 <strong className={styles.priceValue}>{formatCOP(ticketPrice)}</strong>
+              ) : (
+                <strong className={styles.priceValue}>{formatCOP(40000)}</strong>
               )}
             </div>
 

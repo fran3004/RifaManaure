@@ -255,6 +255,10 @@
     padding-bottom: 3rem;
   }
 
+  .bottomBar {
+    padding-bottom: calc(5.25rem + var(--cart-h, 0px) + env(safe-area-inset-bottom, 0px));
+  }
+
   .bottomContainer {
     flex-direction: column;
     text-align: center;

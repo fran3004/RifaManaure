@@ -112,10 +112,10 @@
   font-family: var(--font-heading, 'Playfair Display Variable', Georgia, serif);
   font-size: clamp(1.35rem, 1.8vw, 1.5rem);
   font-weight: 700;
-  color: #FFFFFF;
+  color: #FFFFFF !important;
   line-height: 1.25;
   margin: 0;
-  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
 }
 
 .cardDescription {
