@@ -2,7 +2,13 @@
   position: fixed;
   bottom: calc(20px + env(safe-area-inset-bottom, 0px) + var(--cart-h, 0px));
   right: 20px;
-  z-index: var(--z-whatsapp);
+  z-index: var(--z-whatsapp, 300);
+  width: 60px;
+  height: 60px;
+  pointer-events: none; /* El contenedor no captura clics ni hover */
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transition:
     bottom var(--transition-base, 250ms ease),
     opacity var(--transition-fast, 150ms ease),
@@ -11,22 +17,57 @@
 
 .btnHidden {
   opacity: 0;
-  pointer-events: none;
+  pointer-events: none !important;
   visibility: hidden;
 }
 
-.floatingBtnContainer {
+.floatingBtn {
+  pointer-events: auto; /* Solo este círculo exacto recibe eventos de cursor */
+  position: relative;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: #25D366; /* Verde oficial de WhatsApp tal cual en la imagen */
+  color: #FFFFFF;
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  justify-content: center;
   text-decoration: none;
+  box-shadow:
+    0 4px 14px rgba(0, 0, 0, 0.22),
+    0 2px 6px rgba(37, 211, 102, 0.3);
   transition:
     transform var(--transition-fast, 150ms ease),
-    box-shadow var(--transition-fast, 150ms ease);
-  position: relative;
-  border-radius: var(--radius-full);
+    box-shadow var(--transition-fast, 150ms ease),
+    background-color var(--transition-fast, 150ms ease);
+  outline: none;
 }
 
+.whatsappIcon {
+  color: #FFFFFF;
+  display: block;
+  flex-shrink: 0;
+  transition: transform var(--transition-fast, 150ms ease);
+}
+
+.floatingBtn:hover {
+  transform: scale(1.06);
+  background: #20BA5A;
+  box-shadow:
+    0 6px 20px rgba(0, 0, 0, 0.26),
+    0 4px 12px rgba(37, 211, 102, 0.45);
+}
+
+.floatingBtn:active {
+  transform: scale(0.96);
+}
+
+.floatingBtn:focus-visible {
+  outline: 3px solid var(--focus-ring-on-dark, #F5A623);
+  outline-offset: 3px;
+}
+
+/* Pulso suave controlado (máximo 3 ciclos) */
 .pulseRing {
   position: absolute;
   top: 0;
@@ -40,98 +81,81 @@
   pointer-events: none;
 }
 
-.floatingBtn {
-  position: relative;
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #25d366 0%, #128c7e 100%);
-  color: #ffffff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow:
-    var(--shadow-lg, 0 12px 32px rgba(15, 46, 29, 0.16)),
-    0 4px 14px rgba(37, 211, 102, 0.45);
-  transition:
-    transform var(--transition-fast, 150ms ease),
-    box-shadow var(--transition-fast, 150ms ease);
-}
-
-.whatsappIcon {
-  color: #ffffff;
-}
-
-.floatingBtnContainer:hover .floatingBtn {
-  transform: scale(1.08) translateY(-2px);
-  box-shadow:
-    0 14px 32px rgba(37, 211, 102, 0.6),
-    0 6px 16px rgba(15, 46, 29, 0.25);
-}
-
-.floatingBtnContainer:active .floatingBtn {
-  transform: scale(0.96);
-}
-
-.floatingBtnContainer:focus-visible {
-  outline: 3px solid var(--focus-ring-on-dark, #f5a623);
-  outline-offset: 4px;
-}
-
-.tooltip {
-  background: var(--brand-deep, #0f2e1d);
-  color: var(--text-on-dark, #eef4ef);
-  border: 1px solid var(--border-subtle, #dcd5c4);
-  padding: 0.5rem 0.85rem;
-  border-radius: var(--radius-full);
-  font-family: var(--font-sans, sans-serif);
-  font-size: 0.84rem;
-  font-weight: 600;
-  white-space: nowrap;
-  box-shadow: var(--shadow-md, 0 6px 16px rgba(15, 46, 29, 0.12));
-  opacity: 0;
-  transform: translateX(8px);
-  pointer-events: none;
-  transition:
-    opacity 200ms ease,
-    transform 200ms ease;
-}
-
-.floatingBtnContainer:hover .tooltip,
-.floatingBtnContainer:focus-visible .tooltip {
-  opacity: 1;
-  transform: translateX(0);
-}
-
-.tooltipDismissed {
-  display: none !important;
-  opacity: 0 !important;
-}
-
 @keyframes pulse {
   0% {
     transform: scale(1);
     opacity: 0.85;
   }
   70% {
-    transform: scale(1.5);
+    transform: scale(1.4);
     opacity: 0;
   }
   100% {
-    transform: scale(1.55);
+    transform: scale(1.45);
     opacity: 0;
   }
 }
 
+/* Tooltip con pointer-events: none estricto (rango limitado exclusivamente al icono) */
+.tooltip {
+  position: absolute;
+  right: calc(100% + 14px);
+  top: 50%;
+  transform: translateY(-50%) translateX(8px);
+  background: var(--brand-deep, #0F2E1D);
+  color: var(--text-on-dark, #EEF4EF);
+  border: 1px solid rgba(220, 213, 196, 0.25);
+  padding: 0.5rem 0.9rem;
+  border-radius: var(--radius-full, 9999px);
+  font-family: var(--font-sans, sans-serif);
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: var(--shadow-md, 0 6px 16px rgba(15, 46, 29, 0.16));
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none !important; /* CRÍTICO: el tooltip nunca captura el cursor */
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease,
+    visibility 180ms ease;
+  user-select: none;
+}
+
+/* Triangulito indicador que apunta hacia el botón */
+.tooltip::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: -6px;
+  transform: translateY(-50%);
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-left: 6px solid var(--brand-deep, #0F2E1D);
+}
+
+.tooltipVisible {
+  opacity: 1 !important;
+  visibility: visible !important;
+  transform: translateY(-50%) translateX(0) !important;
+}
+
 @media (max-width: 640px) {
   .floatingBtnWrapper {
-    bottom: calc(20px + env(safe-area-inset-bottom, 0px) + var(--cart-h, 0px));
-    right: 20px;
+    width: 52px;
+    height: 52px;
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px) + var(--cart-h, 0px));
+    right: 16px;
   }
 
   .floatingBtn {
-    width: 48px;
-    height: 48px;
+    width: 52px;
+    height: 52px;
+  }
+
+  .whatsappIcon {
+    width: 30px !important;
+    height: 30px !important;
   }
 
   .tooltip {
@@ -146,7 +170,6 @@
   }
 
   .floatingBtnWrapper,
-  .floatingBtnContainer,
   .floatingBtn,
   .tooltip {
     transition: none !important;
