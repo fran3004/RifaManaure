@@ -1,0 +1,1442 @@
+[
+  {
+    "id": "cuatrimoto-aventura-cordillera",
+    "source": {
+      "file": "cuatrimoto-aventura-cordillera.jpg",
+      "width": 1920,
+      "height": 1440,
+      "bytes": 564686,
+      "sha256": "1cfeffa1b1bb0658e2a76786361a6272e3a9d2f6f5071a2779747b2ee4263649"
+    },
+    "aliasOf": null,
+    "category": "cuatrimoto",
+    "tags": [
+      "cuatrimoto",
+      "cordillera",
+      "serrania-del-perija",
+      "aventura",
+      "paisaje",
+      "trocha"
+    ],
+    "alt": "Grupo de cuatrimotos todoterreno estacionadas en una cresta verde con vista panorámica a la Serranía del Perijá",
+    "caption": "Rutas todoterreno en las alturas de la Serranía del Perijá con vistas imponentes a los valles de Manaure.",
+    "quality": {
+      "score": 5,
+      "sharpness": "alta",
+      "issues": []
+    },
+    "risks": {
+      "identifiablePeople": false,
+      "thirdPartyBranding": false,
+      "notes": "Siluetas de personas lejanas en la cresta, sin rostros identificables ni primeros planos."
+    },
+    "focalPoint": {
+      "x": 0.35,
+      "y": 0.65
+    },
+    "safeCrops": {
+      "1:1": true,
+      "4:3": true,
+      "3:4": true,
+      "4:5": true,
+      "16:9": true,
+      "1.91:1": true
+    },
+    "uses": [
+      "hero",
+      "galeria",
+      "tarjeta-premio"
+    ],
+    "notForUse": [],
+    "decision": "usar",
+    "notes": "Excelente candidata para Hero o cabecera gracias a su alta resolución nativa (1920x1440), horizonte limpio y composición equilibrada."
+  },
+  {
+    "id": "cuatrimoto-cumbre",
+    "source": {
+      "file": "cuatrimoto-cumbre.jpg",
+      "width": 1920,
+      "height": 2560,
+      "bytes": 409986,
+      "sha256": "1db5c02de294628ff7c991eb519954f6c26a052e80e758f72de4163e20b8ac77"
+    },
+    "aliasOf": null,
+    "category": "cuatrimoto",
+    "tags": [
+      "cuatrimoto",
+      "alta-montana",
+      "cumbre",
+      "paramo",
+      "aventura"
+    ],
+    "alt": "Cuatrimotos en la cima de la montaña frente a un amplio horizonte nublado en Manaure",
+    "caption": "Ascenso en cuatrimoto a los puntos más elevados de la cordillera.",
+    "quality": {
+      "score": 4,
+      "sharpness": "media",
+      "issues": [
+        "gran área de cielo blanquecino en tercio superior",
+        "sujeto en tercio inferior"
+      ]
+    },
+    "risks": {
+      "identifiablePeople": false,
+      "thirdPartyBranding": false,
+      "notes": "Figuras humanas muy distantes sin rasgos faciales visibles."
+    },
+    "focalPoint": {
+      "x": 0.45,
+      "y": 0.6
+    },
+    "safeCrops": {
+      "1:1": true,
+      "4:3": false,
+      "3:4": true,
+      "4:5": true,
+      "16:9": false,
+      "1.91:1": false
+    },
+    "uses": [
+      "galeria"
+    ],
+    "notForUse": [
+      "hero",
+      "og-image"
+    ],
+    "decision": "usar",
+    "notes": "Formato nativo vertical 3:4 (1920x2560). Ideal para la galería en móvil y tarjeta vertical."
+  },
+  {
+    "id": "cuatrimoto-flota",
+    "source": {
+      "file": "cuatrimoto-flota.jpg",
+      "width": 2400,
+      "height": 1800,
+      "bytes": 788650,
+      "sha256": "8b7dd2f8e4315219c0b739699344e6d68ad3c25b0ed5b0157ff13bce5f2532d9"
+    },
+    "aliasOf": null,
+    "category": "cuatrimoto",
+    "tags": [
+      "cuatrimoto",
+      "equipamiento",
+      "flota",
+      "cuatri-tours-manaure",
+      "seguridad"
+    ],
+    "alt": "Cuatrimoto amarilla y negra todoterreno equipada y lista para el tour en la base de operaciones",
+    "caption": "Vehículos todoterreno de última generación con mantenimiento certificado y casco de seguridad.",
+    "quality": {
+      "score": 4,
+      "sharpness": "alta",
+      "issues": [
+        "entorno urbano/pavimentado en lugar de naturaleza"
+      ]
+    },
+    "risks": {
+      "identifiablePeople": false,
+      "thirdPartyBranding": true,
+      "notes": "Pendón visible con marca y logo de Cuatri Tours Manaure (aliado oficial de la rifa)."
+    },
+    "focalPoint": {
+      "x": 0.5,
+      "y": 0.55
+    },
+    "safeCrops": {
+      "1:1": true,
+      "4:3": true,
+      "3:4": true,
+      "4:5": true,
+      "16:9": true,
+      "1.91:1": false
+    },
+    "uses": [
+      "tarjeta-premio",
+      "galeria"
+    ],
+    "notForUse": [
+      "hero"
+    ],
+    "decision": "usar",
+    "notes": "Muestra la calidad y robustez de los vehículos del aliado Cuatri Tours Manaure. Ya utilizada en el proyecto."
+  },
+  {
+    "id": "cuatrimoto-mirador",
+    "source": {
+      "file": "cuatrimoto-mirador.jpg",
+      "width": 750,
+      "height": 931,
+      "bytes": 108285,
+      "sha256": "b4a8de07ac131558398c17ea90995558da3732fdd1b1f3e45d92b274e55e99a4"
+    },
+    "aliasOf": null,
+    "category": "cuatrimoto",
+    "tags": [
+      "cuatrimoto",
+      "mirador",
+      "piloto",
+      "topiario",
+      "experiencia"
+    ],
+    "alt": "Piloto en cuatrimoto posando junto a jardines topiarios y mirador de montaña en Manaure",
+    "caption": "Paradas fotográficas en los miradores icónicos de la ruta en cuatrimoto.",
+    "quality": {
+      "score": 4,
+      "sharpness": "alta",
+      "issues": [
+        "resolución moderada (750x931)"
+      ]
+    },
+    "risks": {
+      "identifiablePeople": true,
+      "thirdPartyBranding": false,
+      "notes": "Rostro de joven con gorra y gafas oscuras sentado en la cuatrimoto. Requiere autorización de uso de imagen (Ley 1581 de 2012). Autorización de imagen confirmada por el usuario (Decisión 9 aprobada)."
+    },
+    "focalPoint": {
+      "x": 0.5,
+      "y": 0.45
+    },
+    "safeCrops": {
+      "1:1": true,
+      "4:3": false,
+      "3:4": true,
+      "4:5": true,
+      "16:9": false,
+      "1.91:1": false
+    },
+    "uses": [
+      "tarjeta-premio",
+      "galeria"
+    ],
+    "notForUse": [
+      "hero",
+      "og-image"
+    ],
+    "decision": "usar",
+    "notes": "Toma limpia original sin marcas de agua ni contadores. Versión preferente sobre cuatrimoto-topiario.jpg."
+  },
+  {
+    "id": "cuatrimoto-ruta",
+    "source": {
+      "file": "cuatrimoto-ruta.jpg",
+      "width": 750,
+      "height": 883,
+      "bytes": 177016,
+      "sha256": "8d58a7f76c1432380ee7b5b20b0e275b330a067a1ec5ff20c4063e2e54b7dd2c"
+    },
+    "aliasOf": null,
+    "category": "cuatrimoto",
+    "tags": [
+      "cuatrimoto",
+      "trocha",
+      "selva",
+      "ruta",
+      "ecoturismo"
+    ],
+    "alt": "Cuatrimoto transitando por una trocha ecoturística rodeada de densa vegetación tropical en Manaure",
+    "caption": "Recorridos guiados por senderos naturales y caminos veredales.",
+    "quality": {
+      "score": 5,
+      "sharpness": "alta",
+      "issues": [
+        "resolución moderada (750x883)"
+      ]
+    },
+    "risks": {
+      "identifiablePeople": false,
+      "thirdPartyBranding": false,
+      "notes": "Silueta del conductor con casco sin rostro visible."
+    },
+    "focalPoint": {
+      "x": 0.5,
+      "y": 0.6
+    },
+    "safeCrops": {
+      "1:1": true,
+      "4:3": false,
+      "3:4": true,
+      "4:5": true,
+      "16:9": false,
+      "1.91:1": false
+    },
+    "uses": [
+      "tarjeta-premio",
+      "galeria"
+    ],
+    "notForUse": [
+      "hero"
+    ],
+    "decision": "usar",
+    "notes": "Excelente contraste y saturación natural. Actualmente en uso en DetallePremio y carrusel."
+  },
+  {
+    "id": "cuatrimoto-topiario",
+    "source": {
+      "file": "cuatrimoto-topiario.jpg",
+      "width": 750,
+      "height": 931,
+      "bytes": 98242,
+      "sha256": "3820d8af10e6d0a1f7b4f9e1b1985a504abc56d4ffed76362b859646fee251f0"
+    },
+    "aliasOf": "cuatrimoto-mirador",
+    "category": "cuatrimoto",
+    "tags": [
+      "cuatrimoto",
+      "duplicado",
+      "artefacto-instagram"
+    ],
+    "alt": "Cuatrimoto en mirador (duplicado con artefacto de carrusel de Instagram 4/5)",
+    "caption": "Duplicado no apto para producción.",
+    "quality": {
+      "score": 1,
+      "sharpness": "media",
+      "issues": [
+        "contador de carrusel \"4/5\" incrustado en esquina superior derecha",
+        "nombre erróneo",
+        "duplicado inferior"
+      ]
+    },
+    "risks": {
+      "identifiablePeople": true,
+      "thirdPartyBranding": false,
+      "notes": "Misma persona que cuatrimoto-mirador.jpg."
+    },
+    "focalPoint": {
+      "x": 0.5,
+      "y": 0.45
+    },
+    "safeCrops": {
+      "1:1": false,
+      "4:3": false,
+      "3:4": false,
+      "4:5": false,
+      "16:9": false,
+      "1.91:1": false
+    },
+    "uses": [],
+    "notForUse": [
+      "hero",
+      "tarjeta-premio",
+      "galeria",
+      "og-image"
+    ],
+    "decision": "descartar",
+    "notes": "DESCARTADO (Decisión 2 aprobada): Duplicado con artefacto de Instagram \"4/5\". Usar cuatrimoto-mirador.jpg."
+  },
+  {
+    "id": "fogata-casa-de-vidrio",
+    "source": {
+      "file": "fogata-casa-de-vidrio.jpg",
+      "width": 1600,
+      "height": 1200,
+      "bytes": 533166,
+      "sha256": "e885e3a54e9a73f82b4fc1e3a1096e90cf56959b2c7168bc803972aab300db69"
+    },
+    "aliasOf": null,
+    "category": "glamping",
+    "tags": [
+      "fogata",
+      "casa-de-vidrio",
+      "atardecer",
+      "mirador",
+      "descanso",
+      "pareja"
+    ],
+    "alt": "Círculo de fogata en piedra sobre terraza de montaña con vista panorámica a la Serranía del Perijá",
+    "caption": "Fogata nocturna privada en el mirador de la Casa de Vidrio con vista panorámica al valle.",
+    "quality": {
+      "score": 5,
+      "sharpness": "alta",
+      "issues": []
+    },
+    "risks": {
+      "identifiablePeople": false,
+      "thirdPartyBranding": false,
+      "notes": "Sin personas ni marcas comerciales visibles."
+    },
+    "focalPoint": {
+      "x": 0.55,
+      "y": 0.55
+    },
+    "safeCrops": {
+      "1:1": true,
+      "4:3": true,
+      "3:4": true,
+      "4:5": true,
+      "16:9": true,
+      "1.91:1": true
+    },
+    "uses": [
+      "hero",
+      "tarjeta-premio",
+      "galeria",
+      "og-image"
+    ],
+    "notForUse": [],
+    "decision": "usar",
+    "notes": "Fotografía insignia del premio mayor. 1600x1200 en nitidez impecable. Máster oficial de la experiencia fogata."
+  },
+  {
+    "id": "fogata-circulo-piedra",
+    "source": {
+      "file": "fogata-circulo-piedra.jpg",
+      "width": 1600,
+      "height": 1200,
+      "bytes": 512443,
+      "sha256": "8c159315a8160d729dbb5a8c1e8225bff7d9739dad37d9e78c9129953d72d72a"
+    },
+    "aliasOf": "fogata-casa-de-vidrio",
+    "category": "glamping",
+    "tags": [
+      "fogata",
+      "duplicado",
+      "circulo-piedra"
+    ],
+    "alt": "Fogata en terraza de piedra (duplicado casi idéntico de fogata-casa-de-vidrio)",
+    "caption": "Duplicado redundante.",
+    "quality": {
+      "score": 4,
+      "sharpness": "alta",
+      "issues": [
+        "duplicado con compresión ligeramente diferente (diff 1.38/255)"
+      ]
+    },
+    "risks": {
+      "identifiablePeople": false,
+      "thirdPartyBranding": false,
+      "notes": "Sin personas ni marcas."
+    },
+    "focalPoint": {
+      "x": 0.55,
+      "y": 0.55
+    },
+    "safeCrops": {
+      "1:1": true,
+      "4:3": true,
+      "3:4": true,
+      "4:5": true,
+      "16:9": true,
+      "1.91:1": true
+    },
+    "uses": [],
+    "notForUse": [
+      "hero",
+      "tarjeta-premio",
+      "galeria",
+      "og-image"
+    ],
+    "decision": "descartar",
+    "notes": "DESCARTADO (Decisión 1 aprobada): Duplicado cuasi-idéntico de fogata-casa-de-vidrio.jpg."
+  },
+  {
+    "id": "fogata-mirador-nocturno",
+    "source": {
+      "file": "fogata-mirador-nocturno.jpg",
+      "width": 1600,
+      "height": 1200,
+      "bytes": 102009,
+      "sha256": "8ec46652ad4bcdf03ae3c0036b5845bceb0ad633450216402725455db0d8afca"
+    },
+    "aliasOf": null,
+    "category": "glamping",
+    "tags": [
+      "camping",
+      "glamping",
+      "noche",
+      "fogata",
+      "estrellas",
+      "carpa"
+    ],
+    "alt": "Carpa iluminada en campamento nocturno de montaña junto a sillas con cobijas bajo el cielo estrellado",
+    "caption": "Noche bajo las estrellas en los campamentos de alta montaña de Manaure.",
+    "quality": {
+      "score": 3,
+      "sharpness": "baja",
+      "issues": [
+        "subexpuesta (luminancia media 50.9)",
+        "ruido térmico/digital visible en sombras",
+        "poca nitidez"
+      ]
+    },
+    "risks": {
+      "identifiablePeople": false,
+      "thirdPartyBranding": false,
+      "notes": "Sin personas visibles."
+    },
+    "focalPoint": {
+      "x": 0.4,
+      "y": 0.65
+    },
+    "safeCrops": {
+      "1:1": true,
+      "4:3": true,
+      "3:4": false,
+      "4:5": false,
+      "16:9": true,
+      "1.91:1": true
+    },
+    "uses": [
+      "galeria"
+    ],
+    "notForUse": [
+      "hero",
+      "tarjeta-premio",
+      "og-image"
+    ],
+    "decision": "reservar",
+    "notes": "Aporta valor documental sobre la experiencia nocturna real, pero su alta presencia de ruido y baja luminosidad desaconsejan su uso en Hero o tarjetas principales."
+  },
+  {
+    "id": "gastronomia-casa-arepas",
+    "source": {
+      "file": "gastronomia-casa-arepas.jpg",
+      "width": 1920,
+      "height": 1440,
+      "bytes": 472104,
+      "sha256": "e526a7f84f1afe809ec8b717e08d3aececd924e00ae5e5f45e012c33a825c479"
+    },
+    "aliasOf": null,
+    "category": "gastronomia",
+    "tags": [
+      "gastronomia",
+      "restaurante",
+      "arepas",
+      "aliado",
+      "casa-de-las-arepas"
+    ],
+    "alt": "Fachada del restaurante La Casa de las Arepas con comensales disfrutando comida típica en Manaure",
+    "caption": "Experiencia gastronómica tradicional en La Casa de las Arepas, aliado oficial del sorteo.",
+    "quality": {
+      "score": 3,
+      "sharpness": "alta",
+      "issues": [
+        "composición documental/comercial con múltiples elementos visuales"
+      ]
+    },
+    "risks": {
+      "identifiablePeople": true,
+      "thirdPartyBranding": true,
+      "notes": "Presencia de varios comensales y empleados con rostros reconocibles. Letrero comercial grande de \"LA CASA DE LAS AREPAS\". Requiere confirmación de autorización de imagen."
+    },
+    "focalPoint": {
+      "x": 0.5,
+      "y": 0.55
+    },
+    "safeCrops": {
+      "1:1": true,
+      "4:3": true,
+      "3:4": true,
+      "4:5": true,
+      "16:9": true,
+      "1.91:1": true
+    },
+    "uses": [
+      "tarjeta-premio",
+      "galeria"
+    ],
+    "notForUse": [
+      "hero",
+      "og-image"
+    ],
+    "decision": "usar",
+    "notes": "ASIGNADO A TARJETA GASTRONÓMICA (Decisión 6 aprobada): Aliado oficial La Casa de las Arepas."
+  },
+  {
+    "id": "gastronomia-local",
+    "source": {
+      "file": "gastronomia-local.jpg",
+      "width": 710,
+      "height": 960,
+      "bytes": 89528,
+      "sha256": "d4785b1923ce057845bec34ac549b76de6c9fdb98339694973958786eb617376"
+    },
+    "aliasOf": null,
+    "category": "gastronomia",
+    "tags": [
+      "gastronomia",
+      "arepa-rellena",
+      "plato-tipico",
+      "collage",
+      "comida"
+    ],
+    "alt": "Collage vertical de dos fotografías gastronómicas: arepa de maíz rellena con queso y plato montañero tradicional",
+    "caption": "Platos tradicionales y sabores autóctonos de Manaure y la Serranía.",
+    "quality": {
+      "score": 2,
+      "sharpness": "alta",
+      "issues": [
+        "archivo compuesto: dos fotos apiladas verticalmente separadas por una franja oscura",
+        "resolución total 710x960"
+      ]
+    },
+    "risks": {
+      "identifiablePeople": false,
+      "thirdPartyBranding": false,
+      "notes": "Planos cerrados de comida en mesa sin personas ni marcas comerciales."
+    },
+    "focalPoint": {
+      "x": 0.5,
+      "y": 0.5
+    },
+    "safeCrops": {
+      "1:1": false,
+      "4:3": false,
+      "3:4": false,
+      "4:5": false,
+      "16:9": false,
+      "1.91:1": false
+    },
+    "uses": [],
+    "notForUse": [
+      "hero",
+      "tarjeta-premio",
+      "galeria",
+      "og-image"
+    ],
+    "decision": "usar-con-correccion",
+    "notes": "CORRECCIÓN APROBADA (Decisión 3): Escindida en dos activos independientes: gastronomia-arepa y gastronomia-plato."
+  },
+  {
+    "id": "glamping-mashiramo-domo",
+    "source": {
+      "file": "glamping-mashiramo-domo.jpg",
+      "width": 750,
+      "height": 292,
+      "bytes": 46164,
+      "sha256": "5e162148773607b209593726040c80b7a1bbc70e24dcf17118b2d0471e27258a"
+    },
+    "aliasOf": null,
+    "category": "glamping",
+    "tags": [
+      "glamping",
+      "domo-geodesico",
+      "mashiramo",
+      "bosque",
+      "descanso"
+    ],
+    "alt": "Domo geodésico de Mashiramo Glamping iluminado en la noche sobre plataforma de madera en el bosque",
+    "caption": "Hospedaje de lujo en domos geodésicos en medio de la naturaleza de Manaure.",
+    "quality": {
+      "score": 3,
+      "sharpness": "media",
+      "issues": [
+        "altura extremadamente baja (solo 292 píxeles)",
+        "relación de aspecto ultra-ancha 2.568:1 (750x292)"
+      ]
+    },
+    "risks": {
+      "identifiablePeople": false,
+      "thirdPartyBranding": false,
+      "notes": "Sin personas ni marcas."
+    },
+    "focalPoint": {
+      "x": 0.45,
+      "y": 0.55
+    },
+    "safeCrops": {
+      "1:1": false,
+      "4:3": false,
+      "3:4": false,
+      "4:5": false,
+      "16:9": false,
+      "1.91:1": false
+    },
+    "uses": [
+      "galeria"
+    ],
+    "notForUse": [
+      "hero",
+      "tarjeta-premio",
+      "og-image"
+    ],
+    "decision": "reservar",
+    "notes": "RESERVADO (Decisión 7 aprobada): Baja altura (292 px) insuficiente para tarjetas verticales."
+  },
+  {
+    "id": "hospedaje-villa-adelaida",
+    "source": {
+      "file": "hospedaje-villa-adelaida.jpg",
+      "width": 1920,
+      "height": 1440,
+      "bytes": 1338625,
+      "sha256": "c10a80d057bb057643ff3701e6b60a10488dc37af932b8eb39f781f3b177c6b6"
+    },
+    "aliasOf": null,
+    "category": "hospedaje",
+    "tags": [
+      "hospedaje",
+      "villa-adelaida",
+      "cabana",
+      "hotel-campestre",
+      "jardines"
+    ],
+    "alt": "Cabaña campestre de piedra y teja colonial rodeada de jardines floridos y terrazas verdes en Villa Adelaida",
+    "caption": "Alojamiento campestre y descanso en Villa Adelaida, aliado oficial de hotelería.",
+    "quality": {
+      "score": 5,
+      "sharpness": "alta",
+      "issues": []
+    },
+    "risks": {
+      "identifiablePeople": false,
+      "thirdPartyBranding": false,
+      "notes": "Sin personas visibles."
+    },
+    "focalPoint": {
+      "x": 0.5,
+      "y": 0.5
+    },
+    "safeCrops": {
+      "1:1": true,
+      "4:3": true,
+      "3:4": true,
+      "4:5": true,
+      "16:9": true,
+      "1.91:1": true
+    },
+    "uses": [
+      "tarjeta-premio",
+      "galeria",
+      "hero"
+    ],
+    "notForUse": [],
+    "decision": "usar",
+    "notes": "Excelente fotografía técnica: 1920x1440, 1.3 MB, máxima nitidez (109), luz diurna impecable. Llena el vacío de imagen para hospedaje/hotel de la rifa."
+  },
+  {
+    "id": "og-image",
+    "source": {
+      "file": "og-image.jpg",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 248571,
+      "sha256": "54cf456166880708ae64e0243c4c9f22b9511568a9dfaf5f8f7c5d5673154bf6"
+    },
+    "aliasOf": null,
+    "category": "serrania",
+    "tags": [
+      "panoramica",
+      "serrania-del-perija",
+      "canon",
+      "cordillera",
+      "cielo",
+      "open-graph"
+    ],
+    "alt": "Majestuoso cañón montañoso y cordillera de la Serranía del Perijá bajo cielo azul despejado",
+    "caption": "Paisaje insigne de la Serranía del Perijá en Manaure, Balcón del Cesar.",
+    "quality": {
+      "score": 5,
+      "sharpness": "alta",
+      "issues": []
+    },
+    "risks": {
+      "identifiablePeople": false,
+      "thirdPartyBranding": false,
+      "notes": "Sin personas ni marcas."
+    },
+    "focalPoint": {
+      "x": 0.5,
+      "y": 0.5
+    },
+    "safeCrops": {
+      "1:1": true,
+      "4:3": true,
+      "3:4": false,
+      "4:5": false,
+      "16:9": true,
+      "1.91:1": true
+    },
+    "uses": [
+      "hero",
+      "og-image",
+      "galeria"
+    ],
+    "notForUse": [],
+    "decision": "usar",
+    "notes": "MÁSTER HERO Y OPEN GRAPH (Decisión 5 y 10 aprobada): Fuente nativa 1920x1080 16:9."
+  },
+  {
+    "id": "parapente-bandera",
+    "source": {
+      "file": "parapente-bandera.jpg",
+      "width": 1200,
+      "height": 1600,
+      "bytes": 176072,
+      "sha256": "96d22494f0f027ada98f8454acf418d35769446583c2370715b95a036313fa4f"
+    },
+    "aliasOf": null,
+    "category": "parapente",
+    "tags": [
+      "parapente",
+      "bandera",
+      "manaure-aventura",
+      "deportes-extremos",
+      "cielo"
+    ],
+    "alt": "Vuelo en parapente sobre el valle ondeando la bandera amarilla de Manaure Aventura",
+    "caption": "Vuelos tándem con instructores certificados sobre los cielos de Manaure.",
+    "quality": {
+      "score": 4,
+      "sharpness": "media",
+      "issues": [
+        "cielo plano/blanquecino en tercio superior"
+      ]
+    },
+    "risks": {
+      "identifiablePeople": false,
+      "thirdPartyBranding": true,
+      "notes": "Bandera con logo de Manaure Aventura (aliado oficial del evento)."
+    },
+    "focalPoint": {
+      "x": 0.55,
+      "y": 0.45
+    },
+    "safeCrops": {
+      "1:1": true,
+      "4:3": false,
+      "3:4": true,
+      "4:5": true,
+      "16:9": false,
+      "1.91:1": false
+    },
+    "uses": [
+      "tarjeta-premio",
+      "galeria"
+    ],
+    "notForUse": [
+      "hero",
+      "og-image"
+    ],
+    "decision": "usar",
+    "notes": "Actualmente en uso en la tarjeta de experiencia de Parapente. Vertical 1200x1600."
+  },
+  {
+    "id": "parapente-despegue-atardecer",
+    "source": {
+      "file": "parapente-despegue-atardecer.jpg",
+      "width": 1600,
+      "height": 1200,
+      "bytes": 121785,
+      "sha256": "7aea917294b14bb77d8e9082c7f08e5b5455ba4b1286ebc22399382a06d18bdd"
+    },
+    "aliasOf": null,
+    "category": "parapente",
+    "tags": [
+      "parapente",
+      "atardecer",
+      "golden-hour",
+      "silueta",
+      "aventura",
+      "emocion"
+    ],
+    "alt": "Siluetas de pilotos y parapente despegando en la montaña frente al sol poniente en Manaure",
+    "caption": "Despegue en parapente durante el atardecer en los miradores de Manaure.",
+    "quality": {
+      "score": 5,
+      "sharpness": "media",
+      "issues": [
+        "contraste de silueta con pérdida intencional de detalle en sombras"
+      ]
+    },
+    "risks": {
+      "identifiablePeople": false,
+      "thirdPartyBranding": false,
+      "notes": "Personas a contraluz en silueta completa; no identificables individualmente."
+    },
+    "focalPoint": {
+      "x": 0.7,
+      "y": 0.6
+    },
+    "safeCrops": {
+      "1:1": true,
+      "4:3": true,
+      "3:4": true,
+      "4:5": true,
+      "16:9": true,
+      "1.91:1": true
+    },
+    "uses": [
+      "hero",
+      "galeria"
+    ],
+    "notForUse": [],
+    "decision": "usar",
+    "notes": "Fotografía sumamente evocadora con excelente balance lumínico en altas luces y color dorado. 1600x1200 horizontal."
+  },
+  {
+    "id": "parapente-tandem-canon",
+    "source": {
+      "file": "parapente-tandem-canon.jpg",
+      "width": 591,
+      "height": 1055,
+      "bytes": 231552,
+      "sha256": "468abbd934ce5c1b533d3b257867be2cbccdc83fd4a4cd024fbd90e17dc08b21"
+    },
+    "aliasOf": null,
+    "category": "parapente",
+    "tags": [
+      "parapente",
+      "vuelo-tandem",
+      "piloto-pasajero",
+      "canon",
+      "adrenalina"
+    ],
+    "alt": "Piloto y pasajero volando en parapente tándem sobre el profundo cañón verde de Manaure",
+    "caption": "Sobrevuelo biplaza disfrutando la inmensidad del cañón del Perijá.",
+    "quality": {
+      "score": 4,
+      "sharpness": "alta",
+      "issues": [
+        "ancho reducido (591x1055)"
+      ]
+    },
+    "risks": {
+      "identifiablePeople": true,
+      "thirdPartyBranding": false,
+      "notes": "Pasajero y piloto con rostros visibles de frente/perfil. Requiere confirmación de autorización de uso de imagen. Autorización de imagen confirmada por el usuario (Decisión 9 aprobada)."
+    },
+    "focalPoint": {
+      "x": 0.35,
+      "y": 0.6
+    },
+    "safeCrops": {
+      "1:1": true,
+      "4:3": false,
+      "3:4": false,
+      "4:5": true,
+      "16:9": false,
+      "1.91:1": false
+    },
+    "uses": [
+      "galeria"
+    ],
+    "notForUse": [
+      "hero",
+      "og-image"
+    ],
+    "decision": "usar-con-correccion",
+    "notes": "Contiene perfil ICC incrustado. Gran fuerza emocional y autenticidad del premio real. Debe verificarse la autorización de los ocupantes."
+  },
+  {
+    "id": "parapente-vuelo",
+    "source": {
+      "file": "parapente-vuelo.jpg",
+      "width": 598,
+      "height": 1077,
+      "bytes": 140207,
+      "sha256": "9fcb97578b1d3a03fe870bc7bbba6886035a8e81de019b370c61e63cbcbbd89e"
+    },
+    "aliasOf": null,
+    "category": "parapente",
+    "tags": [
+      "parapente",
+      "ala-roja",
+      "vuelo-libre",
+      "accion",
+      "valle"
+    ],
+    "alt": "Parapente con vela roja y amarilla volando en altura sobre el valle verde de Manaure",
+    "caption": "Vuelo panorámico con vela deportiva sobre la geografía del Cesar.",
+    "quality": {
+      "score": 4,
+      "sharpness": "media",
+      "issues": [
+        "ancho moderado (598x1077)"
+      ]
+    },
+    "risks": {
+      "identifiablePeople": false,
+      "thirdPartyBranding": false,
+      "notes": "Figuras lejanas bajo la vela sin rostros definidos."
+    },
+    "focalPoint": {
+      "x": 0.5,
+      "y": 0.4
+    },
+    "safeCrops": {
+      "1:1": true,
+      "4:3": false,
+      "3:4": false,
+      "4:5": true,
+      "16:9": false,
+      "1.91:1": false
+    },
+    "uses": [
+      "hero",
+      "galeria"
+    ],
+    "notForUse": [
+      "og-image"
+    ],
+    "decision": "usar",
+    "notes": "Actualmente en uso en el carrusel de Hero y en la galería."
+  },
+  {
+    "id": "serrania-valle-nubes",
+    "source": {
+      "file": "registro-fotografico.jpg",
+      "width": 636,
+      "height": 974,
+      "bytes": 116431,
+      "sha256": "533a4fb9606b21650ca41992f45e5a238e66bf6e728183e74338a937b59ef0d2"
+    },
+    "aliasOf": "registro-fotografico",
+    "category": "serrania",
+    "tags": [
+      "valle",
+      "montana",
+      "nubes",
+      "serrania-del-perija",
+      "paisaje"
+    ],
+    "alt": "Valle verde y laderas montañosas de la Serranía del Perijá cubiertas por nubes bajas",
+    "caption": "Paisaje de valles y neblina en las estribaciones de la Serranía.",
+    "quality": {
+      "score": 4,
+      "sharpness": "media",
+      "issues": [
+        "nombre engañoso: no muestra fotógrafo, ni cámara, ni sesión fotográfica",
+        "resolución moderada (636x974)"
+      ]
+    },
+    "risks": {
+      "identifiablePeople": false,
+      "thirdPartyBranding": false,
+      "notes": "Sin personas ni marcas."
+    },
+    "focalPoint": {
+      "x": 0.5,
+      "y": 0.5
+    },
+    "safeCrops": {
+      "1:1": true,
+      "4:3": false,
+      "3:4": true,
+      "4:5": true,
+      "16:9": false,
+      "1.91:1": false
+    },
+    "uses": [
+      "galeria"
+    ],
+    "notForUse": [
+      "tarjeta-premio"
+    ],
+    "decision": "usar",
+    "notes": "REASIGNADO Y RENOMBRADO (Decisión 4 aprobada): Paisaje de la Serranía del Perijá con nubes bajas. Nombre anterior registrado como alias."
+  },
+  {
+    "id": "serrania-los-pinos",
+    "source": {
+      "file": "serrania-los-pinos.jpg",
+      "width": 1920,
+      "height": 1440,
+      "bytes": 574881,
+      "sha256": "3a1a4657c36e596b5dfd8c9580575cb340776bfb1e2090266154de0631d1c582"
+    },
+    "aliasOf": null,
+    "category": "serrania",
+    "tags": [
+      "los-pinos",
+      "bosque-de-niebla",
+      "sendero",
+      "naturaleza",
+      "arboles"
+    ],
+    "alt": "Bosque de pinos y senderos verdes en las alturas de Manaure con vista a la cordillera",
+    "caption": "Senderismo y contacto con la naturaleza en la reserva Los Pinos.",
+    "quality": {
+      "score": 5,
+      "sharpness": "alta",
+      "issues": []
+    },
+    "risks": {
+      "identifiablePeople": false,
+      "thirdPartyBranding": false,
+      "notes": "Sin personas ni marcas."
+    },
+    "focalPoint": {
+      "x": 0.5,
+      "y": 0.5
+    },
+    "safeCrops": {
+      "1:1": true,
+      "4:3": true,
+      "3:4": true,
+      "4:5": true,
+      "16:9": true,
+      "1.91:1": true
+    },
+    "uses": [
+      "galeria",
+      "hero"
+    ],
+    "notForUse": [],
+    "decision": "usar",
+    "notes": "Fotografía en 1920x1440 con tonos verdes puros y excelente rango dinámico."
+  },
+  {
+    "id": "serrania-perija-cordillera",
+    "source": {
+      "file": "serrania-perija-cordillera.jpg",
+      "width": 1920,
+      "height": 1440,
+      "bytes": 605585,
+      "sha256": "bba577f7fe3a0d5c55667ad287ce9224872c9913d56c0468a9b359e2b9548af4"
+    },
+    "aliasOf": null,
+    "category": "serrania",
+    "tags": [
+      "cordillera",
+      "serrania-del-perija",
+      "orografia",
+      "cielo-azul",
+      "ecoturismo"
+    ],
+    "alt": "Grandes cañones y formaciones geológicas de la Serranía del Perijá en un día soleado",
+    "caption": "Imponente geografía montañosa que enmarca el Balcón del Cesar.",
+    "quality": {
+      "score": 5,
+      "sharpness": "alta",
+      "issues": []
+    },
+    "risks": {
+      "identifiablePeople": false,
+      "thirdPartyBranding": false,
+      "notes": "Sin personas ni marcas."
+    },
+    "focalPoint": {
+      "x": 0.5,
+      "y": 0.55
+    },
+    "safeCrops": {
+      "1:1": true,
+      "4:3": true,
+      "3:4": true,
+      "4:5": true,
+      "16:9": true,
+      "1.91:1": true
+    },
+    "uses": [
+      "galeria",
+      "hero",
+      "og-image"
+    ],
+    "notForUse": [],
+    "decision": "usar",
+    "notes": "1920x1440. Paisaje puro de altísima calidad que transmite majestuosidad y escala."
+  },
+  {
+    "id": "serrania-perija-frailejones",
+    "source": {
+      "file": "serrania-perija-frailejones.jpg",
+      "width": 1156,
+      "height": 671,
+      "bytes": 276585,
+      "sha256": "7f6f12df31cf13ed00bcd177d97e510ae44e308dc5739f33efcfdbb3e9b01f7e"
+    },
+    "aliasOf": null,
+    "category": "serrania",
+    "tags": [
+      "frailejones",
+      "paramo",
+      "flora-endemica",
+      "serrania-del-perija",
+      "biodiversidad"
+    ],
+    "alt": "Campo de frailejones florecidos en el páramo de la Serranía del Perijá",
+    "caption": "Ecosistema único de páramo y frailejones en las cumbres del Perijá.",
+    "quality": {
+      "score": 5,
+      "sharpness": "alta",
+      "issues": []
+    },
+    "risks": {
+      "identifiablePeople": false,
+      "thirdPartyBranding": false,
+      "notes": "Sin personas ni marcas."
+    },
+    "focalPoint": {
+      "x": 0.4,
+      "y": 0.55
+    },
+    "safeCrops": {
+      "1:1": true,
+      "4:3": true,
+      "3:4": false,
+      "4:5": false,
+      "16:9": true,
+      "1.91:1": true
+    },
+    "uses": [
+      "tarjeta-premio",
+      "galeria",
+      "hero"
+    ],
+    "notForUse": [],
+    "decision": "usar",
+    "notes": "Nitidez extrema (sharpness 100). Activo biocultural de primer nivel para ecoturismo."
+  },
+  {
+    "id": "serrania-perija-laguna",
+    "source": {
+      "file": "serrania-perija-laguna.jpg",
+      "width": 1600,
+      "height": 1200,
+      "bytes": 552933,
+      "sha256": "7ac655ea30af5caa440ccbf779343cb96a6254a125dc95636a1924aef1f62876"
+    },
+    "aliasOf": null,
+    "category": "serrania",
+    "tags": [
+      "laguna",
+      "agua-cristalina",
+      "reflejo",
+      "paramo",
+      "alta-montana"
+    ],
+    "alt": "Laguna natural de montaña reflejando los árboles y el cielo en la Serranía del Perijá",
+    "caption": "Espejo de agua natural en las alturas de la Serranía del Perijá.",
+    "quality": {
+      "score": 5,
+      "sharpness": "alta",
+      "issues": []
+    },
+    "risks": {
+      "identifiablePeople": false,
+      "thirdPartyBranding": false,
+      "notes": "Sin personas ni marcas."
+    },
+    "focalPoint": {
+      "x": 0.5,
+      "y": 0.5
+    },
+    "safeCrops": {
+      "1:1": true,
+      "4:3": true,
+      "3:4": true,
+      "4:5": true,
+      "16:9": true,
+      "1.91:1": true
+    },
+    "uses": [
+      "tarjeta-premio",
+      "hero",
+      "galeria"
+    ],
+    "notForUse": [],
+    "decision": "usar",
+    "notes": "Foto icónica utilizada actualmente en la tarjeta de expedición al páramo y carrusel hero."
+  },
+  {
+    "id": "serrania-perija-panoramica",
+    "source": {
+      "file": "serrania-perija-panoramica.jpg",
+      "width": 1075,
+      "height": 805,
+      "bytes": 139754,
+      "sha256": "bc5d89c10b8c1fa3cf5ef4df213a12616e2efdb7b40fb94d601f19f5b5ee76df"
+    },
+    "aliasOf": "og-image",
+    "category": "serrania",
+    "tags": [
+      "panoramica",
+      "serrania-del-perija",
+      "cordillera",
+      "variante"
+    ],
+    "alt": "Vista panorámica de la cordillera del Perijá (variante 4:3 de og-image)",
+    "caption": "Cordillera del Perijá en formato clásico.",
+    "quality": {
+      "score": 4,
+      "sharpness": "media",
+      "issues": [
+        "misma escena que og-image.jpg pero con menor ancho y recorte 4:3"
+      ]
+    },
+    "risks": {
+      "identifiablePeople": false,
+      "thirdPartyBranding": false,
+      "notes": "Sin personas ni marcas."
+    },
+    "focalPoint": {
+      "x": 0.5,
+      "y": 0.5
+    },
+    "safeCrops": {
+      "1:1": true,
+      "4:3": true,
+      "3:4": false,
+      "4:5": false,
+      "16:9": true,
+      "1.91:1": false
+    },
+    "uses": [
+      "galeria"
+    ],
+    "notForUse": [
+      "hero",
+      "og-image"
+    ],
+    "decision": "reservar",
+    "notes": "RESERVADO: Misma escena que og-image.jpg. Se usa og-image como máster canónico."
+  },
+  {
+    "id": "serrania-pozo-cristalino",
+    "source": {
+      "file": "serrania-pozo-cristalino.jpg",
+      "width": 750,
+      "height": 1334,
+      "bytes": 198587,
+      "sha256": "f35d5bda9829221db85c79a7ede6f3d13fd01f502c6dbbaba15298c3f421eb98"
+    },
+    "aliasOf": null,
+    "category": "serrania",
+    "tags": [
+      "cascada",
+      "pozo-natural",
+      "rio",
+      "bano-natural",
+      "balneario"
+    ],
+    "alt": "Pozo natural de agua cristalina entre formaciones rocosas en Manaure",
+    "caption": "Aguas cristalinas y pozos naturales para refrescarse tras las caminatas.",
+    "quality": {
+      "score": 4,
+      "sharpness": "alta",
+      "issues": [
+        "formato estrecho vertical 9:16 (750x1334)"
+      ]
+    },
+    "risks": {
+      "identifiablePeople": false,
+      "thirdPartyBranding": false,
+      "notes": "Sin personas ni marcas."
+    },
+    "focalPoint": {
+      "x": 0.5,
+      "y": 0.5
+    },
+    "safeCrops": {
+      "1:1": true,
+      "4:3": false,
+      "3:4": false,
+      "4:5": true,
+      "16:9": false,
+      "1.91:1": false
+    },
+    "uses": [
+      "galeria"
+    ],
+    "notForUse": [
+      "hero",
+      "og-image"
+    ],
+    "decision": "usar",
+    "notes": "Agrega un ángulo fresco y acuático al inventario de naturaleza, ideal para la galería y móvil."
+  },
+  {
+    "id": "serrania-sabana-rubia",
+    "source": {
+      "file": "serrania-sabana-rubia.jpg",
+      "width": 750,
+      "height": 899,
+      "bytes": 210723,
+      "sha256": "850d5e97ae32a6071d51427afcdc76cb18a4b8f107146b420ba4b3518f4d4e8c"
+    },
+    "aliasOf": null,
+    "category": "serrania",
+    "tags": [
+      "sabana-rubia",
+      "pastizal",
+      "paramo",
+      "textura-dorada",
+      "paisaje"
+    ],
+    "alt": "Páramo de Sabana Rubia con vegetación dorada y senderos de alta montaña",
+    "caption": "Pastizales dorados característicos de Sabana Rubia en Perijá.",
+    "quality": {
+      "score": 4,
+      "sharpness": "alta",
+      "issues": [
+        "resolución moderada (750x899)"
+      ]
+    },
+    "risks": {
+      "identifiablePeople": false,
+      "thirdPartyBranding": false,
+      "notes": "Sin personas ni marcas."
+    },
+    "focalPoint": {
+      "x": 0.5,
+      "y": 0.55
+    },
+    "safeCrops": {
+      "1:1": true,
+      "4:3": false,
+      "3:4": true,
+      "4:5": true,
+      "16:9": false,
+      "1.91:1": false
+    },
+    "uses": [
+      "galeria"
+    ],
+    "notForUse": [
+      "hero",
+      "og-image"
+    ],
+    "decision": "usar",
+    "notes": "Textura biológica única que enriquece el catálogo de la Serranía del Perijá."
+  },
+  {
+    "id": "serrania-topiarios",
+    "source": {
+      "file": "serrania-topiarios.jpg",
+      "width": 1920,
+      "height": 1440,
+      "bytes": 987836,
+      "sha256": "85d1aa6f5cdd2c7fc607796d9bb0a6f0791295bc51c5570dd7beaa5eac663a8e"
+    },
+    "aliasOf": null,
+    "category": "serrania",
+    "tags": [
+      "topiarios",
+      "esculturas-vegetales",
+      "mirador",
+      "los-pinos",
+      "jardin"
+    ],
+    "alt": "Mirador con figuras topiarias esculpidas en arbustos verdes frente al valle de Manaure",
+    "caption": "Jardines topiarios con mirador hacia el valle en el Balcón del Cesar.",
+    "quality": {
+      "score": 5,
+      "sharpness": "alta",
+      "issues": []
+    },
+    "risks": {
+      "identifiablePeople": false,
+      "thirdPartyBranding": false,
+      "notes": "Sin personas identificables."
+    },
+    "focalPoint": {
+      "x": 0.45,
+      "y": 0.5
+    },
+    "safeCrops": {
+      "1:1": true,
+      "4:3": true,
+      "3:4": true,
+      "4:5": true,
+      "16:9": true,
+      "1.91:1": true
+    },
+    "uses": [
+      "galeria",
+      "hero"
+    ],
+    "notForUse": [],
+    "decision": "usar",
+    "notes": "1920x1440, nitidez 90. Son los verdaderos jardines topiarios emblemáticos de Manaure, en altísima resolución y excelente luz."
+  }
+]
