@@ -83,18 +83,16 @@
 
 .cardTopBar {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
+  flex-direction: column;
+  gap: 0.45rem;
   width: 100%;
 }
 
-.pillsGroup {
+.topBarRow {
   display: flex;
   align-items: center;
-  gap: 0.45rem;
-  flex: 1;
-  min-width: 0;
+  justify-content: space-between;
+  width: 100%;
 }
 
 .pillDarkGold {
@@ -114,29 +112,9 @@
   -webkit-backdrop-filter: blur(8px);
   line-height: 1.2;
   white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.pillSolidAmber {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.35rem 0.75rem;
-  border-radius: 9999px;
-  background-color: #E58E26;
-  color: #0A1C10;
-  font-family: var(--font-sans, 'Outfit Variable', sans-serif);
-  font-size: 0.65rem;
-  font-weight: 800;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  line-height: 1.2;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .topGlassBadge {
-  margin-left: auto;
   width: 32px;
   height: 32px;
   border-radius: 10px;
@@ -151,22 +129,38 @@
   flex-shrink: 0;
 }
 
+.partnerRow {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.pillSolidAmber {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.32rem 0.75rem;
+  border-radius: 9999px;
+  background-color: #E58E26;
+  color: #0A1C10;
+  font-family: var(--font-sans, 'Outfit Variable', sans-serif);
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: 1.25;
+  white-space: normal;
+  max-width: 100%;
+}
+
 .cardBody {
   margin-top: auto;
   display: flex;
   flex-direction: column;
 }
 
-.titleRow {
-  display: flex;
-  align-items: center;
-  gap: 0.85rem;
-  margin-bottom: 0.75rem;
-}
-
 .titleGlassIcon {
-  width: 50px;
-  height: 50px;
+  width: 48px;
+  height: 48px;
   border-radius: 14px;
   background: rgba(255, 255, 255, 0.22);
   backdrop-filter: blur(12px);
@@ -180,15 +174,16 @@
   justify-content: center;
   color: #F5A623;
   flex-shrink: 0;
+  margin-bottom: 0.75rem;
 }
 
 .cardTitle {
   font-family: var(--font-heading, 'Playfair Display Variable', Georgia, serif);
-  font-size: clamp(1.25rem, 1.8vw, 1.45rem);
+  font-size: clamp(1.3rem, 1.8vw, 1.55rem);
   font-weight: 700;
   color: #FFFFFF !important;
   line-height: 1.25;
-  margin: 0;
+  margin: 0 0 0.65rem 0;
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
 }
 
@@ -271,10 +266,6 @@
     width: 44px;
     height: 44px;
     border-radius: 12px;
-  }
-
-  .pillsGroup {
-    flex-wrap: wrap;
   }
 }
 

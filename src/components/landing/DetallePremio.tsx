@@ -151,31 +151,29 @@ export const DetallePremio: React.FC = () => {
 
                 {/* Contenedor interno unificado sobre la fotografía con degradado */}
                 <div className={styles.cardInner}>
-                  {/* Barra superior con píldoras de alto contraste y badge de vidrio */}
+                  {/* Barra superior con píldoras de alto contraste y badge de vidrio reacomodados para lectura completa */}
                   <div className={styles.cardTopBar}>
-                    <div className={styles.pillsGroup}>
+                    <div className={styles.topBarRow}>
                       <span className={styles.pillDarkGold}>
                         {`EXPERIENCIA ${displayNum}`}
                       </span>
-                      {exp.partner_name ? (
+                      <div className={styles.topGlassBadge} aria-hidden="true">
+                        <Compass size={16} />
+                      </div>
+                    </div>
+                    {exp.partner_name && (
+                      <div className={styles.partnerRow}>
                         <span className={styles.pillSolidAmber}>{exp.partner_name}</span>
-                      ) : (
-                        <span className={styles.pillSolidAmber}>COBERTURA PAREJA</span>
-                      )}
-                    </div>
-                    <div className={styles.topGlassBadge} aria-hidden="true">
-                      <Compass size={16} />
-                    </div>
+                      </div>
+                    )}
                   </div>
 
-                  {/* Cuerpo inferior: squircle de vidrio con icono, título serif, descripción y lista de inclusiones */}
+                  {/* Cuerpo inferior: squircle de vidrio con icono arriba, título serif de ancho completo para lectura perfecta */}
                   <div className={styles.cardBody}>
-                    <div className={styles.titleRow}>
-                      <div className={styles.titleGlassIcon} aria-hidden="true">
-                        {renderExperienceIcon(exp.icon)}
-                      </div>
-                      <h3 className={styles.cardTitle}>{exp.title}</h3>
+                    <div className={styles.titleGlassIcon} aria-hidden="true">
+                      {renderExperienceIcon(exp.icon)}
                     </div>
+                    <h3 className={styles.cardTitle}>{exp.title}</h3>
 
                     <p className={styles.cardDescription}>{exp.description}</p>
 
