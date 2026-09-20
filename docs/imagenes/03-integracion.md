@@ -29,15 +29,14 @@ Se completó con éxito la conexión de los **338 derivados optimizados** genera
 Todas las imágenes canónicas del sorteo fueron asignadas a sus respectivos espacios de acuerdo con el plan de dirección de arte aprobado:
 
 ### 2.1 Hero Principal (`HeroRifa.tsx`)
-Carrusel rotativo con dirección de arte dinámica (móvil 4:5 vs escritorio 16:9) y carga prioritaria (`priority={true}`) en el primer slide:
+Carrusel rotativo con dirección de arte dinámica (móvil 4:5 vs escritorio 16:9), carga prioritaria (`priority={true}`) en el primer slide y rotación entre las 4 experiencias estelares (excluida `parapente-vuelo` por solicitud del usuario):
 
 | Slide | Slug Canónico | Categoría | Uso Móvil (4:5) | Uso Escritorio (16:9) | Rol |
 |---|---|---|---|---|---|
-| **0** | `cuatrimoto-aventura-cordillera` | Cuatrimotos | 640w / 1080w | 1280w / 1600w / 1920w | **Elemento LCP** (Preload activo) |
-| **1** | `hospedaje-villa-adelaida` | Hospedaje | 640w / 1080w | 1280w / 1600w / 1920w | Rotación Hero |
-| **2** | `parapente-bandera` | Parapente | 640w / 1080w | 1280w / 1600w / 1920w | Rotación Hero |
-| **3** | `serrania-perija-laguna` | Serranía | 640w / 1080w | 1280w / 1600w / 1920w | Rotación Hero |
-| **4** | `gastronomia-casa-arepas` | Gastronomía | 640w / 1080w | 1280w / 1600w / 1920w | Rotación Hero |
+| **0** | `og-image` | Serranía | 640w / 768w | 640w / 1024w / 1600w / 1920w | **Elemento LCP** (Preload activo) |
+| **1** | `cuatrimoto-aventura-cordillera` | Cuatrimotos | 640w / 1080w | 1280w / 1600w / 1920w | Rotación Hero |
+| **2** | `serrania-perija-laguna` | Serranía | 640w / 1080w | 1280w / 1600w / 1920w | Rotación Hero |
+| **3** | `fogata-casa-de-vidrio` | Fogata | 640w / 1080w | 1280w / 1600w / 1920w | Rotación Hero |
 
 ### 2.2 Tarjetas de Experiencias del Premio (`DetallePremio.tsx` y `prizeService.ts`)
 Tarjetas informativas de alta resolución en proporción 16:9 / 3:2:
@@ -232,3 +231,4 @@ export function MiNuevoComponente() {
 
 Para consultar el registro detallado de los 116 archivos eliminados, los 30.6 MB liberados del repositorio, las políticas de archivos dudosos y las instrucciones de restauración, consulte el informe complementario:
 👉 [`docs/imagenes/04-limpieza.md`](file:///c:/Users/frani/Downloads/RifaManaure/docs/imagenes/04-limpieza.md).
+

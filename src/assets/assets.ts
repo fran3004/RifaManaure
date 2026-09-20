@@ -225,7 +225,7 @@ export interface HeroSlideFoto extends Foto {
   tituloExperiencia: string;
 }
 
-/** 5 fotografías estelares aprobadas para el carrusel interactivo del Hero */
+/** 4 fotografías estelares aprobadas para el carrusel interactivo del Hero (excluida parapente-vuelo por solicitud del usuario) */
 export const fotosHeroCarousel: HeroSlideFoto[] = [
   {
     ...crearFoto(
@@ -235,15 +235,6 @@ export const fotosHeroCarousel: HeroSlideFoto[] = [
     ),
     slug: 'og-image',
     tituloExperiencia: 'Serranía del Perijá',
-  },
-  {
-    ...crearFoto(
-      'parapente-vuelo',
-      'Vuelo libre en parapente biplaza sobrevolando el valle verde de Manaure',
-      'parapente'
-    ),
-    slug: 'parapente-vuelo',
-    tituloExperiencia: 'Vuelo en Parapente Tándem',
   },
   {
     ...crearFoto(
