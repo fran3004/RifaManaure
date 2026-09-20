@@ -6,7 +6,8 @@
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--border-subtle, #DCD5C4);
-  height: var(--navbar-h, 72px);
+  height: calc(var(--navbar-h, 72px) + env(safe-area-inset-top, 0px));
+  padding-top: env(safe-area-inset-top, 0px);
   display: flex;
   align-items: center;
   transition:

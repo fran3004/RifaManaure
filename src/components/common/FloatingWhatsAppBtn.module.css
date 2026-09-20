@@ -1,7 +1,7 @@
 .floatingBtnWrapper {
   position: fixed;
   bottom: calc(20px + env(safe-area-inset-bottom, 0px) + var(--cart-h, 0px));
-  right: 20px;
+  right: calc(20px + env(safe-area-inset-right, 0px));
   z-index: var(--z-whatsapp, 300);
   width: 60px;
   height: 60px;
@@ -145,7 +145,7 @@
     width: 52px;
     height: 52px;
     bottom: calc(16px + env(safe-area-inset-bottom, 0px) + var(--cart-h, 0px));
-    right: 16px;
+    right: calc(16px + env(safe-area-inset-right, 0px));
   }
 
   .floatingBtn {
@@ -175,3 +175,4 @@
     transition: none !important;
   }
 }
+

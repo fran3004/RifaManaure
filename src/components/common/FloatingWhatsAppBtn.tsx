@@ -118,3 +118,4 @@ export const FloatingWhatsAppBtn: React.FC<FloatingWhatsAppBtnProps> = ({
     </aside>
   );
 };
+

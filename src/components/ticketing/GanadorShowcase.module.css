@@ -5,7 +5,7 @@
 
 .celebrationSection {
   position: relative;
-  padding: 4rem 1rem;
+  padding: clamp(4rem, 8vw, 7rem) 1rem;
   background-color: var(--bg-surface, #FBF8F1);
   overflow: hidden;
   border-top: 1px solid var(--border-subtle, #DCD5C4);

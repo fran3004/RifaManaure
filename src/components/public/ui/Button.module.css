@@ -19,6 +19,11 @@
     box-shadow var(--transition-fast, 150ms ease);
 }
 
+.button:hover:not(:disabled):not(.disabled) {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md, 0 6px 16px rgba(15, 46, 29, 0.12));
+}
+
 .button:active:not(:disabled):not(.disabled) {
   transform: scale(0.98);
 }
@@ -95,6 +100,8 @@
 
 .ghost:hover:not(:disabled):not(.disabled) {
   background-color: rgba(27, 74, 46, 0.08);
+  transform: none;
+  box-shadow: none;
 }
 
 .danger-soft {

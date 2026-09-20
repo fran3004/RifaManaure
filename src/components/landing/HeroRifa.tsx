@@ -81,7 +81,11 @@ export const HeroRifa: React.FC<HeroRifaProps> = ({
       {/* Fondo de pantalla completa con <picture> optimizado */}
       <div className={styles.bgWrapper}>
         <picture>
-          <source srcSet={heroImage.hero} type="image/webp" />
+          <source
+            srcSet={heroImage.heroSrcSet || heroImage.hero}
+            sizes="100vw"
+            type="image/webp"
+          />
           <img
             src={heroImage.heroJpg}
             alt={heroImage.alt}

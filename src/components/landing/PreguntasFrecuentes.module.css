@@ -1,5 +1,5 @@
 .faqSection {
-  padding: 5.5rem 0;
+  padding: clamp(4rem, 8vw, 7rem) 0;
   background-color: var(--bg-page);
   border-top: 1px solid var(--border-subtle);
 }
