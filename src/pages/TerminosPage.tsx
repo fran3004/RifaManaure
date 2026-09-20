@@ -2,15 +2,19 @@ import React from 'react';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
+import { FloatingWhatsAppBtn } from '@/components/common/FloatingWhatsAppBtn';
 import { ShieldCheck, FileText, CheckCircle2 } from 'lucide-react';
 import styles from './TerminosPage.module.css';
 
 export const TerminosPage: React.FC = () => {
   useDocumentTitle('Términos y Condiciones Oficiales');
   return (
-    <div className={styles.pageLayout}>
+    <div className={styles.pageLayout} data-theme="public">
+      <a href="#contenido-terminos" className="skipLink">
+        Saltar al contenido de términos
+      </a>
       <Navbar />
-      <main className={styles.mainContent}>
+      <main id="contenido-terminos" tabIndex={-1} className={styles.mainContent}>
         <div className={`container ${styles.container}`}>
           <div className={styles.header}>
             <div className={styles.badge}>
@@ -129,6 +133,7 @@ export const TerminosPage: React.FC = () => {
         </div>
       </main>
       <Footer />
+      <FloatingWhatsAppBtn />
     </div>
   );
 };

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSystemSettings } from '@/hooks/useSystemSettings';
-import { useTicketCart } from '@/context/useTicketCart';
+import { useOptionalTicketCart } from '@/context/useTicketCart';
 import { createWhatsAppLink } from '@/lib/utils';
 import styles from './FloatingWhatsAppBtn.module.css';
 
@@ -29,7 +29,8 @@ export const FloatingWhatsAppBtn: React.FC<FloatingWhatsAppBtnProps> = ({
   customMessage = 'Hola Manaure Vive, deseo información sobre la Gran Rifa Ecoturística.',
 }) => {
   const settings = useSystemSettings();
-  const { isCheckoutOpen } = useTicketCart();
+  const ticketCart = useOptionalTicketCart();
+  const isCheckoutOpen = ticketCart?.isCheckoutOpen ?? false;
   const [isHovered, setIsHovered] = useState(false);
   const [tooltipDismissed, setTooltipDismissed] = useState(false);
   const [hasActiveDialog, setHasActiveDialog] = useState(false);

@@ -17,6 +17,7 @@ import { formatTicketNumber, formatCOP, createWhatsAppLink } from '@/lib/utils';
 import { verifyPublicOrderOrTickets, type PublicOrderVerification } from '@/services/ticketService';
 import { DigitalReceiptModal } from '@/components/receipt/DigitalReceiptModal';
 import type { DigitalReceiptData } from '@/services/receiptGeneratorService';
+import { FloatingWhatsAppBtn } from '@/components/common/FloatingWhatsAppBtn';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useSystemSettings } from '@/hooks/useSystemSettings';
 import styles from './VerificarPage.module.css';
@@ -89,9 +90,12 @@ export const VerificarPage: React.FC = () => {
   };
 
   return (
-    <div className={styles.pageLayout}>
+    <div className={styles.pageLayout} data-theme="public">
+      <a href="#contenido-verificar" className="skipLink">
+        Saltar al contenido de verificación
+      </a>
       <Navbar />
-      <main className={styles.mainContent}>
+      <main id="contenido-verificar" tabIndex={-1} className={styles.mainContent}>
         <div className={`container ${styles.container}`}>
           <div className={styles.header}>
             <div className={styles.badge}>
@@ -160,35 +164,14 @@ export const VerificarPage: React.FC = () => {
                           </span>
                         </div>
 
-                        <div style={{ textAlign: 'right' }}>
-                          <span
-                            style={{
-                              fontSize: '0.75rem',
-                              textTransform: 'uppercase',
-                              letterSpacing: '0.05em',
-                              color: 'var(--text-muted, #5e7a6f)',
-                              fontWeight: 600,
-                              display: 'block',
-                            }}
-                          >
+                        <div className={styles.buyerInfoGroup}>
+                          <span className={styles.buyerLabel}>
                             Comprador Registrado
                           </span>
-                          <span
-                            style={{
-                              fontSize: '1.05rem',
-                              fontWeight: 700,
-                              color: 'var(--text-primary, #f3f7f5)',
-                            }}
-                          >
+                          <span className={styles.buyerName}>
                             {ord.maskedBuyerName}
                           </span>
-                          <span
-                            style={{
-                              fontSize: '0.8rem',
-                              color: 'var(--text-secondary, #9cb5ab)',
-                              display: 'block',
-                            }}
-                          >
+                          <span className={styles.buyerDoc}>
                             Doc: {ord.maskedDocumentId}
                           </span>
                         </div>
@@ -348,8 +331,7 @@ export const VerificarPage: React.FC = () => {
                         <div className={styles.raffleInfoGroup}>
                           <span className={styles.raffleInfoLabel}>Total de la Orden</span>
                           <span
-                            className={styles.raffleInfoValue}
-                            style={{ color: 'var(--color-brand-accent, #f59e0b)' }}
+                            className={`${styles.raffleInfoValue} ${styles.raffleInfoHighlight}`}
                           >
                             {formatCOP(ord.totalAmount)} ({ord.ticketCount}{' '}
                             {ord.ticketCount === 1 ? 'boleto' : 'boletos'})
@@ -371,7 +353,7 @@ export const VerificarPage: React.FC = () => {
                             />
                             Números Asignados ({ord.tickets.length})
                           </h4>
-                          <span style={{ fontSize: '0.8rem', color: 'var(--text-muted, #5e7a6f)' }}>
+                          <span className={styles.ticketsSectionSub}>
                             Numeración oficial de 3 cifras
                           </span>
                         </div>
@@ -406,9 +388,7 @@ export const VerificarPage: React.FC = () => {
 
                       {/* Callout de Soporte si la orden fue rechazada o tiene dudas */}
                       <div className={styles.supportCallout}>
-                        <span
-                          style={{ fontSize: '0.85rem', color: 'var(--text-secondary, #9cb5ab)' }}
-                        >
+                        <span className={styles.supportPrompt}>
                           ¿Tienes alguna duda sobre tu orden <strong>{ord.reference}</strong>?
                         </span>
                         <a
@@ -470,6 +450,7 @@ export const VerificarPage: React.FC = () => {
       )}
 
       <Footer />
+      <FloatingWhatsAppBtn />
     </div>
   );
 };
