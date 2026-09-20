@@ -11,6 +11,7 @@ export interface ArtDirectionConfig {
   media: string;
   ratio?: ImageVariant['ratio'];
   role?: ImageVariant['role'];
+  variantRole?: ImageVariant['role'];
   sizes?: string;
 }
 
@@ -24,7 +25,9 @@ export interface ResponsiveImageProps {
   sizes: string;
   /** Variante de recorte por aspect ratio */
   ratio?: ImageVariant['ratio'];
-  /** Rol específico del slot */
+  /** Rol específico del slot en el manifiesto */
+  variantRole?: ImageVariant['role'];
+  /** @deprecated Usar variantRole para evitar advertencias de jsx-a11y aria-role */
   role?: ImageVariant['role'];
   /** Dirección de arte responsiva opcional con media queries específicas (ej. Hero móvil 4:5 vs desktop 16:9) */
   artDirection?: ArtDirectionConfig[];
@@ -58,6 +61,7 @@ export const ResponsiveImage: React.FC<ResponsiveImageProps> = ({
   id,
   sizes,
   ratio,
+  variantRole,
   role,
   artDirection,
   priority = false,
@@ -80,18 +84,18 @@ export const ResponsiveImage: React.FC<ResponsiveImageProps> = ({
   const entry: ImageEntry | undefined = imageManifest[canonicalId];
 
   if (!entry) {
-    console.warn(`[ResponsiveImage] No se encontró la imagen con id o alias '${id}' en imageManifest.`);
+    console.warn(`[ResponsiveImage] Imagen no encontrada en imageManifest: "${id}"`);
     return null;
   }
 
-  // 2. Determinar posición del punto focal
-  const effectiveFocal = objectPosition || `${Math.round(entry.focalPoint.x * 100)}% ${Math.round(entry.focalPoint.y * 100)}%`;
+  const effectiveRole = variantRole || role;
+  const effectiveFocal = objectPosition || `${entry.focalPoint.x}% ${entry.focalPoint.y}%`;
 
-  // 3. Filtrar variantes según ratio y/o role
-  const filterVariants = (r?: ImageVariant['ratio'], ro?: ImageVariant['role']) => {
+  // Filtrar variantes relevantes por aspect ratio y/o rol
+  const filterVariants = (rat?: ImageVariant['ratio'], ro?: ImageVariant['role']) => {
     let list = entry.variants;
-    if (r) {
-      list = list.filter((v) => v.ratio === r);
+    if (rat) {
+      list = list.filter((v) => v.ratio === rat);
     }
     if (ro) {
       list = list.filter((v) => v.role === ro);
@@ -103,7 +107,7 @@ export const ResponsiveImage: React.FC<ResponsiveImageProps> = ({
     return [...list].sort((a, b) => a.width - b.width);
   };
 
-  const mainVariants = filterVariants(ratio, role);
+  const mainVariants = filterVariants(ratio, effectiveRole);
   // Variante representativa para dimensiones y fallback img
   const fallbackVariant = mainVariants[Math.floor(mainVariants.length / 2)] || mainVariants[0];
 
@@ -149,7 +153,8 @@ export const ResponsiveImage: React.FC<ResponsiveImageProps> = ({
       <picture className={className}>
         {/* Fuentes para dirección de arte responsiva opcional */}
         {artDirection?.map((art, index) => {
-          const artVariants = filterVariants(art.ratio, art.role);
+          const artRole = art.variantRole || art.role;
+          const artVariants = filterVariants(art.ratio, artRole);
           if (artVariants.length === 0) return null;
           return (
             <React.Fragment key={index}>

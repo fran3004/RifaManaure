@@ -168,19 +168,19 @@ export const HeroRifa: React.FC<HeroRifaProps> = ({
                 <ResponsiveImage
                   id={foto.slug}
                   priority={index === 0}
-                  role="hero-desktop"
+                  variantRole="hero-desktop"
                   ratio="16x9"
                   sizes="100vw"
                   artDirection={[
                     {
                       media: '(max-width: 768px)',
-                      role: 'hero-mobile',
+                      variantRole: 'hero-mobile',
                       ratio: '4x5',
                       sizes: '100vw',
                     },
                     {
                       media: '(min-width: 769px)',
-                      role: 'hero-desktop',
+                      variantRole: 'hero-desktop',
                       ratio: '16x9',
                       sizes: '100vw',
                     },
