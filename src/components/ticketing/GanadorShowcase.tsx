@@ -33,13 +33,13 @@ interface Particle {
 }
 
 const CONFETTI_COLORS = [
-  '#fbbf24', // Gold light
-  '#f59e0b', // Gold amber
-  '#10b981', // Emerald
-  '#34d399', // Emerald bright
-  '#06b6d4', // Cyan
-  '#ec4899', // Pink
-  '#ffffff', // White sparkle
+  '#F5A623', // Ámbar de la marca
+  '#E09015', // Ámbar profundo
+  '#1B4A2E', // Verde Bosque
+  '#246A40', // Verde Bosque vibrante
+  '#B23A09', // Coral
+  '#F4EFE4', // Crema cálido
+  '#FFFFFF', // Blanco
 ];
 
 export const GanadorShowcase: React.FC<GanadorShowcaseProps> = ({ winner }) => {
@@ -47,8 +47,14 @@ export const GanadorShowcase: React.FC<GanadorShowcaseProps> = ({ winner }) => {
   const animationFrameRef = useRef<number | null>(null);
   const particlesRef = useRef<Particle[]>([]);
 
-  // Lanzar explosión de confeti
+  // Lanzar explosión de confeti (respetando prefers-reduced-motion)
   const burstConfetti = useCallback(() => {
+    if (
+      typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    ) {
+      return;
+    }
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -215,7 +221,7 @@ export const GanadorShowcase: React.FC<GanadorShowcaseProps> = ({ winner }) => {
               <span className={styles.ticketPresentationLabel}>Número del Boleto Premiado</span>
               <div className={styles.hugeTicketNumber}>#{winner.ticket_number}</div>
               <div className={styles.lotteryMetaPill}>
-                <Award size={16} aria-hidden="true" color="#fbbf24" />
+                <Award size={16} aria-hidden="true" color="var(--brand-accent-strong, #8A5200)" />
                 <span>
                   Sorteo con la{' '}
                   <strong>{winner.raffle?.lottery_reference || 'Lotería Oficial'}</strong> • Premio
@@ -229,7 +235,7 @@ export const GanadorShowcase: React.FC<GanadorShowcaseProps> = ({ winner }) => {
           <div className={styles.winnerInfoGrid}>
             <div className={styles.infoItem}>
               <span className={styles.infoLabel}>
-                <User size={14} aria-hidden="true" color="#10b981" /> Ganador Acreditado
+                <User size={14} aria-hidden="true" color="var(--brand-primary, #1B4A2E)" /> Ganador Acreditado
               </span>
               <span className={styles.infoValue}>{maskBuyerName(winner.buyer?.full_name)}</span>
               <span className={styles.infoSub}>
@@ -239,22 +245,22 @@ export const GanadorShowcase: React.FC<GanadorShowcaseProps> = ({ winner }) => {
 
             <div className={styles.infoItem}>
               <span className={styles.infoLabel}>
-                <MapPin size={14} aria-hidden="true" color="#f59e0b" /> Procedencia
+                <MapPin size={14} aria-hidden="true" color="var(--brand-accent-strong, #8A5200)" /> Procedencia
               </span>
               <span className={styles.infoValue}>
                 {winner.buyer?.city || 'Manaure (Balcón del Cesar)'}
               </span>
-              <span className={styles.infoSub} style={{ color: '#94a3b8' }}>
+              <span className={styles.infoSub}>
                 Municipio del Comprador
               </span>
             </div>
 
             <div className={styles.infoItem}>
               <span className={styles.infoLabel}>
-                <Calendar size={14} aria-hidden="true" color="#3b82f6" /> Fecha del Sorteo
+                <Calendar size={14} aria-hidden="true" color="var(--brand-primary, #1B4A2E)" /> Fecha del Sorteo
               </span>
               <span className={styles.infoValue}>{formatDate(winner.draw_date)}</span>
-              <span className={styles.infoSub} style={{ color: '#93c5fd' }}>
+              <span className={styles.infoSub}>
                 Adjudicado Oficialmente
               </span>
             </div>

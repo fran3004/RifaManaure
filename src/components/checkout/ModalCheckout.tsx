@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useTicketCart } from '@/context/useTicketCart';
 import {
   X,
@@ -150,8 +150,10 @@ export const ModalCheckout: React.FC = () => {
   const [receiptPreview, setReceiptPreview] = useState<string | null>(null);
   const [paymentReferenceInput, setPaymentReferenceInput] = useState<string>('');
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const modalCardRef = useRef<HTMLDivElement | null>(null);
+  const triggerElementRef = useRef<HTMLElement | null>(null);
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     if (currentStep === 7) {
       setCurrentStep(1);
       setCreatedOrderId('');
@@ -163,7 +165,75 @@ export const ModalCheckout: React.FC = () => {
       setHasReservationError(false);
     }
     closeCheckout();
-  };
+  }, [currentStep, closeCheckout]);
+
+  // Gestión de foco inicial, restauración al cerrar y bloqueo de scroll del body
+  useEffect(() => {
+    if (isCheckoutOpen) {
+      triggerElementRef.current = document.activeElement as HTMLElement | null;
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+
+      const timer = setTimeout(() => {
+        if (modalCardRef.current) {
+          const focusable = modalCardRef.current.querySelectorAll<HTMLElement>(
+            'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+          );
+          if (focusable.length > 0) {
+            focusable[0].focus();
+          }
+        }
+      }, 50);
+
+      return () => {
+        clearTimeout(timer);
+        document.body.style.overflow = originalOverflow;
+        if (triggerElementRef.current && typeof triggerElementRef.current.focus === 'function') {
+          triggerElementRef.current.focus();
+        }
+      };
+    }
+  }, [isCheckoutOpen]);
+
+  // Focus trap y cierre seguro con tecla Escape
+  useEffect(() => {
+    if (!isCheckoutOpen) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (!isReserving && !isSubmittingProof) {
+          e.preventDefault();
+          handleClose();
+        }
+        return;
+      }
+
+      if (e.key === 'Tab' && modalCardRef.current) {
+        const focusableElements = modalCardRef.current.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        );
+        if (focusableElements.length === 0) return;
+
+        const firstElement = focusableElements[0];
+        const lastElement = focusableElements[focusableElements.length - 1];
+
+        if (e.shiftKey) {
+          if (document.activeElement === firstElement) {
+            e.preventDefault();
+            lastElement.focus();
+          }
+        } else {
+          if (document.activeElement === lastElement) {
+            e.preventDefault();
+            firstElement.focus();
+          }
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isCheckoutOpen, isReserving, isSubmittingProof, handleClose]);
 
   // Cargar cuentas oficiales de recaudo
   useEffect(() => {
@@ -413,11 +483,13 @@ export const ModalCheckout: React.FC = () => {
   return (
     <div className={styles.modalBackdrop} onClick={handleClose}>
       <div
+        ref={modalCardRef}
         className={styles.modalCard}
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
         aria-labelledby="modal-checkout-title"
+        tabIndex={-1}
       >
         {/* Barra Superior del Modal */}
         <div className={styles.modalHeader}>
@@ -438,14 +510,25 @@ export const ModalCheckout: React.FC = () => {
           </button>
         </div>
 
-        {/* Indicador Visual de Progreso (Paso X de 7) */}
+        {/* Indicador Visual de Progreso (7 Pasos Segmentados) */}
         {!hasReservationError && (
-          <div className={styles.stepperBar}>
-            <div className={styles.stepperProgressTrack}>
-              <div
-                className={styles.stepperProgressFill}
-                style={{ width: `${(currentStep / 7) * 100}%` }}
-              />
+          <div className={styles.stepperBar} role="region" aria-label="Progreso del checkout">
+            <div className={styles.stepperSegments} aria-hidden="true">
+              {([1, 2, 3, 4, 5, 6, 7] as CheckoutStepNumber[]).map((stepNum) => {
+                const isCompleted = currentStep > stepNum;
+                const isCurrent = currentStep === stepNum;
+                let stepClass = styles.stepPending;
+                if (isCompleted) stepClass = styles.stepCompleted;
+                else if (isCurrent) stepClass = styles.stepCurrent;
+
+                return (
+                  <div
+                    key={stepNum}
+                    className={`${styles.stepperSegment} ${stepClass}`}
+                    title={`Paso ${stepNum}: ${STEP_TITLES[stepNum]}`}
+                  />
+                );
+              })}
             </div>
             <div className={styles.stepperInfo}>
               <span className={styles.stepperBadge}>Paso {currentStep} de 7</span>
@@ -526,7 +609,12 @@ export const ModalCheckout: React.FC = () => {
                   onChange={handleInputChange}
                   className={`${styles.input} ${errors.fullName ? styles.inputError : ''}`}
                 />
-                {errors.fullName && <span className={styles.errorText}>{errors.fullName}</span>}
+                {errors.fullName && (
+                  <span className={styles.errorText} role="alert">
+                    <AlertCircle size={14} aria-hidden="true" />
+                    <span>{errors.fullName}</span>
+                  </span>
+                )}
               </div>
 
               <div className={styles.inputGroup}>
@@ -543,7 +631,12 @@ export const ModalCheckout: React.FC = () => {
                   className={`${styles.input} ${errors.documentId ? styles.inputError : ''}`}
                   maxLength={12}
                 />
-                {errors.documentId && <span className={styles.errorText}>{errors.documentId}</span>}
+                {errors.documentId && (
+                  <span className={styles.errorText} role="alert">
+                    <AlertCircle size={14} aria-hidden="true" />
+                    <span>{errors.documentId}</span>
+                  </span>
+                )}
               </div>
 
               <div className={styles.inputGroup}>
@@ -560,7 +653,12 @@ export const ModalCheckout: React.FC = () => {
                   className={`${styles.input} ${errors.phone ? styles.inputError : ''}`}
                   maxLength={10}
                 />
-                {errors.phone && <span className={styles.errorText}>{errors.phone}</span>}
+                {errors.phone && (
+                  <span className={styles.errorText} role="alert">
+                    <AlertCircle size={14} aria-hidden="true" />
+                    <span>{errors.phone}</span>
+                  </span>
+                )}
               </div>
 
               <div className={styles.inputGroup}>
@@ -576,7 +674,12 @@ export const ModalCheckout: React.FC = () => {
                   onChange={handleInputChange}
                   className={`${styles.input} ${errors.email ? styles.inputError : ''}`}
                 />
-                {errors.email && <span className={styles.errorText}>{errors.email}</span>}
+                {errors.email && (
+                  <span className={styles.errorText} role="alert">
+                    <AlertCircle size={14} aria-hidden="true" />
+                    <span>{errors.email}</span>
+                  </span>
+                )}
               </div>
 
               <div className={`${styles.inputGroup} ${styles.inputFull}`}>
@@ -592,14 +695,19 @@ export const ModalCheckout: React.FC = () => {
                   onChange={handleInputChange}
                   className={`${styles.input} ${errors.city ? styles.inputError : ''}`}
                 />
-                {errors.city && <span className={styles.errorText}>{errors.city}</span>}
+                {errors.city && (
+                  <span className={styles.errorText} role="alert">
+                    <AlertCircle size={14} aria-hidden="true" />
+                    <span>{errors.city}</span>
+                  </span>
+                )}
               </div>
             </div>
 
             {/* Canal Oficial de Notificación */}
             <div className={styles.contactPreferenceContainer}>
               <label className={styles.contactPreferenceTitle}>
-                <Bell size={15} color="#f59e0b" aria-hidden="true" />
+                <Bell size={15} color="var(--brand-accent, #f59e0b)" aria-hidden="true" />
                 Canal oficial de confirmación
               </label>
               <div className={styles.contactPreferenceGrid} style={{ gridTemplateColumns: '1fr' }}>
@@ -628,7 +736,12 @@ export const ModalCheckout: React.FC = () => {
                   para la entrega del premio.
                 </span>
               </label>
-              {errors.acceptTerms && <span className={styles.errorText}>{errors.acceptTerms}</span>}
+              {errors.acceptTerms && (
+                <span className={styles.errorText} role="alert">
+                  <AlertCircle size={14} aria-hidden="true" />
+                  <span>{errors.acceptTerms}</span>
+                </span>
+              )}
             </div>
 
             <div className={styles.stepNavigation}>
@@ -797,13 +910,19 @@ export const ModalCheckout: React.FC = () => {
         {/* ========================================================================= */}
         {!hasReservationError && currentStep === 4 && (
           <div className={styles.stepContent}>
-            {/* Banner de Reserva Exitosa */}
-            <div className={styles.timerBanner}>
-              <Clock size={20} className={styles.timerIcon} aria-hidden="true" />
+            {/* Banner de Reserva Exitosa con estado urgente si restan menos de 120s */}
+            <div className={timeLeftSeconds < 120 ? styles.timerBannerUrgent : styles.timerBanner}>
+              <Clock
+                size={20}
+                className={timeLeftSeconds < 120 ? styles.timerIconUrgent : styles.timerIcon}
+                aria-hidden="true"
+              />
               <div>
                 <strong>Boletos Reservados: {formatTimer(timeLeftSeconds)}</strong>
                 <p>
-                  Cuentas oficiales para realizar tu transferencia antes de que termine el tiempo.
+                  {timeLeftSeconds < 120
+                    ? '¡Atención! Quedan menos de 2 minutos para completar tu transferencia bancaria.'
+                    : 'Cuentas oficiales para realizar tu transferencia antes de que termine el tiempo.'}
                 </p>
               </div>
             </div>
@@ -817,11 +936,20 @@ export const ModalCheckout: React.FC = () => {
                   type="button"
                   className={styles.copyBtn}
                   onClick={() => copyToClipboard(orderReference, 'ref')}
+                  aria-label={copiedKey === 'ref' ? 'Referencia copiada' : 'Copiar referencia de pago'}
                 >
                   {copiedKey === 'ref' ? <Check size={16} aria-hidden="true" /> : <Copy size={16} aria-hidden="true" />}
                   <span>{copiedKey === 'ref' ? 'Copiado' : 'Copiar'}</span>
                 </button>
               </div>
+            </div>
+
+            {/* Aclaración oficial de métodos de pago */}
+            <div className={styles.paymentNoticeBox}>
+              <AlertCircle size={18} className={styles.paymentNoticeIcon} aria-hidden="true" />
+              <span>
+                Aceptamos transferencias directas (Bre-B, Nequi, Daviplata, Bancolombia). No recibimos pagos con tarjeta de crédito ni débito.
+              </span>
             </div>
 
             {/* Cuentas de Transferencia */}
@@ -894,6 +1022,11 @@ export const ModalCheckout: React.FC = () => {
                             copyToClipboard(acc.account_number.replace(/\s+/g, ''), acc.id);
                           }}
                           title="Copiar número de cuenta"
+                          aria-label={
+                            copiedKey === acc.id
+                              ? 'Número copiado al portapapeles'
+                              : `Copiar número de cuenta de ${acc.bank_name}`
+                          }
                         >
                           {copiedKey === acc.id ? <Check size={14} aria-hidden="true" /> : <Copy size={14} aria-hidden="true" />}
                           <span>{copiedKey === acc.id ? 'Copiado' : 'Copiar número'}</span>
@@ -1119,15 +1252,7 @@ export const ModalCheckout: React.FC = () => {
               </div>
 
               {errorMessage && (
-                <div
-                  style={{
-                    color: '#ef4444',
-                    fontSize: '0.85rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.4rem',
-                  }}
-                >
+                <div className={styles.errorMessageBox} role="alert">
                   <AlertCircle size={16} aria-hidden="true" />
                   <span>{errorMessage}</span>
                 </div>
@@ -1216,7 +1341,8 @@ export const ModalCheckout: React.FC = () => {
                     type="button"
                     onClick={() => copyToClipboard(orderReference, 'confirm_ref')}
                     className={styles.copyBtn}
-                    style={{ marginLeft: '8px', padding: '0.2rem 0.5rem', fontSize: '0.75rem' }}
+                    style={{ marginLeft: '8px', padding: '0.2rem 0.5rem', fontSize: '0.75rem', minHeight: '36px' }}
+                    aria-label={copiedKey === 'confirm_ref' ? 'Número de orden copiado' : 'Copiar número de orden'}
                   >
                     {copiedKey === 'confirm_ref' ? <Check size={12} aria-hidden="true" /> : <Copy size={12} aria-hidden="true" />}
                     <span>{copiedKey === 'confirm_ref' ? 'Copiado' : 'Copiar'}</span>
