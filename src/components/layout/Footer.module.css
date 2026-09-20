@@ -104,7 +104,7 @@
 .colTitle {
   font-size: 1.05rem;
   font-weight: 700;
-  color: var(--text-on-dark);
+  color: var(--text-on-dark, #EEF4EF) !important;
   margin-bottom: 1.25rem;
   letter-spacing: -0.01em;
 }
