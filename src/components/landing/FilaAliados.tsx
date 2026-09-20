@@ -483,17 +483,17 @@ export const FilaAliados: React.FC = () => {
                       <img
                         src={aliado.logoSrc}
                         srcSet={aliado.logoSrcSet}
-                        sizes="120px"
-                        alt=""
-                        width={120}
-                        height={120}
+                        sizes="160px"
+                        alt={`Logo de ${aliado.name}`}
+                        width={150}
+                        height={150}
                         loading="lazy"
                         className={styles.aliadoLogo}
                         draggable={false}
                       />
                     ) : (
                       <div className={styles.placeholderLogo}>
-                        <Handshake size={36} aria-hidden="true" />
+                        <Handshake size={40} aria-hidden="true" />
                       </div>
                     )}
                   </div>
@@ -501,9 +501,6 @@ export const FilaAliados: React.FC = () => {
                   <strong className={styles.aliadoName} title={aliado.name}>
                     {aliado.name}
                   </strong>
-                  <span className={styles.aliadoCategory} title={aliado.category}>
-                    {aliado.category}
-                  </span>
                   <span className="visually-hidden"> (se abre en una pestaña nueva)</span>
                 </a>
               );
@@ -520,17 +517,17 @@ export const FilaAliados: React.FC = () => {
                     <img
                       src={aliado.logoSrc}
                       srcSet={aliado.logoSrcSet}
-                      sizes="120px"
-                      alt=""
-                      width={120}
-                      height={120}
+                      sizes="160px"
+                      alt={`Logo de ${aliado.name}`}
+                      width={150}
+                      height={150}
                       loading="lazy"
                       className={styles.aliadoLogo}
                       draggable={false}
                     />
                   ) : (
                     <div className={styles.placeholderLogo}>
-                      <Handshake size={36} aria-hidden="true" />
+                      <Handshake size={40} aria-hidden="true" />
                     </div>
                   )}
                 </div>
@@ -538,9 +535,6 @@ export const FilaAliados: React.FC = () => {
                 <strong className={styles.aliadoName} title={aliado.name}>
                   {aliado.name}
                 </strong>
-                <span className={styles.aliadoCategory} title={aliado.category}>
-                  {aliado.category}
-                </span>
               </div>
             );
           })}

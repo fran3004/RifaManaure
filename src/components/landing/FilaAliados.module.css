@@ -89,7 +89,7 @@
   display: flex;
   flex-direction: row;
   flex-wrap: nowrap;
-  gap: 2.25rem;
+  gap: 2.5rem;
   width: max-content;
   will-change: transform;
   cursor: grab;
@@ -130,37 +130,29 @@
   cursor: default;
 }
 
-/* Tesela blanca para que cualquier logo se lea nítido sobre el fondo crema */
+/* Contenedor transparente del logo: sin cuadro blanco para lucimiento pleno del emblema */
 .logoTile {
-  width: 140px;
-  height: 140px;
-  border-radius: var(--radius-lg);
-  background-color: var(--bg-card);
-  border: 1px solid var(--border-subtle);
-  box-shadow: var(--shadow-sm);
+  width: 150px;
+  height: 150px;
+  background-color: transparent;
+  border: none;
+  box-shadow: none;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1.1rem;
+  padding: 0.25rem;
   position: relative;
-  transition:
-    transform var(--transition-fast),
-    border-color var(--transition-fast),
-    box-shadow var(--transition-fast);
+  transition: transform var(--transition-normal, 250ms ease);
   box-sizing: border-box;
 }
 
-/* Efecto Instagram al hover y al recibir foco */
+/* Efecto al hover y al recibir foco: elevación suave del logo */
 .aliadoItem:hover .logoTile,
 .aliadoItem:focus-visible .logoTile {
-  transform: translateY(-4px) scale(1.04);
-  border-color: #e1306c;
-  box-shadow:
-    0 0 0 3px rgba(225, 48, 108, 0.45),
-    0 8px 24px rgba(225, 48, 108, 0.22);
+  transform: translateY(-6px) scale(1.08);
 }
 
-/* Logotipo sin distorsiones ni filtros */
+/* Logotipo sin distorsiones ni fondos artificiales, con sombra suave para resaltar */
 .aliadoLogo {
   max-width: 100%;
   max-height: 100%;
@@ -168,12 +160,14 @@
   height: auto;
   object-fit: contain;
   pointer-events: none;
-  filter: none !important;
-  transition: transform var(--transition-fast);
+  filter: drop-shadow(0 4px 10px rgba(15, 46, 29, 0.08));
+  transition:
+    transform var(--transition-normal, 250ms ease),
+    filter var(--transition-normal, 250ms ease);
 }
 
 .aliadoItem:hover .aliadoLogo {
-  transform: scale(1.04);
+  filter: drop-shadow(0 8px 20px rgba(15, 46, 29, 0.16));
 }
 
 .placeholderLogo {
@@ -185,13 +179,14 @@
   color: var(--brand-accent);
 }
 
+/* Nombre del aliado: limpio, centrado y destacado */
 .aliadoName {
   font-family: var(--font-sans);
   font-size: 0.95rem;
   font-weight: 700;
   color: var(--text-primary);
-  margin-top: 0.85rem;
-  line-height: 1.25;
+  margin-top: 0.75rem;
+  line-height: 1.3;
   text-align: center;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -199,26 +194,11 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
   max-width: 100%;
-  transition: color var(--transition-fast);
+  transition: color var(--transition-fast), transform var(--transition-fast);
 }
 
 .aliadoItem:hover .aliadoName {
   color: var(--brand-primary);
-}
-
-.aliadoCategory {
-  font-family: var(--font-sans);
-  font-size: 0.8rem;
-  color: var(--text-secondary);
-  line-height: 1.25;
-  margin-top: 0.25rem;
-  text-align: center;
-  display: -webkit-box;
-  -webkit-line-clamp: 1;
-  line-clamp: 1;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  max-width: 100%;
 }
 
 /* --- Adaptabilidad Responsive --- */
@@ -233,50 +213,41 @@
   }
 
   .aliadosTrack {
-    gap: 1.5rem;
+    gap: 1.75rem;
     padding: 0.5rem 1rem;
   }
 
   .aliadoItem {
-    flex: 0 0 145px;
-    width: 145px;
+    flex: 0 0 140px;
+    width: 140px;
   }
 
   .logoTile {
     width: 125px;
     height: 125px;
-    padding: 0.85rem;
+    padding: 0.2rem;
   }
 
   .aliadoName {
     font-size: 0.875rem;
-    margin-top: 0.65rem;
-  }
-
-  .aliadoCategory {
-    font-size: 0.75rem;
+    margin-top: 0.55rem;
   }
 }
 
 @media (max-width: 480px) {
   .aliadoItem {
-    flex: 0 0 130px;
-    width: 130px;
+    flex: 0 0 120px;
+    width: 120px;
   }
 
   .logoTile {
-    width: 112px;
-    height: 112px;
-    padding: 0.75rem;
-    border-radius: var(--radius-md);
+    width: 110px;
+    height: 110px;
+    padding: 0.15rem;
   }
 
   .aliadoName {
     font-size: 0.825rem;
-  }
-
-  .aliadoCategory {
-    font-size: 0.72rem;
   }
 }
 
