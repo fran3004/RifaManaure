@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { getCachedPrizeDetails, getPublicPrizeDetails } from '@/services/prizeService';
-import type { PublicPrizeData, PrizeExperienceRow } from '@/types/raffle.types';
+import {
+  getCachedPrizeDetails,
+  getPublicPrizeDetails,
+  DEFAULT_OFFICIAL_TOUR_FEATURES,
+} from '@/services/prizeService';
+import type { PublicPrizeData, PrizeExperienceRow, OfficialTourFeature } from '@/types/raffle.types';
 import { imageAliases, imageManifest } from '@/types/image-manifest';
 import {
   Sparkles,
@@ -117,7 +121,11 @@ export const DetallePremio: React.FC = () => {
       'exp-fotografia': 'cuatrimoto-mirador',
     };
 
-    if (id === 'exp-gastronomia' || title.trim().toLowerCase() === 'tour gastronómico local') {
+    // Si es la experiencia gastronómica por id o título y aún tiene el slug antiguo de montaña
+    if (
+      (id === 'exp-gastronomia' || title.trim().toLowerCase().includes('gastron')) &&
+      (!slug || slug === 'serrania-perija-panoramica' || slug === 'cuatrimoto-flota')
+    ) {
       return map['exp-gastronomia'];
     }
 
@@ -142,6 +150,22 @@ export const DetallePremio: React.FC = () => {
     return rawTitle;
   };
 
+  // Normalizar lista de especificaciones del tour oficial
+  const tourFeatures: OfficialTourFeature[] =
+    Array.isArray(settings.official_tour_features) &&
+    (settings.official_tour_features as any[]).length > 0
+      ? (settings.official_tour_features as any[]).map((f) => {
+          if (typeof f === 'string') {
+            return { title: '', description: f };
+          }
+          return {
+            title: f.title || '',
+            description: f.description || '',
+            icon: f.icon,
+          };
+        })
+      : DEFAULT_OFFICIAL_TOUR_FEATURES;
+
   return (
     <section id="premio" className={styles.premioSection} aria-labelledby="titulo-premio">
       <div className="container">
@@ -153,71 +177,36 @@ export const DetallePremio: React.FC = () => {
           subtitle={settings.subtitle}
         />
 
+        {/* Banner Verde Oficial del Premio Mayor */}
         <section className={styles.mayorPrizeCard} aria-labelledby="titulo-premio-mayor">
           <div className={styles.mayorPrizeHeader}>
             <div className={styles.mayorPrizeIcon} aria-hidden="true">
               <Trophy size={18} />
             </div>
             <div>
-              <span className={styles.mayorPrizeEyebrow}>PREMIO MAYOR OFICIAL</span>
+              <span className={styles.mayorPrizeEyebrow}>
+                {settings.official_tour_badge || 'PREMIO MAYOR OFICIAL'}
+              </span>
               <h3 id="titulo-premio-mayor" className={styles.mayorPrizeTitle}>
-                Tour Vive Manaure • 3 Días y 2 Noches
+                {settings.official_tour_title || 'Tour Vive Manaure • 3 Días y 2 Noches'}
               </h3>
               <p className={styles.mayorPrizeSubtitle}>
-                Todo incluido para la pareja (2 personas). Especificación detallada del premio:
+                {settings.official_tour_subtitle ||
+                  'Todo incluido para la pareja (2 personas). Especificación detallada del premio:'}
               </p>
             </div>
           </div>
 
           <ul className={styles.mayorPrizeList}>
-            <li>
-              <Sparkles size={14} aria-hidden="true" />
-              <span>
-                <strong>Viaje ida y vuelta pago:</strong> desde tu lugar de residencia hasta Manaure – Cesar para la pareja (2 personas)
-              </span>
-            </li>
-            <li>
-              <Sparkles size={14} aria-hidden="true" />
-              <span>
-                <strong>Hospedaje:</strong> en uno de los mejores hoteles / glamping campestre
-              </span>
-            </li>
-            <li>
-              <Sparkles size={14} aria-hidden="true" />
-              <span>
-                <strong>Noche romántica:</strong> velada íntima preparada especialmente para la pareja
-              </span>
-            </li>
-            <li>
-              <Sparkles size={14} aria-hidden="true" />
-              <span>
-                <strong>Alimentación completa:</strong> desayunos, almuerzos campestres y cenas típicas
-              </span>
-            </li>
-            <li>
-              <Sparkles size={14} aria-hidden="true" />
-              <span>
-                <strong>Experiencia de cuatrimoto:</strong> ruta guiada por trochas y miradores
-              </span>
-            </li>
-            <li>
-              <Sparkles size={14} aria-hidden="true" />
-              <span>
-                <strong>Experiencia del parapente:</strong> vuelo libre tándem con piloto certificado
-              </span>
-            </li>
-            <li>
-              <Sparkles size={14} aria-hidden="true" />
-              <span>
-                <strong>Ruta Casa de Vidrio:</strong> Serranía de Perijá con fogata nocturna
-              </span>
-            </li>
-            <li>
-              <Sparkles size={14} aria-hidden="true" />
-              <span>
-                <strong>Registro fotográfico:</strong> cobertura profesional en alta definición
-              </span>
-            </li>
+            {tourFeatures.map((feat, idx) => (
+              <li key={idx}>
+                <Sparkles size={14} aria-hidden="true" />
+                <span>
+                  {feat.title ? <strong>{feat.title} </strong> : null}
+                  {feat.description}
+                </span>
+              </li>
+            ))}
           </ul>
         </section>
 
@@ -247,39 +236,52 @@ export const DetallePremio: React.FC = () => {
                   data-fit={media.fit}
                   style={mediaCustomProps}
                 >
-                  {media.fit !== 'cover' && (
+                  {exp.image_url ? (
                     <img
-                      src={media.backdropSrc}
-                      alt=""
-                      aria-hidden="true"
-                      loading="lazy"
-                      decoding="async"
-                      fetchPriority="low"
-                      className={styles.backdrop}
-                    />
-                  )}
-
-                  {media.fit === 'asis' ? (
-                    <img
-                      src={media.primarySrc}
-                      alt={media.alt}
-                      width={710}
-                      height={960}
+                      src={exp.image_url}
+                      alt={exp.title}
                       loading="lazy"
                       decoding="async"
                       className={styles.foreground}
+                      style={{ objectFit: 'cover', width: '100%', height: '100%' }}
                     />
                   ) : (
-                    <ResponsiveImage
-                      id={media.slug}
-                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 380px"
-                      variantRole={media.fit === 'contain' ? 'lightbox' : 'tarjeta'}
-                      ratio={media.fit === 'contain' ? 'full' : '4x5'}
-                      className={styles.foreground}
-                      imgClassName={styles.foregroundImage}
-                      alt={media.alt}
-                      objectPosition={`${media.focalX * 100}% ${media.focalY * 100}%`}
-                    />
+                    <>
+                      {media.fit !== 'cover' && (
+                        <img
+                          src={media.backdropSrc}
+                          alt=""
+                          aria-hidden="true"
+                          loading="lazy"
+                          decoding="async"
+                          fetchPriority="low"
+                          className={styles.backdrop}
+                        />
+                      )}
+
+                      {media.fit === 'asis' ? (
+                        <img
+                          src={media.primarySrc}
+                          alt={media.alt}
+                          width={710}
+                          height={960}
+                          loading="lazy"
+                          decoding="async"
+                          className={styles.foreground}
+                        />
+                      ) : (
+                        <ResponsiveImage
+                          id={media.slug}
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 380px"
+                          variantRole={media.fit === 'contain' ? 'lightbox' : 'tarjeta'}
+                          ratio={media.fit === 'contain' ? 'full' : '4x5'}
+                          className={styles.foreground}
+                          imgClassName={styles.foregroundImage}
+                          alt={media.alt}
+                          objectPosition={`${media.focalX * 100}% ${media.focalY * 100}%`}
+                        />
+                      )}
+                    </>
                   )}
 
                   <div className={styles.cardScrim} />

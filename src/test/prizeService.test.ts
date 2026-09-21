@@ -83,5 +83,25 @@ describe('prizeService - Gestión del Premio Mayor', () => {
     expect(retrieved.settings.id).toBe('main');
     expect(retrieved.experiences).toHaveLength(DEFAULT_PRIZE_EXPERIENCES.length);
   });
+
+  it('debe incluir la configuración del Banner Verde Oficial con sus 8 especificaciones por defecto', () => {
+    const data = getCachedPrizeDetails();
+
+    expect(data.settings.official_tour_badge).toBe('PREMIO MAYOR OFICIAL');
+    expect(data.settings.official_tour_title).toBe('Tour Vive Manaure • 3 Días y 2 Noches');
+    expect(data.settings.official_tour_subtitle).toContain('Todo incluido para la pareja (2 personas)');
+    expect(Array.isArray(data.settings.official_tour_features)).toBe(true);
+    expect(data.settings.official_tour_features).toHaveLength(8);
+
+    const firstFeature = (data.settings.official_tour_features as any[])[0];
+    expect(firstFeature.title).toBe('Viaje ida y vuelta pago:');
+  });
+
+  it('la experiencia gastronómica debe apuntar al slug oficial de La Casa de las Arepas', () => {
+    const gastro = DEFAULT_PRIZE_EXPERIENCES.find((exp) => exp.id === 'exp-gastronomia');
+    expect(gastro).toBeDefined();
+    expect(gastro?.image_slug).toBe('gastronomia-casa-arepas');
+  });
 });
+
 

@@ -570,6 +570,10 @@ export type Database = {
           badge_text: string;
           title: string;
           subtitle: string;
+          official_tour_badge: string;
+          official_tour_title: string;
+          official_tour_subtitle: string;
+          official_tour_features: Json;
           updated_at: string;
         };
         Insert: {
@@ -577,6 +581,10 @@ export type Database = {
           badge_text?: string;
           title?: string;
           subtitle?: string;
+          official_tour_badge?: string;
+          official_tour_title?: string;
+          official_tour_subtitle?: string;
+          official_tour_features?: Json;
           updated_at?: string;
         };
         Update: {
@@ -584,6 +592,10 @@ export type Database = {
           badge_text?: string;
           title?: string;
           subtitle?: string;
+          official_tour_badge?: string;
+          official_tour_title?: string;
+          official_tour_subtitle?: string;
+          official_tour_features?: Json;
           updated_at?: string;
         };
         Relationships: [];

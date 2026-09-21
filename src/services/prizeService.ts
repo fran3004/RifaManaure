@@ -6,9 +6,45 @@ import type {
   PrizeExperienceInsert,
   PrizeExperienceUpdate,
   PublicPrizeData,
+  OfficialTourFeature,
 } from '@/types/raffle.types';
 
 export const PRIZE_CACHE_KEY = 'manaure_prize_details_cache';
+
+export const DEFAULT_OFFICIAL_TOUR_FEATURES: OfficialTourFeature[] = [
+  {
+    title: 'Viaje ida y vuelta pago:',
+    description: 'desde tu lugar de residencia hasta Manaure – Cesar para la pareja (2 personas)',
+  },
+  {
+    title: 'Hospedaje:',
+    description: 'en uno de los mejores hoteles / glamping campestre',
+  },
+  {
+    title: 'Noche romántica:',
+    description: 'velada íntima preparada especialmente para la pareja',
+  },
+  {
+    title: 'Alimentación completa:',
+    description: 'desayunos, almuerzos campestres y cenas típicas',
+  },
+  {
+    title: 'Experiencia de cuatrimoto:',
+    description: 'ruta guiada por trochas y miradores',
+  },
+  {
+    title: 'Experiencia del parapente:',
+    description: 'vuelo libre tándem con piloto certificado',
+  },
+  {
+    title: 'Ruta Casa de Vidrio:',
+    description: 'Serranía de Perijá con fogata nocturna',
+  },
+  {
+    title: 'Registro fotográfico:',
+    description: 'cobertura profesional en alta definición',
+  },
+];
 
 export const DEFAULT_PRIZE_SETTINGS: PrizeSettingsRow = {
   id: 'main',
@@ -16,6 +52,11 @@ export const DEFAULT_PRIZE_SETTINGS: PrizeSettingsRow = {
   title: '¿Qué incluye el Premio Mayor?',
   subtitle:
     'Una vivencia integral que reúne la mejor hotelería campestre, aventura extrema y la riqueza cultural y gastronómica de Manaure.',
+  official_tour_badge: 'PREMIO MAYOR OFICIAL',
+  official_tour_title: 'Tour Vive Manaure • 3 Días y 2 Noches',
+  official_tour_subtitle:
+    'Todo incluido para la pareja (2 personas). Especificación detallada del premio:',
+  official_tour_features: DEFAULT_OFFICIAL_TOUR_FEATURES,
   updated_at: new Date().toISOString(),
 };
 
@@ -186,7 +227,23 @@ export async function getPublicPrizeDetails(): Promise<PublicPrizeData> {
     const cached = getCachedPrizeDetails();
 
     const finalSettings: PrizeSettingsRow = settingsRes.data
-      ? (settingsRes.data as PrizeSettingsRow)
+      ? {
+          ...DEFAULT_PRIZE_SETTINGS,
+          ...(settingsRes.data as PrizeSettingsRow),
+          official_tour_badge:
+            (settingsRes.data as any).official_tour_badge || DEFAULT_PRIZE_SETTINGS.official_tour_badge,
+          official_tour_title:
+            (settingsRes.data as any).official_tour_title || DEFAULT_PRIZE_SETTINGS.official_tour_title,
+          official_tour_subtitle:
+            (settingsRes.data as any).official_tour_subtitle ||
+            DEFAULT_PRIZE_SETTINGS.official_tour_subtitle,
+          official_tour_features:
+            (settingsRes.data as any).official_tour_features &&
+            Array.isArray((settingsRes.data as any).official_tour_features) &&
+            ((settingsRes.data as any).official_tour_features as any[]).length > 0
+              ? (settingsRes.data as any).official_tour_features
+              : DEFAULT_PRIZE_SETTINGS.official_tour_features,
+        }
       : cached.settings;
 
     const finalExperiences: PrizeExperienceRow[] =
@@ -228,6 +285,23 @@ export async function getAdminPrizeDetails(): Promise<{
     if (!settings) {
       // Si la tabla no tiene registro todavía, crearlo o devolver el por defecto
       settings = DEFAULT_PRIZE_SETTINGS;
+    } else {
+      settings = {
+        ...DEFAULT_PRIZE_SETTINGS,
+        ...settings,
+        official_tour_badge:
+          (settings as any).official_tour_badge || DEFAULT_PRIZE_SETTINGS.official_tour_badge,
+        official_tour_title:
+          (settings as any).official_tour_title || DEFAULT_PRIZE_SETTINGS.official_tour_title,
+        official_tour_subtitle:
+          (settings as any).official_tour_subtitle || DEFAULT_PRIZE_SETTINGS.official_tour_subtitle,
+        official_tour_features:
+          (settings as any).official_tour_features &&
+          Array.isArray((settings as any).official_tour_features) &&
+          ((settings as any).official_tour_features as any[]).length > 0
+            ? (settings as any).official_tour_features
+            : DEFAULT_PRIZE_SETTINGS.official_tour_features,
+      };
     }
 
     const experiences = (experiencesRes.data || []) as PrizeExperienceRow[];
@@ -246,21 +320,36 @@ export async function getAdminPrizeDetails(): Promise<{
 }
 
 /**
- * Actualiza los textos de cabecera de la sección del premio.
+ * Actualiza los textos de cabecera de la sección del premio o del Tour Oficial.
  */
 export async function updatePrizeSettings(
   updates: Partial<PrizeSettingsUpdate>
 ): Promise<{ success: boolean; data?: PrizeSettingsRow; error?: string }> {
   try {
+    const payload: Record<string, any> = {
+      id: 'main',
+      updated_at: new Date().toISOString(),
+    };
+
+    if (updates.badge_text !== undefined) payload.badge_text = updates.badge_text.trim();
+    if (updates.title !== undefined) payload.title = updates.title.trim();
+    if (updates.subtitle !== undefined) payload.subtitle = updates.subtitle.trim();
+    if (updates.official_tour_badge !== undefined) {
+      payload.official_tour_badge = updates.official_tour_badge.trim();
+    }
+    if (updates.official_tour_title !== undefined) {
+      payload.official_tour_title = updates.official_tour_title.trim();
+    }
+    if (updates.official_tour_subtitle !== undefined) {
+      payload.official_tour_subtitle = updates.official_tour_subtitle.trim();
+    }
+    if (updates.official_tour_features !== undefined) {
+      payload.official_tour_features = updates.official_tour_features;
+    }
+
     const { data, error } = await supabase
       .from('prize_settings')
-      .upsert({
-        id: 'main',
-        badge_text: updates.badge_text?.trim() || DEFAULT_PRIZE_SETTINGS.badge_text,
-        title: updates.title?.trim() || DEFAULT_PRIZE_SETTINGS.title,
-        subtitle: updates.subtitle?.trim() || DEFAULT_PRIZE_SETTINGS.subtitle,
-        updated_at: new Date().toISOString(),
-      })
+      .upsert(payload)
       .select()
       .single();
 
@@ -268,14 +357,19 @@ export async function updatePrizeSettings(
       return { success: false, error: error.message };
     }
 
+    const mergedData: PrizeSettingsRow = {
+      ...DEFAULT_PRIZE_SETTINGS,
+      ...(data as PrizeSettingsRow),
+    };
+
     // Actualizar caché
     const currentCache = getCachedPrizeDetails();
     setCachedPrizeDetails({
       ...currentCache,
-      settings: data as PrizeSettingsRow,
+      settings: mergedData,
     });
 
-    return { success: true, data: data as PrizeSettingsRow };
+    return { success: true, data: mergedData };
   } catch (err) {
     return {
       success: false,

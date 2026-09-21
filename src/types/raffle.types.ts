@@ -101,6 +101,14 @@ export interface SystemSettingsResponse {
   message?: string;
 }
 
+export interface OfficialTourFeature {
+  [key: string]: string | undefined;
+  id?: string;
+  title: string;       // Ej: "Viaje ida y vuelta pago:"
+  description: string; // Ej: "desde tu lugar de residencia hasta Manaure – Cesar para la pareja (2 personas)"
+  icon?: string;
+}
+
 export type PrizeSettingsRow = Database['public']['Tables']['prize_settings']['Row'];
 export type PrizeSettingsUpdate = Database['public']['Tables']['prize_settings']['Update'];
 

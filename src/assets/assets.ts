@@ -265,4 +265,104 @@ export const fotosHeroCarousel: HeroSlideFoto[] = [
   },
 ].filter((f): f is HeroSlideFoto => Boolean(f && f.slug));
 
+export interface CatalogoFotoItem {
+  id: string;
+  slug: string;
+  alt: string;
+  caption: string;
+  categoria: 'gastronomia' | 'cuatrimoto' | 'glamping' | 'hospedaje' | 'parapente' | 'serrania';
+  categoriaLabel: string;
+  thumb: string;
+  card: string;
+  cardJpg: string;
+  full: string;
+  dominantColor: string;
+}
+
+const CATEGORIA_LABELS: Record<string, string> = {
+  gastronomia: 'Gastronomía Local',
+  cuatrimoto: 'Aventura en Cuatrimoto',
+  glamping: 'Glamping & Fogata',
+  hospedaje: 'Hospedaje Campestre',
+  parapente: 'Vuelo en Parapente',
+  serrania: 'Serranía del Perijá',
+};
+
+/** Catálogo exhaustivo y categorizado de las 26 fotografías optimizadas de Manaure */
+export const catalogoFotosManaure: CatalogoFotoItem[] = Object.values(imageManifest).map((entry) => {
+  const vCard = entry.variants.find((v) => v.role === 'tarjeta') || entry.variants[0];
+  const vThumb = entry.variants.find((v) => v.role === 'galeria-thumb') || entry.variants[0];
+  const vFull = entry.variants.find((v) => v.role === 'lightbox') || entry.variants[0];
+  return {
+    id: entry.id,
+    slug: entry.id,
+    alt: entry.alt,
+    caption: entry.caption,
+    categoria: entry.category,
+    categoriaLabel: CATEGORIA_LABELS[entry.category] || 'Ecoturismo',
+    thumb: vThumb?.webp.url || vThumb?.jpg.url || '',
+    card: vCard?.webp.url || vCard?.jpg.url || '',
+    cardJpg: vCard?.jpg.url || '',
+    full: vFull?.webp.url || vFull?.jpg.url || '',
+    dominantColor: entry.dominantColor || '#0f2e1d',
+  };
+});
+
+/**
+ * Resuelve la URL optimizada para tarjeta o previsualización a partir de un slug o URL externa.
+ */
+export function resolveExperienceImage(
+  imageSlug: string | null | undefined,
+  imageUrl?: string | null | undefined
+): string {
+  if (imageUrl && imageUrl.trim()) {
+    return imageUrl.trim();
+  }
+  if (!imageSlug || !imageSlug.trim()) {
+    return catalogoFotosManaure[0]?.cardJpg || '/images/rifa/cuatrimoto/cuatrimoto-aventura-cordillera--4x5-768w.jpg';
+  }
+  const cleanSlug = imageSlug.trim();
+  const canonicalId = imageAliases[cleanSlug] || cleanSlug;
+  const matchCatalogo = catalogoFotosManaure.find(
+    (f) => f.id === canonicalId || f.slug === canonicalId
+  );
+  if (matchCatalogo) {
+    return matchCatalogo.card;
+  }
+  const matchFoto = fotos.find((f) => f.slug === cleanSlug);
+  if (matchFoto) {
+    return matchFoto.card;
+  }
+  return catalogoFotosManaure[0]?.cardJpg || '';
+}
+
+/**
+ * Resuelve la miniatura optimizada para selectores del admin.
+ */
+export function resolveExperienceThumb(
+  imageSlug: string | null | undefined,
+  imageUrl?: string | null | undefined
+): string {
+  if (imageUrl && imageUrl.trim()) {
+    return imageUrl.trim();
+  }
+  if (!imageSlug || !imageSlug.trim()) {
+    return catalogoFotosManaure[0]?.thumb || '';
+  }
+  const cleanSlug = imageSlug.trim();
+  const canonicalId = imageAliases[cleanSlug] || cleanSlug;
+  const matchCatalogo = catalogoFotosManaure.find(
+    (f) => f.id === canonicalId || f.slug === canonicalId
+  );
+  if (matchCatalogo) {
+    return matchCatalogo.thumb;
+  }
+  const matchFoto = fotos.find((f) => f.slug === cleanSlug);
+  if (matchFoto) {
+    return matchFoto.thumb;
+  }
+  return catalogoFotosManaure[0]?.thumb || '';
+}
+
+
 

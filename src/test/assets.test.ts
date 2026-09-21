@@ -44,4 +44,20 @@ describe('Inventario de Assets y Aliados (src/assets/assets.ts)', () => {
   it('logoPrincipal debe estar disponible', () => {
     expect(logoPrincipal).toBeDefined();
   });
+
+  it('catalogoFotosManaure debe contener las 26 fotografías optimizadas de Manaure categorizadas', async () => {
+    const { catalogoFotosManaure, resolveExperienceImage } = await import('@/assets/assets');
+    expect(catalogoFotosManaure.length).toBe(26);
+
+    const gastroFoto = catalogoFotosManaure.find((f) => f.slug === 'gastronomia-casa-arepas');
+    expect(gastroFoto).toBeDefined();
+    expect(gastroFoto?.categoria).toBe('gastronomia');
+    expect(gastroFoto?.categoriaLabel).toBe('Gastronomía Local');
+    expect(gastroFoto?.card).toContain('.webp');
+
+    // Debe resolver correctamente la imagen
+    const resolvedUrl = resolveExperienceImage('gastronomia-casa-arepas');
+    expect(resolvedUrl).toBeTruthy();
+    expect(resolvedUrl).toContain('gastronomia-casa-arepas');
+  });
 });
