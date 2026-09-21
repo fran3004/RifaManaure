@@ -18,7 +18,7 @@
   width: 56px;
   height: 56px;
   border-radius: var(--radius-full, 9999px);
-  background-color: rgba(239, 68, 68, 0.15);
+  background-color: var(--overlay-danger-subtle);
   color: #ef4444;
   margin-bottom: 1.25rem;
 }
@@ -31,11 +31,12 @@
 }
 
 .message {
-  font-size: 0.925rem;
+  font-size: 0.875rem;
+  line-height: 1.45;
   color: #e2e8f0;
   max-width: 480px;
   margin: 0 0 1.5rem 0;
-  line-height: 1.5;
+  line-height: 1.45;
 }
 
 .retryButton {
@@ -45,7 +46,8 @@
   padding: 0.6rem 1.25rem;
   background-color: #ef4444;
   color: #ffffff;
-  font-size: 0.9rem;
+  font-size: 0.875rem;
+  line-height: 1.2;
   font-weight: 600;
   border: none;
   border-radius: var(--radius-md, 10px);

@@ -6,7 +6,6 @@ import { AdminErrorState } from '@/components/admin/common/AdminErrorState';
 import {
   fetchAdminDashboardMetrics,
   fetchAdminOrdersPaginated,
-  fetchAuditLogs,
   getSignedProofUrl,
   type AdminDashboardMetrics,
   type OrderWithDetails,
@@ -29,9 +28,6 @@ import {
   ShieldCheck,
   ArrowUpRight,
   Layers,
-  Send,
-  Trophy,
-  Sparkles,
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AdminOrderReviewModal } from '@/components/admin/orders/AdminOrderReviewModal';
@@ -108,50 +104,23 @@ const DashboardReceiptThumbnail: React.FC<DashboardReceiptCardProps> = ({ order,
       </div>
 
       {loading ? (
-        <div
-          style={{
-            padding: '1rem',
-            textAlign: 'center',
-            backgroundColor: 'var(--bg-main, #0a1410)',
-            borderRadius: 'var(--radius-md, 10px)',
-            color: 'var(--text-muted, #5e7a6f)',
-            fontSize: '0.8rem',
-          }}
-        >
-          <Clock size={16} style={{ display: 'block', margin: '0 auto 0.25rem auto' }} />
+        <div className={styles.receiptSkeletonBox}>
+          <Clock size={16} className={styles.receiptSkeletonIcon} />
           Generando acceso seguro...
         </div>
       ) : !signedUrl ? (
-        <div
-          style={{
-            padding: '1rem',
-            textAlign: 'center',
-            backgroundColor: 'var(--bg-main, #0a1410)',
-            borderRadius: 'var(--radius-md, 10px)',
-            color: '#ef4444',
-            fontSize: '0.8rem',
-          }}
-        >
-          <AlertTriangle size={16} style={{ display: 'block', margin: '0 auto 0.25rem auto' }} />
+        <div className={`${styles.receiptSkeletonBox} ${styles.receiptSkeletonBoxError}`}>
+          <AlertTriangle size={16} className={styles.receiptSkeletonIcon} />
           Comprobante no disponible
         </div>
       ) : isPdf ? (
         <div
-          className={styles.receiptImageThumbWrapper}
+          className={`${styles.receiptImageThumbWrapper} ${styles.receiptPdfThumb}`}
           onClick={() => onReview(order)}
           title="Clic para revisar comprobante PDF"
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            height: '140px',
-          }}
         >
-          <FileText size={32} color="#f59e0b" />
-          <span
-            style={{ fontSize: '0.75rem', color: '#9cb5ab', marginTop: '0.25rem', fontWeight: 600 }}
-          >
+          <FileText size={32} color="var(--brand-accent)" />
+          <span className={styles.receiptPdfLabel}>
             Documento PDF
           </span>
           <div className={styles.receiptOverlayZoom}>
@@ -160,10 +129,9 @@ const DashboardReceiptThumbnail: React.FC<DashboardReceiptCardProps> = ({ order,
         </div>
       ) : (
         <div
-          className={styles.receiptImageThumbWrapper}
+          className={`${styles.receiptImageThumbWrapper} ${styles.receiptThumbFixed}`}
           onClick={() => onReview(order)}
           title="Clic para revisar comprobante"
-          style={{ height: '140px' }}
         >
           <img
             src={signedUrl}
@@ -179,13 +147,7 @@ const DashboardReceiptThumbnail: React.FC<DashboardReceiptCardProps> = ({ order,
       <div className={styles.receiptActions}>
         <button
           type="button"
-          className={styles.btnPrimary}
-          style={{
-            width: '100%',
-            justifyContent: 'center',
-            padding: '0.45rem 0.75rem',
-            fontSize: '0.8rem',
-          }}
+          className={`${styles.btnPrimary} ${styles.receiptFullWidthBtn}`}
           onClick={() => onReview(order)}
         >
           <Eye size={14} />
@@ -215,22 +177,11 @@ export const DashboardView: React.FC = () => {
 
   const [recentOrders, setRecentOrders] = useState<OrderWithDetails[]>([]);
   const [recentReceipts, setRecentReceipts] = useState<OrderWithDetails[]>([]);
-  const [auditLogs, setAuditLogs] = useState<
-    {
-      id: string;
-      action: string;
-      entity_type: string;
-      entity_id: string;
-      performed_by: string | null;
-      details: Record<string, unknown> | null;
-      created_at: string;
-    }[]
-  >([]);
 
   const { selectedRaffleId, selectedRaffle } = useAdminRaffle();
   const navigate = useNavigate();
 
-  const [activeTab, setActiveTab] = useState<'orders' | 'receipts' | 'audit'>('orders');
+  const [activeTab, setActiveTab] = useState<'orders' | 'receipts'>('orders');
   const [selectedOrderForReview, setSelectedOrderForReview] = useState<OrderWithDetails | null>(
     null
   );
@@ -240,11 +191,10 @@ export const DashboardView: React.FC = () => {
 
   const loadData = useCallback(async () => {
     try {
-      const [m, recentOrdersRes, recentReceiptsRes, logs] = await Promise.all([
+      const [m, recentOrdersRes, recentReceiptsRes] = await Promise.all([
         fetchAdminDashboardMetrics(selectedRaffleId),
         fetchAdminOrdersPaginated({ pageSize: 6, raffleId: selectedRaffleId }),
         fetchAdminOrdersPaginated({ pageSize: 6, hasReceipt: true, raffleId: selectedRaffleId }),
-        fetchAuditLogs('ALL', '', selectedRaffleId),
       ]);
 
       setMetrics(m);
@@ -258,7 +208,6 @@ export const DashboardView: React.FC = () => {
       });
 
       setRecentReceipts(sortedReceipts);
-      setAuditLogs(logs.slice(0, 8));
       setError(null);
     } catch (err: unknown) {
       console.error('Error al cargar datos del Dashboard:', err);
@@ -356,6 +305,10 @@ export const DashboardView: React.FC = () => {
     }
   };
 
+  const progressTrackStyle: React.CSSProperties = {
+    ['--dash-progress-width' as string]: `${Math.min(metrics.percentageSold, 100)}%`,
+  };
+
   return (
     <div className={styles.viewContainer}>
       <AdminPageHeader
@@ -410,7 +363,7 @@ export const DashboardView: React.FC = () => {
                   </p>
                 </div>
               </div>
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <div className={styles.dashboardAlertActions}>
                 <button type="button" className={styles.btnPrimary} onClick={handleViewReceipts}>
                   <Eye size={16} />
                   <span>Ver Comprobantes</span>
@@ -427,14 +380,11 @@ export const DashboardView: React.FC = () => {
             <div className={styles.metricCard}>
               <div className={styles.metricHeader}>
                 <span className={styles.metricLabel}>Recaudo Confirmado</span>
-                <div
-                  className={styles.metricIcon}
-                  style={{ color: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.15)' }}
-                >
+                <div className={`${styles.metricIcon} ${styles.metricIconSuccess}`}>
                   <TrendingUp size={20} />
                 </div>
               </div>
-              <div className={styles.metricValue} style={{ color: '#34d399' }}>
+              <div className={`${styles.metricValue} ${styles.metricValueSuccess}`}>
                 {formatCOP(metrics.confirmedMoney)}
               </div>
               <span className={styles.metricHint}>
@@ -446,16 +396,12 @@ export const DashboardView: React.FC = () => {
             <div className={styles.metricCard}>
               <div className={styles.metricHeader}>
                 <span className={styles.metricLabel}>Por Verificar</span>
-                <div
-                  className={styles.metricIcon}
-                  style={{ color: '#fbbf24', backgroundColor: 'rgba(245, 158, 11, 0.15)' }}
-                >
+                <div className={`${styles.metricIcon} ${styles.metricIconWarning}`}>
                   <Clock size={20} />
                 </div>
               </div>
               <div
-                className={styles.metricValue}
-                style={{ color: metrics.pendingVerificationMoney > 0 ? '#fbbf24' : 'inherit' }}
+                className={`${styles.metricValue} ${metrics.pendingVerificationMoney > 0 ? styles.metricValueWarning : ''}`}
               >
                 {formatCOP(metrics.pendingVerificationMoney)}
               </div>
@@ -474,17 +420,15 @@ export const DashboardView: React.FC = () => {
               </div>
               <div className={styles.metricValue}>
                 {metrics.ticketsSold}{' '}
-                <span
-                  style={{ fontSize: '1rem', color: 'var(--text-muted, #5e7a6f)', fontWeight: 500 }}
-                >
+                <span className={styles.metricTicketTotal}>
                   / {metrics.totalTickets}
                 </span>
               </div>
-              <div className={styles.dashboardProgressTrack}>
-                <div
-                  className={styles.dashboardProgressBar}
-                  style={{ width: `${Math.min(metrics.percentageSold, 100)}%` }}
-                />
+              <div
+                className={styles.dashboardProgressTrack}
+                style={progressTrackStyle}
+              >
+                <div className={styles.dashboardProgressBar} />
               </div>
               <span className={styles.metricHint}>
                 {metrics.percentageSold}% vendido • {metrics.ticketsAvailable} disponibles
@@ -496,39 +440,20 @@ export const DashboardView: React.FC = () => {
               <div className={styles.metricHeader}>
                 <span className={styles.metricLabel}>Comprobantes Pendientes</span>
                 <div
-                  className={styles.metricIcon}
-                  style={{
-                    color: metrics.pendingReceiptsCount > 0 ? '#fbbf24' : '#34d399',
-                    backgroundColor:
-                      metrics.pendingReceiptsCount > 0
-                        ? 'rgba(245, 158, 11, 0.15)'
-                        : 'rgba(16, 185, 129, 0.15)',
-                  }}
+                  className={`${styles.metricIcon} ${
+                    metrics.pendingReceiptsCount > 0
+                      ? styles.metricIconWarning
+                      : styles.metricIconSuccess
+                  }`}
                 >
                   <Receipt size={20} />
                 </div>
               </div>
               <div className={styles.metricValue}>{metrics.pendingReceiptsCount}</div>
               <span className={styles.metricHint}>
-                {metrics.pendingReceiptsCount > 0 ? (
-                  <button
-                    type="button"
-                    onClick={handleViewReceipts}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      padding: 0,
-                      color: '#fbbf24',
-                      textDecoration: 'underline',
-                      cursor: 'pointer',
-                      fontSize: 'inherit',
-                    }}
-                  >
-                    Ver comprobantes pendientes
-                  </button>
-                ) : (
-                  'Bandeja de verificación al día'
-                )}
+                {metrics.pendingReceiptsCount > 0
+                  ? `${metrics.pendingReceiptsCount} pendiente${metrics.pendingReceiptsCount === 1 ? '' : 's'} por verificar`
+                  : 'Bandeja de verificación al día'}
               </span>
             </div>
 
@@ -540,59 +465,34 @@ export const DashboardView: React.FC = () => {
                   <Layers size={20} />
                 </div>
               </div>
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'baseline',
-                  gap: '0.75rem',
-                  marginTop: '0.2rem',
-                }}
-              >
+              <div className={styles.metricStatRow}>
                 <div>
-                  <span style={{ fontSize: '1.25rem', fontWeight: 700, color: '#34d399' }}>
+                  <span className={styles.metricStatValueSuccess}>
                     {metrics.ticketsAvailable}
                   </span>
-                  <span
-                    style={{
-                      fontSize: '0.75rem',
-                      color: 'var(--text-muted, #5e7a6f)',
-                      marginLeft: '0.25rem',
-                    }}
-                  >
+                  <span className={styles.metricStatLabel}>
                     disp.
                   </span>
                 </div>
-                <span style={{ color: 'var(--border-subtle, rgba(156, 181, 171, 0.3))' }}>•</span>
+                <span className={styles.metricStatSeparator}>•</span>
                 <div>
-                  <span style={{ fontSize: '1.25rem', fontWeight: 700, color: '#fbbf24' }}>
+                  <span className={styles.metricStatValueWarning}>
                     {metrics.ticketsReserved}
                   </span>
-                  <span
-                    style={{
-                      fontSize: '0.75rem',
-                      color: 'var(--text-muted, #5e7a6f)',
-                      marginLeft: '0.25rem',
-                    }}
-                  >
+                  <span className={styles.metricStatLabel}>
                     res.
                   </span>
                 </div>
                 {Boolean(metrics.ticketsBlocked && metrics.ticketsBlocked > 0) && (
                   <>
-                    <span style={{ color: 'var(--border-subtle, rgba(156, 181, 171, 0.3))' }}>
+                    <span className={styles.metricStatSeparator}>
                       •
                     </span>
                     <div>
-                      <span style={{ fontSize: '1.25rem', fontWeight: 700, color: '#f87171' }}>
+                      <span className={styles.metricStatValueError}>
                         {metrics.ticketsBlocked}
                       </span>
-                      <span
-                        style={{
-                          fontSize: '0.75rem',
-                          color: 'var(--text-muted, #5e7a6f)',
-                          marginLeft: '0.25rem',
-                        }}
-                      >
+                      <span className={styles.metricStatLabel}>
                         bloq.
                       </span>
                     </div>
@@ -612,40 +512,21 @@ export const DashboardView: React.FC = () => {
                   <ShieldCheck size={20} />
                 </div>
               </div>
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'baseline',
-                  gap: '0.75rem',
-                  marginTop: '0.2rem',
-                }}
-              >
+              <div className={styles.metricStatRow}>
                 <div>
-                  <span style={{ fontSize: '1.25rem', fontWeight: 700, color: '#34d399' }}>
+                  <span className={styles.metricStatValueSuccess}>
                     {metrics.paidOrdersCount}
                   </span>
-                  <span
-                    style={{
-                      fontSize: '0.75rem',
-                      color: 'var(--text-muted, #5e7a6f)',
-                      marginLeft: '0.25rem',
-                    }}
-                  >
+                  <span className={styles.metricStatLabel}>
                     aprob.
                   </span>
                 </div>
-                <span style={{ color: 'var(--border-subtle, rgba(156, 181, 171, 0.3))' }}>•</span>
+                <span className={styles.metricStatSeparator}>•</span>
                 <div>
-                  <span style={{ fontSize: '1.25rem', fontWeight: 700, color: '#f87171' }}>
+                  <span className={styles.metricStatValueError}>
                     {metrics.rejectedOrdersCount}
                   </span>
-                  <span
-                    style={{
-                      fontSize: '0.75rem',
-                      color: 'var(--text-muted, #5e7a6f)',
-                      marginLeft: '0.25rem',
-                    }}
-                  >
+                  <span className={styles.metricStatLabel}>
                     rech.
                   </span>
                 </div>
@@ -666,7 +547,7 @@ export const DashboardView: React.FC = () => {
             </div>
           </div>
 
-          {/* Sección Dinámica con Pestañas: Órdenes, Comprobantes, Actividad */}
+          {/* Sección Dinámica con Pestañas: Órdenes y Comprobantes */}
           <div id="dashboard-tabs-section" className={styles.cardSection}>
             <div className={styles.dashboardTabsRow}>
               <button
@@ -688,43 +569,24 @@ export const DashboardView: React.FC = () => {
                 <span>Últimos Comprobantes</span>
                 {metrics.pendingReceiptsCount > 0 && (
                   <span
-                    className={styles.dashboardTabBadge}
-                    style={{ backgroundColor: 'rgba(245, 158, 11, 0.3)', color: '#fbbf24' }}
+                    className={`${styles.dashboardTabBadge} ${styles.tabBadgePending}`}
                   >
                     {metrics.pendingReceiptsCount} por validar
                   </span>
                 )}
-              </button>
-
-              <button
-                type="button"
-                className={`${styles.dashboardTabBtn} ${activeTab === 'audit' ? styles.dashboardTabBtnActive : ''}`}
-                onClick={() => setActiveTab('audit')}
-              >
-                <ShieldCheck size={16} />
-                <span>Actividad Administrativa</span>
-                <span className={styles.dashboardTabBadge}>{auditLogs.length}</span>
               </button>
             </div>
 
             {/* CONTENIDO TAB 1: ÚLTIMAS ÓRDENES */}
             {activeTab === 'orders' && (
               <div>
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    marginBottom: '1rem',
-                  }}
-                >
-                  <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary, #9cb5ab)' }}>
+                <div className={styles.tabPanelHeader}>
+                  <span className={styles.tabPanelSubtitle}>
                     Visualizando las 6 órdenes más recientes registradas en Supabase.
                   </span>
                   <Link
                     to="/admin/ordenes"
-                    className={styles.btnSecondary}
-                    style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem' }}
+                    className={`${styles.btnSecondary} ${styles.btnCompactSecondary}`}
                   >
                     <span>Ver todas las órdenes</span>
                     <ArrowUpRight size={14} />
@@ -748,33 +610,23 @@ export const DashboardView: React.FC = () => {
                           <th>Boletos</th>
                           <th>Total</th>
                           <th>Estado</th>
-                          <th style={{ textAlign: 'right' }}>Acción</th>
+                          <th className={styles.thAlignRight}>Acción</th>
                         </tr>
                       </thead>
                       <tbody>
                         {recentOrders.map((ord) => (
                           <tr key={ord.id}>
-                            <td
-                              style={{
-                                fontFamily: 'var(--font-mono, monospace)',
-                                fontWeight: 700,
-                                color: '#f59e0b',
-                              }}
-                            >
+                            <td className={styles.tdReference}>
                               {ord.reference}
                             </td>
-                            <td style={{ fontSize: '0.8rem', color: 'var(--text-muted, #5e7a6f)' }}>
+                            <td className={styles.tableDate}>
                               {formatActivityDate(ord.created_at)}
                             </td>
                             <td>
-                              <div
-                                style={{ fontWeight: 600, color: 'var(--text-primary, #f3f7f5)' }}
-                              >
+                              <div className={styles.buyerName}>
                                 {ord.buyers?.full_name || 'N/A'}
                               </div>
-                              <div
-                                style={{ fontSize: '0.75rem', color: 'var(--text-muted, #5e7a6f)' }}
-                              >
+                              <div className={styles.tableMeta}>
                                 {ord.buyers?.phone || ord.buyers?.email || ''}
                               </div>
                             </td>
@@ -786,18 +638,13 @@ export const DashboardView: React.FC = () => {
                                   </span>
                                 ))}
                                 {(ord.tickets?.length || 0) > 3 && (
-                                  <span
-                                    style={{
-                                      fontSize: '0.75rem',
-                                      color: 'var(--text-muted, #5e7a6f)',
-                                    }}
-                                  >
+                                  <span className={styles.tableMeta}>
                                     +{(ord.tickets?.length || 0) - 3}
                                   </span>
                                 )}
                               </div>
                             </td>
-                            <td style={{ fontWeight: 700, color: '#f3f7f5' }}>
+                            <td className={styles.dashboardTableTotal}>
                               {formatCOP(ord.total_amount)}
                             </td>
                             <td>
@@ -822,16 +669,15 @@ export const DashboardView: React.FC = () => {
                                 </span>
                               )}
                               {ord.status === 'cancelled' && (
-                                <span className={styles.badgeDanger} style={{ opacity: 0.7 }}>
+                                <span className={`${styles.badgeDanger} ${styles.badgeCancelled}`}>
                                   Cancelada
                                 </span>
                               )}
                             </td>
-                            <td style={{ textAlign: 'right' }}>
+                              <td className={styles.dashboardTableAction}>
                               <button
                                 type="button"
-                                className={styles.btnSecondary}
-                                style={{ padding: '0.3rem 0.65rem', fontSize: '0.775rem' }}
+                                className={`${styles.btnSecondary} ${styles.btnSmallSecondary}`}
                                 onClick={() => handleOpenReview(ord)}
                               >
                                 <Eye size={13} />
@@ -850,21 +696,13 @@ export const DashboardView: React.FC = () => {
             {/* CONTENIDO TAB 2: ÚLTIMOS COMPROBANTES */}
             {activeTab === 'receipts' && (
               <div>
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    marginBottom: '1.25rem',
-                  }}
-                >
-                  <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary, #9cb5ab)' }}>
+                <div className={styles.tabPanelHeaderLg}>
+                  <span className={styles.tabPanelSubtitle}>
                     Comprobantes de pago cargados por los usuarios para revisión manual.
                   </span>
                   <Link
                     to="/admin/comprobantes"
-                    className={styles.btnSecondary}
-                    style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem' }}
+                    className={`${styles.btnSecondary} ${styles.btnCompactSecondary}`}
                   >
                     <span>Bandeja completa de comprobantes</span>
                     <ArrowUpRight size={14} />
@@ -886,160 +724,6 @@ export const DashboardView: React.FC = () => {
                         onReview={handleOpenReview}
                       />
                     ))}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* CONTENIDO TAB 3: ACTIVIDAD ADMINISTRATIVA */}
-            {activeTab === 'audit' && (
-              <div>
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    marginBottom: '1.25rem',
-                  }}
-                >
-                  <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary, #9cb5ab)' }}>
-                    Registro inmutable de auditoría sobre aprobaciones, rechazos y cambios
-                    operativos.
-                  </span>
-                  <Link
-                    to="/admin/auditoria"
-                    className={styles.btnSecondary}
-                    style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem' }}
-                  >
-                    <span>Ver historial de auditoría</span>
-                    <ArrowUpRight size={14} />
-                  </Link>
-                </div>
-
-                {auditLogs.length === 0 ? (
-                  <AdminEmptyState
-                    icon={<ShieldCheck size={32} />}
-                    title="Sin registros de auditoría"
-                    description="Las acciones de los administradores se registrarán de manera inmutable y se mostrarán aquí."
-                  />
-                ) : (
-                  <div className={styles.activityTimeline}>
-                    {auditLogs.map((log) => {
-                      const isWinner = log.action.toLowerCase().includes('winner');
-                      const isRaffle = log.action.toLowerCase().includes('raffle');
-                      const isApprove =
-                        log.action.toLowerCase().includes('approve') ||
-                        log.action.toLowerCase().includes('aprobar');
-                      const isReject =
-                        log.action.toLowerCase().includes('reject') ||
-                        log.action.toLowerCase().includes('rechazar');
-                      const isNotify =
-                        log.action.toLowerCase().includes('notif') ||
-                        log.action.toLowerCase().includes('email') ||
-                        log.action.toLowerCase().includes('whatsapp');
-
-                      let iconClass = styles.activityIconGeneric;
-                      let icon = <Activity size={16} />;
-                      let actionTitle = log.action.replace(/_/g, ' ');
-
-                      if (isWinner) {
-                        iconClass = styles.activityIconApprove;
-                        icon = <Trophy size={16} />;
-                        actionTitle = 'Sorteo Oficial: Ganador Registrado';
-                      } else if (isRaffle) {
-                        iconClass = styles.activityIconApprove;
-                        icon = <Sparkles size={16} />;
-                        actionTitle = log.action.toLowerCase().includes('create')
-                          ? 'Nueva Rifa Creada'
-                          : 'Parámetros de Rifa Editados';
-                      } else if (isApprove) {
-                        iconClass = styles.activityIconApprove;
-                        icon = <CheckCircle2 size={16} />;
-                        actionTitle = 'Pago Aprobado y Boletos Vendidos';
-                      } else if (isReject) {
-                        iconClass = styles.activityIconReject;
-                        icon = <XCircle size={16} />;
-                        actionTitle = 'Pago Rechazado';
-                      } else if (isNotify) {
-                        iconClass = styles.activityIconNotify;
-                        icon = <Send size={16} />;
-                        actionTitle = 'Notificación Despachada';
-                      }
-
-                      return (
-                        <div key={log.id} className={styles.activityItem}>
-                          <div className={`${styles.activityIcon} ${iconClass}`}>{icon}</div>
-                          <div className={styles.activityBody}>
-                            <div className={styles.activityActionTitle}>{actionTitle}</div>
-                            <div className={styles.activityActionDetails}>
-                              {isWinner && log.details ? (
-                                <span>
-                                  {log.details.ticket_number
-                                    ? `Boleto Ganador #${formatTicketNumber(String(log.details.ticket_number))} • `
-                                    : ''}
-                                  {log.details.buyer_name
-                                    ? `Ganador: ${String(log.details.buyer_name)} • `
-                                    : ''}
-                                  {log.details.order_reference
-                                    ? `Orden: ${String(log.details.order_reference)}`
-                                    : ''}
-                                </span>
-                              ) : isRaffle && log.details ? (
-                                <span>
-                                  {Boolean(
-                                    (log.details.new_values as Record<string, unknown>)?.title ||
-                                    log.details.title
-                                  ) && (
-                                    <>
-                                      Rifa:{' '}
-                                      {String(
-                                        (log.details.new_values as Record<string, unknown>)
-                                          ?.title || log.details.title
-                                      )}{' '}
-                                      •{' '}
-                                    </>
-                                  )}
-                                  {Boolean(
-                                    (log.details.new_values as Record<string, unknown>)?.status ||
-                                    log.details.status
-                                  )
-                                    ? `Estado: ${String((log.details.new_values as Record<string, unknown>)?.status || log.details.status)}`
-                                    : 'Parámetros operativos actualizados'}
-                                </span>
-                              ) : log.details ? (
-                                <span>
-                                  {log.details.reference
-                                    ? `Orden: ${String(log.details.reference)} • `
-                                    : ''}
-                                  {log.details.reason
-                                    ? `Motivo: ${String(log.details.reason)} • `
-                                    : ''}
-                                  {log.details.amount
-                                    ? `Total: ${formatCOP(Number(log.details.amount))} • `
-                                    : ''}
-                                  {log.details.tickets_count
-                                    ? `${String(log.details.tickets_count)} boletos`
-                                    : ''}
-                                </span>
-                              ) : (
-                                <span>
-                                  Entidad: {log.entity_type} ({log.entity_id})
-                                </span>
-                              )}
-                            </div>
-                            <div className={styles.activityMeta}>
-                              <span>{formatActivityDate(log.created_at)}</span>
-                              {log.performed_by && (
-                                <>
-                                  <span>•</span>
-                                  <span>Admin: {log.performed_by}</span>
-                                </>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
                   </div>
                 )}
               </div>

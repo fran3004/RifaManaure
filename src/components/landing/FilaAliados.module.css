@@ -4,7 +4,7 @@
   border-top: 1px solid var(--border-subtle);
   border-bottom: 1px solid var(--border-subtle);
   position: relative;
-  overflow: hidden;
+  overflow: clip;
 }
 
 /* --- Barra de Controles: Guía y Botón de Pausa --- */
@@ -21,7 +21,8 @@
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  font-size: 0.85rem;
+  font-size: 0.875rem;
+  line-height: 1.2;
   font-weight: 500;
   color: var(--text-secondary);
   background-color: var(--bg-card);
@@ -44,7 +45,8 @@
   border: 1px solid var(--border-subtle);
   color: var(--brand-primary);
   font-family: var(--font-sans);
-  font-size: 0.85rem;
+  font-size: 0.875rem;
+  line-height: 1.2;
   font-weight: 700;
   cursor: pointer;
   box-shadow: var(--shadow-sm);
@@ -98,8 +100,9 @@
   padding: 0.75rem 1.5rem;
 }
 
+.aliadosTrack.isDragging,
 .isDragging {
-  cursor: grabbing !important;
+  cursor: grabbing;
 }
 
 /* Elemento individual de aliado */
@@ -182,11 +185,12 @@
 /* Nombre del aliado: limpio, centrado y destacado */
 .aliadoName {
   font-family: var(--font-sans);
-  font-size: 0.95rem;
+  font-size: 1rem;
+  line-height: 1.45;
   font-weight: 700;
   color: var(--text-primary);
   margin-top: 0.75rem;
-  line-height: 1.3;
+  line-height: 1.45;
   text-align: center;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -247,7 +251,8 @@
   }
 
   .aliadoName {
-    font-size: 0.825rem;
+    font-size: 0.875rem;
+  line-height: 1.2;
   }
 }
 
@@ -262,7 +267,7 @@
 
   .aliadosTrack,
   .reducedMotionTrack {
-    transform: none !important;
+    transform: none;
     will-change: auto;
     scroll-snap-type: x mandatory;
     cursor: default;

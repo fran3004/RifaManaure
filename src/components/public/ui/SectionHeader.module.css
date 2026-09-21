@@ -23,7 +23,8 @@
 
 .title {
   font-family: var(--font-heading, 'Playfair Display Variable', Georgia, serif);
-  font-size: clamp(1.85rem, 3.5vw, 2.6rem);
+  font-size: 1.875rem;
+  line-height: 1.2;
   font-weight: 800;
   line-height: 1.2;
   color: var(--text-primary, #16261C);
@@ -37,9 +38,10 @@
 
 .subtitle {
   font-family: var(--font-sans, 'Outfit Variable', sans-serif);
-  font-size: clamp(0.95rem, 1.5vw, 1.1rem);
+  font-size: 1rem;
+  line-height: 1.45;
   color: var(--text-secondary, #41564A);
-  line-height: 1.6;
+  line-height: 1.45;
   max-width: 60ch;
   margin: 0;
 }

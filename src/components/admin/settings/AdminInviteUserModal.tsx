@@ -145,7 +145,7 @@ export const AdminInviteUserModal: React.FC<AdminInviteUserModalProps> = ({
               <h4 className={styles.successTitle}>Usuario Pre-autorizado</h4>
               <p className={styles.successMessage}>
                 <strong>{createdUser.email}</strong> quedó registrado con rol{' '}
-                <span style={{ textTransform: 'uppercase', color: '#34d399', fontWeight: 700 }}>
+                <span className={styles.createdUserRole}>
                   {createdUser.role}
                 </span>
                 .{' '}
@@ -156,7 +156,7 @@ export const AdminInviteUserModal: React.FC<AdminInviteUserModalProps> = ({
 
               <div className={styles.accessLinkBox}>
                 <span className={styles.accessLinkLabel}>
-                  <ExternalLink size={12} style={{ display: 'inline', marginRight: '4px' }} />
+                  <ExternalLink size={12} className={styles.accessLinkIcon} />
                   Enlace de Ingreso para el Administrador
                 </span>
                 <div className={styles.linkRow}>
@@ -180,10 +180,7 @@ export const AdminInviteUserModal: React.FC<AdminInviteUserModalProps> = ({
               </div>
             </div>
 
-            <div
-              className={styles.modalFooter}
-              style={{ padding: '0.75rem 0 0 0', border: 'none' }}
-            >
+            <div className={`${styles.modalFooter} ${styles.successModalFooter}`}>
               <button type="button" className={styles.btnSubmit} onClick={handleResetAndClose}>
                 Entendido y Cerrar
               </button>
@@ -194,7 +191,7 @@ export const AdminInviteUserModal: React.FC<AdminInviteUserModalProps> = ({
             <div className={styles.modalBody}>
               {errorMsg && (
                 <div className={styles.errorBanner} role="alert">
-                  <AlertCircle size={18} style={{ flexShrink: 0 }} />
+                  <AlertCircle size={18} className={styles.errorBannerIcon} />
                   <span>{errorMsg}</span>
                 </div>
               )}
@@ -203,7 +200,7 @@ export const AdminInviteUserModal: React.FC<AdminInviteUserModalProps> = ({
               <div className={styles.formGroup}>
                 <label className={styles.label} htmlFor="inviteEmail">
                   <Mail size={14} />
-                  Correo Electrónico Oficial <span style={{ color: '#f87171' }}>*</span>
+                  Correo Electrónico Oficial <span className={styles.requiredAsterisk}>*</span>
                 </label>
                 <input
                   id="inviteEmail"
@@ -239,7 +236,7 @@ export const AdminInviteUserModal: React.FC<AdminInviteUserModalProps> = ({
               <div className={styles.formGroup}>
                 <label className={styles.label}>
                   <Shield size={14} />
-                  Rol y Nivel de Privilegios <span style={{ color: '#f87171' }}>*</span>
+                  Rol y Nivel de Privilegios <span className={styles.requiredAsterisk}>*</span>
                 </label>
                 <div className={styles.roleSelector}>
                   {/* Auditor */}
@@ -251,7 +248,7 @@ export const AdminInviteUserModal: React.FC<AdminInviteUserModalProps> = ({
                   >
                     <Shield
                       size={18}
-                      style={{ color: role === 'auditor' ? '#34d399' : '#9cb5ab' }}
+                      className={`${styles.roleIcon} ${role === 'auditor' ? styles.roleIconActive : ''}`}
                     />
                     <span className={styles.roleName}>Auditor</span>
                     <span className={styles.roleDesc}>Solo lectura para reportes y órdenes</span>
@@ -264,7 +261,10 @@ export const AdminInviteUserModal: React.FC<AdminInviteUserModalProps> = ({
                     tabIndex={0}
                     role="button"
                   >
-                    <Shield size={18} style={{ color: role === 'admin' ? '#34d399' : '#9cb5ab' }} />
+                    <Shield
+                      size={18}
+                      className={`${styles.roleIcon} ${role === 'admin' ? styles.roleIconActive : ''}`}
+                    />
                     <span className={styles.roleName}>Admin</span>
                     <span className={styles.roleDesc}>Gestión de rifas, órdenes y pagos</span>
                   </div>
@@ -281,10 +281,6 @@ export const AdminInviteUserModal: React.FC<AdminInviteUserModalProps> = ({
                     }}
                     tabIndex={isSuperadmin ? 0 : -1}
                     role="button"
-                    style={{
-                      opacity: isSuperadmin ? 1 : 0.45,
-                      cursor: isSuperadmin ? 'pointer' : 'not-allowed',
-                    }}
                     title={
                       !isSuperadmin
                         ? 'Solo un Superadministrador puede otorgar este rol'
@@ -293,7 +289,9 @@ export const AdminInviteUserModal: React.FC<AdminInviteUserModalProps> = ({
                   >
                     <ShieldAlert
                       size={18}
-                      style={{ color: role === 'superadmin' ? '#f59e0b' : '#9cb5ab' }}
+                      className={`${styles.roleIcon} ${
+                        role === 'superadmin' ? styles.roleIconSuperadminActive : ''
+                      }`}
                     />
                     <span className={styles.roleName}>Superadmin</span>
                     <span className={styles.roleDesc}>

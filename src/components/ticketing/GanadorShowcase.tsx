@@ -33,9 +33,9 @@ interface Particle {
 }
 
 const CONFETTI_COLORS = [
-  '#F5A623', // Ámbar de la marca
+  'var(--brand-accent)', // Ámbar de la marca
   '#E09015', // Ámbar profundo
-  '#1B4A2E', // Verde Bosque
+  'var(--brand-primary)', // Verde Bosque
   '#246A40', // Verde Bosque vibrante
   '#B23A09', // Coral
   '#F4EFE4', // Crema cálido
@@ -235,7 +235,7 @@ export const GanadorShowcase: React.FC<GanadorShowcaseProps> = ({ winner }) => {
           <div className={styles.winnerInfoGrid}>
             <div className={styles.infoItem}>
               <span className={styles.infoLabel}>
-                <User size={14} aria-hidden="true" color="var(--brand-primary, #1B4A2E)" /> Ganador Acreditado
+                <User size={14} aria-hidden="true" color="var(--brand-primary, var(--brand-primary))" /> Ganador Acreditado
               </span>
               <span className={styles.infoValue}>{maskBuyerName(winner.buyer?.full_name)}</span>
               <span className={styles.infoSub}>
@@ -257,7 +257,7 @@ export const GanadorShowcase: React.FC<GanadorShowcaseProps> = ({ winner }) => {
 
             <div className={styles.infoItem}>
               <span className={styles.infoLabel}>
-                <Calendar size={14} aria-hidden="true" color="var(--brand-primary, #1B4A2E)" /> Fecha del Sorteo
+                <Calendar size={14} aria-hidden="true" color="var(--brand-primary, var(--brand-primary))" /> Fecha del Sorteo
               </span>
               <span className={styles.infoValue}>{formatDate(winner.draw_date)}</span>
               <span className={styles.infoSub}>
@@ -281,26 +281,6 @@ export const GanadorShowcase: React.FC<GanadorShowcaseProps> = ({ winner }) => {
               </a>
             )}
 
-            {winner.delivery_photos && winner.delivery_photos.length > 0 && (
-              <div className={styles.photoGalleryRow}>
-                <span className={styles.photoGalleryLabel}>Registro Fotográfico de Entrega:</span>
-                <div className={styles.photoThumbnails}>
-                  {winner.delivery_photos.map((photoUrl, pIdx) => (
-                    <a
-                      key={pIdx}
-                      href={photoUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={styles.photoThumb}
-                      title={`Ver foto de entrega #${pIdx + 1}`}
-                      aria-label={`Ver fotografía de entrega #${pIdx + 1}`}
-                    >
-                      <img src={photoUrl} alt={`Foto entrega ${pIdx + 1}`} />
-                    </a>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
 
           {/* Botón para festejar y relanzar confeti */}

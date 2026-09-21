@@ -6,15 +6,15 @@
 }
 
 .activeRaffleCard {
-  background: var(--bg-surface-elevated, #0d231a);
-  border: 1px solid rgba(16, 185, 129, 0.25);
+  background: var(--admin-surface-2, #ffffff);
+  border: 1px solid var(--admin-border-strong, #1b4a2e);
   border-radius: 16px;
   padding: 1.75rem;
   box-shadow:
-    0 12px 32px -8px rgba(0, 0, 0, 0.5),
-    0 0 0 1px rgba(16, 185, 129, 0.1);
+    0 12px 32px -8px rgba(15, 46, 29, 0.16),
+    0 0 0 1px rgba(27, 74, 46, 0.08);
   position: relative;
-  overflow: hidden;
+  overflow: clip;
 }
 
 .activeRaffleCard::before {
@@ -24,7 +24,7 @@
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(90deg, #10b981, #059669, #34d399);
+  background: linear-gradient(90deg, var(--admin-brand), var(--admin-accent), var(--admin-brand));
 }
 
 .cardHeader {
@@ -50,91 +50,78 @@
   flex-wrap: wrap;
 }
 
-.badgeActive {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  background: rgba(16, 185, 129, 0.15);
-  border: 1px solid rgba(16, 185, 129, 0.3);
-  color: #34d399;
-  font-size: 0.75rem;
-  font-weight: 700;
-  padding: 0.25rem 0.65rem;
-  border-radius: 9999px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.badgePaused {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  background: rgba(245, 158, 11, 0.15);
-  border: 1px solid rgba(245, 158, 11, 0.3);
-  color: #fbbf24;
-  font-size: 0.75rem;
-  font-weight: 700;
-  padding: 0.25rem 0.65rem;
-  border-radius: 9999px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.badgeDraft {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  background: rgba(148, 163, 184, 0.15);
-  border: 1px solid rgba(148, 163, 184, 0.3);
-  color: #cbd5e1;
-  font-size: 0.75rem;
-  font-weight: 700;
-  padding: 0.25rem 0.65rem;
-  border-radius: 9999px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
+.badgeActive,
+.badgePaused,
+.badgeDraft,
 .badgeFinished {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  background: rgba(59, 130, 246, 0.15);
-  border: 1px solid rgba(59, 130, 246, 0.3);
-  color: #93c5fd;
-  font-size: 0.75rem;
-  font-weight: 700;
   padding: 0.25rem 0.65rem;
-  border-radius: 9999px;
+  border-radius: var(--radius-full, 9999px);
+  font-size: 0.875rem;
+  line-height: 1.2;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  border-width: 1px;
+  border-style: solid;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 
+.badgeActive {
+  background-color: var(--admin-success-bg, rgba(16, 185, 129, 0.12));
+  color: var(--admin-brand, #1b4a2e);
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+.badgePaused {
+  background-color: var(--admin-warning-bg, rgba(245, 158, 11, 0.12));
+  color: var(--admin-warning, #8a5200);
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
+.badgeDraft {
+  background-color: var(--admin-neutral-bg, rgba(148, 163, 184, 0.12));
+  color: var(--admin-neutral, var(--text-muted, #7e9c90));
+  border-color: rgba(148, 163, 184, 0.25);
+}
+
+.badgeFinished {
+  background-color: var(--admin-info-bg, rgba(59, 130, 246, 0.12));
+  color: var(--admin-info, #245a8d);
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
 .raffleEditionTag {
-  font-size: 0.8rem;
-  color: var(--text-muted, #5e7a6f);
+  font-size: 0.875rem;
+  line-height: 1.2;
+  color: var(--admin-text-2, #41564a);
   font-weight: 500;
 }
 
 .raffleTitle {
-  font-size: 1.45rem;
+  font-size: 1.5rem;
+  line-height: 1.2;
   font-weight: 700;
-  color: var(--text-primary, #ffffff);
+  color: var(--admin-text, #16261c);
   margin: 0;
-  line-height: 1.25;
+  line-height: 1.2;
 }
 
 .raffleDescription {
-  font-size: 0.88rem;
-  color: var(--text-secondary, #9cb5ab);
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: var(--admin-text-2, #41564a);
   margin: 0.35rem 0 0 0;
   line-height: 1.45;
 }
 
 /* Barra de Progreso de Ventas */
 .salesProgressSection {
-  background: rgba(0, 0, 0, 0.25);
-  border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.06));
+  background: var(--admin-surface-3, #edf5f0);
+  border: 1px solid var(--admin-border, #dcd5c4);
   border-radius: 12px;
   padding: 1rem 1.25rem;
   margin-bottom: 1.5rem;
@@ -158,41 +145,48 @@
 }
 
 .progressLabel {
-  font-size: 0.85rem;
+  font-size: 0.875rem;
+  line-height: 1.2;
   font-weight: 600;
-  color: var(--text-primary, #ffffff);
+  color: var(--admin-text, #16261c);
 }
 
 .progressBadge {
-  background: rgba(16, 185, 129, 0.2);
-  color: #34d399;
-  font-size: 0.75rem;
+  background: var(--admin-success-bg, #edf5f0);
+  color: var(--admin-brand, #1b4a2e);
+  font-size: 0.875rem;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
   font-weight: 700;
   padding: 0.15rem 0.5rem;
   border-radius: 6px;
 }
 
 .progressStats {
-  font-size: 0.85rem;
-  color: var(--text-secondary, #9cb5ab);
+  font-size: 0.875rem;
+  line-height: 1.45;
+  font-variant-numeric: tabular-nums;
+  color: var(--admin-text-2, #41564a);
 }
 
 .progressBarContainer {
   width: 100%;
-  height: 8px;
-  background: rgba(255, 255, 255, 0.08);
+  height: 10px;
+  background: #c2d0c6;
+  border: 1px solid var(--admin-border, #dcd5c4);
   border-radius: 9999px;
   overflow: hidden;
 }
 
 .progressBarFill {
   height: 100%;
-  background: linear-gradient(90deg, #10b981, #34d399);
+  width: var(--progress-percentage, 0%);
+  background: var(--admin-brand, #1b4a2e);
   border-radius: 9999px;
+  box-shadow: 0 0 0 1px rgba(27, 74, 46, 0.12);
   transition: width 0.4s ease;
 }
 
-/* Grilla de Métricas */
 .metricsGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -200,20 +194,23 @@
 }
 
 .metricCard {
-  background: var(--bg-surface, #081912);
-  border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.07));
-  border-radius: 12px;
-  padding: 1.15rem;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg, 16px);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-sm);
+  padding: 1.25rem 1.5rem;
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
-  transition:
-    transform 0.2s ease,
-    border-color 0.2s ease;
+  gap: 0.5rem;
+  position: relative;
+  overflow: clip;
+  min-width: 0;
+  transition: border-color var(--transition-fast, 150ms ease), transform var(--transition-fast, 150ms ease);
 }
 
 .metricCard:hover {
-  border-color: rgba(16, 185, 129, 0.3);
+  border-color: rgba(16, 185, 129, 0.35);
   transform: translateY(-2px);
 }
 
@@ -221,12 +218,14 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 0.5rem;
 }
 
 .metricLabel {
-  font-size: 0.78rem;
+  font-size: 0.875rem;
+  line-height: 1.2;
   font-weight: 600;
-  color: var(--text-secondary, #9cb5ab);
+  color: var(--admin-text-2, #41564a);
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
@@ -235,23 +234,26 @@
   width: 32px;
   height: 32px;
   border-radius: 8px;
-  background: rgba(16, 185, 129, 0.1);
-  color: var(--brand-emerald-400, #34d399);
+  background: var(--admin-surface-3, #edf5f0);
+  color: var(--admin-brand, #1b4a2e);
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .metricValue {
-  font-size: 1.35rem;
+  font-size: 1.5rem;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
   font-weight: 700;
-  color: var(--text-primary, #ffffff);
+  color: var(--admin-text, #16261c);
   line-height: 1.2;
 }
 
 .metricHint {
   font-size: 0.75rem;
-  color: var(--text-muted, #5e7a6f);
+  line-height: 1.45;
+  color: var(--admin-text-muted, #5a6b5f);
 }
 
 /* Listado de Otras Rifas */
@@ -269,7 +271,8 @@
 }
 
 .sectionTitle {
-  font-size: 1.1rem;
+  font-size: 1.125rem;
+  line-height: 1.2;
   font-weight: 700;
   color: var(--text-primary, #ffffff);
   margin: 0;
@@ -308,6 +311,7 @@
 
 .otherTitle {
   font-size: 1rem;
+  line-height: 1.2;
   font-weight: 700;
   color: var(--text-primary, #ffffff);
   margin: 0;
@@ -315,7 +319,8 @@
 
 .otherSlug {
   font-size: 0.75rem;
-  color: var(--text-muted, #5e7a6f);
+  line-height: 1.2;
+  color: var(--text-muted, #7e9c90);
 }
 
 .otherStatsRow {
@@ -332,12 +337,15 @@
 }
 
 .otherStatLabel {
-  font-size: 0.72rem;
-  color: var(--text-muted, #5e7a6f);
+  font-size: 0.875rem;
+  line-height: 1.2;
+  color: var(--text-muted, #7e9c90);
 }
 
 .otherStatVal {
-  font-size: 0.9rem;
+  font-size: 1rem;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
   font-weight: 600;
   color: var(--text-primary, #ffffff);
 }
@@ -349,19 +357,20 @@
   justify-content: space-between;
   padding: 0.85rem 1.25rem;
   border-radius: 10px;
-  font-size: 0.88rem;
+  font-size: 0.875rem;
+  line-height: 1.45;
   font-weight: 500;
   animation: fadeIn 0.2s ease;
 }
 
 .feedbackSuccess {
-  background: rgba(16, 185, 129, 0.15);
+  background: var(--overlay-success-subtle);
   border: 1px solid rgba(16, 185, 129, 0.3);
   color: #a7f3d0;
 }
 
 .feedbackError {
-  background: rgba(239, 68, 68, 0.15);
+  background: var(--overlay-danger-subtle);
   border: 1px solid rgba(239, 68, 68, 0.3);
   color: #fca5a5;
 }
@@ -380,3 +389,105 @@
 .feedbackCloseBtn:hover {
   opacity: 1;
 }
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.feedbackContent {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.activeInPanelTag {
+  border: 0;
+  color: var(--admin-accent-dark, #8a5200);
+  background: transparent;
+  font-weight: 600;
+  padding: 0;
+}
+
+.btnSelectInPanel {
+  padding: 0.2rem 0.55rem;
+  font-size: 0.875rem;
+  line-height: 1.2;
+  border-color: var(--admin-accent-dark, #8a5200);
+  color: var(--admin-accent-dark, #8a5200);
+}
+
+.progressIcon {
+  color: var(--admin-brand, #1b4a2e);
+}
+
+.revenueHighlight {
+  color: var(--admin-brand, #1b4a2e);
+}
+
+.metricValueMedium {
+  font-size: 1.125rem;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+
+.metricValueDate {
+  font-size: 1.125rem;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+
+.otherBadgesRow {
+  margin-bottom: 0.35rem;
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.otherActiveBadge {
+  font-size: 0.875rem;
+  line-height: 1.2;
+  color: #fbbf24;
+  font-weight: 600;
+  background: rgba(217, 119, 6, 0.15);
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  border: 1px solid rgba(217, 119, 6, 0.4);
+}
+
+.otherActionsGroup {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.btnManageOther {
+  padding: 0.35rem 0.55rem;
+  font-size: 0.875rem;
+  line-height: 1.2;
+  border-color: #d97706;
+  color: #fbbf24;
+}
+
+.btnEditSmall {
+  padding: 0.35rem 0.55rem;
+  font-size: 0.875rem;
+  line-height: 1.2;
+}
+
+.otherDrawDate {
+  font-size: 0.875rem;
+  line-height: 1.45;
+  font-variant-numeric: tabular-nums;
+  color: #9cb5ab;
+}
+
+.otherSoldValue {
+  color: var(--color-success);
+  font-size: 0.875rem;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+

@@ -134,16 +134,16 @@ export const DigitalReceiptModal: React.FC<DigitalReceiptModalProps> = ({
         {/* Previsualización del Comprobante */}
         <div className={styles.previewContainer}>
           {isGenerating ? (
-            <div style={{ textAlign: 'center', padding: '2rem', color: '#9cb5ab' }}>
-              <div style={{ fontSize: '1rem', fontWeight: 600 }}>
+            <div className={styles.previewLoading}>
+              <div className={styles.previewLoadingTitle}>
                 Generando certificado digital en alta resolución...
               </div>
-              <div style={{ fontSize: '0.8rem', color: '#5e7a6f', marginTop: '0.35rem' }}>
+              <div className={styles.previewLoadingSubtitle}>
                 Verificando validez y sellos oficiales
               </div>
             </div>
           ) : errorMsg ? (
-            <div style={{ textAlign: 'center', padding: '2rem', color: '#f87171' }}>
+            <div className={styles.previewError}>
               <div>{errorMsg}</div>
             </div>
           ) : previewUrl ? (
@@ -157,7 +157,7 @@ export const DigitalReceiptModal: React.FC<DigitalReceiptModalProps> = ({
 
         {/* Mensaje de Seguridad */}
         <div className={styles.securityNotice}>
-          <CheckCircle2 size={18} style={{ flexShrink: 0, color: '#34d399' }} aria-hidden="true" />
+          <CheckCircle2 size={18} className={styles.securityIcon} aria-hidden="true" />
           <div>
             <strong>Documento Oficial Autenticado:</strong> Este comprobante certifica la
             titularidad oficial de los números adquiridos ante la plataforma{' '}
@@ -202,29 +202,13 @@ export const DigitalReceiptModal: React.FC<DigitalReceiptModalProps> = ({
         </div>
 
         {/* Copiar enlace / texto directo */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            marginTop: '-0.5rem',
-          }}
-        >
+        <div className={styles.copyShareWrapper}>
           <button
             type="button"
             onClick={() => void handleCopyShareLink()}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: copiedLink ? '#34d399' : 'var(--text-secondary, #9cb5ab)',
-              fontSize: '0.8rem',
-              cursor: 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.4rem',
-              padding: '0.5rem 0.75rem',
-              minHeight: '44px',
-            }}
+            className={`${styles.btnCopyShare} ${
+              copiedLink ? styles.btnCopyShareCopied : ''
+            }`}
           >
             {copiedLink ? <Check size={14} aria-hidden="true" /> : <Copy size={14} aria-hidden="true" />}
             <span>

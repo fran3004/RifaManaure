@@ -313,7 +313,6 @@ export async function registerWinner(
       p_lottery_draw_number: payload.lotteryDrawNumber.trim(),
       p_draw_date: payload.drawDate || new Date().toISOString(),
       p_official_act_url: payload.officialActUrl || null,
-      p_delivery_photos: payload.deliveryPhotos || [],
       p_notes: payload.notes || null,
     });
 
@@ -399,46 +398,3 @@ export async function uploadWinnerActDocument(
   }
 }
 
-/**
- * Subir fotografía de entrega de premio al bucket 'winner-documents'
- */
-export async function uploadWinnerDeliveryPhoto(
-  file: File,
-  raffleId: string
-): Promise<{ success: boolean; url?: string; error?: string }> {
-  try {
-    const validMimes = ['image/jpeg', 'image/png', 'image/webp'];
-    if (!validMimes.includes(file.type)) {
-      return { success: false, error: 'Solo se admiten fotografías en formato JPG, PNG o WEBP.' };
-    }
-
-    if (file.size > 10 * 1024 * 1024) {
-      return { success: false, error: 'La fotografía no debe superar 10 MB.' };
-    }
-
-    const ext = file.name.split('.').pop() || 'jpg';
-    const timestamp = Date.now();
-    const randomSuffix = Math.random().toString(36).substring(2, 7);
-    const filePath = `entregas/${raffleId}/foto_entrega_${timestamp}_${randomSuffix}.${ext}`;
-
-    const { error: uploadError } = await supabase.storage
-      .from('winner-documents')
-      .upload(filePath, file, {
-        cacheControl: '3600',
-        upsert: true,
-      });
-
-    if (uploadError) {
-      return { success: false, error: uploadError.message };
-    }
-
-    const { data: publicData } = supabase.storage.from('winner-documents').getPublicUrl(filePath);
-
-    return { success: true, url: publicData.publicUrl };
-  } catch (err) {
-    return {
-      success: false,
-      error: err instanceof Error ? err.message : 'Error al subir foto de entrega.',
-    };
-  }
-}

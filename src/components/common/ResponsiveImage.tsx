@@ -129,23 +129,22 @@ export const ResponsiveImage: React.FC<ResponsiveImageProps> = ({
       .join(', ');
   };
 
+  const wrapperStyle: React.CSSProperties = {
+    ...style,
+    ['--img-dominant-color' as string]: entry.dominantColor,
+    ['--img-lqip-bg' as string]: `url(${entry.lqip})`,
+    ['--img-focal-pos' as string]: effectiveFocal,
+  };
+
   return (
     <div
       className={`${styles.pictureWrapper} ${containerClassName}`}
-      style={{
-        ...style,
-        backgroundColor: entry.dominantColor,
-      }}
+      style={wrapperStyle}
     >
       {/* Marcador de Carga LQIP difuminado sin salto de diseño (CLS = 0) */}
       {!disableLqip && (
         <div
           className={`${styles.lqipPlaceholder} ${isLoaded ? styles.lqipHidden : ''} ${priority ? styles.noTransition : ''}`}
-          style={{
-            backgroundImage: `url(${entry.lqip})`,
-            backgroundColor: entry.dominantColor,
-            backgroundPosition: effectiveFocal,
-          }}
           aria-hidden="true"
         />
       )}
@@ -197,10 +196,7 @@ export const ResponsiveImage: React.FC<ResponsiveImageProps> = ({
           fetchPriority={priority ? 'high' : undefined}
           onLoad={handleImageLoad}
           className={`${styles.imgBase} ${isLoaded ? styles.imgLoaded : ''} ${priority ? styles.noTransition : ''} ${imgClassName}`}
-          style={{
-            objectPosition: effectiveFocal,
-            ...imgStyle,
-          }}
+          style={imgStyle}
         />
       </picture>
     </div>

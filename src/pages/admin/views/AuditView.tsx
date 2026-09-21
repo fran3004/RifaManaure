@@ -949,10 +949,10 @@ export const AuditView: React.FC = () => {
           <div className={styles.metricHeader}>
             <span className={styles.metricLabel}>Integridad de Datos</span>
             <div className={styles.metricIcon}>
-              <ShieldCheck size={18} color="#34d399" />
+              <ShieldCheck size={18} color="var(--color-success)" />
             </div>
           </div>
-          <div className={styles.metricValue} style={{ color: '#34d399', fontSize: '1.35rem' }}>
+          <div className={`${styles.metricValue} ${styles.metricValueSuccess}`}>
             Activa y Protegida
           </div>
           <span className={styles.metricHint}>Triggers inmutables de PostgreSQL</span>
@@ -962,7 +962,7 @@ export const AuditView: React.FC = () => {
           <div className={styles.metricHeader}>
             <span className={styles.metricLabel}>Total de Eventos</span>
             <div className={styles.metricIcon}>
-              <History size={18} color="#f59e0b" />
+              <History size={18} color="var(--brand-accent)" />
             </div>
           </div>
           <div className={styles.metricValue}>{totalCount}</div>
@@ -984,16 +984,9 @@ export const AuditView: React.FC = () => {
         </div>
 
         <div className={commonStyles.filterControls}>
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.4rem',
-              color: 'var(--text-secondary, #9cb5ab)',
-            }}
-          >
+          <div className={commonStyles.filterLabel}>
             <Filter size={16} />
-            <span style={{ fontSize: '0.85rem' }}>Filtrar:</span>
+            <span className={commonStyles.filterLabelText}>Filtrar:</span>
           </div>
           <select
             className={commonStyles.filterSelect}
@@ -1056,23 +1049,10 @@ export const AuditView: React.FC = () => {
       ) : viewMode === 'timeline' ? (
         /* =================== MODO LÍNEA DE TIEMPO (TIMELINE) =================== */
         <div className={commonStyles.cardSection}>
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              marginBottom: '1.25rem',
-            }}
-          >
-            <h2 className={commonStyles.sectionTitle} style={{ margin: 0, fontSize: '1.15rem' }}>
+          <div className={styles.viewSectionHeader}>
+            <h2 className={`${commonStyles.sectionTitle} ${styles.sectionTitleCompact}`}>
               Actividades y Transiciones Recientes{' '}
-              <span
-                style={{
-                  fontSize: '0.85rem',
-                  color: 'var(--text-muted, #5e7a6f)',
-                  fontWeight: 500,
-                }}
-              >
+              <span className={styles.eventCountBadge}>
                 ({totalCount} eventos)
               </span>
             </h2>
@@ -1117,10 +1097,10 @@ export const AuditView: React.FC = () => {
                     </div>
 
                     <div className={styles.cardBody}>
-                      <div style={{ fontWeight: 700, color: '#f3f7f5', marginBottom: '0.2rem' }}>
+                      <div className={styles.cardHeadline}>
                         {narrative.headline}
                       </div>
-                      <div style={{ color: 'var(--text-secondary, #9cb5ab)', fontSize: '0.85rem' }}>
+                      <div className={styles.cardDetail}>
                         {narrative.detail}
                       </div>
                     </div>
@@ -1140,14 +1120,7 @@ export const AuditView: React.FC = () => {
                                   href={chip.link}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className={chipClass}
-                                  style={{
-                                    textDecoration: 'none',
-                                    cursor: 'pointer',
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    gap: '0.35rem',
-                                  }}
+                                  className={`${chipClass} ${styles.chipLink}`}
                                   title="Abrir documento en nueva pestaña"
                                 >
                                   <span>{chip.label}</span>
@@ -1163,13 +1136,7 @@ export const AuditView: React.FC = () => {
                             );
                           })}
                         </div>
-                        <span
-                          style={{
-                            fontSize: '0.72rem',
-                            color: '#5e7a6f',
-                            fontFamily: 'var(--font-mono, monospace)',
-                          }}
-                        >
+                        <span className={styles.footerTimestamp}>
                           {time.full}
                         </span>
                       </div>
@@ -1186,15 +1153,8 @@ export const AuditView: React.FC = () => {
               Mostrando <strong>{logs.length}</strong> de <strong>{totalCount}</strong> eventos
             </div>
             <div className={commonStyles.paginationControls}>
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.4rem',
-                  marginRight: '0.5rem',
-                }}
-              >
-                <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary, #9cb5ab)' }}>
+              <div className={commonStyles.pageSizeRow}>
+                <span className={commonStyles.pageSizeLabel}>
                   Por pág.:
                 </span>
                 <select
@@ -1237,23 +1197,10 @@ export const AuditView: React.FC = () => {
       ) : (
         /* =================== MODO TABLA EJECUTIVA =================== */
         <div>
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              marginBottom: '1rem',
-            }}
-          >
-            <h2 className={commonStyles.sectionTitle} style={{ margin: 0, fontSize: '1.15rem' }}>
+          <div className={styles.viewSectionHeader}>
+            <h2 className={`${commonStyles.sectionTitle} ${styles.sectionTitleCompact}`}>
               Actividades y Transiciones Recientes{' '}
-              <span
-                style={{
-                  fontSize: '0.85rem',
-                  color: 'var(--text-muted, #5e7a6f)',
-                  fontWeight: 500,
-                }}
-              >
+              <span className={styles.eventCountBadge}>
                 ({totalCount} eventos)
               </span>
             </h2>
@@ -1264,12 +1211,12 @@ export const AuditView: React.FC = () => {
               <table className={styles.executiveTable}>
                 <thead>
                   <tr>
-                    <th style={{ width: '175px' }}>Fecha y Hora</th>
-                    <th style={{ width: '165px' }}>Evento</th>
-                    <th style={{ width: '135px' }}>Referencia</th>
+                    <th className={styles.thDateTime}>Fecha y Hora</th>
+                    <th className={styles.thEvent}>Evento</th>
+                    <th className={styles.thReference}>Referencia</th>
                     <th>Detalle de la Operación</th>
-                    <th style={{ width: '150px' }}>Impacto / Monto</th>
-                    <th style={{ width: '135px', textAlign: 'right' }}>Responsable</th>
+                    <th className={styles.thImpact}>Impacto / Monto</th>
+                    <th className={styles.thActor}>Responsable</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1303,19 +1250,9 @@ export const AuditView: React.FC = () => {
                         <td>
                           {row.reference ? (
                             <span
-                              className={
+                              className={`${
                                 row.referenceType === 'order' ? styles.chipGold : styles.chipEmerald
-                              }
-                              style={{
-                                fontSize: '0.78rem',
-                                padding: '0.2rem 0.55rem',
-                                display: 'inline-block',
-                                maxWidth: '140px',
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis',
-                                whiteSpace: 'nowrap',
-                                verticalAlign: 'middle',
-                              }}
+                              } ${styles.tableReferenceChip}`}
                               title={row.reference}
                             >
                               {row.reference}
@@ -1349,7 +1286,7 @@ export const AuditView: React.FC = () => {
                         </td>
 
                         {/* 6. Responsable */}
-                        <td style={{ textAlign: 'right' }}>
+                        <td className={styles.tdActor}>
                           {row.actor.type === 'admin' && (
                             <span className={styles.actorBadgeAdmin}>
                               <Shield size={12} />
@@ -1382,15 +1319,8 @@ export const AuditView: React.FC = () => {
                 Mostrando <strong>{logs.length}</strong> de <strong>{totalCount}</strong> eventos
               </div>
               <div className={commonStyles.paginationControls}>
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.4rem',
-                    marginRight: '0.5rem',
-                  }}
-                >
-                  <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary, #9cb5ab)' }}>
+                <div className={commonStyles.pageSizeRow}>
+                  <span className={commonStyles.pageSizeLabel}>
                     Por pág.:
                   </span>
                   <select

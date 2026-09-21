@@ -39,7 +39,6 @@ export interface ImageEntry {
 }
 
 export const imageAliases: Record<string, string> = {
-  "gastronomia-casa-arepas": "gastronomia-local",
   "gastronomia-arepa": "gastronomia-local",
   "gastronomia-plato": "gastronomia-local",
   "fogata-circulo-piedra": "fogata-casa-de-vidrio",

@@ -1,14 +1,14 @@
 .header {
   height: 64px;
-  background-color: var(--bg-surface, #11221c);
-  border-bottom: 1px solid var(--border-subtle, rgba(156, 181, 171, 0.15));
+  background-color: #164328;
+  border-bottom: 1px solid #2e7049;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 1.5rem;
   position: sticky;
   top: 0;
-  z-index: 30;
+  z-index: var(--z-sticky);
   backdrop-filter: blur(10px);
 }
 
@@ -21,18 +21,20 @@
 .menuToggleBtn {
   display: none;
   background: none;
-  border: 1px solid var(--border-subtle, rgba(156, 181, 171, 0.2));
-  color: var(--text-primary, #f3f7f5);
+  border: 1px solid var(--admin-border-strong, #33604c);
+  color: var(--admin-text, #f3f7f5);
   cursor: pointer;
-  padding: 0.45rem;
-  border-radius: var(--radius-md, 10px);
+  padding: 0.5rem;
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: var(--admin-r-field, 10px);
   align-items: center;
   justify-content: center;
-  transition: background-color var(--transition-fast, 150ms ease);
+  transition: background-color var(--admin-motion-fast, 150ms ease-out);
 }
 
 .menuToggleBtn:hover {
-  background-color: var(--bg-surface-elevated, #1a332a);
+  background-color: #246a40;
 }
 
 .rightSection {
@@ -46,19 +48,21 @@
   align-items: center;
   gap: 0.4rem;
   padding: 0.45rem 0.85rem;
-  background-color: var(--bg-surface-elevated, #1a332a);
-  color: var(--text-secondary, #9cb5ab);
-  border: 1px solid var(--border-subtle, rgba(156, 181, 171, 0.15));
-  border-radius: var(--radius-md, 10px);
-  font-size: 0.825rem;
+  background-color: #246a40;
+  color: #eef7f0;
+  border: 1px solid #4c9667;
+  border-radius: var(--admin-r-field, 10px);
+  font-size: 0.875rem;
+  line-height: 1.2;
   font-weight: 500;
   text-decoration: none;
-  transition: all var(--transition-fast, 150ms ease);
+  transition: all var(--admin-motion-fast, 150ms ease-out);
 }
 
 .storeLink:hover {
-  color: var(--color-brand-accent, #f59e0b);
-  border-color: rgba(245, 158, 11, 0.3);
+  color: #ffffff;
+  background-color: #2e7d4f;
+  border-color: #8ed1a5;
 }
 
 .userBadge {
@@ -66,25 +70,28 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.35rem 0.75rem;
-  background-color: rgba(0, 0, 0, 0.2);
-  border: 1px solid var(--border-subtle, rgba(156, 181, 171, 0.15));
-  border-radius: var(--radius-full, 9999px);
+  background-color: #123820;
+  border: 1px solid #3f8057;
+  border-radius: var(--admin-r-control, 9999px);
 }
 
 .userEmail {
-  font-size: 0.825rem;
-  color: var(--text-primary, #f3f7f5);
-  font-weight: 500;
+  font-size: 0.875rem;
+  line-height: 1.2;
+  color: #f4fbf5;
+  font-weight: 600;
 }
 
 .roleTag {
-  font-size: 0.675rem;
+  font-size: 0.75rem;
+  line-height: 1.2;
   font-weight: 700;
   text-transform: uppercase;
-  color: var(--color-brand-accent, #f59e0b);
-  background-color: var(--color-brand-accent-soft, rgba(245, 158, 11, 0.15));
-  padding: 0.1rem 0.4rem;
-  border-radius: var(--radius-full, 9999px);
+  color: #0f2e1d;
+  background-color: #f5a623;
+  border: 1px solid #ffd27a;
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--admin-r-control, 9999px);
 }
 
 .headerLogoutBtn {
@@ -92,18 +99,20 @@
   align-items: center;
   gap: 0.4rem;
   padding: 0.45rem 0.85rem;
-  background-color: rgba(239, 68, 68, 0.1);
-  color: #f87171;
-  border: 1px solid rgba(239, 68, 68, 0.25);
-  border-radius: var(--radius-md, 10px);
-  font-size: 0.825rem;
+  background-color: rgba(180, 35, 24, 0.2);
+  color: #ffd6d1;
+  border: 1px solid rgba(255, 151, 139, 0.7);
+  border-radius: var(--admin-r-field, 10px);
+  font-size: 0.875rem;
+  line-height: 1.2;
   font-weight: 600;
   cursor: pointer;
-  transition: all var(--transition-fast, 150ms ease);
+  transition: all var(--admin-motion-fast, 150ms ease-out);
 }
 
 .headerLogoutBtn:hover {
-  background-color: #ef4444;
+  background-color: #b42318;
+  border-color: #ffb0a6;
   color: #ffffff;
 }
 
@@ -125,31 +134,33 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.35rem 0.75rem;
-  background-color: rgba(10, 20, 16, 0.6);
-  border: 1px solid rgba(16, 185, 129, 0.25);
+  background-color: #246a40;
+  border: 1px solid #5b9d70;
   border-radius: var(--radius-md, 10px);
   transition: border-color var(--transition-fast, 150ms ease);
 }
 
 .raffleSelectorContainer:hover,
 .raffleSelectorContainer:focus-within {
-  border-color: rgba(16, 185, 129, 0.5);
+  border-color: #f5a623;
+  box-shadow: 0 0 0 2px rgba(245, 166, 35, 0.18);
 }
 
 .raffleSelectorLabel {
   display: flex;
   align-items: center;
   gap: 0.35rem;
-  font-size: 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1.2;
   font-weight: 600;
   text-transform: uppercase;
-  color: #34d399;
+  color: #f5c45f;
   letter-spacing: 0.04em;
   white-space: nowrap;
 }
 
 .raffleIcon {
-  color: #34d399;
+  color: #f5a623;
   flex-shrink: 0;
 }
 
@@ -157,31 +168,62 @@
   display: flex;
   align-items: center;
   gap: 0.4rem;
+  position: relative;
 }
 
 .raffleSelect {
-  background: transparent;
-  color: var(--text-primary, #f3f7f5);
-  font-size: 0.825rem;
+  appearance: none;
+  -webkit-appearance: none;
+  background: #246a40 !important;
+  color: #ffffff !important;
+  font-size: 0.875rem;
+  line-height: 1.2;
   font-weight: 600;
   border: none;
   outline: none;
   cursor: pointer;
   max-width: 260px;
   text-overflow: ellipsis;
-  padding: 0.15rem 0.25rem;
+  padding: 0.35rem 1.5rem 0.35rem 0.45rem;
+  border-radius: 6px;
+}
+
+.raffleSelect:hover,
+.raffleSelect:focus {
+  background: #2e7d4f !important;
+  color: #ffffff !important;
+}
+
+.selectWrapper::after {
+  content: '';
+  position: absolute;
+  right: 0.45rem;
+  top: 50%;
+  width: 0.45rem;
+  height: 0.45rem;
+  border-right: 2px solid #d7f0dd;
+  border-bottom: 2px solid #d7f0dd;
+  transform: translateY(-65%) rotate(45deg);
+  pointer-events: none;
+}
+
+.raffleSelect:focus-visible {
+  outline: 2px solid var(--focus-ring-on-dark, var(--brand-accent));
+  outline-offset: 2px;
+  border-radius: var(--radius-sm, 6px);
 }
 
 .raffleSelect option {
-  background-color: #11221c;
-  color: #f3f7f5;
+  background-color: #1b4a2e;
+  color: #ffffff;
   padding: 0.5rem;
 }
 
 .raffleLoadingBadge,
 .raffleEmptyBadge {
   font-size: 0.75rem;
-  color: var(--text-muted, #5e7a6f);
+  line-height: 1.2;
+  color: #c4dfcb;
   font-style: italic;
 }
 
@@ -194,21 +236,21 @@
 }
 
 .statusDotActive {
-  background-color: #10b981;
-  box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
+  background-color: var(--admin-success, var(--color-success));
+  box-shadow: 0 0 8px rgba(52, 211, 153, 0.6);
 }
 
 .statusDotPaused {
-  background-color: #f59e0b;
-  box-shadow: 0 0 8px rgba(245, 158, 11, 0.6);
+  background-color: var(--admin-warning, var(--brand-accent));
+  box-shadow: 0 0 8px rgba(245, 166, 35, 0.6);
 }
 
 .statusDotFinished {
-  background-color: #94a3b8;
+  background-color: var(--admin-neutral, #cbd5e1);
 }
 
 .statusDotDefault {
-  background-color: #8b5cf6;
+  background-color: var(--admin-info, #93c5fd);
 }
 
 @media (max-width: 768px) {

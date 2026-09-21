@@ -1,71 +1,97 @@
 /**
- * Tokens de diseño y variables CSS para la plataforma Manaure Vive.
- * Paleta inspirada en la biodiversidad de Manaure (Cesar):
- * Bosque nublado, montañas de Perijá, sol de montaña y detalles dorados.
+ * Tokens de diseño y variables CSS neutrales para la plataforma Manaure Vive.
+ * Define escalas compartidas (espaciado, radios, sombras, transiciones, tipografías y capas)
+ * y la paleta primitiva cruda de marca (sin asignación de rol).
+ *
+ * Los tokens de rol (--bg-page, --text-primary, --border-subtle, etc.) viven
+ * exclusivamente en theme-public.css y theme-admin.css.
  */
 
 :root {
-  /* Colores Principales de Marca */
-  --color-brand-primary: #0f382c; /* Verde bosque profundo */
-  --color-brand-primary-light: #185241; /* Verde selva */
-  --color-brand-accent: #f59e0b; /* Ámbar / Dorado premio */
-  --color-brand-accent-hover: #d97706; /* Ámbar intenso */
-  --color-brand-accent-soft: rgba(245, 158, 11, 0.15);
+  /* --- Paleta Primitiva de Marca (Valores crudos sin rol) --- */
+  --color-forest: #1B4A2E;
+  --color-forest-hover: #246A40;
+  --color-forest-deep: #0F2E1D;
+  --color-amber: #F5A623;
+  --color-amber-hover: #E09015;
+  --color-amber-dark: #8A5200;
+  --color-amber-soft: #FDF1D8;
+  --color-success: #10B981;
+  --color-coral: #B23A09;
+  --color-coral-soft: #FBE9E1;
+  --color-danger: #B42318;
+  --color-muted: #5F6673;
+  --color-cream-page: #F4EFE4;
+  --color-cream-surface: #FBF8F1;
+  --color-white: #FFFFFF;
+  --color-sand-border: #DCD5C4;
+  --color-ink-primary: #16261C;
+  --color-ink-secondary: #41564A;
+  --color-ink-muted: #5A6B5F;
 
-  /* Fondos y Superficies */
-  --bg-main: #0a1410; /* Fondo oscuro inmersivo */
-  --bg-surface: #11221c; /* Tarjetas y modales */
-  --bg-surface-elevated: #1a332a; /* Elementos destacados */
-  --bg-surface-glass: rgba(17, 34, 28, 0.85);
+  /* --- Tipografías --- */
+  --font-heading: 'Playfair Display Variable', Georgia, 'Times New Roman', serif;
+  --font-sans: 'Outfit Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, 'SF Mono', Consolas, monospace;
 
-  /* Textos y Jerarquía */
-  --text-primary: #f3f7f5; /* Blanco suave */
-  --text-secondary: #9cb5ab; /* Verde grisáceo legible */
-  --text-muted: #5e7a6f; /* Texto secundario atenuado */
-  --text-inverse: #08120e; /* Texto sobre botones amarillos */
+  /* --- Escala de Espaciado (4px) --- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-24: 96px;
 
-  /* Estados de Boletos */
-  --ticket-available-bg: #162f25;
-  --ticket-available-border: #285444;
-  --ticket-available-text: #e2f0ea;
+  /* --- Radios de Borde --- */
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+  --radius-full: 999px;
 
-  --ticket-selected-bg: #f59e0b;
-  --ticket-selected-border: #fbbf24;
-  --ticket-selected-text: #08120e;
+  /* --- Sombras Cálidas (Base rgba(15, 46, 29, α)) --- */
+  --shadow-sm: 0 2px 6px rgba(15, 46, 29, 0.08);
+  --shadow-md: 0 6px 16px rgba(15, 46, 29, 0.12);
+  --shadow-lg: 0 12px 32px rgba(15, 46, 29, 0.16);
+  --shadow-glow-amber: 0 0 24px rgba(245, 166, 35, 0.35);
 
-  --ticket-reserved-bg: #451a03;
-  --ticket-reserved-border: #b45309;
-  --ticket-reserved-text: #fde68a;
+  /* --- Superficies y overlays compartidos --- */
+  --overlay-neutral-subtle: rgba(156, 181, 171, 0.15);
+  --overlay-neutral: rgba(156, 181, 171, 0.2);
+  --overlay-success-subtle: rgba(16, 185, 129, 0.15);
+  --overlay-warning-subtle: rgba(245, 158, 11, 0.15);
+  --overlay-danger-subtle: rgba(239, 68, 68, 0.15);
 
-  --ticket-sold-bg: #1f2937;
-  --ticket-sold-border: #374151;
-  --ticket-sold-text: #6b7280;
+  /* --- Transiciones y Curvas de Aceleración --- */
+  --transition-easing: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --transition-fast: 150ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  --transition-base: 250ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  --transition-normal: var(--transition-base);
+  --transition-slow: 400ms cubic-bezier(0.2, 0.7, 0.2, 1);
 
-  /* Bordes y Líneas */
-  --border-subtle: rgba(156, 181, 171, 0.15);
-  --border-focus: #f59e0b;
+  /* --- Escala Canónica de Capas (z-index) --- */
+  --z-base: 0;
+  --z-raised: 10;
+  --z-sticky: 100;
+  --z-dropdown: 500;
+  --z-whatsapp: 900;
+  --z-modal-backdrop: 1000;
+  --z-modal-card: 1010;
+  --z-toast: 2000;
 
-  /* Sombras y Elevaciones */
-  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.25);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.35);
-  --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.5);
-  --shadow-glow: 0 0 20px rgba(245, 158, 11, 0.25);
+  /* Alias de compatibilidad semántica */
+  --z-modal: var(--z-modal-backdrop);
+  --z-navbar: var(--z-sticky);
+  --z-lightbox: var(--z-modal-backdrop);
+  --z-cart: var(--z-sticky);
 
-  /* Tipografías */
-  --font-sans:
-    'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-heading: 'Outfit', var(--font-sans);
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  /* --- Alturas --- */
+  --navbar-h: 72px;
+  --cart-h: 0px;
 
-  /* Radios de borde */
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 16px;
-  --radius-xl: 24px;
-  --radius-full: 9999px;
-
-  /* Transiciones */
-  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-normal: 250ms cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-slow: 400ms cubic-bezier(0.4, 0, 0.2, 1);
+  /* --- Foco Base --- */
+  --border-focus: var(--color-forest, #1B4A2E);
 }

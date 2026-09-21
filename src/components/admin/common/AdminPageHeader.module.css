@@ -21,7 +21,8 @@
 
 .title {
   font-family: var(--font-heading, sans-serif);
-  font-size: 1.75rem;
+  font-size: 1.875rem;
+  line-height: 1.2;
   font-weight: 700;
   color: var(--text-primary, #f3f7f5);
   margin: 0;
@@ -32,22 +33,25 @@
   display: inline-flex;
   align-items: center;
   padding: 0.2rem 0.6rem;
-  background-color: var(--color-brand-accent-soft, rgba(245, 158, 11, 0.15));
-  color: var(--color-brand-accent, #f59e0b);
+  background-color: var(--color-brand-accent-soft, var(--overlay-warning-subtle));
+  color: var(--color-brand-accent, var(--brand-accent));
   border: 1px solid rgba(245, 158, 11, 0.3);
   border-radius: var(--radius-full, 9999px);
   font-size: 0.75rem;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 
 .description {
-  font-size: 0.95rem;
+  font-size: 1rem;
+  line-height: 1.45;
   color: var(--text-secondary, #9cb5ab);
   margin: 0;
   max-width: 650px;
-  line-height: 1.5;
+  line-height: 1.45;
 }
 
 .actionsArea {
@@ -66,7 +70,8 @@
   }
 
   .title {
-    font-size: 1.4rem;
+    font-size: 1.5rem;
+    line-height: 1.2;
   }
 
   .actionsArea {

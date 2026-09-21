@@ -131,7 +131,8 @@ const EditRaffleForm: React.FC<{
             <div>
               <h3 className={styles.headerTitle}>Editar Parámetros de la Rifa</h3>
               <span className={styles.headerSubtitle}>
-                Slug: <code>{raffle.slug}</code> • Emisión: {raffle.total_tickets} boletos
+                <span className={styles.headerMetaLabel}>Identificador</span> {raffle.slug} •
+                Emisión: {raffle.total_tickets} boletos
               </span>
             </div>
           </div>
@@ -152,7 +153,7 @@ const EditRaffleForm: React.FC<{
             {/* Banner de Error Explicativo y Amigable */}
             {errorMessage && (
               <div className={styles.errorBanner}>
-                <AlertTriangle size={20} style={{ flexShrink: 0, marginTop: 2 }} />
+                <AlertTriangle size={20} className={styles.errorBannerIcon} />
                 <div className={styles.errorBannerContent}>
                   <strong className={styles.errorBannerTitle}>Atención con la Operación</strong>
                   <span>{errorMessage}</span>
@@ -311,7 +312,7 @@ const EditRaffleForm: React.FC<{
 
               {status === 'active' && (
                 <div className={`${styles.statusNotice} ${styles.statusNoticeActive}`}>
-                  <Info size={16} style={{ flexShrink: 0, marginTop: 2 }} />
+                  <Info size={16} className={styles.statusNoticeIcon} />
                   <span>
                     <strong>Sorteo Activo:</strong> La rifa está visible y los usuarios pueden
                     seleccionar boletos y pagar en tiempo real. Al activar esta rifa, cualquier otra
@@ -322,7 +323,7 @@ const EditRaffleForm: React.FC<{
 
               {status === 'paused' && (
                 <div className={`${styles.statusNotice} ${styles.statusNoticePaused}`}>
-                  <Info size={16} style={{ flexShrink: 0, marginTop: 2 }} />
+                  <Info size={16} className={styles.statusNoticeIcon} />
                   <span>
                     <strong>Sorteo Pausado:</strong> La página pública mostrará un banner
                     informativo de pausa y bloqueará la selección de boletos y el botón de checkout.
@@ -332,7 +333,7 @@ const EditRaffleForm: React.FC<{
 
               {(status === 'closed' || status === 'finished') && (
                 <div className={`${styles.statusNotice} ${styles.statusNoticeClosed}`}>
-                  <Info size={16} style={{ flexShrink: 0, marginTop: 2 }} />
+                  <Info size={16} className={styles.statusNoticeIcon} />
                   <span>
                     <strong>Sorteo Concluido:</strong> No se permitirán nuevas reservas ni compras.
                     Los boletos quedan preservados en el histórico.

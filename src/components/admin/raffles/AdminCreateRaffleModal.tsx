@@ -166,7 +166,7 @@ const CreateRaffleForm: React.FC<{
           <div className={styles.modalBody}>
             {errorMessage && (
               <div className={styles.errorBanner}>
-                <AlertTriangle size={20} style={{ flexShrink: 0, marginTop: 2 }} />
+                <AlertTriangle size={20} className={styles.errorBannerIcon} />
                 <div className={styles.errorBannerContent}>
                   <strong className={styles.errorBannerTitle}>Atención con la Operación</strong>
                   <span>{errorMessage}</span>
@@ -371,7 +371,7 @@ const CreateRaffleForm: React.FC<{
 
             {status === 'active' && (
               <div className={`${styles.statusNotice} ${styles.statusNoticeActive}`}>
-                <Info size={16} style={{ flexShrink: 0, marginTop: 2 }} />
+                <Info size={16} className={styles.statusNoticeIcon} />
                 <span>
                   <strong>Atención:</strong> Al crear esta rifa con estado Activa, cualquier otra
                   rifa que esté actualmente activa pasará automáticamente a estado Pausada.

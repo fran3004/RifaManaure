@@ -330,28 +330,15 @@ export const TicketsView: React.FC = () => {
 
       {/* Alerta de Éxito Global */}
       {actionSuccess && (
-        <div
-          style={{
-            padding: '0.85rem 1.25rem',
-            backgroundColor: 'rgba(16, 185, 129, 0.15)',
-            border: '1px solid #10b981',
-            borderRadius: 'var(--radius-md, 10px)',
-            color: '#34d399',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            fontSize: '0.875rem',
-            fontWeight: 600,
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <div className={styles.successAlert}>
+          <div className={styles.successAlertContent}>
             <CheckCircle2 size={18} />
             <span>{actionSuccess}</span>
           </div>
           <button
             type="button"
             onClick={() => setActionSuccess(null)}
-            style={{ background: 'none', border: 'none', color: '#34d399', cursor: 'pointer' }}
+            className={styles.iconButtonSuccess}
           >
             <X size={16} />
           </button>
@@ -374,14 +361,11 @@ export const TicketsView: React.FC = () => {
         <div className={styles.metricCard}>
           <div className={styles.metricHeader}>
             <span className={styles.metricLabel}>Disponibles</span>
-            <div
-              className={styles.metricIcon}
-              style={{ color: '#34d399', backgroundColor: 'rgba(16, 185, 129, 0.15)' }}
-            >
+            <div className={`${styles.metricIcon} ${styles.metricIconAvailable}`}>
               <Ticket size={20} />
             </div>
           </div>
-          <div className={styles.metricValue} style={{ color: '#34d399' }}>
+          <div className={`${styles.metricValue} ${styles.metricValueAvailable}`}>
             {ticketCounts.availableCount}
           </div>
           <span className={styles.metricHint}>Libres para compra pública</span>
@@ -390,14 +374,11 @@ export const TicketsView: React.FC = () => {
         <div className={styles.metricCard}>
           <div className={styles.metricHeader}>
             <span className={styles.metricLabel}>En Reserva Temporal</span>
-            <div
-              className={styles.metricIcon}
-              style={{ color: '#fbbf24', backgroundColor: 'rgba(245, 158, 11, 0.15)' }}
-            >
+            <div className={`${styles.metricIcon} ${styles.metricIconReserved}`}>
               <Clock size={20} />
             </div>
           </div>
-          <div className={styles.metricValue} style={{ color: '#fbbf24' }}>
+          <div className={`${styles.metricValue} ${styles.metricValueReserved}`}>
             {ticketCounts.reservedCount}
           </div>
           <span className={styles.metricHint}>En checkout o validación</span>
@@ -406,14 +387,11 @@ export const TicketsView: React.FC = () => {
         <div className={styles.metricCard}>
           <div className={styles.metricHeader}>
             <span className={styles.metricLabel}>Vendidos / Pagados</span>
-            <div
-              className={styles.metricIcon}
-              style={{ color: '#60a5fa', backgroundColor: 'rgba(59, 130, 246, 0.15)' }}
-            >
+            <div className={`${styles.metricIcon} ${styles.metricIconSold}`}>
               <CheckCircle2 size={20} />
             </div>
           </div>
-          <div className={styles.metricValue} style={{ color: '#60a5fa' }}>
+          <div className={`${styles.metricValue} ${styles.metricValueSold}`}>
             {ticketCounts.soldCount}
           </div>
           <span className={styles.metricHint}>Confirmados por administración</span>
@@ -422,14 +400,11 @@ export const TicketsView: React.FC = () => {
         <div className={styles.metricCard}>
           <div className={styles.metricHeader}>
             <span className={styles.metricLabel}>Bloqueados</span>
-            <div
-              className={styles.metricIcon}
-              style={{ color: '#cbd5e1', backgroundColor: 'rgba(148, 163, 184, 0.15)' }}
-            >
+            <div className={`${styles.metricIcon} ${styles.metricIconBlocked}`}>
               <Lock size={20} />
             </div>
           </div>
-          <div className={styles.metricValue} style={{ color: '#cbd5e1' }}>
+          <div className={`${styles.metricValue} ${styles.metricValueBlocked}`}>
             {ticketCounts.blockedCount}
           </div>
           <span className={styles.metricHint}>Retirados de venta</span>
@@ -453,16 +428,9 @@ export const TicketsView: React.FC = () => {
         </div>
 
         <div className={styles.filterControls}>
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.4rem',
-              color: 'var(--text-secondary, #9cb5ab)',
-            }}
-          >
+          <div className={styles.filterLabel}>
             <Filter size={16} />
-            <span style={{ fontSize: '0.85rem' }}>Estado:</span>
+            <span className={styles.filterLabelText}>Estado:</span>
           </div>
           <select
             className={styles.filterSelect}
@@ -505,23 +473,14 @@ export const TicketsView: React.FC = () => {
 
       {/* SECCIÓN PRINCIPAL: MATRIZ O TABLA */}
       <div className={styles.cardSection}>
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            marginBottom: '1rem',
-          }}
-        >
-          <h2 className={styles.sectionTitle} style={{ margin: 0 }}>
+        <div className={styles.sectionHeader}>
+          <h2 className={`${styles.sectionTitle} ${styles.sectionTitleNoMargin}`}>
             {viewMode === 'grid' ? 'Matriz General de Boletos' : 'Inventario Detallado de Boletos'}{' '}
-            <span
-              style={{ fontSize: '0.9rem', color: 'var(--text-muted, #5e7a6f)', fontWeight: 500 }}
-            >
+            <span className={styles.sectionCount}>
               ({totalFilteredCount} boletos encontrados)
             </span>
           </h2>
-          <span style={{ fontSize: '0.8rem', color: 'var(--text-muted, #5e7a6f)' }}>
+          <span className={styles.sectionHint}>
             Haz clic sobre cualquier boleto para consultar detalles, comprador, orden o bloquear.
           </span>
         </div>
@@ -576,7 +535,7 @@ export const TicketsView: React.FC = () => {
             </div>
 
             {/* Paginación para Vista de Matriz */}
-            <div className={styles.paginationBar} style={{ marginTop: '1.5rem' }}>
+            <div className={`${styles.paginationBar} ${styles.paginationBarMatrix}`}>
               <div className={styles.paginationInfo}>
                 Mostrando <strong>{tickets.length}</strong> de <strong>{totalFilteredCount}</strong>{' '}
                 boletos
@@ -632,20 +591,13 @@ export const TicketsView: React.FC = () => {
                     <th>Comprador</th>
                     <th>Contacto</th>
                     <th>Fecha Reserva</th>
-                    <th style={{ textAlign: 'right' }}>Acciones</th>
+                    <th className={styles.tableHeaderActions}>Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
                   {tickets.map((t) => (
                     <tr key={t.id || t.number}>
-                      <td
-                        style={{
-                          fontFamily: 'var(--font-mono, monospace)',
-                          fontWeight: 700,
-                          fontSize: '1.05rem',
-                          color: '#f59e0b',
-                        }}
-                      >
+                      <td className={styles.ticketNumberCell}>
                         {formatTicketNumber(t.number)}
                       </td>
                       <td>
@@ -673,24 +625,15 @@ export const TicketsView: React.FC = () => {
                       <td>
                         {t.orders ? (
                           <div>
-                            <span
-                              style={{
-                                fontFamily: 'var(--font-mono, monospace)',
-                                fontWeight: 700,
-                                color: '#f59e0b',
-                                fontSize: '0.85rem',
-                              }}
-                            >
+                            <span className={styles.orderReference}>
                               {t.orders.reference}
                             </span>
-                            <div
-                              style={{ fontSize: '0.75rem', color: 'var(--text-muted, #5e7a6f)' }}
-                            >
+                            <div className={styles.tableMeta}>
                               Total: {formatCOP(t.orders.total_amount)} ({t.orders.status})
                             </div>
                           </div>
                         ) : (
-                          <span style={{ color: 'var(--text-muted, #5e7a6f)', fontSize: '0.8rem' }}>
+                          <span className={styles.tableMuted}>
                             Sin orden
                           </span>
                         )}
@@ -698,55 +641,41 @@ export const TicketsView: React.FC = () => {
                       <td>
                         {t.buyers ? (
                           <div>
-                            <div style={{ fontWeight: 600, color: 'var(--text-primary, #f3f7f5)' }}>
+                            <div className={styles.buyerName}>
                               {t.buyers.full_name}
                             </div>
-                            <div
-                              style={{ fontSize: '0.75rem', color: 'var(--text-muted, #5e7a6f)' }}
-                            >
+                            <div className={styles.tableMeta}>
                               Doc: {maskDocumentId(t.buyers.document_id)}
                             </div>
                           </div>
                         ) : (
-                          <span style={{ color: 'var(--text-muted, #5e7a6f)', fontSize: '0.8rem' }}>
+                          <span className={styles.tableMuted}>
                             -
                           </span>
                         )}
                       </td>
                       <td>
                         {t.buyers ? (
-                          <div
-                            style={{ fontSize: '0.8rem', color: 'var(--text-secondary, #9cb5ab)' }}
-                          >
+                          <div className={styles.contactCell}>
                             <div>{t.buyers.phone}</div>
-                            <div
-                              style={{ fontSize: '0.75rem', color: 'var(--text-muted, #5e7a6f)' }}
-                            >
+                            <div className={styles.tableMeta}>
                               {t.buyers.email}
                             </div>
                           </div>
                         ) : (
-                          <span style={{ color: 'var(--text-muted, #5e7a6f)', fontSize: '0.8rem' }}>
+                          <span className={styles.tableMuted}>
                             -
                           </span>
                         )}
                       </td>
-                      <td style={{ fontSize: '0.8rem', color: 'var(--text-muted, #5e7a6f)' }}>
+                      <td className={styles.tableDate}>
                         {t.reserved_at ? new Date(t.reserved_at).toLocaleString('es-CO') : '-'}
                       </td>
-                      <td style={{ textAlign: 'right' }}>
-                        <div
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'flex-end',
-                            gap: '0.4rem',
-                          }}
-                        >
+                      <td className={styles.tableActionsCell}>
+                        <div className={styles.tableActions}>
                           <button
                             type="button"
-                            className={styles.btnSecondary}
-                            style={{ padding: '0.3rem 0.6rem', fontSize: '0.75rem' }}
+                            className={`${styles.btnSecondary} ${styles.compactActionBtn}`}
                             onClick={() => handleSelectTicket(t)}
                             title="Consultar detalles"
                           >
@@ -756,8 +685,7 @@ export const TicketsView: React.FC = () => {
                           {t.status === 'blocked' ? (
                             <button
                               type="button"
-                              className={styles.btnSuccess}
-                              style={{ padding: '0.3rem 0.6rem', fontSize: '0.75rem' }}
+                              className={`${styles.btnSuccess} ${styles.compactActionBtn}`}
                               onClick={() => handleOpenUnblockModal(t)}
                               title="Desbloquear boleto"
                             >
@@ -768,13 +696,7 @@ export const TicketsView: React.FC = () => {
                             <button
                               type="button"
                               disabled
-                              className={styles.btnSecondary}
-                              style={{
-                                padding: '0.3rem 0.6rem',
-                                fontSize: '0.75rem',
-                                opacity: 0.4,
-                                cursor: 'not-allowed',
-                              }}
+                              className={`${styles.btnSecondary} ${styles.compactActionBtn} ${styles.protectedActionBtn}`}
                               title="No se puede bloquear un boleto vendido con orden pagada"
                             >
                               <ShieldCheck size={13} />
@@ -783,8 +705,7 @@ export const TicketsView: React.FC = () => {
                           ) : (
                             <button
                               type="button"
-                              className={styles.btnDanger}
-                              style={{ padding: '0.3rem 0.6rem', fontSize: '0.75rem' }}
+                              className={`${styles.btnDanger} ${styles.compactActionBtn}`}
                               onClick={() => handleOpenBlockModal(t)}
                               title="Bloquear boleto preventivamente"
                             >
@@ -853,38 +774,16 @@ export const TicketsView: React.FC = () => {
       {isDetailModalOpen && selectedTicket && (
         <div className={styles.adminModalBackdrop} onClick={handleCloseDetail}>
           <div className={styles.adminModalCard} onClick={(e) => e.stopPropagation()}>
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                borderBottom: '1px solid var(--border-subtle, rgba(156, 181, 171, 0.15))',
-                paddingBottom: '1rem',
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                <div
-                  style={{
-                    width: 44,
-                    height: 44,
-                    borderRadius: 'var(--radius-md, 10px)',
-                    backgroundColor: 'rgba(245, 158, 11, 0.15)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: '#f59e0b',
-                    fontSize: '1.25rem',
-                    fontWeight: 800,
-                    fontFamily: 'var(--font-mono, monospace)',
-                  }}
-                >
+            <div className={styles.detailHeader}>
+              <div className={styles.detailHeaderGroup}>
+                <div className={styles.ticketNumberBadge}>
                   {formatTicketNumber(selectedTicket.number)}
                 </div>
                 <div>
-                  <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 700, color: '#f3f7f5' }}>
+                  <h3 className={styles.detailTitle}>
                     Boleto #{formatTicketNumber(selectedTicket.number)}
                   </h3>
-                  <div style={{ marginTop: '0.2rem' }}>
+                  <div className={styles.detailStatus}>
                     {selectedTicket.status === 'available' && (
                       <span className={styles.badgeSuccess}>
                         <Ticket size={12} /> Disponible para compra
@@ -911,12 +810,7 @@ export const TicketsView: React.FC = () => {
               <button
                 type="button"
                 onClick={handleCloseDetail}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: 'var(--text-muted, #5e7a6f)',
-                  cursor: 'pointer',
-                }}
+                className={styles.iconButtonNeutral}
               >
                 <X size={20} />
               </button>
@@ -924,65 +818,23 @@ export const TicketsView: React.FC = () => {
 
             {/* Mensaje de error / éxito si existe */}
             {actionError && (
-              <div
-                style={{
-                  padding: '0.75rem 1rem',
-                  backgroundColor: 'rgba(239, 68, 68, 0.15)',
-                  border: '1px solid #ef4444',
-                  borderRadius: 'var(--radius-md, 10px)',
-                  color: '#f87171',
-                  fontSize: '0.85rem',
-                }}
-              >
+              <div className={styles.actionError}>
                 {actionError}
               </div>
             )}
 
             {/* SECCIÓN: ORDEN ASOCIADA */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              <span
-                style={{
-                  fontSize: '0.8rem',
-                  fontWeight: 700,
-                  color: 'var(--color-brand-accent, #f59e0b)',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em',
-                }}
-              >
+            <div className={styles.detailSection}>
+              <span className={styles.detailSectionLabel}>
                 Orden de Compra
               </span>
               {selectedTicket.orders ? (
-                <div
-                  style={{
-                    backgroundColor: 'var(--bg-main, #0a1410)',
-                    border: '1px solid var(--border-subtle, rgba(156, 181, 171, 0.2))',
-                    borderRadius: 'var(--radius-md, 10px)',
-                    padding: '1rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    flexWrap: 'wrap',
-                    gap: '0.75rem',
-                  }}
-                >
+                <div className={styles.orderCard}>
                   <div>
-                    <div
-                      style={{
-                        fontFamily: 'var(--font-mono, monospace)',
-                        fontWeight: 700,
-                        color: '#f59e0b',
-                        fontSize: '1rem',
-                      }}
-                    >
+                    <div className={styles.orderReferenceLarge}>
                       {selectedTicket.orders.reference}
                     </div>
-                    <div
-                      style={{
-                        fontSize: '0.8rem',
-                        color: 'var(--text-secondary, #9cb5ab)',
-                        marginTop: '0.2rem',
-                      }}
-                    >
+                    <div className={styles.orderMeta}>
                       Estado: <strong>{selectedTicket.orders.status}</strong> • Total:{' '}
                       <strong>{formatCOP(selectedTicket.orders.total_amount)}</strong> • Boletos en
                       orden: {selectedTicket.orders.ticket_count}
@@ -990,8 +842,7 @@ export const TicketsView: React.FC = () => {
                   </div>
                   <button
                     type="button"
-                    className={styles.btnSecondary}
-                    style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}
+                    className={`${styles.btnSecondary} ${styles.modalActionBtn}`}
                     onClick={handleOpenAssociatedOrder}
                   >
                     <ShoppingBag size={14} />
@@ -999,31 +850,15 @@ export const TicketsView: React.FC = () => {
                   </button>
                 </div>
               ) : (
-                <div
-                  style={{
-                    padding: '0.85rem',
-                    backgroundColor: 'var(--bg-main, #0a1410)',
-                    borderRadius: 'var(--radius-md, 10px)',
-                    color: 'var(--text-muted, #5e7a6f)',
-                    fontSize: '0.85rem',
-                  }}
-                >
+                <div className={styles.detailEmpty}>
                   Este boleto no está asociado a ninguna orden actualmente.
                 </div>
               )}
             </div>
 
             {/* SECCIÓN: DATOS DEL COMPRADOR */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              <span
-                style={{
-                  fontSize: '0.8rem',
-                  fontWeight: 700,
-                  color: 'var(--color-brand-accent, #f59e0b)',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em',
-                }}
-              >
+            <div className={styles.detailSection}>
+              <span className={styles.detailSectionLabel}>
                 Datos del Comprador
               </span>
               {selectedTicket.buyers ? (
@@ -1046,63 +881,27 @@ export const TicketsView: React.FC = () => {
                   </div>
                   <div className={styles.ticketDetailGroup}>
                     <span className={styles.ticketDetailLabel}>Correo Electrónico</span>
-                    <span className={styles.ticketDetailValue} style={{ wordBreak: 'break-all' }}>
+                    <span className={`${styles.ticketDetailValue} ${styles.emailValue}`}>
                       {selectedTicket.buyers.email}
                     </span>
                   </div>
                 </div>
               ) : (
-                <div
-                  style={{
-                    padding: '0.85rem',
-                    backgroundColor: 'var(--bg-main, #0a1410)',
-                    borderRadius: 'var(--radius-md, 10px)',
-                    color: 'var(--text-muted, #5e7a6f)',
-                    fontSize: '0.85rem',
-                  }}
-                >
+                <div className={styles.detailEmpty}>
                   Sin comprador asignado.
                 </div>
               )}
             </div>
 
             {/* SECCIÓN: ACCIONES ADMINISTRATIVAS */}
-            <div
-              style={{
-                borderTop: '1px solid var(--border-subtle, rgba(156, 181, 171, 0.15))',
-                paddingTop: '1rem',
-                marginTop: '0.5rem',
-              }}
-            >
-              <span
-                style={{
-                  fontSize: '0.8rem',
-                  fontWeight: 700,
-                  color: 'var(--text-secondary, #9cb5ab)',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em',
-                  display: 'block',
-                  marginBottom: '0.75rem',
-                }}
-              >
+            <div className={styles.detailActions}>
+              <span className={styles.detailActionsLabel}>
                 Acciones Administrativas
               </span>
 
               {selectedTicket.status === 'sold' ? (
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.75rem',
-                    padding: '0.85rem 1rem',
-                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                    border: '1px solid rgba(59, 130, 246, 0.3)',
-                    borderRadius: 'var(--radius-md, 10px)',
-                    color: '#93c5fd',
-                    fontSize: '0.85rem',
-                  }}
-                >
-                  <ShieldCheck size={20} style={{ flexShrink: 0 }} />
+                <div className={styles.protectedNotice}>
+                  <ShieldCheck size={20} className={styles.protectedNoticeIcon} />
                   <div>
                     <strong>Boleto Vendido y Protegido:</strong> Este número se encuentra vinculado
                     a una orden pagada y confirmada. No se permite modificación ni bloqueo manual
@@ -1110,16 +909,8 @@ export const TicketsView: React.FC = () => {
                   </div>
                 </div>
               ) : selectedTicket.status === 'blocked' ? (
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    gap: '1rem',
-                    flexWrap: 'wrap',
-                  }}
-                >
-                  <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary, #9cb5ab)' }}>
+                <div className={styles.actionRow}>
+                  <span className={styles.actionText}>
                     El boleto está bloqueado. Puedes habilitarlo para que vuelva a estar disponible
                     en el checkout.
                   </span>
@@ -1133,16 +924,8 @@ export const TicketsView: React.FC = () => {
                   </button>
                 </div>
               ) : (
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    gap: '1rem',
-                    flexWrap: 'wrap',
-                  }}
-                >
-                  <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary, #9cb5ab)' }}>
+                <div className={styles.actionRow}>
+                  <span className={styles.actionText}>
                     {selectedTicket.status === 'reserved'
                       ? 'El boleto está en reserva temporal. Al bloquearlo, se cancelará su disponibilidad para compra.'
                       : 'El boleto está libre. Puedes bloquearlo preventivamente para retirarlo del inventario público.'}
@@ -1171,84 +954,41 @@ export const TicketsView: React.FC = () => {
           onClick={() => !isProcessingAction && setIsBlockModalOpen(false)}
         >
           <div
-            className={styles.adminModalCard}
-            style={{ maxWidth: '520px' }}
+            className={`${styles.adminModalCard} ${styles.narrowModalCard}`}
             onClick={(e) => e.stopPropagation()}
           >
-            <div
-              style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#f87171' }}
-            >
-              <div
-                style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: '50%',
-                  backgroundColor: 'rgba(239, 68, 68, 0.15)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
+            <div className={styles.dangerModalHeader}>
+              <div className={styles.dangerModalIcon}>
                 <AlertTriangle size={22} />
               </div>
               <div>
-                <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 700, color: '#ffffff' }}>
+                <h3 className={styles.modalTitle}>
                   Bloquear Boleto #{formatTicketNumber(selectedTicket.number)}
                 </h3>
-                <span style={{ fontSize: '0.8rem', color: '#fca5a5' }}>
+                <span className={styles.dangerModalSubtitle}>
                   Acción administrativa con registro en bitácora de auditoría
                 </span>
               </div>
             </div>
 
-            <p
-              style={{
-                fontSize: '0.875rem',
-                color: 'var(--text-secondary, #9cb5ab)',
-                margin: '0.5rem 0 0 0',
-                lineHeight: 1.5,
-              }}
-            >
+            <p className={styles.modalParagraph}>
               Al bloquear el boleto <strong>#{formatTicketNumber(selectedTicket.number)}</strong>,
               este dejará de estar disponible para compra pública y cualquier reserva temporal
               asociada será cancelada.
             </p>
 
             {actionError && (
-              <div
-                style={{
-                  padding: '0.75rem 1rem',
-                  backgroundColor: 'rgba(239, 68, 68, 0.15)',
-                  border: '1px solid #ef4444',
-                  borderRadius: 'var(--radius-md, 10px)',
-                  color: '#f87171',
-                  fontSize: '0.85rem',
-                }}
-              >
+              <div className={styles.actionError}>
                 {actionError}
               </div>
             )}
 
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '0.5rem',
-                marginTop: '0.5rem',
-              }}
-            >
-              <label
-                style={{
-                  fontSize: '0.8rem',
-                  fontWeight: 600,
-                  color: 'var(--text-secondary, #9cb5ab)',
-                }}
-              >
-                Motivo del Bloqueo <span style={{ color: '#ef4444' }}>*</span>
+            <div className={styles.formStackBlockReason}>
+              <label className={styles.modalFormLabel}>
+                Motivo del Bloqueo <span className={styles.requiredMark}>*</span>
               </label>
               <select
-                className={styles.filterSelect}
-                style={{ width: '100%' }}
+                className={`${styles.filterSelect} ${styles.fullWidthSelect}`}
                 value={blockReason}
                 onChange={(e) => setBlockReason(e.target.value)}
               >
@@ -1261,26 +1001,15 @@ export const TicketsView: React.FC = () => {
 
               {blockReason === 'Otro motivo justificado' && (
                 <textarea
-                  className={styles.formModalTextarea}
                   placeholder="Detalla el motivo específico del bloqueo para el registro de auditoría..."
                   value={customBlockReason}
                   onChange={(e) => setCustomBlockReason(e.target.value)}
-                  style={{ marginTop: '0.5rem' }}
+                  className={`${styles.formModalTextarea} ${styles.textareaWithTopMargin}`}
                 />
               )}
             </div>
 
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'flex-end',
-                gap: '0.75rem',
-                borderTop: '1px solid var(--border-subtle, rgba(156, 181, 171, 0.15))',
-                paddingTop: '1rem',
-                marginTop: '0.5rem',
-              }}
-            >
+            <div className={styles.modalFooter}>
               <button
                 type="button"
                 className={styles.btnSecondary}
@@ -1312,44 +1041,24 @@ export const TicketsView: React.FC = () => {
           onClick={() => !isProcessingAction && setIsUnblockModalOpen(false)}
         >
           <div
-            className={styles.adminModalCard}
-            style={{ maxWidth: '520px' }}
+            className={`${styles.adminModalCard} ${styles.narrowModalCard}`}
             onClick={(e) => e.stopPropagation()}
           >
-            <div
-              style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#10b981' }}
-            >
-              <div
-                style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: '50%',
-                  backgroundColor: 'rgba(16, 185, 129, 0.15)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
+            <div className={styles.successModalHeader}>
+              <div className={styles.successModalIcon}>
                 <Unlock size={22} />
               </div>
               <div>
-                <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 700, color: '#ffffff' }}>
+                <h3 className={styles.modalTitle}>
                   Desbloquear Boleto #{formatTicketNumber(selectedTicket.number)}
                 </h3>
-                <span style={{ fontSize: '0.8rem', color: '#6ee7b7' }}>
+                <span className={styles.successModalSubtitle}>
                   Habilitación para venta en plataforma pública
                 </span>
               </div>
             </div>
 
-            <p
-              style={{
-                fontSize: '0.875rem',
-                color: 'var(--text-secondary, #9cb5ab)',
-                margin: '0.5rem 0 0 0',
-                lineHeight: 1.5,
-              }}
-            >
+            <p className={styles.modalParagraph}>
               ¿Deseas desbloquear el boleto{' '}
               <strong>#{formatTicketNumber(selectedTicket.number)}</strong>? Este volverá a estar en
               estado <strong>disponible</strong> para que cualquier comprador pueda seleccionarlo y
@@ -1357,35 +1066,13 @@ export const TicketsView: React.FC = () => {
             </p>
 
             {actionError && (
-              <div
-                style={{
-                  padding: '0.75rem 1rem',
-                  backgroundColor: 'rgba(239, 68, 68, 0.15)',
-                  border: '1px solid #ef4444',
-                  borderRadius: 'var(--radius-md, 10px)',
-                  color: '#f87171',
-                  fontSize: '0.85rem',
-                }}
-              >
+              <div className={styles.actionError}>
                 {actionError}
               </div>
             )}
 
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '0.4rem',
-                marginTop: '0.5rem',
-              }}
-            >
-              <label
-                style={{
-                  fontSize: '0.8rem',
-                  fontWeight: 600,
-                  color: 'var(--text-secondary, #9cb5ab)',
-                }}
-              >
+            <div className={styles.formStackUnblockReason}>
+              <label className={styles.modalFormLabel}>
                 Motivo / Nota de Auditoría
               </label>
               <input
@@ -1397,17 +1084,7 @@ export const TicketsView: React.FC = () => {
               />
             </div>
 
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'flex-end',
-                gap: '0.75rem',
-                borderTop: '1px solid var(--border-subtle, rgba(156, 181, 171, 0.15))',
-                paddingTop: '1rem',
-                marginTop: '0.5rem',
-              }}
-            >
+            <div className={styles.modalFooter}>
               <button
                 type="button"
                 className={styles.btnSecondary}

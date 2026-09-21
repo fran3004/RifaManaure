@@ -69,17 +69,8 @@ const ReceiptThumbnail: React.FC<ReceiptThumbnailProps> = ({
 
   if (loading) {
     return (
-      <div
-        style={{
-          padding: '1.25rem',
-          textAlign: 'center',
-          backgroundColor: 'var(--bg-main, #0a1410)',
-          borderRadius: 'var(--radius-md, 10px)',
-          color: 'var(--text-muted, #5e7a6f)',
-          fontSize: '0.8rem',
-        }}
-      >
-        <Clock size={18} style={{ display: 'block', margin: '0 auto 0.3rem auto' }} />
+      <div className={styles.receiptThumbNotice}>
+        <Clock size={18} className={styles.receiptThumbNoticeIcon} />
         Generando acceso seguro...
       </div>
     );
@@ -87,17 +78,8 @@ const ReceiptThumbnail: React.FC<ReceiptThumbnailProps> = ({
 
   if (!signedUrl) {
     return (
-      <div
-        style={{
-          padding: '1.25rem',
-          textAlign: 'center',
-          backgroundColor: 'var(--bg-main, #0a1410)',
-          borderRadius: 'var(--radius-md, 10px)',
-          color: '#ef4444',
-          fontSize: '0.8rem',
-        }}
-      >
-        <AlertTriangle size={18} style={{ display: 'block', margin: '0 auto 0.3rem auto' }} />
+      <div className={`${styles.receiptThumbNotice} ${styles.receiptThumbNoticeError}`}>
+        <AlertTriangle size={18} className={styles.receiptThumbNoticeIcon} />
         Acceso no disponible
       </div>
     );
@@ -106,23 +88,12 @@ const ReceiptThumbnail: React.FC<ReceiptThumbnailProps> = ({
   if (isPdf) {
     return (
       <div
-        className={styles.receiptImageThumbWrapper}
+        className={`${styles.receiptImageThumbWrapper} ${styles.receiptPdfThumbWrapper}`}
         onClick={() => onSelect(signedUrl)}
         title="Clic para ver comprobante PDF"
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          minHeight: '120px',
-          backgroundColor: 'var(--bg-main, #0a1410)',
-          cursor: 'pointer',
-        }}
       >
-        <FileText size={34} color="#f59e0b" />
-        <span
-          style={{ fontSize: '0.75rem', color: '#9cb5ab', marginTop: '0.35rem', fontWeight: 600 }}
-        >
+        <FileText size={34} color="var(--brand-accent)" />
+        <span className={styles.receiptPdfLabel}>
           Documento PDF
         </span>
         <div className={styles.receiptOverlayZoom}>
@@ -333,20 +304,11 @@ export const ReceiptsView: React.FC = () => {
 
       {actionMessage && (
         <div
-          style={{
-            padding: '1rem 1.25rem',
-            borderRadius: 'var(--radius-md, 10px)',
-            backgroundColor:
-              actionMessage.type === 'success'
-                ? 'rgba(16, 185, 129, 0.15)'
-                : 'rgba(239, 68, 68, 0.15)',
-            border: `1px solid ${actionMessage.type === 'success' ? '#10b981' : '#ef4444'}`,
-            color: actionMessage.type === 'success' ? '#34d399' : '#fca5a5',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            fontSize: '0.9rem',
-          }}
+          className={`${styles.receiptActionBanner} ${
+            actionMessage.type === 'success'
+              ? styles.receiptActionSuccess
+              : styles.receiptActionError
+          }`}
         >
           {actionMessage.type === 'success' ? <Check size={18} /> : <AlertTriangle size={18} />}
           <span>{actionMessage.text}</span>
@@ -367,16 +329,9 @@ export const ReceiptsView: React.FC = () => {
         </div>
 
         <div className={styles.filterControls}>
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.4rem',
-              color: 'var(--text-secondary, #9cb5ab)',
-            }}
-          >
+          <div className={styles.filterLabel}>
             <Filter size={16} />
-            <span style={{ fontSize: '0.85rem' }}>Estado:</span>
+            <span className={styles.filterLabelText}>Estado:</span>
           </div>
           <select
             className={styles.filterSelect}
@@ -444,14 +399,7 @@ export const ReceiptsView: React.FC = () => {
                   <span className={styles.receiptBuyerMeta}>
                     C.C. {ord.buyers?.document_id || 'N/A'} • Cel: {ord.buyers?.phone || 'N/A'}
                   </span>
-                  <span
-                    style={{
-                      fontSize: '1rem',
-                      fontWeight: 800,
-                      color: 'var(--color-brand-accent, #f59e0b)',
-                      marginTop: '0.2rem',
-                    }}
-                  >
+                  <span className={styles.receiptBuyerAmount}>
                     {formatCOP(ord.total_amount)} ({ord.ticket_count}{' '}
                     {ord.ticket_count === 1 ? 'boleto' : 'boletos'})
                   </span>
@@ -465,19 +413,10 @@ export const ReceiptsView: React.FC = () => {
                     onSelect={(url) => setSelectedReceiptUrl(url)}
                   />
                 ) : (
-                  <div
-                    style={{
-                      padding: '1.5rem',
-                      textAlign: 'center',
-                      backgroundColor: 'var(--bg-main, #0a1410)',
-                      borderRadius: 'var(--radius-md, 10px)',
-                      color: 'var(--text-muted, #5e7a6f)',
-                      fontSize: '0.85rem',
-                    }}
-                  >
+                  <div className={styles.receiptEmptyBox}>
                     <FileText
                       size={24}
-                      style={{ display: 'block', margin: '0 auto 0.4rem auto' }}
+                      className={styles.receiptEmptyBoxIcon}
                     />
                     Sin archivo adjunto
                   </div>
@@ -485,16 +424,7 @@ export const ReceiptsView: React.FC = () => {
 
                 {/* Boletos Asociados */}
                 <div>
-                  <span
-                    style={{
-                      display: 'block',
-                      fontSize: '0.75rem',
-                      color: 'var(--text-muted, #5e7a6f)',
-                      marginBottom: '0.3rem',
-                      textTransform: 'uppercase',
-                      fontWeight: 600,
-                    }}
-                  >
+                  <span className={styles.receiptTicketsLabel}>
                     Números Reservados:
                   </span>
                   <div className={styles.receiptTicketsRow}>
@@ -510,8 +440,7 @@ export const ReceiptsView: React.FC = () => {
                 <div className={styles.receiptActions}>
                   <button
                     type="button"
-                    className={styles.btnSecondary}
-                    style={{ flex: 1 }}
+                    className={`${styles.btnSecondary} ${styles.btnFlex}`}
                     onClick={() => setSelectedReviewOrder(ord)}
                     title="Abrir auditoría completa con datos del comprador y comprobante"
                   >
@@ -558,15 +487,8 @@ export const ReceiptsView: React.FC = () => {
           </div>
 
           <div className={styles.paginationControls}>
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.4rem',
-                marginRight: '0.5rem',
-              }}
-            >
-              <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary, #9cb5ab)' }}>
+            <div className={styles.pageSizeRow}>
+              <span className={styles.pageSizeLabel}>
                 Por pág.:
               </span>
               <select
@@ -634,87 +556,45 @@ export const ReceiptsView: React.FC = () => {
       {selectedReceiptUrl && (
         <div className={styles.adminModalBackdrop} onClick={() => setSelectedReceiptUrl(null)}>
           <div
-            className={styles.adminModalCard}
+            className={`${styles.adminModalCard} ${styles.receiptViewerCard}`}
             onClick={(e) => e.stopPropagation()}
-            style={{ maxWidth: '800px', textAlign: 'center' }}
           >
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                marginBottom: '1rem',
-              }}
-            >
+            <div className={styles.receiptModalHeader}>
               <div>
-                <h3 style={{ margin: 0, color: '#f3f7f5', fontSize: '1.2rem', textAlign: 'left' }}>
+                <h3 className={styles.receiptModalTitle}>
                   Soporte de Transferencia Bancaria
                 </h3>
-                <span
-                  style={{
-                    display: 'block',
-                    fontSize: '0.75rem',
-                    color: '#9cb5ab',
-                    textAlign: 'left',
-                  }}
-                >
+                <span className={styles.receiptModalSubtitle}>
                   Acceso privado y temporal autorizado (15 minutos de vigencia)
                 </span>
               </div>
               <button
                 type="button"
-                className={styles.btnSecondary}
+                className={`${styles.btnSecondary} ${styles.btnReceiptModalClose}`}
                 onClick={() => setSelectedReceiptUrl(null)}
-                style={{ padding: '0.4rem 0.6rem' }}
               >
                 <X size={18} />
               </button>
             </div>
 
-            <div
-              style={{
-                maxHeight: '70vh',
-                overflowY: 'auto',
-                backgroundColor: '#000',
-                borderRadius: 'var(--radius-md, 10px)',
-                padding: '0.5rem',
-              }}
-            >
+            <div className={styles.receiptViewerContainer}>
               {selectedReceiptUrl.toLowerCase().includes('.pdf') ? (
                 <iframe
                   src={selectedReceiptUrl}
                   title="Comprobante PDF"
-                  style={{
-                    width: '100%',
-                    height: '65vh',
-                    border: 'none',
-                    borderRadius: 'var(--radius-sm, 6px)',
-                  }}
+                  className={styles.receiptIframe}
                 />
               ) : (
                 <img
                   src={selectedReceiptUrl}
                   alt="Comprobante de pago"
-                  style={{
-                    maxWidth: '100%',
-                    height: 'auto',
-                    display: 'block',
-                    margin: '0 auto',
-                    borderRadius: 'var(--radius-sm, 6px)',
-                  }}
+                  className={styles.receiptFullImg}
                 />
               )}
             </div>
 
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginTop: '1rem',
-              }}
-            >
-              <span style={{ fontSize: '0.75rem', color: '#9cb5ab' }}>
+            <div className={styles.receiptModalFooter}>
+              <span className={styles.receiptSecurityNotice}>
                 * Nunca se generan enlaces públicos permanentes para proteger los datos bancarios.
               </span>
               <a
@@ -734,74 +614,40 @@ export const ReceiptsView: React.FC = () => {
       {rejectingOrder && (
         <div className={styles.adminModalBackdrop} onClick={() => setRejectingOrder(null)}>
           <div className={styles.adminModalCard} onClick={(e) => e.stopPropagation()}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <h3
-                style={{
-                  margin: 0,
-                  color: '#fca5a5',
-                  fontSize: '1.25rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                }}
-              >
+            <div className={styles.modalHeaderBetween}>
+              <h3 className={styles.rejectModalTitle}>
                 <XCircle size={22} />
                 Rechazar Orden {rejectingOrder.reference}
               </h3>
               <button
                 type="button"
-                className={styles.btnSecondary}
+                className={`${styles.btnSecondary} ${styles.modalCloseMiniBtn}`}
                 onClick={() => setRejectingOrder(null)}
-                style={{ padding: '0.35rem 0.5rem' }}
               >
                 <X size={16} />
               </button>
             </div>
 
-            <p style={{ color: 'var(--text-secondary, #9cb5ab)', fontSize: '0.9rem', margin: 0 }}>
+            <p className={styles.modalDescriptionText}>
               Al rechazar esta orden, los{' '}
-              <strong style={{ color: '#f59e0b' }}>{rejectingOrder.ticket_count} boletos</strong>{' '}
+              <strong className={styles.highlightText}>{rejectingOrder.ticket_count} boletos</strong>{' '}
               reservados serán liberados inmediatamente a la plataforma pública para que otros
               usuarios puedan adquirirlos.
             </p>
 
             <div>
-              <label
-                style={{
-                  display: 'block',
-                  fontSize: '0.85rem',
-                  fontWeight: 600,
-                  color: '#e2f0ea',
-                  marginBottom: '0.5rem',
-                }}
-              >
+              <label className={styles.modalFieldLabel}>
                 Motivo del Rechazo:
               </label>
               <textarea
                 value={rejectionReason}
                 onChange={(e) => setRejectionReason(e.target.value)}
                 rows={3}
-                style={{
-                  width: '100%',
-                  padding: '0.75rem',
-                  backgroundColor: 'var(--bg-main, #0a1410)',
-                  border: '1px solid var(--border-subtle, rgba(156, 181, 171, 0.2))',
-                  borderRadius: 'var(--radius-md, 10px)',
-                  color: '#ffffff',
-                  fontSize: '0.9rem',
-                  outline: 'none',
-                }}
+                className={styles.modalReasonTextarea}
               />
             </div>
 
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'flex-end',
-                gap: '0.75rem',
-                marginTop: '0.5rem',
-              }}
-            >
+            <div className={styles.modalFooterActions}>
               <button
                 type="button"
                 className={styles.btnSecondary}

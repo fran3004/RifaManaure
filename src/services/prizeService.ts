@@ -107,7 +107,7 @@ export const DEFAULT_PRIZE_EXPERIENCES: PrizeExperienceRow[] = [
       'Café especial de origen',
     ],
     image_url: null,
-    image_slug: 'gastronomia-local',
+    image_slug: 'gastronomia-casa-arepas',
     icon: 'Utensils',
     display_order: 5,
     is_active: true,

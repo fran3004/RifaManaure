@@ -350,6 +350,7 @@ export async function printOrSavePdfDigitalReceipt(data: DigitalReceiptData): Pr
             align-items: center;
             justify-content: center;
             min-height: 100vh;
+            min-height: 100dvh;
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
           }

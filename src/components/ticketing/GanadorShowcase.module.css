@@ -1,6 +1,6 @@
 /* ========================================================================= */
 /* GANADOR SHOWCASE - SISTEMA DE DISEÑO PÚBLICO MANAURE VIVE                 */
-/* Paleta: Crema (#F4EFE4), Verde Bosque (#1B4A2E), Ámbar (#F5A623)          */
+/* Paleta: Crema (#F4EFE4), Verde Bosque (var(--brand-primary)), Ámbar (var(--brand-accent))          */
 /* ========================================================================= */
 
 .celebrationSection {
@@ -19,12 +19,12 @@
   width: 100%;
   height: 100%;
   pointer-events: none;
-  z-index: 10;
+  z-index: var(--z-base);
 }
 
 .container {
   position: relative;
-  z-index: 20;
+  z-index: var(--z-raised);
   max-width: 960px;
   margin: 0 auto;
   display: flex;
@@ -44,7 +44,8 @@
   border: 1px solid rgba(245, 166, 35, 0.45);
   box-shadow: 0 2px 8px rgba(245, 166, 35, 0.15);
   color: var(--brand-accent-strong, #8A5200);
-  font-size: 0.85rem;
+  font-size: 0.875rem;
+  line-height: 1.2;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -58,33 +59,35 @@
 
 .mainTitle {
   font-family: var(--font-heading, Georgia, serif);
-  font-size: clamp(2rem, 5vw, 3.15rem);
+  font-size: 2.5rem;
+  line-height: 1.2;
   font-weight: 800;
-  color: var(--brand-primary, #1B4A2E);
+  color: var(--brand-primary, var(--brand-primary));
   line-height: 1.2;
   margin: 0;
   letter-spacing: -0.02em;
 }
 
 .goldenHighlight {
-  background: linear-gradient(135deg, #F5A623 0%, #D97706 100%);
+  background: linear-gradient(135deg, var(--brand-accent) 0%, #D97706 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .subtitle {
-  font-size: 1.05rem;
+  font-size: 1.125rem;
+  line-height: 1.45;
   color: var(--text-secondary, #41564A);
   max-width: 680px;
   margin: 0 auto;
-  line-height: 1.6;
+  line-height: 1.45;
 }
 
 /* Tarjeta Principal del Ganador */
 .winnerHeroCard {
   width: 100%;
   background-color: var(--bg-card, #FFFFFF);
-  border: 1.5px solid var(--brand-accent, #F5A623);
+  border: 1.5px solid var(--brand-accent, var(--brand-accent));
   border-radius: var(--radius-xl, 28px);
   padding: 2.5rem 2rem;
   box-shadow: var(--shadow-lg, 0 12px 32px rgba(15, 46, 29, 0.16));
@@ -92,7 +95,7 @@
   flex-direction: column;
   gap: 2rem;
   position: relative;
-  overflow: hidden;
+  overflow: clip;
   box-sizing: border-box;
 }
 
@@ -108,7 +111,7 @@
   height: 80px;
   border-radius: 50%;
   background-color: var(--brand-accent-soft, #FDF1D8);
-  border: 2px solid var(--brand-accent, #F5A623);
+  border: 2px solid var(--brand-accent, var(--brand-accent));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -134,7 +137,8 @@
 }
 
 .ticketPresentationLabel {
-  font-size: 0.85rem;
+  font-size: 0.875rem;
+  line-height: 1.2;
   text-transform: uppercase;
   color: var(--brand-accent-strong, #8A5200);
   font-weight: 700;
@@ -143,13 +147,15 @@
 
 .hugeTicketNumber {
   font-family: var(--font-mono, monospace);
-  font-size: clamp(3.2rem, 8vw, 5.25rem);
+  font-size: 2.5rem;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
   font-weight: 900;
-  color: var(--brand-primary, #1B4A2E);
-  line-height: 1;
+  color: var(--brand-primary, var(--brand-primary));
+  line-height: 1.2;
   padding: 0.4rem 2rem;
   background-color: var(--bg-surface, #FBF8F1);
-  border: 2px solid var(--brand-accent, #F5A623);
+  border: 2px solid var(--brand-accent, var(--brand-accent));
   border-radius: var(--radius-lg, 20px);
   display: inline-block;
   letter-spacing: 0.05em;
@@ -160,7 +166,8 @@
   display: inline-flex;
   align-items: center;
   gap: 0.6rem;
-  font-size: 0.9rem;
+  font-size: 0.875rem;
+  line-height: 1.2;
   color: var(--brand-accent-strong, #8A5200);
   background-color: var(--brand-accent-soft, #FDF1D8);
   padding: 0.4rem 1.15rem;
@@ -188,7 +195,7 @@
 }
 
 .infoLabel {
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   text-transform: uppercase;
   color: var(--text-muted, #5A6B5F);
   font-weight: 700;
@@ -199,14 +206,17 @@
 }
 
 .infoValue {
-  font-size: 1.1rem;
+  font-size: 1.125rem;
+  line-height: 1.2;
   font-weight: 700;
   color: var(--text-primary, #16261C);
 }
 
 .infoSub {
-  font-size: 0.8rem;
-  color: var(--brand-primary, #1B4A2E);
+  font-size: 0.875rem;
+  line-height: 1.45;
+  font-variant-numeric: tabular-nums;
+  color: var(--brand-primary, var(--brand-primary));
   display: flex;
   align-items: center;
   gap: 0.3rem;
@@ -228,9 +238,10 @@
   padding: 0.85rem 1.6rem;
   border-radius: var(--radius-md, 14px);
   background-color: var(--brand-accent-soft, #FDF1D8);
-  border: 1px solid var(--brand-accent, #F5A623);
+  border: 1px solid var(--brand-accent, var(--brand-accent));
   color: var(--brand-deep, #0F2E1D);
-  font-size: 0.95rem;
+  font-size: 1rem;
+  line-height: 1.45;
   font-weight: 700;
   text-decoration: none;
   transition: all var(--transition-fast, 150ms ease);
@@ -238,65 +249,15 @@
 }
 
 .actButton:hover {
-  background-color: var(--brand-accent, #F5A623);
+  background-color: var(--brand-accent, var(--brand-accent));
   color: var(--brand-deep, #0F2E1D);
   transform: translateY(-2px);
   box-shadow: var(--shadow-md, 0 6px 16px rgba(15, 46, 29, 0.12));
 }
 
 .actButton:focus-visible {
-  outline: 3px solid var(--focus-ring, #1B4A2E);
+  outline: 3px solid var(--focus-ring, var(--brand-primary));
   outline-offset: 2px;
-}
-
-.photoGalleryRow {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.75rem;
-  width: 100%;
-}
-
-.photoGalleryLabel {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--text-secondary, #41564A);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.photoThumbnails {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.85rem;
-  flex-wrap: wrap;
-}
-
-.photoThumb {
-  width: 72px;
-  height: 72px;
-  border-radius: var(--radius-sm, 10px);
-  overflow: hidden;
-  border: 2px solid var(--border-subtle, #DCD5C4);
-  transition: transform var(--transition-fast, 150ms ease), border-color var(--transition-fast, 150ms ease);
-  display: block;
-}
-
-.photoThumb:hover {
-  transform: scale(1.08);
-  border-color: var(--brand-accent, #F5A623);
-}
-
-.photoThumb:focus-visible {
-  outline: 3px solid var(--focus-ring, #1B4A2E);
-  outline-offset: 2px;
-}
-
-.photoThumb img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
 }
 
 /* Banner de la Próxima Edición */
@@ -315,19 +276,21 @@
 }
 
 .noticeIcon {
-  color: var(--brand-primary, #1B4A2E);
+  color: var(--brand-primary, var(--brand-primary));
   flex-shrink: 0;
 }
 
 .noticeTitle {
-  font-size: 0.95rem;
+  font-size: 1rem;
+  line-height: 1.45;
   font-weight: 700;
-  color: var(--brand-primary, #1B4A2E);
+  color: var(--brand-primary, var(--brand-primary));
   margin: 0 0 0.2rem 0;
 }
 
 .noticeDesc {
-  font-size: 0.85rem;
+  font-size: 0.875rem;
+  line-height: 1.2;
   color: var(--text-secondary, #41564A);
   margin: 0;
   line-height: 1.45;
@@ -352,13 +315,13 @@
 
 .btnConfetti:hover {
   background-color: var(--brand-accent-soft, #FDF1D8);
-  border-color: var(--brand-accent, #F5A623);
+  border-color: var(--brand-accent, var(--brand-accent));
   color: var(--brand-accent-strong, #8A5200);
   transform: translateY(-1px);
 }
 
 .btnConfetti:focus-visible {
-  outline: 3px solid var(--focus-ring, #1B4A2E);
+  outline: 3px solid var(--focus-ring, var(--brand-primary));
   outline-offset: 2px;
 }
 
@@ -367,7 +330,9 @@
     padding: 1.75rem 1.25rem;
   }
   .hugeTicketNumber {
-    font-size: 3rem;
+    font-size: 2.5rem;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
     padding: 0.3rem 1.25rem;
   }
   .nextEditionNotice {

@@ -460,14 +460,13 @@ export const PartnersView: React.FC = () => {
         description="Administración integral de operadores turísticos, cabañas, restaurantes y comercios aliados en Manaure (Cesar)."
         badge={`${metrics.total} Aliados`}
         actions={
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+          <div className={partnerStyles.headerActions}>
             <button
               type="button"
-              className={styles.btnSecondary}
+              className={`${styles.btnSecondary} ${partnerStyles.btnRefresh}`}
               onClick={() => void loadPartners()}
               disabled={loading}
               title="Actualizar lista de aliados"
-              style={{ padding: '0.6rem 0.85rem' }}
             >
               <RefreshCw size={15} className={loading ? 'animate-spin' : ''} />
             </button>
@@ -482,22 +481,14 @@ export const PartnersView: React.FC = () => {
       {/* Banner de Retroalimentación */}
       {feedback && (
         <div
-          className={styles.cardSection}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.75rem',
-            padding: '1rem 1.25rem',
-            backgroundColor:
-              feedback.type === 'success' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)',
-            border: `1px solid ${
-              feedback.type === 'success' ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)'
-            }`,
-            color: feedback.type === 'success' ? '#34d399' : '#fca5a5',
-          }}
+          className={`${styles.cardSection} ${partnerStyles.feedbackBanner} ${
+            feedback.type === 'success'
+              ? partnerStyles.feedbackBannerSuccess
+              : partnerStyles.feedbackBannerError
+          }`}
         >
           {feedback.type === 'success' ? <CheckCircle2 size={18} /> : <AlertCircle size={18} />}
-          <span style={{ fontSize: '0.9rem', fontWeight: 500 }}>{feedback.message}</span>
+          <span className={partnerStyles.feedbackMessage}>{feedback.message}</span>
         </div>
       )}
 
@@ -517,11 +508,11 @@ export const PartnersView: React.FC = () => {
         <div className={styles.metricCard}>
           <div className={styles.metricHeader}>
             <span className={styles.metricLabel}>Visibles en Web</span>
-            <div className={styles.metricIcon} style={{ color: '#34d399' }}>
+            <div className={`${styles.metricIcon} ${partnerStyles.metricSuccess}`}>
               <Sparkles size={18} />
             </div>
           </div>
-          <div className={styles.metricValue} style={{ color: '#34d399' }}>
+          <div className={`${styles.metricValue} ${partnerStyles.metricSuccess}`}>
             {metrics.active}
           </div>
           <span className={styles.metricHint}>Publicados en FilaAliados</span>
@@ -530,11 +521,11 @@ export const PartnersView: React.FC = () => {
         <div className={styles.metricCard}>
           <div className={styles.metricHeader}>
             <span className={styles.metricLabel}>Inactivos / Ocultos</span>
-            <div className={styles.metricIcon} style={{ color: '#f87171' }}>
+            <div className={`${styles.metricIcon} ${partnerStyles.metricDanger}`}>
               <EyeOff size={18} />
             </div>
           </div>
-          <div className={styles.metricValue} style={{ color: '#f87171' }}>
+          <div className={`${styles.metricValue} ${partnerStyles.metricDanger}`}>
             {metrics.inactive}
           </div>
           <span className={styles.metricHint}>Pausados temporalmente</span>
@@ -543,11 +534,11 @@ export const PartnersView: React.FC = () => {
         <div className={styles.metricCard}>
           <div className={styles.metricHeader}>
             <span className={styles.metricLabel}>Sectores / Categorías</span>
-            <div className={styles.metricIcon} style={{ color: '#60a5fa' }}>
+            <div className={`${styles.metricIcon} ${partnerStyles.metricInfo}`}>
               <Compass size={18} />
             </div>
           </div>
-          <div className={styles.metricValue} style={{ color: '#60a5fa' }}>
+          <div className={`${styles.metricValue} ${partnerStyles.metricInfo}`}>
             {metrics.uniqueCategories}
           </div>
           <span className={styles.metricHint}>Diversidad de servicios turísticos</span>
@@ -557,7 +548,7 @@ export const PartnersView: React.FC = () => {
       {/* Barra de Filtros y Búsqueda */}
       <div className={styles.filterBar}>
         <div className={styles.searchGroup}>
-          <Search size={16} style={{ color: 'var(--text-muted, #5e7a6f)' }} />
+          <Search size={16} className={partnerStyles.searchIcon} />
           <input
             type="text"
             className={styles.searchInput}
@@ -585,8 +576,7 @@ export const PartnersView: React.FC = () => {
         <div className={styles.emptyStateCard}>
           <Loader2
             size={32}
-            className="animate-spin"
-            style={{ color: 'var(--color-brand-accent, #f59e0b)' }}
+            className={`animate-spin ${partnerStyles.loaderAccent}`}
           />
           <h3 className={styles.emptyStateTitle}>Cargando Aliados</h3>
           <p className={styles.emptyStateDescription}>
@@ -642,7 +632,7 @@ export const PartnersView: React.FC = () => {
                     ) : (
                       <Building2
                         size={28}
-                        style={{ color: 'var(--color-brand-accent, #f59e0b)' }}
+                        className={partnerStyles.logoFallbackIcon}
                       />
                     )}
                   </div>
@@ -702,9 +692,8 @@ export const PartnersView: React.FC = () => {
                       href={partner.instagram_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className={partnerStyles.linkTag}
+                      className={`${partnerStyles.linkTag} ${partnerStyles.linkTagInstagram}`}
                       title="Visitar perfil de Instagram"
-                      style={{ color: '#fb7185' }}
                     >
                       <InstagramIcon size={13} />
                       <span>Instagram</span>
@@ -713,7 +702,7 @@ export const PartnersView: React.FC = () => {
                   )}
 
                   {!partner.website_url && !partner.instagram_url && (
-                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted, #5e7a6f)' }}>
+                    <span className={partnerStyles.noLinksText}>
                       Sin enlaces externos configurados
                     </span>
                   )}
@@ -766,34 +755,21 @@ export const PartnersView: React.FC = () => {
           aria-modal="true"
         >
           <div
-            className={styles.adminModalCard}
+            className={`${styles.adminModalCard} ${partnerStyles.modalCardLg}`}
             onClick={(e) => e.stopPropagation()}
-            style={{ maxWidth: '600px' }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-                <div
-                  style={{
-                    width: '36px',
-                    height: '36px',
-                    borderRadius: '10px',
-                    backgroundColor: 'rgba(245, 158, 11, 0.15)',
-                    color: 'var(--color-brand-accent, #f59e0b)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
+            <div className={partnerStyles.modalHeaderRow}>
+              <div className={partnerStyles.modalTitleGroup}>
+                <div className={partnerStyles.modalIconBox}>
                   <Building2 size={20} />
                 </div>
-                <h3 className={styles.sectionTitle} style={{ margin: 0 }}>
+                <h3 className={`${styles.sectionTitle} ${partnerStyles.modalSectionTitle}`}>
                   {editingPartner ? 'Editar Aliado Oficial' : 'Registrar Nuevo Aliado'}
                 </h3>
               </div>
               <button
                 type="button"
-                className={styles.btnSecondary}
-                style={{ padding: '0.4rem', border: 'none', background: 'transparent' }}
+                className={`${styles.btnSecondary} ${partnerStyles.modalCloseBtn}`}
                 onClick={() => !isSubmitting && setIsFormModalOpen(false)}
                 disabled={isSubmitting}
               >
@@ -802,16 +778,7 @@ export const PartnersView: React.FC = () => {
             </div>
 
             {formErrors.submit && (
-              <div
-                style={{
-                  padding: '0.75rem',
-                  backgroundColor: 'rgba(239, 68, 68, 0.15)',
-                  border: '1px solid rgba(239, 68, 68, 0.3)',
-                  borderRadius: '8px',
-                  color: '#fca5a5',
-                  fontSize: '0.85rem',
-                }}
-              >
+              <div className={partnerStyles.formErrorBanner}>
                 {formErrors.submit}
               </div>
             )}
@@ -820,7 +787,7 @@ export const PartnersView: React.FC = () => {
               {/* Nombre */}
               <div className={styles.formModalGroup}>
                 <label className={styles.formModalLabel}>
-                  Nombre del Aliado <span style={{ color: '#f87171' }}>*</span>
+                  Nombre del Aliado <span className={partnerStyles.requiredIndicator}>*</span>
                 </label>
                 <input
                   type="text"
@@ -832,14 +799,14 @@ export const PartnersView: React.FC = () => {
                   disabled={isSubmitting}
                 />
                 {formErrors.name && (
-                  <span style={{ fontSize: '0.75rem', color: '#f87171' }}>{formErrors.name}</span>
+                  <span className={partnerStyles.formFieldError}>{formErrors.name}</span>
                 )}
               </div>
 
               {/* Slug */}
               <div className={styles.formModalGroup}>
                 <label className={styles.formModalLabel}>
-                  Slug Identificador <span style={{ color: '#f87171' }}>*</span>
+                  Slug Identificador <span className={partnerStyles.requiredIndicator}>*</span>
                 </label>
                 <input
                   type="text"
@@ -856,14 +823,14 @@ export const PartnersView: React.FC = () => {
                   disabled={isSubmitting}
                 />
                 {formErrors.slug && (
-                  <span style={{ fontSize: '0.75rem', color: '#f87171' }}>{formErrors.slug}</span>
+                  <span className={partnerStyles.formFieldError}>{formErrors.slug}</span>
                 )}
               </div>
 
               {/* Categoría */}
               <div className={`${styles.formModalGroup} ${styles.formModalFull}`}>
                 <label className={styles.formModalLabel}>
-                  Sector o Categoría Turística <span style={{ color: '#f87171' }}>*</span>
+                  Sector o Categoría Turística <span className={partnerStyles.requiredIndicator}>*</span>
                 </label>
                 <input
                   type="text"
@@ -904,7 +871,7 @@ export const PartnersView: React.FC = () => {
                     onClick={() => setLogoTab('upload')}
                   >
                     <Upload size={14} />
-                    <span>Subir Archivo (Storage)</span>
+                    <span>Subir archivo al almacenamiento</span>
                   </button>
                   <button
                     type="button"
@@ -923,7 +890,7 @@ export const PartnersView: React.FC = () => {
                     <label className={partnerStyles.fileDropzone}>
                       <ImageIcon
                         size={28}
-                        style={{ color: 'var(--color-brand-accent, #f59e0b)' }}
+                        className={partnerStyles.dropzoneIcon}
                       />
                       <span className={partnerStyles.dropzoneTitle}>
                         {logoFile
@@ -936,7 +903,7 @@ export const PartnersView: React.FC = () => {
                       <input
                         type="file"
                         accept="image/png,image/webp,image/jpeg,image/svg+xml"
-                        style={{ display: 'none' }}
+                        className={partnerStyles.hiddenInput}
                         onChange={handleFileChange}
                         disabled={isSubmitting}
                       />
@@ -987,7 +954,7 @@ export const PartnersView: React.FC = () => {
                 )}
 
                 {formErrors.logo && (
-                  <span style={{ fontSize: '0.75rem', color: '#f87171', marginTop: '0.3rem' }}>
+                  <span className={partnerStyles.formFieldErrorSpaced}>
                     {formErrors.logo}
                   </span>
                 )}
@@ -1021,7 +988,7 @@ export const PartnersView: React.FC = () => {
                   disabled={isSubmitting}
                 />
                 {formErrors.website_url && (
-                  <span style={{ fontSize: '0.75rem', color: '#f87171' }}>
+                  <span className={partnerStyles.formFieldError}>
                     {formErrors.website_url}
                   </span>
                 )}
@@ -1041,7 +1008,7 @@ export const PartnersView: React.FC = () => {
                   disabled={isSubmitting}
                 />
                 {formErrors.instagram_url && (
-                  <span style={{ fontSize: '0.75rem', color: '#f87171' }}>
+                  <span className={partnerStyles.formFieldError}>
                     {formErrors.instagram_url}
                   </span>
                 )}
@@ -1066,7 +1033,7 @@ export const PartnersView: React.FC = () => {
               </div>
 
               {/* Estado Activo */}
-              <div className={styles.formModalGroup} style={{ justifyContent: 'center' }}>
+              <div className={`${styles.formModalGroup} ${partnerStyles.formModalGroupCentered}`}>
                 <label className={styles.formModalCheckboxLabel}>
                   <input
                     type="checkbox"
@@ -1083,15 +1050,7 @@ export const PartnersView: React.FC = () => {
 
               {/* Botones de Acción */}
               <div
-                className={styles.formModalFull}
-                style={{
-                  display: 'flex',
-                  justifyContent: 'flex-end',
-                  gap: '0.75rem',
-                  marginTop: '1rem',
-                  borderTop: '1px solid rgba(156, 181, 171, 0.15)',
-                  paddingTop: '1rem',
-                }}
+                className={`${styles.formModalFull} ${partnerStyles.formModalFooter}`}
               >
                 <button
                   type="button"
@@ -1131,44 +1090,24 @@ export const PartnersView: React.FC = () => {
           aria-modal="true"
         >
           <div
-            className={styles.adminModalCard}
+            className={`${styles.adminModalCard} ${partnerStyles.deleteModalCard}`}
             onClick={(e) => e.stopPropagation()}
-            style={{ maxWidth: '440px', textAlign: 'center' }}
           >
-            <div
-              style={{
-                width: '56px',
-                height: '56px',
-                borderRadius: '50%',
-                backgroundColor: 'rgba(239, 68, 68, 0.15)',
-                color: '#f87171',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                margin: '0 auto',
-              }}
-            >
+            <div className={partnerStyles.deleteModalIcon}>
               <Trash2 size={24} />
             </div>
 
-            <h3 className={styles.sectionTitle} style={{ margin: '0.5rem 0' }}>
+            <h3 className={`${styles.sectionTitle} ${partnerStyles.deleteModalTitle}`}>
               ¿Eliminar Aliado Oficial?
             </h3>
 
-            <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary, #9cb5ab)', margin: 0 }}>
+            <p className={partnerStyles.deleteModalDescription}>
               Estás a punto de eliminar a{' '}
-              <strong style={{ color: '#ffffff' }}>{deletingPartner.name}</strong>. Esta acción
+              <strong className={partnerStyles.highlightText}>{deletingPartner.name}</strong>. Esta acción
               removerá el convenio de la base de datos y ya no aparecerá en el sitio público.
             </p>
 
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'center',
-                gap: '0.75rem',
-                marginTop: '1.25rem',
-              }}
-            >
+            <div className={partnerStyles.deleteModalActions}>
               <button
                 type="button"
                 className={styles.btnSecondary}

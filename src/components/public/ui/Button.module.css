@@ -29,34 +29,37 @@
 }
 
 .button:focus-visible {
-  outline: 3px solid var(--focus-ring, #1B4A2E);
+  outline: 3px solid var(--focus-ring, var(--brand-primary));
   outline-offset: 2px;
 }
 
 /* Tamaños */
 .sm {
-  font-size: 0.85rem;
+  font-size: 0.875rem;
+  line-height: 1.2;
   padding: 0.4rem 0.85rem;
   border-radius: var(--radius-sm, 10px);
 }
 
 .md {
-  font-size: 0.95rem;
+  font-size: 1rem;
+  line-height: 1.2;
   padding: 0.65rem 1.35rem;
   min-height: 44px;
 }
 
 .lg {
-  font-size: 1.05rem;
+  font-size: 1.125rem;
+  line-height: 1.2;
   padding: 0.85rem 1.85rem;
   min-height: 48px;
 }
 
 /* Variantes */
 .primary {
-  background-color: var(--brand-primary, #1B4A2E);
+  background-color: var(--brand-primary, var(--brand-primary));
   color: #FFFFFF;
-  border: 1px solid var(--brand-primary, #1B4A2E);
+  border: 1px solid var(--brand-primary, var(--brand-primary));
   box-shadow: var(--shadow-sm, 0 2px 6px rgba(15, 46, 29, 0.08));
 }
 
@@ -68,9 +71,9 @@
 }
 
 .accent {
-  background-color: var(--brand-accent, #F5A623);
+  background-color: var(--brand-accent, var(--brand-accent));
   color: var(--brand-deep, #0F2E1D); /* NUNCA blanco */
-  border: 1px solid var(--brand-accent, #F5A623);
+  border: 1px solid var(--brand-accent, var(--brand-accent));
   box-shadow: var(--shadow-sm, 0 2px 6px rgba(15, 46, 29, 0.08));
 }
 
@@ -84,18 +87,18 @@
 .secondary {
   background-color: var(--bg-card, #FFFFFF);
   border: 1px solid var(--border-subtle, #DCD5C4);
-  color: var(--brand-primary, #1B4A2E);
+  color: var(--brand-primary, var(--brand-primary));
 }
 
 .secondary:hover:not(:disabled):not(.disabled) {
   background-color: var(--bg-surface, #FBF8F1);
-  border-color: var(--brand-primary, #1B4A2E);
+  border-color: var(--brand-primary, var(--brand-primary));
 }
 
 .ghost {
   background-color: transparent;
   border: 1px solid transparent;
-  color: var(--brand-primary, #1B4A2E);
+  color: var(--brand-primary, var(--brand-primary));
 }
 
 .ghost:hover:not(:disabled):not(.disabled) {
@@ -123,6 +126,14 @@
   pointer-events: none;
   filter: grayscale(0.2);
   box-shadow: none;
+}
+
+/* Estado Loading */
+.loading {
+  position: relative;
+  cursor: wait;
+  pointer-events: none;
+  opacity: 0.85;
 }
 
 /* Iconos y Spinner */
@@ -167,11 +178,11 @@
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   .button {
-    transition: none !important;
-    transform: none !important;
+    transition: none;
+    transform: none;
   }
   .button:active:not(:disabled):not(.disabled) {
-    transform: none !important;
+    transform: none;
   }
   .spinner {
     animation-duration: 1.5s;

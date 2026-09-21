@@ -7,7 +7,6 @@ import {
   AlertTriangle,
   UploadCloud,
   FileText,
-  Image as ImageIcon,
   Loader2,
   Trash2,
 } from 'lucide-react';
@@ -16,7 +15,6 @@ import {
   searchWinningTicketCandidate,
   registerWinner,
   uploadWinnerActDocument,
-  uploadWinnerDeliveryPhoto,
   type TicketWinnerCandidate,
 } from '@/services/winnerService';
 import { formatCOP } from '@/lib/utils';
@@ -53,14 +51,12 @@ const AdminRegisterWinnerModalContent: React.FC<AdminRegisterWinnerModalProps> =
   const [isSearchingCandidate, setIsSearchingCandidate] = useState<boolean>(false);
 
   const [actFile, setActFile] = useState<File | null>(null);
-  const [photoFiles, setPhotoFiles] = useState<File[]>([]);
   const [notes, setNotes] = useState<string>('');
 
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   const actFileInputRef = useRef<HTMLInputElement>(null);
-  const photoFileInputRef = useRef<HTMLInputElement>(null);
 
   // Buscar el boleto y verificar si está vendido
   const handleSearchCandidate = async () => {
@@ -100,18 +96,6 @@ const AdminRegisterWinnerModalContent: React.FC<AdminRegisterWinnerModalProps> =
     }
   };
 
-  const handlePhotoFilesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    if (files.length > 0) {
-      setPhotoFiles((prev) => [...prev, ...files].slice(0, 6)); // Máximo 6 fotos
-      setSubmitError(null);
-    }
-  };
-
-  const removePhotoFile = (index: number) => {
-    setPhotoFiles((prev) => prev.filter((_, i) => i !== index));
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitError(null);
@@ -149,23 +133,13 @@ const AdminRegisterWinnerModalContent: React.FC<AdminRegisterWinnerModalProps> =
         officialActUrl = uploadActRes.url || null;
       }
 
-      // 2. Subir fotos de entrega si existen
-      const deliveryPhotos: string[] = [];
-      for (const photo of photoFiles) {
-        const uploadPhotoRes = await uploadWinnerDeliveryPhoto(photo, selectedRaffleId);
-        if (uploadPhotoRes.success && uploadPhotoRes.url) {
-          deliveryPhotos.push(uploadPhotoRes.url);
-        }
-      }
-
-      // 3. Invocar RPC administrativa register_winner
+      // 2. Invocar RPC administrativa register_winner
       const regRes = await registerWinner({
         raffleId: selectedRaffleId,
         ticketNumber: candidate.ticketNumber,
         lotteryDrawNumber: lotteryDrawNumber.trim(),
         drawDate: new Date(drawDate).toISOString(),
         officialActUrl,
-        deliveryPhotos,
         notes: notes.trim() || null,
       });
 
@@ -382,13 +356,13 @@ const AdminRegisterWinnerModalContent: React.FC<AdminRegisterWinnerModalProps> =
                   ref={actFileInputRef}
                   onChange={handleActFileChange}
                   accept="application/pdf"
-                  style={{ display: 'none' }}
+                  className={styles.hiddenInput}
                 />
 
                 {actFile ? (
                   <div className={styles.filePreviewCard}>
                     <div className={styles.filePreviewInfo}>
-                      <FileText size={20} color="#34d399" />
+                      <FileText size={20} color="var(--color-success)" />
                       <span className={styles.fileName}>{actFile.name}</span>
                     </div>
                     <button
@@ -412,50 +386,6 @@ const AdminRegisterWinnerModalContent: React.FC<AdminRegisterWinnerModalProps> =
                     <span className={styles.uploadSubtext}>
                       Documento firmado y sellado de la adjudicación del premio (máx. 10 MB).
                     </span>
-                  </div>
-                )}
-              </div>
-
-              {/* Subir Fotos de Entrega */}
-              <div className={styles.formGroup}>
-                <label className={styles.formLabel}>Fotografías de Entrega del Premio</label>
-                <input
-                  type="file"
-                  ref={photoFileInputRef}
-                  onChange={handlePhotoFilesChange}
-                  accept="image/jpeg,image/png,image/webp"
-                  multiple
-                  style={{ display: 'none' }}
-                />
-
-                <div
-                  className={styles.uploadDropzone}
-                  onClick={() => photoFileInputRef.current?.click()}
-                >
-                  <ImageIcon size={28} color="#94a3b8" />
-                  <span className={styles.uploadText}>
-                    Haz clic para agregar fotos de entrega (JPG, PNG, WEBP)
-                  </span>
-                  <span className={styles.uploadSubtext}>
-                    Fotos con el ganador recibiendo su experiencia en Manaure (hasta 6 fotos).
-                  </span>
-                </div>
-
-                {photoFiles.length > 0 && (
-                  <div className={styles.photoGrid}>
-                    {photoFiles.map((photo, idx) => (
-                      <div key={idx} className={styles.photoThumbnail}>
-                        <img src={URL.createObjectURL(photo)} alt={`Foto entrega ${idx + 1}`} />
-                        <button
-                          type="button"
-                          onClick={() => removePhotoFile(idx)}
-                          className={styles.removePhotoBtn}
-                          title="Eliminar foto"
-                        >
-                          <X size={12} />
-                        </button>
-                      </div>
-                    ))}
                   </div>
                 )}
               </div>

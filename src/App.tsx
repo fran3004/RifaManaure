@@ -16,6 +16,9 @@ const TerminosPage = lazy(() =>
 );
 
 // Carga perezosa de autenticación y módulo administrativo
+const AdminRouteRoot = lazy(() =>
+  import('@/components/admin/layout/AdminRouteRoot').then((m) => ({ default: m.AdminRouteRoot }))
+);
 const AdminLoginPage = lazy(() =>
   import('@/pages/AdminLoginPage').then((m) => ({ default: m.AdminLoginPage }))
 );
@@ -79,31 +82,30 @@ export const App: React.FC = () => {
                 <Route path="/verificar" element={<VerificarPage />} />
                 <Route path="/terminos" element={<TerminosPage />} />
 
-                {/* Acceso Administrativo */}
-                <Route path="/admin/login" element={<AdminLoginPage />} />
-
-                {/* Panel Administrativo Protegido con Layout y Sub-rutas */}
-                <Route
-                  path="/admin"
-                  element={
-                    <ProtectedRoute>
-                      <AdminLayout />
-                    </ProtectedRoute>
-                  }
-                >
-                  <Route index element={<DashboardView />} />
-                  <Route path="dashboard" element={<Navigate to="/admin" replace />} />
-                  <Route path="ordenes" element={<OrdersView />} />
-                  <Route path="comprobantes" element={<ReceiptsView />} />
-                  <Route path="tickets" element={<TicketsView />} />
-                  <Route path="compradores" element={<BuyersView />} />
-                  <Route path="rifas" element={<RafflesView />} />
-                  <Route path="premio" element={<PrizeView />} />
-                  <Route path="cuentas" element={<PaymentAccountsView />} />
-                  <Route path="aliados" element={<PartnersView />} />
-                  <Route path="ganadores" element={<WinnersView />} />
-                  <Route path="auditoria" element={<AuditView />} />
-                  <Route path="configuracion" element={<SettingsView />} />
+                {/* Subárbol Administrativo con theme-admin.css centralizado */}
+                <Route path="/admin" element={<AdminRouteRoot />}>
+                  <Route path="login" element={<AdminLoginPage />} />
+                  <Route
+                    element={
+                      <ProtectedRoute>
+                        <AdminLayout />
+                      </ProtectedRoute>
+                    }
+                  >
+                    <Route index element={<DashboardView />} />
+                    <Route path="dashboard" element={<Navigate to="/admin" replace />} />
+                    <Route path="ordenes" element={<OrdersView />} />
+                    <Route path="comprobantes" element={<ReceiptsView />} />
+                    <Route path="tickets" element={<TicketsView />} />
+                    <Route path="compradores" element={<BuyersView />} />
+                    <Route path="rifas" element={<RafflesView />} />
+                    <Route path="premio" element={<PrizeView />} />
+                    <Route path="cuentas" element={<PaymentAccountsView />} />
+                    <Route path="aliados" element={<PartnersView />} />
+                    <Route path="ganadores" element={<WinnersView />} />
+                    <Route path="auditoria" element={<AuditView />} />
+                    <Route path="configuracion" element={<SettingsView />} />
+                  </Route>
                 </Route>
 
                 {/* Redirección por defecto */}

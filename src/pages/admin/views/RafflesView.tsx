@@ -167,6 +167,12 @@ export const RafflesView: React.FC = () => {
     }
   };
 
+  const activeSalesProgressStyle: React.CSSProperties | undefined = activeRaffle
+    ? ({
+        ['--progress-percentage' as string]: `${Math.min(100, activeRaffle.sales_percentage)}%`,
+      } as React.CSSProperties)
+    : undefined;
+
   return (
     <div className={styles.viewContainer}>
       <AdminPageHeader
@@ -178,7 +184,7 @@ export const RafflesView: React.FC = () => {
             : undefined
         }
         actions={
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+          <div className={styles.headerActions}>
             <button
               type="button"
               className={adminStyles.btnSecondary}
@@ -208,7 +214,7 @@ export const RafflesView: React.FC = () => {
             feedback.type === 'success' ? styles.feedbackSuccess : styles.feedbackError
           }`}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <div className={styles.feedbackContent}>
             {feedback.type === 'success' ? <CheckCircle size={18} /> : <AlertCircle size={18} />}
             <span>{feedback.message}</span>
           </div>
@@ -250,35 +256,20 @@ export const RafflesView: React.FC = () => {
               <div className={styles.cardHeaderLeft}>
                 <div className={styles.badgesRow}>
                   {renderStatusBadge(activeRaffle.status)}
-                  <span className={styles.raffleEditionTag}>
-                    Slug: <code>{activeRaffle.slug}</code>
-                  </span>
                   {activeRaffle.id === selectedRaffleId ? (
                     <span
-                      className={styles.raffleEditionTag}
-                      style={{
-                        borderColor: 'rgba(217, 119, 6, 0.5)',
-                        color: '#fbbf24',
-                        background: 'rgba(217, 119, 6, 0.15)',
-                        fontWeight: 600,
-                      }}
+                      className={`${styles.raffleEditionTag} ${styles.activeInPanelTag}`}
                     >
-                      ★ Activa en el Panel
+                      ★ Seleccionada en el panel
                     </span>
                   ) : (
                     <button
                       type="button"
-                      className={adminStyles.btnSecondary}
-                      style={{
-                        padding: '0.2rem 0.55rem',
-                        fontSize: '0.75rem',
-                        borderColor: '#d97706',
-                        color: '#fbbf24',
-                      }}
+                      className={`${adminStyles.btnSecondary} ${styles.btnSelectInPanel}`}
                       onClick={() => setSelectedRaffleId(activeRaffle.id)}
                       title="Seleccionar esta rifa para gestionar en todo el panel"
                     >
-                      Gestionar en Panel
+                      Usar en el panel
                     </button>
                   )}
                 </div>
@@ -300,7 +291,7 @@ export const RafflesView: React.FC = () => {
             <div className={styles.salesProgressSection}>
               <div className={styles.progressInfoRow}>
                 <div className={styles.progressLabelGroup}>
-                  <TrendingUp size={16} style={{ color: '#34d399' }} />
+                  <TrendingUp size={16} className={styles.progressIcon} />
                   <span className={styles.progressLabel}>Rendimiento de Ventas</span>
                   <span className={styles.progressBadge}>
                     {activeRaffle.sales_percentage}% vendido
@@ -309,18 +300,18 @@ export const RafflesView: React.FC = () => {
                 <div className={styles.progressStats}>
                   <strong>{activeRaffle.sold_tickets}</strong> de{' '}
                   <strong>{activeRaffle.total_tickets}</strong> boletos pagados (
-                  <strong style={{ color: '#34d399' }}>
+                  <strong className={styles.revenueHighlight}>
                     {formatCOP(activeRaffle.total_revenue)}
                   </strong>{' '}
                   recaudados)
                 </div>
               </div>
 
-              <div className={styles.progressBarContainer}>
-                <div
-                  className={styles.progressBarFill}
-                  style={{ width: `${Math.min(100, activeRaffle.sales_percentage)}%` }}
-                />
+              <div
+                className={styles.progressBarContainer}
+                style={activeSalesProgressStyle}
+              >
+                <div className={styles.progressBarFill} />
               </div>
             </div>
 
@@ -362,7 +353,7 @@ export const RafflesView: React.FC = () => {
                     <Award size={18} />
                   </div>
                 </div>
-                <div className={styles.metricValue} style={{ fontSize: '1.15rem' }}>
+                <div className={`${styles.metricValue} ${styles.metricValueMedium}`}>
                   {activeRaffle.lottery_reference || 'Lotería de Santander'}
                 </div>
                 <span className={styles.metricHint}>Premio mayor auditable</span>
@@ -375,7 +366,7 @@ export const RafflesView: React.FC = () => {
                     <Calendar size={18} />
                   </div>
                 </div>
-                <div className={styles.metricValue} style={{ fontSize: '1.1rem' }}>
+                <div className={`${styles.metricValue} ${styles.metricValueDate}`}>
                   {formatColombianDate(activeRaffle.draw_date)}
                 </div>
                 <span className={styles.metricHint}>
@@ -399,48 +390,23 @@ export const RafflesView: React.FC = () => {
                   <div key={r.id} className={styles.otherRaffleCard}>
                     <div className={styles.otherCardTop}>
                       <div>
-                        <div
-                          style={{
-                            marginBottom: '0.35rem',
-                            display: 'flex',
-                            gap: '0.4rem',
-                            alignItems: 'center',
-                            flexWrap: 'wrap',
-                          }}
-                        >
+                        <div className={styles.otherBadgesRow}>
                           {renderStatusBadge(r.status)}
                           {r.id === selectedRaffleId ? (
-                            <span
-                              style={{
-                                fontSize: '0.72rem',
-                                color: '#fbbf24',
-                                fontWeight: 600,
-                                background: 'rgba(217, 119, 6, 0.15)',
-                                padding: '0.15rem 0.45rem',
-                                borderRadius: '4px',
-                                border: '1px solid rgba(217, 119, 6, 0.4)',
-                              }}
-                            >
+                            <span className={styles.otherActiveBadge}>
                               ★ Activa en Panel
                             </span>
                           ) : null}
                         </div>
                         <h4 className={styles.otherTitle}>{r.title}</h4>
-                        <span className={styles.otherSlug}>Slug: {r.slug}</span>
                       </div>
 
-                      <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
+                      <div className={styles.otherActionsGroup}>
                         {r.id !== selectedRaffleId && (
                           <button
                             type="button"
-                            className={adminStyles.btnSecondary}
+                            className={`${adminStyles.btnSecondary} ${styles.btnManageOther}`}
                             onClick={() => setSelectedRaffleId(r.id)}
-                            style={{
-                              padding: '0.35rem 0.55rem',
-                              fontSize: '0.75rem',
-                              borderColor: '#d97706',
-                              color: '#fbbf24',
-                            }}
                             title="Seleccionar esta rifa para filtrar el panel"
                           >
                             Gestionar
@@ -448,9 +414,8 @@ export const RafflesView: React.FC = () => {
                         )}
                         <button
                           type="button"
-                          className={adminStyles.btnSecondary}
+                          className={`${adminStyles.btnSecondary} ${styles.btnEditSmall}`}
                           onClick={() => setSelectedRaffleToEdit(r)}
-                          style={{ padding: '0.35rem 0.55rem', fontSize: '0.75rem' }}
                         >
                           <Edit3 size={13} />
                           <span>Editar</span>
@@ -471,13 +436,13 @@ export const RafflesView: React.FC = () => {
                       </div>
                       <div className={styles.otherStatItem}>
                         <span className={styles.otherStatLabel}>Sorteo</span>
-                        <span style={{ fontSize: '0.8rem', color: '#9cb5ab' }}>
+                        <span className={styles.otherDrawDate}>
                           {formatColombianDate(r.draw_date)}
                         </span>
                       </div>
                       <div className={styles.otherStatItem}>
                         <span className={styles.otherStatLabel}>Vendidos</span>
-                        <strong style={{ color: '#34d399', fontSize: '0.85rem' }}>
+                        <strong className={styles.otherSoldValue}>
                           {r.sold_tickets} ({r.sales_percentage}%)
                         </strong>
                       </div>

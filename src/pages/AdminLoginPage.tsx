@@ -57,7 +57,7 @@ export const AdminLoginPage: React.FC = () => {
   };
 
   return (
-    <div className={styles.pageContainer}>
+    <div className={styles.pageContainer} data-theme="admin">
       <div className={styles.loginCard}>
         <div className={styles.brandHeader}>
           <div className={styles.logoBadge}>

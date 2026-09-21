@@ -7,19 +7,18 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 2500;
+  z-index: var(--z-modal-backdrop);
   padding: 1rem;
 }
 
 .modalCard {
-  background-color: var(--bg-surface, #11221c);
-  border: 1px solid rgba(16, 185, 129, 0.3);
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-xl, 20px);
   width: 100%;
   max-width: 520px;
-  box-shadow:
-    0 25px 50px -12px rgba(0, 0, 0, 0.7),
-    0 0 35px rgba(16, 185, 129, 0.12);
+  box-shadow: var(--shadow-lg);
+  color: var(--text-primary);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -42,8 +41,8 @@
   align-items: center;
   justify-content: space-between;
   padding: 1.25rem 1.5rem;
-  background-color: var(--bg-surface-elevated, #162c24);
-  border-bottom: 1px solid var(--border-subtle, rgba(156, 181, 171, 0.15));
+  background-color: var(--bg-surface);
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 .headerTitleGroup {
@@ -59,40 +58,44 @@
   width: 36px;
   height: 36px;
   border-radius: 10px;
-  background-color: rgba(16, 185, 129, 0.15);
-  border: 1px solid rgba(16, 185, 129, 0.3);
-  color: #10b981;
+  background-color: var(--admin-surface-3, var(--overlay-success-subtle));
+  border: 1px solid rgba(27, 74, 46, 0.25);
+  color: var(--admin-brand, #1B4A2E);
 }
 
 .headerTitle {
   margin: 0;
-  font-size: 1.15rem;
+  font-size: 1.125rem;
+  line-height: 1.2;
   font-weight: 700;
-  color: var(--text-primary, #f3f7f5);
+  color: var(--text-primary);
 }
 
 .headerSubtitle {
-  font-size: 0.75rem;
-  color: var(--text-secondary, #9cb5ab);
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: var(--admin-text-2, var(--text-secondary));
   display: block;
 }
 
 .closeButton {
   background: none;
   border: none;
-  color: var(--text-secondary, #9cb5ab);
+  color: var(--admin-text-2, var(--text-secondary, #41564A));
   cursor: pointer;
-  padding: 0.4rem;
+  padding: 0.5rem;
+  min-width: 44px;
+  min-height: 44px;
   border-radius: var(--radius-md, 8px);
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   transition: all var(--transition-fast, 150ms ease);
 }
 
 .closeButton:hover:not(:disabled) {
-  background-color: rgba(255, 255, 255, 0.08);
-  color: var(--text-primary, #ffffff);
+  background-color: var(--admin-neutral-bg, rgba(22, 38, 28, 0.06));
+  color: var(--text-primary, #16261C);
 }
 
 .modalBody {
@@ -103,8 +106,8 @@
 }
 
 .detailsCard {
-  background-color: var(--bg-main, #0a1410);
-  border: 1px solid var(--border-subtle, rgba(156, 181, 171, 0.15));
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md, 12px);
   padding: 1.25rem;
   display: flex;
@@ -120,14 +123,16 @@
 }
 
 .detailLabel {
-  font-size: 0.82rem;
-  color: var(--text-secondary, #9cb5ab);
+  font-size: 0.875rem;
+  line-height: 1.2;
+  color: var(--admin-text-2, var(--text-secondary, #41564A));
 }
 
 .detailValue {
-  font-size: 0.9rem;
+  font-size: 0.875rem;
+  line-height: 1.45;
   font-weight: 600;
-  color: var(--text-primary, #f3f7f5);
+  color: var(--admin-text, var(--text-primary, #16261C));
   text-align: right;
 }
 
@@ -144,18 +149,21 @@
 }
 
 .amountLabel {
-  font-size: 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1.2;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: #34d399;
+  color: var(--admin-brand, #1B4A2E);
   margin-bottom: 0.25rem;
 }
 
 .amountValue {
-  font-size: 1.75rem;
+  font-size: 1.875rem;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
   font-weight: 800;
-  color: var(--color-brand-accent, #f59e0b);
+  color: var(--admin-accent-dark, var(--brand-accent-strong, #8A5200));
   letter-spacing: -0.02em;
 }
 
@@ -166,9 +174,10 @@
 }
 
 .ticketsLabel {
-  font-size: 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1.2;
   font-weight: 600;
-  color: var(--text-secondary, #9cb5ab);
+  color: var(--admin-text-2, var(--text-secondary, #41564A));
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -183,26 +192,39 @@
 
 .ticketChip {
   padding: 0.2rem 0.5rem;
-  font-size: 0.8rem;
+  font-size: 0.875rem;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
   font-weight: 700;
   font-family: var(--font-mono, monospace);
-  background-color: rgba(16, 185, 129, 0.15);
-  border: 1px solid rgba(16, 185, 129, 0.3);
-  color: #34d399;
+  background-color: var(--admin-surface-3, var(--overlay-success-subtle));
+  border: 1px solid rgba(27, 74, 46, 0.25);
+  color: var(--admin-brand, #1B4A2E);
   border-radius: var(--radius-sm, 6px);
 }
 
 .warningNotice {
-  background-color: rgba(16, 185, 129, 0.08);
-  border: 1px solid rgba(16, 185, 129, 0.2);
+  background-color: var(--admin-surface-3, #EDF5F0);
+  border: 1px solid rgba(27, 74, 46, 0.22);
   border-radius: var(--radius-md, 10px);
   padding: 0.85rem 1rem;
   display: flex;
   align-items: flex-start;
   gap: 0.65rem;
-  color: #a7f3d0;
-  font-size: 0.82rem;
-  line-height: 1.4;
+  color: var(--admin-text-2, #2D4A3E);
+  font-size: 0.875rem;
+  line-height: 1.45;
+}
+
+.warningNotice strong {
+  color: var(--admin-text, #16261C);
+  font-weight: 700;
+}
+
+.warningIcon {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: var(--admin-brand, #1B4A2E);
 }
 
 .modalFooter {
@@ -211,34 +233,36 @@
   justify-content: flex-end;
   gap: 0.75rem;
   padding: 1.25rem 1.5rem;
-  background-color: var(--bg-surface-elevated, #162c24);
-  border-top: 1px solid var(--border-subtle, rgba(156, 181, 171, 0.15));
+  background-color: var(--bg-surface);
+  border-top: 1px solid var(--border-subtle);
 }
 
 .btnCancel {
   background-color: transparent;
-  border: 1px solid var(--border-subtle, rgba(156, 181, 171, 0.2));
-  color: var(--text-secondary, #9cb5ab);
+  border: 1px solid var(--border-subtle, #DCD5C4);
+  color: var(--admin-text-2, var(--text-secondary, #41564A));
   border-radius: var(--radius-md, 10px);
   padding: 0.65rem 1.25rem;
-  font-size: 0.88rem;
+  font-size: 0.875rem;
+  line-height: 1.2;
   font-weight: 600;
   cursor: pointer;
   transition: all var(--transition-fast, 150ms ease);
 }
 
 .btnCancel:hover:not(:disabled) {
-  background-color: rgba(255, 255, 255, 0.05);
-  color: var(--text-primary, #ffffff);
+  background-color: var(--admin-neutral-bg, rgba(22, 38, 28, 0.06));
+  color: var(--admin-text, var(--text-primary, #16261C));
 }
 
 .btnConfirm {
-  background-color: #10b981;
+  background-color: var(--color-success);
   border: 1px solid #059669;
   color: #ffffff;
   border-radius: var(--radius-md, 10px);
   padding: 0.65rem 1.35rem;
-  font-size: 0.88rem;
+  font-size: 0.875rem;
+  line-height: 1.2;
   font-weight: 700;
   cursor: pointer;
   display: inline-flex;

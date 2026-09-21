@@ -5,6 +5,7 @@
 
 .pageLayout {
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
   background-color: var(--bg-page, #F4EFE4);
@@ -39,7 +40,8 @@
   border: 1px solid rgba(245, 166, 35, 0.45);
   color: var(--brand-accent-strong, #8A5200);
   font-family: var(--font-sans, system-ui, sans-serif);
-  font-size: 0.85rem;
+  font-size: 0.875rem;
+  line-height: 1.2;
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -48,7 +50,8 @@
 
 .title {
   font-family: var(--font-heading, 'Playfair Display Variable', Georgia, serif);
-  font-size: clamp(2.25rem, 5vw, 3.15rem);
+  font-size: 2.5rem;
+  line-height: 1.2;
   font-weight: 800;
   color: var(--brand-deep, #0F2E1D);
   margin-bottom: 1rem;
@@ -58,15 +61,16 @@
 
 .subtitle {
   font-family: var(--font-sans, system-ui, sans-serif);
-  font-size: 1.075rem;
+  font-size: 1rem;
+  line-height: 1.45;
   color: var(--text-secondary, #41564A);
-  line-height: 1.6;
+  line-height: 1.45;
   max-width: 660px;
   margin: 0 auto;
 }
 
 .subtitle strong {
-  color: var(--brand-primary, #1B4A2E);
+  color: var(--brand-primary, var(--brand-primary));
   font-weight: 700;
 }
 
@@ -88,7 +92,8 @@
 
 .label {
   font-family: var(--font-sans, system-ui, sans-serif);
-  font-size: 0.95rem;
+  font-size: 1rem;
+  line-height: 1.45;
   font-weight: 700;
   color: var(--text-primary, #16261C);
 }
@@ -121,8 +126,13 @@
 .input:focus {
   outline: none;
   background-color: #FFFFFF;
-  border-color: var(--brand-accent, #F5A623);
+  border-color: var(--brand-accent, var(--brand-accent));
   box-shadow: 0 0 0 4px rgba(245, 166, 35, 0.2);
+}
+
+.input:focus-visible {
+  outline: 2px solid var(--brand-accent, var(--brand-accent));
+  outline-offset: 1px;
 }
 
 .submitBtn {
@@ -132,11 +142,12 @@
   gap: 0.5rem;
   padding: 0.95rem 1.6rem;
   border-radius: var(--radius-md, 14px);
-  background: linear-gradient(135deg, var(--brand-accent, #F5A623) 0%, var(--brand-accent-hover, #E09015) 100%);
+  background: linear-gradient(135deg, var(--brand-accent, var(--brand-accent)) 0%, var(--brand-accent-hover, #E09015) 100%);
   color: var(--brand-deep, #0F2E1D);
   font-family: var(--font-sans, system-ui, sans-serif);
   font-weight: 700;
-  font-size: 0.975rem;
+  font-size: 1rem;
+  line-height: 1.2;
   border: none;
   cursor: pointer;
   box-shadow: 0 4px 14px rgba(245, 166, 35, 0.35);
@@ -162,10 +173,12 @@
 }
 
 .searchHint {
-  font-size: 0.825rem;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  font-variant-numeric: tabular-nums;
   color: var(--text-muted, #5A6B5F);
   margin-top: 0.25rem;
-  line-height: 1.4;
+  line-height: 1.45;
 }
 
 .errorText {
@@ -205,16 +218,18 @@
   gap: 1rem;
   padding-bottom: 1.25rem;
   border-bottom: 1px solid var(--border-subtle, #DCD5C4);
+  min-width: 0;
 }
 
 .orderRefGroup {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+  min-width: 0;
 }
 
 .orderRefLabel {
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   font-weight: 700;
@@ -223,13 +238,17 @@
 
 .orderRefValue {
   font-family: var(--font-mono, monospace);
-  font-size: 1.45rem;
+  font-size: 1.5rem;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
   font-weight: 800;
-  color: var(--brand-primary, #1B4A2E);
+  color: var(--brand-primary, var(--brand-primary));
 }
 
 .orderDate {
-  font-size: 0.825rem;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  font-variant-numeric: tabular-nums;
   color: var(--text-secondary, #41564A);
 }
 
@@ -238,10 +257,11 @@
   display: flex;
   flex-direction: column;
   gap: 0.15rem;
+  min-width: 0;
 }
 
 .buyerLabel {
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--text-muted, #5A6B5F);
@@ -250,13 +270,18 @@
 }
 
 .buyerName {
-  font-size: 1.05rem;
+  font-size: 1rem;
+  line-height: 1.45;
   font-weight: 700;
   color: var(--text-primary, #16261C);
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .buyerDoc {
-  font-size: 0.8rem;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  font-variant-numeric: tabular-nums;
   color: var(--text-secondary, #41564A);
   display: block;
 }
@@ -333,14 +358,17 @@
 
 .statusTitle {
   font-family: var(--font-heading, 'Playfair Display Variable', Georgia, serif);
-  font-size: 1.15rem;
+  font-size: 1.125rem;
+  line-height: 1.2;
   font-weight: 700;
   margin: 0 0 0.35rem 0;
   color: inherit;
 }
 
 .statusDescription {
-  font-size: 0.9rem;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  font-variant-numeric: tabular-nums;
   line-height: 1.55;
   color: inherit;
   margin: 0;
@@ -358,11 +386,13 @@
   justify-content: center;
   gap: 0.5rem;
   padding: 0.75rem 1.35rem;
-  background: linear-gradient(135deg, var(--brand-accent, #F5A623) 0%, var(--brand-accent-hover, #E09015) 100%);
+  background: linear-gradient(135deg, var(--brand-accent, var(--brand-accent)) 0%, var(--brand-accent-hover, #E09015) 100%);
   color: var(--brand-deep, #0F2E1D);
   font-family: var(--font-sans, system-ui, sans-serif);
   font-weight: 700;
-  font-size: 0.9rem;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  font-variant-numeric: tabular-nums;
   border-radius: var(--radius-md, 14px);
   border: none;
   cursor: pointer;
@@ -395,7 +425,8 @@
 }
 
 .raffleInfoLabel {
-  font-size: 0.725rem;
+  font-size: 0.875rem;
+  line-height: 1.2;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -403,7 +434,8 @@
 }
 
 .raffleInfoValue {
-  font-size: 0.95rem;
+  font-size: 1rem;
+  line-height: 1.45;
   font-weight: 700;
   color: var(--text-primary, #16261C);
 }
@@ -430,14 +462,17 @@
 
 .ticketsSectionTitle {
   font-family: var(--font-heading, 'Playfair Display Variable', Georgia, serif);
-  font-size: 1.15rem;
+  font-size: 1.125rem;
+  line-height: 1.2;
   font-weight: 700;
   color: var(--brand-deep, #0F2E1D);
   margin: 0;
 }
 
 .ticketsSectionSub {
-  font-size: 0.825rem;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  font-variant-numeric: tabular-nums;
   color: var(--text-muted, #5A6B5F);
   font-weight: 500;
 }
@@ -467,20 +502,23 @@
 
 .ticketChip:hover {
   transform: translateY(-2px);
-  border-color: var(--brand-accent, #F5A623);
+  border-color: var(--brand-accent, var(--brand-accent));
   box-shadow: var(--shadow-sm);
 }
 
 .ticketNumber {
   font-family: var(--font-mono, monospace);
-  font-size: 1.55rem;
+  font-size: 1.5rem;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
   font-weight: 800;
-  color: var(--brand-primary, #1B4A2E);
-  line-height: 1;
+  color: var(--brand-primary, var(--brand-primary));
+  line-height: 1.2;
 }
 
 .ticketChipStatus {
-  font-size: 0.65rem;
+  font-size: 0.75rem;
+  line-height: 1.2;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -523,7 +561,7 @@
 .supportPrompt {
   font-size: 0.875rem;
   color: var(--text-secondary, #41564A);
-  line-height: 1.4;
+  line-height: 1.45;
 }
 
 .supportPrompt strong {
@@ -584,7 +622,9 @@
 
 .emptyTitle {
   font-family: var(--font-heading, 'Playfair Display Variable', Georgia, serif);
-  font-size: 1.45rem;
+  font-size: 1.5rem;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
   font-weight: 700;
   color: var(--brand-deep, #0F2E1D);
   margin: 0;
@@ -592,8 +632,9 @@
 
 .emptyText {
   max-width: 520px;
-  font-size: 0.95rem;
-  line-height: 1.6;
+  font-size: 1rem;
+  line-height: 1.45;
+  line-height: 1.45;
   color: var(--text-secondary, #41564A);
   margin: 0;
 }
@@ -632,3 +673,31 @@
     justify-content: center;
   }
 }
+
+.statusBannerContent {
+  flex: 1;
+}
+
+.rejectionReason {
+  display: block;
+  margin-top: 0.35rem;
+  font-weight: 600;
+  color: #fee2e2;
+}
+
+.calendarIcon {
+  display: inline;
+  margin-right: 0.3rem;
+  vertical-align: text-bottom;
+}
+
+.ticketTitleIcon {
+  display: inline;
+  margin-right: 0.4rem;
+  vertical-align: text-bottom;
+}
+
+.emptySupportBtn {
+  margin-top: 0.5rem;
+}
+

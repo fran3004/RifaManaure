@@ -1,0 +1,62 @@
+.container {
+  min-height: 70vh;
+  min-height: 70dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  text-align: center;
+  color: var(--text-primary, #f3f7f5);
+  background-color: var(--bg-body, #060e0a);
+}
+
+.iconCircle {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background-color: rgba(239, 68, 68, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ef4444;
+  margin-bottom: 1rem;
+}
+
+.title {
+  font-size: 1.5rem;
+  line-height: 1.2;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.description {
+  max-width: 500px;
+  color: var(--text-secondary, #9cb5ab);
+  font-size: 0.875rem;
+  line-height: 1.45;
+  line-height: 1.45;
+  margin-bottom: 1.5rem;
+}
+
+.retryButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.4rem;
+  border-radius: 8px;
+  background-color: var(--color-success);
+  color: #060e0a;
+  font-weight: 700;
+  font-size: 0.875rem;
+  line-height: 1.2;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.retryButton:hover {
+  opacity: 0.92;
+  transform: translateY(-1px);
+}
+

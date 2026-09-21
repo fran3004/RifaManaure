@@ -4,8 +4,9 @@
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background-color: var(--color-bg, #0b1329);
-  color: var(--color-text, #ffffff);
+  min-height: 100dvh;
+  background-color: var(--admin-bg, #f4efe4);
+  color: var(--admin-text, #16261c);
   padding: var(--space-6, 1.5rem);
   text-align: center;
 }
@@ -13,8 +14,8 @@
 .spinner {
   width: 48px;
   height: 48px;
-  border: 4px solid rgba(255, 255, 255, 0.1);
-  border-top-color: var(--color-primary, #10b981);
+  border: 4px solid var(--admin-border, #dcd5c4);
+  border-top-color: var(--admin-accent, var(--brand-accent));
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
   margin-bottom: var(--space-4, 1rem);
@@ -28,7 +29,7 @@
 
 .loadingText {
   font-size: 1rem;
-  color: var(--color-text-muted, #94a3b8);
+  color: var(--admin-text-2, #41564a);
 }
 
 .deniedContainer {
@@ -36,21 +37,21 @@
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background-color: var(--color-bg, #0b1329);
+  min-height: 100dvh;
+  background-color: var(--admin-bg, #f4efe4);
   padding: var(--space-6, 1.5rem);
 }
 
 .deniedCard {
-  background: var(--color-surface, #131d38);
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  background: var(--admin-surface-2, #ffffff);
+  border: 1px solid var(--admin-danger-border, #b42318);
   border-radius: 1rem;
   padding: 2.5rem 2rem;
   max-width: 480px;
   width: 100%;
   text-align: center;
   box-shadow:
-    0 20px 25px -5px rgba(0, 0, 0, 0.5),
-    0 8px 10px -6px rgba(0, 0, 0, 0.5);
+    var(--admin-sh-md);
 }
 
 .iconWrapper {
@@ -60,35 +61,38 @@
   width: 64px;
   height: 64px;
   border-radius: 50%;
-  background-color: rgba(239, 68, 68, 0.15);
-  color: #ef4444;
+  background-color: var(--admin-error-bg, #fbe9e1);
+  color: var(--admin-error, #b42318);
   margin-bottom: 1.5rem;
 }
 
 .title {
   font-size: 1.5rem;
+  line-height: 1.2;
   font-weight: 700;
-  color: #ffffff;
+  color: var(--admin-text, #16261c);
   margin-bottom: 0.75rem;
 }
 
 .message {
-  font-size: 0.95rem;
-  color: var(--color-text-muted, #94a3b8);
-  line-height: 1.5;
+  font-size: 1rem;
+  line-height: 1.45;
+  color: var(--admin-text-2, #41564a);
+  line-height: 1.45;
   margin-bottom: 1.5rem;
 }
 
 .userInfo {
-  background: rgba(0, 0, 0, 0.2);
+  background: var(--admin-surface, #fbf8f1);
   padding: 0.75rem 1rem;
   border-radius: 0.5rem;
   font-family: monospace;
-  font-size: 0.85rem;
-  color: #cbd5e1;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: var(--admin-text-2, #41564a);
   word-break: break-all;
   margin-bottom: 1.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--admin-border, #dcd5c4);
 }
 
 .actions {
@@ -104,11 +108,12 @@
   gap: 0.5rem;
   width: 100%;
   padding: 0.75rem 1.25rem;
-  background-color: #ef4444;
+  background-color: var(--admin-danger, #b42318);
   color: #ffffff;
   border: none;
   border-radius: 0.5rem;
-  font-size: 0.95rem;
+  font-size: 1rem;
+  line-height: 1.2;
   font-weight: 600;
   cursor: pointer;
   transition:
@@ -117,7 +122,7 @@
 }
 
 .logoutButton:hover {
-  background-color: #dc2626;
+  background-color: #8f1c14;
 }
 
 .logoutButton:active {
@@ -127,13 +132,14 @@
 .homeLink {
   display: inline-block;
   padding: 0.75rem 1.25rem;
-  color: var(--color-text-muted, #94a3b8);
+  color: var(--admin-text-2, #41564a);
   text-decoration: none;
-  font-size: 0.9rem;
+  font-size: 0.875rem;
+  line-height: 1.2;
   transition: color 0.2s ease;
 }
 
 .homeLink:hover {
-  color: #ffffff;
+  color: var(--admin-brand, var(--brand-primary));
   text-decoration: underline;
 }

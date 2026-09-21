@@ -36,30 +36,6 @@ import { AdminOrderReviewModal } from '@/components/admin/orders/AdminOrderRevie
 import { AdminConfirmPaymentModal } from '@/components/admin/orders/AdminConfirmPaymentModal';
 import styles from './AdminViews.module.css';
 
-function formatPaymentMethod(method?: string | null): string {
-  if (!method) return 'Transferencia Manual';
-  switch (method.toLowerCase()) {
-    case 'transfer_manual':
-      return 'Transferencia Manual';
-    case 'wompi':
-      return 'Wompi';
-    case 'bold':
-      return 'Bold';
-    case 'mercadopago':
-      return 'Mercado Pago';
-    case 'cash':
-      return 'Efectivo';
-    default:
-      return method;
-  }
-}
-
-function formatTicketNumber(num: string): string {
-  const n = parseInt(num, 10);
-  if (isNaN(n)) return num;
-  return n.toString().padStart(3, '0');
-}
-
 export const OrdersView: React.FC = () => {
   // Estados de datos y paginación
   const [orders, setOrders] = useState<OrderWithDetails[]>([]);
@@ -315,20 +291,7 @@ export const OrdersView: React.FC = () => {
 
       {actionMessage && (
         <div
-          style={{
-            padding: '0.9rem 1.25rem',
-            borderRadius: 'var(--radius-md, 10px)',
-            backgroundColor:
-              actionMessage.type === 'success'
-                ? 'rgba(16, 185, 129, 0.15)'
-                : 'rgba(239, 68, 68, 0.15)',
-            border: `1px solid ${actionMessage.type === 'success' ? '#10b981' : '#ef4444'}`,
-            color: actionMessage.type === 'success' ? '#34d399' : '#fca5a5',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            fontSize: '0.9rem',
-          }}
+          className={`${styles.actionBanner} ${actionMessage.type === 'success' ? styles.actionBannerSuccess : styles.actionBannerError}`}
         >
           {actionMessage.type === 'success' ? (
             <CheckCircle2 size={18} />
@@ -357,13 +320,7 @@ export const OrdersView: React.FC = () => {
                 setSearchTerm('');
                 setPage(1);
               }}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: 'var(--text-muted, #5e7a6f)',
-                cursor: 'pointer',
-                padding: '2px',
-              }}
+              className={styles.searchClearBtn}
               title="Limpiar búsqueda"
             >
               <X size={16} />
@@ -373,16 +330,9 @@ export const OrdersView: React.FC = () => {
 
         <div className={styles.filterControls}>
           {/* Filtro por Estado */}
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.35rem',
-              color: 'var(--text-secondary, #9cb5ab)',
-            }}
-          >
+          <div className={styles.filterLabel}>
             <Filter size={16} />
-            <span style={{ fontSize: '0.85rem' }}>Estado:</span>
+            <span className={styles.filterLabelText}>Estado:</span>
           </div>
           <select
             className={styles.filterSelect}
@@ -399,16 +349,9 @@ export const OrdersView: React.FC = () => {
           </select>
 
           {/* Ordenamiento */}
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.35rem',
-              color: 'var(--text-secondary, #9cb5ab)',
-            }}
-          >
+          <div className={styles.filterLabel}>
             <ArrowUpDown size={16} />
-            <span style={{ fontSize: '0.85rem' }}>Ordenar:</span>
+            <span className={styles.filterLabelText}>Ordenar:</span>
           </div>
           <select
             className={styles.filterSelect}
@@ -427,18 +370,11 @@ export const OrdersView: React.FC = () => {
 
       {/* Tabla de Órdenes con las 12 columnas especificadas */}
       <div className={styles.cardSection}>
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            marginBottom: '1rem',
-          }}
-        >
-          <h2 className={styles.sectionTitle} style={{ margin: 0 }}>
+        <div className={styles.sectionHeader}>
+          <h2 className={`${styles.sectionTitle} ${styles.sectionTitleNoMargin}`}>
             Listado de Órdenes de Compra
           </h2>
-          <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary, #9cb5ab)' }}>
+          <span className={styles.sectionCount}>
             Mostrando {fromCount} - {toCount} de {totalCount} órdenes
           </span>
         </div>
@@ -459,22 +395,16 @@ export const OrdersView: React.FC = () => {
           />
         ) : (
           <>
-            <div className={styles.tableWrapper}>
-              <table className={styles.table}>
+            <div className={`${styles.tableWrapper} ${styles.ordersTableWrapper}`}>
+              <table className={`${styles.table} ${styles.ordersTable}`}>
                 <thead>
                   <tr>
                     <th>Referencia</th>
                     <th>Fecha</th>
                     <th>Comprador</th>
-                    <th>Teléfono</th>
-                    <th>Correo</th>
-                    <th style={{ textAlign: 'center' }}>Cantidad</th>
-                    <th>Números</th>
                     <th>Total</th>
-                    <th>Método de Pago</th>
                     <th>Estado</th>
-                    <th>Comprobante</th>
-                    <th style={{ textAlign: 'right' }}>Acciones</th>
+                    <th className={styles.thAlignRight}>Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -491,30 +421,18 @@ export const OrdersView: React.FC = () => {
                       <tr key={ord.id}>
                         {/* 1. Referencia */}
                         <td>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                            <strong
-                              style={{
-                                fontFamily: 'var(--font-mono, monospace)',
-                                color: 'var(--color-brand-accent, #f59e0b)',
-                                fontSize: '0.9rem',
-                              }}
-                            >
+                          <div className={styles.referenceCell}>
+                            <strong className={styles.orderReference}>
                               {ord.reference}
                             </strong>
                             <button
                               type="button"
                               onClick={() => copyToClipboard(ord.reference, `ref_${ord.id}`)}
-                              style={{
-                                background: 'none',
-                                border: 'none',
-                                color: 'var(--text-muted, #5e7a6f)',
-                                cursor: 'pointer',
-                                padding: '2px',
-                              }}
+                              className={styles.inlineCopyBtn}
                               title="Copiar referencia"
                             >
                               {copiedKey === `ref_${ord.id}` ? (
-                                <Check size={12} color="#10b981" />
+                                <Check size={12} color="var(--color-success)" />
                               ) : (
                                 <Copy size={12} />
                               )}
@@ -523,113 +441,21 @@ export const OrdersView: React.FC = () => {
                         </td>
 
                         {/* 2. Fecha */}
-                        <td style={{ fontSize: '0.8rem', whiteSpace: 'nowrap' }}>{dateStr}</td>
+                        <td className={styles.tdDateNowrap}>{dateStr}</td>
 
                         {/* 3. Comprador */}
                         <td>
-                          <strong
-                            style={{
-                              display: 'block',
-                              color: 'var(--text-primary, #f3f7f5)',
-                              fontSize: '0.85rem',
-                            }}
-                          >
+                          <strong className={styles.buyerNameBlock}>
                             {ord.buyers?.full_name || 'Desconocido'}
                           </strong>
-                          <span
-                            style={{ fontSize: '0.75rem', color: 'var(--text-muted, #5e7a6f)' }}
-                          >
+                          <span className={styles.tableMeta}>
                             C.C. {ord.buyers?.document_id || 'N/A'}
                           </span>
                         </td>
 
-                        {/* 4. Teléfono */}
-                        <td style={{ fontSize: '0.85rem', whiteSpace: 'nowrap' }}>
-                          {ord.buyers?.phone ? (
-                            <a
-                              href={`https://wa.me/57${ord.buyers.phone.replace(/\D/g, '')}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              style={{ color: '#34d399', textDecoration: 'none' }}
-                              title="Contactar por WhatsApp"
-                            >
-                              {ord.buyers.phone}
-                            </a>
-                          ) : (
-                            'N/A'
-                          )}
-                        </td>
-
-                        {/* 5. Correo */}
-                        <td
-                          style={{
-                            fontSize: '0.8rem',
-                            color: 'var(--text-secondary, #9cb5ab)',
-                            maxWidth: '160px',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            whiteSpace: 'nowrap',
-                          }}
-                          title={ord.buyers?.email || 'N/A'}
-                        >
-                          {ord.buyers?.email || 'N/A'}
-                        </td>
-
-                        {/* 6. Cantidad de tickets */}
-                        <td style={{ textAlign: 'center' }}>
-                          <span
-                            style={{
-                              display: 'inline-block',
-                              padding: '0.2rem 0.55rem',
-                              borderRadius: '9999px',
-                              backgroundColor: 'var(--bg-surface-elevated, #1a332a)',
-                              color: '#ffffff',
-                              fontWeight: 700,
-                              fontSize: '0.8rem',
-                            }}
-                          >
-                            {ord.ticket_count}
-                          </span>
-                        </td>
-
-                        {/* 7. Números */}
-                        <td>
-                          <div className={styles.ticketNumbersList}>
-                            {(ord.tickets || []).map((t) => (
-                              <span key={t.id || t.number} className={styles.ticketNumberChip}>
-                                {formatTicketNumber(t.number)}
-                              </span>
-                            ))}
-                            {(!ord.tickets || ord.tickets.length === 0) && (
-                              <span
-                                style={{ fontSize: '0.75rem', color: 'var(--text-muted, #5e7a6f)' }}
-                              >
-                                N/A
-                              </span>
-                            )}
-                          </div>
-                        </td>
-
-                        {/* 8. Total */}
-                        <td
-                          style={{
-                            fontWeight: 800,
-                            color: 'var(--text-primary, #f3f7f5)',
-                            whiteSpace: 'nowrap',
-                          }}
-                        >
+                        {/* 4. Total */}
+                        <td className={styles.dashboardTableTotal}>
                           {formatCOP(ord.total_amount)}
-                        </td>
-
-                        {/* 9. Método de pago */}
-                        <td
-                          style={{
-                            fontSize: '0.8rem',
-                            color: 'var(--text-secondary, #9cb5ab)',
-                            whiteSpace: 'nowrap',
-                          }}
-                        >
-                          {formatPaymentMethod(ord.payment_method)}
                         </td>
 
                         {/* 10. Estado */}
@@ -655,59 +481,23 @@ export const OrdersView: React.FC = () => {
                             </span>
                           )}
                           {ord.status === 'expired' && (
-                            <span className={styles.badgeDanger} style={{ opacity: 0.7 }}>
+                            <span className={`${styles.badgeDanger} ${styles.badgeCancelled}`}>
                               <AlertCircle size={12} /> Expirada
                             </span>
                           )}
                           {ord.status === 'cancelled' && (
-                            <span className={styles.badgeNeutral} style={{ opacity: 0.7 }}>
+                            <span className={`${styles.badgeNeutral} ${styles.badgeCancelled}`}>
                               <X size={12} /> Cancelada
                             </span>
                           )}
                         </td>
 
-                        {/* 11. Comprobante */}
-                        <td>
-                          {ord.receipt_url ? (
+                        {/* 11. Acciones: la revisión contiene el comprobante cuando existe */}
+                        <td className={styles.thAlignRight}>
+                          <div className={styles.tableActions}>
                             <button
                               type="button"
-                              onClick={() => setSelectedReviewOrder(ord)}
-                              className={styles.btnSecondary}
-                              style={{
-                                padding: '0.35rem 0.65rem',
-                                fontSize: '0.75rem',
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: '0.3rem',
-                                cursor: 'pointer',
-                              }}
-                              title="Revisar soporte en modal de auditoría"
-                            >
-                              <Eye size={14} />
-                              <span>Ver</span>
-                            </button>
-                          ) : (
-                            <span
-                              style={{ fontSize: '0.75rem', color: 'var(--text-muted, #5e7a6f)' }}
-                            >
-                              Sin soporte
-                            </span>
-                          )}
-                        </td>
-
-                        {/* 12. Acciones */}
-                        <td style={{ textAlign: 'right' }}>
-                          <div
-                            style={{
-                              display: 'inline-flex',
-                              gap: '0.4rem',
-                              justifyContent: 'flex-end',
-                            }}
-                          >
-                            <button
-                              type="button"
-                              className={styles.btnSecondary}
-                              style={{ padding: '0.35rem 0.65rem', fontSize: '0.75rem' }}
+                              className={`${styles.btnSecondary} ${styles.btnSmallSecondary}`}
                               onClick={() => setSelectedReviewOrder(ord)}
                               title="Abrir auditoría completa de la orden"
                             >
@@ -719,8 +509,7 @@ export const OrdersView: React.FC = () => {
                               <>
                                 <button
                                   type="button"
-                                  className={styles.btnSuccess}
-                                  style={{ padding: '0.35rem 0.65rem', fontSize: '0.75rem' }}
+                                  className={`${styles.btnSuccess} ${styles.btnSmallSecondary}`}
                                   onClick={() => void handleApprove(ord)}
                                   disabled={isProcessing}
                                   title="Aprobar pago y confirmar boletos vendidos"
@@ -730,8 +519,7 @@ export const OrdersView: React.FC = () => {
                                 </button>
                                 <button
                                   type="button"
-                                  className={styles.btnDanger}
-                                  style={{ padding: '0.35rem 0.65rem', fontSize: '0.75rem' }}
+                                  className={`${styles.btnDanger} ${styles.btnSmallSecondary}`}
                                   onClick={() => setRejectingOrder(ord)}
                                   disabled={isProcessing}
                                   title="Rechazar orden y liberar boletos"
@@ -758,15 +546,8 @@ export const OrdersView: React.FC = () => {
               </div>
 
               <div className={styles.paginationControls}>
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.4rem',
-                    marginRight: '0.5rem',
-                  }}
-                >
-                  <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary, #9cb5ab)' }}>
+                <div className={styles.pageSizeRow}>
+                  <span className={styles.pageSizeLabel}>
                     Filas:
                   </span>
                   <select
@@ -835,73 +616,39 @@ export const OrdersView: React.FC = () => {
       {rejectingOrder && (
         <div className={styles.adminModalBackdrop} onClick={() => setRejectingOrder(null)}>
           <div className={styles.adminModalCard} onClick={(e) => e.stopPropagation()}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <h3
-                style={{
-                  margin: 0,
-                  color: '#fca5a5',
-                  fontSize: '1.25rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                }}
-              >
+            <div className={styles.modalHeaderBetween}>
+              <h3 className={styles.rejectModalTitle}>
                 <XCircle size={22} />
                 Rechazar Orden {rejectingOrder.reference}
               </h3>
               <button
                 type="button"
-                className={styles.btnSecondary}
+                className={`${styles.btnSecondary} ${styles.modalCloseMiniBtn}`}
                 onClick={() => setRejectingOrder(null)}
-                style={{ padding: '0.35rem 0.5rem' }}
               >
                 <X size={16} />
               </button>
             </div>
 
-            <p style={{ color: 'var(--text-secondary, #9cb5ab)', fontSize: '0.9rem', margin: 0 }}>
+            <p className={styles.modalDescriptionText}>
               Al rechazar esta orden, los{' '}
-              <strong style={{ color: '#f59e0b' }}>{rejectingOrder.ticket_count} boletos</strong>{' '}
+              <strong className={styles.highlightText}>{rejectingOrder.ticket_count} boletos</strong>{' '}
               reservados serán liberados inmediatamente a la plataforma pública.
             </p>
 
             <div>
-              <label
-                style={{
-                  display: 'block',
-                  fontSize: '0.85rem',
-                  fontWeight: 600,
-                  color: '#e2f0ea',
-                  marginBottom: '0.5rem',
-                }}
-              >
+              <label className={styles.modalFieldLabel}>
                 Motivo del Rechazo:
               </label>
               <textarea
                 value={rejectionReason}
                 onChange={(e) => setRejectionReason(e.target.value)}
                 rows={3}
-                style={{
-                  width: '100%',
-                  padding: '0.75rem',
-                  backgroundColor: 'var(--bg-main, #0a1410)',
-                  border: '1px solid var(--border-subtle, rgba(156, 181, 171, 0.2))',
-                  borderRadius: 'var(--radius-md, 10px)',
-                  color: '#ffffff',
-                  fontSize: '0.9rem',
-                  outline: 'none',
-                }}
+                className={styles.modalReasonTextarea}
               />
             </div>
 
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'flex-end',
-                gap: '0.75rem',
-                marginTop: '0.5rem',
-              }}
-            >
+            <div className={styles.modalFooterActions}>
               <button
                 type="button"
                 className={styles.btnSecondary}

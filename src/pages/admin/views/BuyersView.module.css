@@ -25,25 +25,31 @@
   left: 0.9rem;
   top: 50%;
   transform: translateY(-50%);
-  color: var(--text-muted, #5e7a6f);
+  color: var(--text-muted, #7e9c90);
   pointer-events: none;
 }
 
 .searchInput {
   width: 100%;
-  background-color: var(--bg-surface, #11221c);
-  border: 1px solid var(--border-subtle, rgba(156, 181, 171, 0.2));
-  border-radius: var(--radius-md, 10px);
+  background-color: var(--admin-search-surface, var(--bg-card));
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
   padding: 0.65rem 1rem 0.65rem 2.5rem;
   color: var(--text-primary, #f3f7f5);
-  font-size: 0.88rem;
+  font-size: 0.875rem;
+  line-height: 1.45;
   outline: none;
   transition: border-color var(--transition-fast, 150ms ease);
 }
 
 .searchInput:focus {
-  border-color: var(--color-brand-accent, #f59e0b);
-  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.15);
+  border-color: var(--color-brand-accent, var(--brand-accent));
+  box-shadow: 0 0 0 2px var(--overlay-warning-subtle);
+}
+
+.searchInput:focus-visible {
+  outline: 2px solid var(--focus-ring-on-dark, var(--brand-accent));
+  outline-offset: 1px;
 }
 
 .toolbarActions {
@@ -54,34 +60,38 @@
 
 /* Card y Tabla de Compradores */
 .tableCard {
-  background-color: var(--bg-surface, #11221c);
-  border: 1px solid var(--border-subtle, rgba(156, 181, 171, 0.15));
-  border-radius: var(--radius-lg, 16px);
-  overflow: hidden;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  overflow: clip;
   box-shadow: 0 4px 20px -4px rgba(0, 0, 0, 0.35);
+  min-width: 0;
 }
 
 .tableScrollWrapper {
   width: 100%;
-  overflow-x: auto;
+  min-width: 0;
+  overflow-x: hidden;
 }
 
 .buyersTable {
   width: 100%;
+  table-layout: fixed;
   border-collapse: collapse;
   text-align: left;
 }
 
 .buyersTable thead th {
   padding: 0.95rem 1.15rem;
-  font-size: 0.72rem;
+  font-size: 0.875rem;
+  line-height: 1.2;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: var(--text-muted, #7e9c90);
-  background: rgba(7, 15, 12, 0.75);
-  border-bottom: 1px solid var(--border-subtle, rgba(156, 181, 171, 0.18));
-  white-space: nowrap;
+  color: var(--text-secondary);
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-subtle);
+  overflow-wrap: anywhere;
 }
 
 .buyersTableRow {
@@ -89,19 +99,21 @@
 }
 
 .buyersTableRow:nth-child(even) {
-  background-color: rgba(255, 255, 255, 0.015);
+  background-color: var(--bg-surface);
 }
 
 .buyersTableRow:hover {
-  background-color: rgba(16, 185, 129, 0.05);
+  background-color: var(--brand-accent-soft);
 }
 
 .buyersTableRow td {
-  padding: 0.85rem 1.15rem;
-  color: var(--text-secondary, #9cb5ab);
-  border-bottom: 1px solid rgba(156, 181, 171, 0.08);
+  padding: 0.75rem 0.65rem;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border-subtle);
   vertical-align: middle;
-  font-size: 0.84rem;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
 }
 
 /* Celdas personalizadas */
@@ -109,12 +121,16 @@
   display: flex;
   flex-direction: column;
   gap: 0.2rem;
+  min-width: 0;
 }
 
 .buyerName {
-  font-size: 0.88rem;
+  font-size: 0.875rem;
+  line-height: 1.45;
   font-weight: 700;
-  color: var(--text-primary, #f3f7f5);
+  color: var(--text-primary);
+  min-width: 0;
+  word-break: break-word;
 }
 
 .docBadge {
@@ -122,23 +138,31 @@
   align-items: center;
   gap: 0.3rem;
   font-family: var(--font-mono, monospace);
-  font-size: 0.75rem;
-  color: #fbbf24;
-  background-color: rgba(245, 158, 11, 0.1);
+  font-size: 0.875rem;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+  color: var(--brand-accent-strong);
+  background-color: var(--brand-accent-soft);
   padding: 0.1rem 0.45rem;
   border-radius: 4px;
-  border: 1px solid rgba(245, 158, 11, 0.2);
+  border: 1px solid rgba(245, 166, 35, 0.4);
   width: fit-content;
+  max-width: 100%;
+  overflow-wrap: anywhere;
 }
 
 .phoneLink {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  color: #34d399;
+  color: var(--brand-primary);
   text-decoration: none;
-  font-size: 0.84rem;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  font-variant-numeric: tabular-nums;
   font-weight: 600;
+  max-width: 100%;
+  flex-wrap: wrap;
 }
 
 .phoneLink:hover {
@@ -146,17 +170,18 @@
 }
 
 .emailText {
-  font-size: 0.8rem;
-  color: #9cb5ab;
-  max-width: 180px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: var(--text-secondary);
+  max-width: 100%;
+  overflow-wrap: anywhere;
 }
 
 .cityText {
-  font-size: 0.82rem;
-  color: #d1e3db;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: var(--text-secondary);
+  overflow-wrap: anywhere;
 }
 
 .ordersCountBadge {
@@ -164,25 +189,29 @@
   align-items: center;
   gap: 0.35rem;
   padding: 0.2rem 0.55rem;
-  background-color: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(156, 181, 171, 0.2);
-  color: #f3f7f5;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
   border-radius: 6px;
-  font-size: 0.78rem;
+  font-size: 0.875rem;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
   font-weight: 600;
   white-space: nowrap;
 }
 
 .ordersCountBadgeActive {
-  background-color: rgba(16, 185, 129, 0.12);
-  border-color: rgba(16, 185, 129, 0.3);
-  color: #34d399;
+  background-color: var(--admin-success-bg);
+  border-color: var(--admin-success);
+  color: var(--admin-success);
 }
 
 .spentAmount {
-  font-size: 0.85rem;
+  font-size: 0.875rem;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
   font-weight: 700;
-  color: #34d399;
+  color: var(--admin-success);
   white-space: nowrap;
 }
 
@@ -190,49 +219,60 @@
 .actionsCell {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: center;
   gap: 0.5rem;
+  flex-wrap: wrap;
 }
 
 .btnActionHistory {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.35rem;
-  padding: 0.35rem 0.7rem;
-  background-color: rgba(59, 130, 246, 0.1);
-  border: 1px solid rgba(59, 130, 246, 0.25);
-  color: #60a5fa;
+  padding: 0.55rem 0.85rem;
+  min-height: 44px;
+  min-width: 0;
+  background-color: var(--admin-info-bg);
+  border: 1px solid var(--admin-info);
+  color: var(--admin-info);
   border-radius: var(--radius-md, 8px);
-  font-size: 0.78rem;
+  font-size: 0.875rem;
+  line-height: 1.2;
   font-weight: 600;
   cursor: pointer;
   transition: all var(--transition-fast, 150ms ease);
+  flex: 1 1 90px;
 }
 
 .btnActionHistory:hover {
-  background-color: rgba(59, 130, 246, 0.2);
-  color: #93c5fd;
+  background-color: var(--admin-info);
+  color: #ffffff;
   transform: translateY(-1px);
 }
 
 .btnActionEdit {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.35rem;
-  padding: 0.35rem 0.7rem;
-  background-color: rgba(16, 185, 129, 0.1);
-  border: 1px solid rgba(16, 185, 129, 0.25);
-  color: #34d399;
+  padding: 0.55rem 0.85rem;
+  min-height: 44px;
+  min-width: 0;
+  background-color: var(--admin-success-bg);
+  border: 1px solid var(--admin-success);
+  color: var(--admin-success);
   border-radius: var(--radius-md, 8px);
-  font-size: 0.78rem;
+  font-size: 0.875rem;
+  line-height: 1.2;
   font-weight: 600;
   cursor: pointer;
   transition: all var(--transition-fast, 150ms ease);
+  flex: 1 1 90px;
 }
 
 .btnActionEdit:hover {
-  background-color: rgba(16, 185, 129, 0.2);
-  color: #6ee7b7;
+  background-color: var(--admin-success);
+  color: #ffffff;
   transform: translateY(-1px);
 }
 
@@ -240,7 +280,8 @@
 .feedbackToast {
   padding: 0.85rem 1.25rem;
   border-radius: var(--radius-md, 10px);
-  font-size: 0.88rem;
+  font-size: 0.875rem;
+  line-height: 1.45;
   font-weight: 500;
   display: flex;
   align-items: center;
@@ -250,15 +291,15 @@
 }
 
 .feedbackSuccess {
-  background-color: rgba(16, 185, 129, 0.15);
-  border: 1px solid rgba(16, 185, 129, 0.35);
-  color: #34d399;
+  background-color: var(--admin-success-bg);
+  border: 1px solid var(--admin-success);
+  color: var(--admin-success);
 }
 
 .feedbackError {
-  background-color: rgba(239, 68, 68, 0.15);
-  border: 1px solid rgba(239, 68, 68, 0.35);
-  color: #fca5a5;
+  background-color: var(--admin-error-bg);
+  border: 1px solid var(--admin-danger-border);
+  color: var(--admin-error);
 }
 
 .feedbackCloseBtn {
@@ -283,8 +324,97 @@
   align-items: center;
   justify-content: space-between;
   padding: 0.85rem 1.25rem;
-  background-color: rgba(7, 15, 12, 0.5);
-  border-top: 1px solid var(--border-subtle, rgba(156, 181, 171, 0.12));
+  background-color: var(--bg-surface);
+  border-top: 1px solid var(--border-subtle);
   flex-wrap: wrap;
   gap: 0.75rem;
 }
+
+.feedbackContent {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.toolbarSummary {
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: var(--text-secondary, #9cb5ab);
+}
+
+.thBuyer {
+  width: 19%;
+}
+
+.thPhone {
+  width: 14%;
+}
+
+.thEmail {
+  width: 18%;
+}
+
+.thCity {
+  width: 12%;
+}
+
+.thOrders {
+  width: 10%;
+  text-align: center;
+}
+
+.thSpent {
+  width: 11%;
+}
+
+.thActions {
+  width: 16%;
+  text-align: center;
+}
+
+.docGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.btnCopyDoc {
+  background: none;
+  border: none;
+  color: #7e9c90;
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  transition: color 150ms ease;
+}
+
+.btnCopyDoc:hover {
+  color: var(--text-primary, #f3f7f5);
+}
+
+.btnCopyDocSuccess {
+  color: var(--color-success);
+}
+
+.phoneNotAvailable {
+  color: #7e9c90;
+}
+
+.tdCenter {
+  text-align: center;
+}
+
+.pageSizeWrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-right: 0.5rem;
+}
+
+.pageSizeLabel {
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: var(--text-secondary, #9cb5ab);
+}
+

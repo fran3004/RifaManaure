@@ -181,9 +181,9 @@ export const VerificarPage: React.FC = () => {
                       {isPaid && (
                         <div className={`${styles.statusBanner} ${styles.statusBannerPaid}`}>
                           <div className={styles.statusIconWrapper}>
-                            <CheckCircle2 size={24} color="#10b981" />
+                            <CheckCircle2 size={24} color="var(--color-success)" />
                           </div>
-                          <div style={{ flex: 1 }}>
+                          <div className={styles.statusBannerContent}>
                             <h3 className={styles.statusTitle}>
                               Pago Confirmado y Boletos Garantizados
                             </h3>
@@ -225,7 +225,7 @@ export const VerificarPage: React.FC = () => {
                           className={`${styles.statusBanner} ${styles.statusBannerPendingVerification}`}
                         >
                           <div className={styles.statusIconWrapper}>
-                            <Clock size={24} color="#f59e0b" />
+                            <Clock size={24} color="var(--brand-accent)" />
                           </div>
                           <div>
                             <h3 className={styles.statusTitle}>
@@ -251,14 +251,7 @@ export const VerificarPage: React.FC = () => {
                             <p className={styles.statusDescription}>
                               El comprobante enviado no pudo ser verificado.
                               {ord.rejectionReason && (
-                                <span
-                                  style={{
-                                    display: 'block',
-                                    marginTop: '0.35rem',
-                                    fontWeight: 600,
-                                    color: '#fee2e2',
-                                  }}
-                                >
+                                <span className={styles.rejectionReason}>
                                   Motivo indicado: {ord.rejectionReason}
                                 </span>
                               )}
@@ -317,11 +310,7 @@ export const VerificarPage: React.FC = () => {
                           <span className={styles.raffleInfoValue}>
                             <Calendar
                               size={13}
-                              style={{
-                                display: 'inline',
-                                marginRight: '0.3rem',
-                                verticalAlign: 'text-bottom',
-                              }}
+                              className={styles.calendarIcon}
                             />
                             {ord.raffle.drawDate
                               ? formatDate(ord.raffle.drawDate)
@@ -345,11 +334,7 @@ export const VerificarPage: React.FC = () => {
                           <h4 className={styles.ticketsSectionTitle}>
                             <Ticket
                               size={16}
-                              style={{
-                                display: 'inline',
-                                marginRight: '0.4rem',
-                                verticalAlign: 'text-bottom',
-                              }}
+                              className={styles.ticketTitleIcon}
                             />
                             Números Asignados ({ord.tickets.length})
                           </h4>
@@ -428,8 +413,7 @@ export const VerificarPage: React.FC = () => {
                     )}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={styles.supportBtn}
-                    style={{ marginTop: '0.5rem' }}
+                    className={`${styles.supportBtn} ${styles.emptySupportBtn}`}
                   >
                     <MessageCircle size={16} />
                     <span>Ayuda con mi compra por WhatsApp</span>

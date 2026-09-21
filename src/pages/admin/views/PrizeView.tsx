@@ -382,8 +382,8 @@ export const PrizeView: React.FC = () => {
           description="Cargando configuración y catálogo del premio..."
           badge="Cargando"
         />
-        <div style={{ display: 'flex', justifyContent: 'center', padding: '4rem 0' }}>
-          <Loader2 size={36} className="animate-spin" style={{ color: '#f59e0b' }} />
+        <div className={styles.loadingContainer}>
+          <Loader2 size={36} className={`animate-spin ${styles.loaderBrand}`} />
         </div>
       </div>
     );
@@ -428,7 +428,7 @@ export const PrizeView: React.FC = () => {
             notification.type === 'success' ? styles.bannerSuccess : styles.bannerError
           }`}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+          <div className={styles.notificationContent}>
             {notification.type === 'success' ? (
               <CheckCircle2 size={18} />
             ) : (
@@ -472,7 +472,7 @@ export const PrizeView: React.FC = () => {
         <form onSubmit={handleSaveSettings} className={styles.settingsForm}>
           <div className={styles.formGroup}>
             <label htmlFor={badgeTextId} className={styles.label}>
-              <Sparkles size={14} style={{ color: '#f59e0b' }} />
+              <Sparkles size={14} className={styles.labelIcon} />
               Distintivo / Badge Superior
             </label>
             <input
@@ -488,7 +488,7 @@ export const PrizeView: React.FC = () => {
 
           <div className={styles.formGroup}>
             <label htmlFor={titleId} className={styles.label}>
-              <Gift size={14} style={{ color: '#f59e0b' }} />
+              <Gift size={14} className={styles.labelIcon} />
               Título Principal de la Sección
             </label>
             <input
@@ -538,9 +538,9 @@ export const PrizeView: React.FC = () => {
       {/* Tarjeta 2: Catálogo de Experiencias y Actividades */}
       <section className={styles.experiencesSection}>
         <div className={styles.sectionBar}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <div className={styles.sectionBarTitleGroup}>
             <h2 className={styles.sectionTitle}>
-              <Gift size={20} style={{ color: '#f59e0b' }} />
+              <Gift size={20} className={styles.sectionTitleIcon} />
               Experiencias y Actividades Incluidas
             </h2>
             <span className={styles.countBadge}>
@@ -555,16 +555,8 @@ export const PrizeView: React.FC = () => {
         </div>
 
         {experiences.length === 0 ? (
-          <div
-            style={{
-              padding: '3rem',
-              textAlign: 'center',
-              background: '#11221c',
-              borderRadius: '16px',
-              border: '1px dashed rgba(156,181,171,0.2)',
-            }}
-          >
-            <p style={{ color: '#9cb5ab', margin: '0 0 1rem 0' }}>
+          <div className={styles.emptyStateContainer}>
+            <p className={styles.emptyStateText}>
               No hay actividades registradas en el premio mayor aún.
             </p>
             <button type="button" onClick={handleOpenCreateModal} className={styles.btnPrimary}>
@@ -590,7 +582,7 @@ export const PrizeView: React.FC = () => {
                       className={styles.cardImg}
                       loading="lazy"
                     />
-                    <span className={styles.partnerTag}>{exp.partner_name}</span>
+                    <span className={styles.partnerBadge}>{exp.partner_name}</span>
                     <span className={styles.orderBadge}>#{exp.display_order}</span>
                   </div>
 
@@ -688,10 +680,10 @@ export const PrizeView: React.FC = () => {
               </button>
             </div>
 
-            <form onSubmit={handleSaveExperience} style={{ display: 'contents' }}>
+            <form onSubmit={handleSaveExperience} className={styles.formContents}>
               <div className={styles.modalBody}>
                 {/* Título y Operador */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div className={styles.modalGridRow}>
                   <div className={styles.formGroup}>
                     <label htmlFor={expTitleId} className={styles.label}>
                       Título de la Experiencia
@@ -757,7 +749,7 @@ export const PrizeView: React.FC = () => {
                       }`}
                       onClick={() => setImageMode('local')}
                     >
-                      <ImageIcon size={14} style={{ display: 'inline', marginRight: '4px' }} />
+                      <ImageIcon size={14} className={styles.tabIcon} />
                       Fotos de Manaure
                     </button>
                     <button
@@ -767,7 +759,7 @@ export const PrizeView: React.FC = () => {
                       }`}
                       onClick={() => setImageMode('upload')}
                     >
-                      <Upload size={14} style={{ display: 'inline', marginRight: '4px' }} />
+                      <Upload size={14} className={styles.tabIcon} />
                       Subir Foto Propia
                     </button>
                   </div>
@@ -788,18 +780,7 @@ export const PrizeView: React.FC = () => {
                           >
                             <img src={f.thumb} alt={f.alt} className={styles.thumbImg} />
                             {isSelected && (
-                              <div
-                                style={{
-                                  position: 'absolute',
-                                  top: 4,
-                                  right: 4,
-                                  background: '#f59e0b',
-                                  color: '#0a1410',
-                                  borderRadius: '50%',
-                                  padding: '2px',
-                                  display: 'flex',
-                                }}
-                              >
+                              <div className={styles.photoCheckBadge}>
                                 <Check size={12} strokeWidth={3} />
                               </div>
                             )}
@@ -814,64 +795,42 @@ export const PrizeView: React.FC = () => {
                           type="file"
                           accept="image/jpeg,image/png,image/webp"
                           onChange={handleFileChange}
-                          style={{ display: 'none' }}
+                          className={styles.hiddenFileInput}
                           disabled={uploadingImage}
                         />
                         {uploadingImage ? (
                           <>
                             <Loader2
                               size={24}
-                              className="animate-spin"
-                              style={{ color: '#f59e0b' }}
+                              className={`animate-spin ${styles.loaderBrand}`}
                             />
-                            <span style={{ fontSize: '0.85rem', color: '#9cb5ab' }}>
+                            <span className={styles.uploadingText}>
                               Subiendo imagen a Supabase Storage...
                             </span>
                           </>
                         ) : expImageUrl ? (
-                          <div
-                            style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '1rem',
-                              width: '100%',
-                            }}
-                          >
+                          <div className={styles.uploadPreviewRow}>
                             <img
                               src={expImageUrl}
                               alt="Vista previa"
-                              style={{
-                                width: '70px',
-                                height: '50px',
-                                objectFit: 'cover',
-                                borderRadius: '6px',
-                              }}
+                              className={styles.uploadPreviewImg}
                             />
-                            <div style={{ textAlign: 'left', flex: 1 }}>
-                              <p
-                                style={{
-                                  fontSize: '0.85rem',
-                                  color: '#f3f7f5',
-                                  margin: 0,
-                                  fontWeight: 600,
-                                }}
-                              >
+                            <div className={styles.uploadPreviewInfo}>
+                              <p className={styles.uploadPreviewTitle}>
                                 Imagen cargada con éxito
                               </p>
-                              <span style={{ fontSize: '0.75rem', color: '#9cb5ab' }}>
+                              <span className={styles.uploadPreviewHint}>
                                 Haz clic aquí para reemplazarla
                               </span>
                             </div>
                           </div>
                         ) : (
                           <>
-                            <Upload size={24} style={{ color: '#f59e0b' }} />
-                            <span
-                              style={{ fontSize: '0.85rem', color: '#f3f7f5', fontWeight: 600 }}
-                            >
+                            <Upload size={24} className={styles.uploadBoxIcon} />
+                            <span className={styles.uploadBoxTitle}>
                               Selecciona o arrastra una foto (JPG, PNG, WebP)
                             </span>
-                            <span style={{ fontSize: '0.75rem', color: '#5e7a6f' }}>
+                            <span className={styles.uploadBoxSubtitle}>
                               Máximo 5 MB. Se alojará de forma segura en la nube.
                             </span>
                           </>
@@ -900,7 +859,7 @@ export const PrizeView: React.FC = () => {
                 {/* Beneficios / Puntos clave */}
                 <div className={styles.formGroup}>
                   <span className={styles.label}>
-                    <CheckCircle2 size={14} style={{ color: '#10b981' }} />
+                    <CheckCircle2 size={14} className={styles.labelIconSuccess} />
                     Beneficios o Puntos Incluidos (Viñetas)
                   </span>
                   <div className={styles.featureList}>
@@ -947,8 +906,7 @@ export const PrizeView: React.FC = () => {
                       <button
                         type="button"
                         onClick={handleAddFeature}
-                        className={styles.btnSecondary}
-                        style={{ padding: '0.5rem 0.85rem' }}
+                        className={`${styles.btnSecondary} ${styles.btnAddFeature}`}
                       >
                         <Plus size={15} />
                         <span>Agregar</span>
@@ -958,7 +916,7 @@ export const PrizeView: React.FC = () => {
                 </div>
 
                 {/* Orden y Estado */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div className={styles.modalGridRow}>
                   <div className={styles.formGroup}>
                     <label htmlFor={expOrderId} className={styles.label}>
                       Orden de Posición
@@ -976,24 +934,15 @@ export const PrizeView: React.FC = () => {
 
                   <div className={styles.formGroup}>
                     <span className={styles.label}>Visibilidad</span>
-                    <div style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
-                      <label
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.5rem',
-                          cursor: 'pointer',
-                          color: '#f3f7f5',
-                          fontSize: '0.9rem',
-                        }}
-                      >
+                    <div className={styles.checkboxContainer}>
+                      <label className={styles.checkboxLabel}>
                         <input
                           type="checkbox"
                           checked={expIsActive}
                           onChange={(e) => setExpIsActive(e.target.checked)}
-                          style={{ accentColor: '#f59e0b', width: '18px', height: '18px' }}
+                          className={styles.checkboxInput}
                         />
-                        <span>Mostrar en la landing page</span>
+                        <span>Mostrar en la página pública</span>
                       </label>
                     </div>
                   </div>
@@ -1030,7 +979,7 @@ export const PrizeView: React.FC = () => {
       {/* Modal: Confirmación de Eliminación */}
       {isDeleteModalOpen && deletingExperience && (
         <div className={styles.modalOverlay}>
-          <div className={styles.modalContent} style={{ maxWidth: '420px' }}>
+          <div className={`${styles.modalContent} ${styles.modalContentSm}`}>
             <div className={styles.modalHeader}>
               <h2 className={styles.modalTitle}>¿Eliminar Experiencia?</h2>
               <button
@@ -1044,10 +993,10 @@ export const PrizeView: React.FC = () => {
             </div>
 
             <div className={styles.modalBody}>
-              <p style={{ color: '#9cb5ab', margin: 0, fontSize: '0.9rem', lineHeight: 1.5 }}>
+              <p className={styles.deleteModalText}>
                 ¿Estás seguro de que deseas eliminar permanentemente la experiencia{' '}
-                <strong style={{ color: '#f3f7f5' }}>"{deletingExperience.title}"</strong> de{' '}
-                <strong style={{ color: '#f59e0b' }}>{deletingExperience.partner_name}</strong>?
+                <strong className={styles.textHighlight}>"{deletingExperience.title}"</strong> de{' '}
+                <strong className={styles.textBrandAccent}>{deletingExperience.partner_name}</strong>?
                 Esta acción retirará la tarjeta de la landing page.
               </p>
             </div>

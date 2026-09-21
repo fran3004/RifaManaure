@@ -78,7 +78,7 @@ export const ToastNotification: React.FC<ToastNotificationProps> = ({ toast, onC
 
         <div
           className={styles.progressBar}
-          style={{ animationDuration: `${toast.duration || 4500}ms` }}
+          style={toast.duration ? ({ ['--toast-duration' as string]: `${toast.duration}ms` } as React.CSSProperties) : undefined}
         />
       </div>
     </div>

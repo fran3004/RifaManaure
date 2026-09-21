@@ -1,16 +1,16 @@
 .backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(4, 15, 11, 0.88);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background-color: rgba(4, 15, 11, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1050;
-  padding: 1.25rem;
-  overflow: hidden;
-  animation: fadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: var(--z-modal-backdrop);
+  padding: 1rem;
+  overflow-y: auto;
+  animation: fadeIn 200ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @keyframes fadeIn {
@@ -23,40 +23,38 @@
 }
 
 .modalCard {
-  background: var(--bg-surface-elevated, #0d231a);
-  border: 1px solid rgba(16, 185, 129, 0.2);
-  border-radius: 18px;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl, 20px);
   width: 100%;
   max-width: 680px;
   max-height: 88vh;
-  height: auto;
+  box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.6), 0 0 0 1px var(--border-subtle);
+  color: var(--text-primary);
   display: flex;
   flex-direction: column;
-  box-shadow:
-    0 24px 48px -12px rgba(0, 0, 0, 0.7),
-    0 0 0 1px rgba(16, 185, 129, 0.15);
   overflow: hidden;
-  animation: scaleIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: scaleIn 200ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @keyframes scaleIn {
   from {
-    opacity: 0;
     transform: scale(0.96) translateY(8px);
+    opacity: 0;
   }
   to {
-    opacity: 1;
     transform: scale(1) translateY(0);
+    opacity: 1;
   }
 }
 
 .modalHeader {
-  padding: 1.25rem 1.75rem;
-  border-bottom: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: var(--bg-surface, #081912);
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--border-subtle);
+  background-color: var(--bg-surface);
   flex-shrink: 0;
 }
 
@@ -75,36 +73,44 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--brand-emerald-400, #34d399);
+  color: var(--admin-success, var(--brand-primary));
   flex-shrink: 0;
 }
 
 .headerTitle {
-  font-size: 1.18rem;
-  font-weight: 700;
-  color: var(--text-primary, #ffffff);
-  margin: 0;
+  font-size: 1.125rem;
   line-height: 1.2;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
 }
 
 .headerSubtitle {
-  font-size: 0.82rem;
-  color: var(--text-secondary, #9cb5ab);
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: var(--admin-text-2, var(--text-secondary));
   display: block;
   margin-top: 0.2rem;
 }
 
+.headerMetaLabel {
+  color: var(--admin-text-2, var(--text-secondary));
+  font-weight: 700;
+}
+
 .closeButton {
   background: transparent;
-  border: 1px solid transparent;
-  color: var(--text-muted, #5e7a6f);
+  border: none;
+  color: var(--text-secondary, #9cb5ab);
   cursor: pointer;
   padding: 0.5rem;
-  border-radius: 8px;
-  display: flex;
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: var(--radius-md, 8px);
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
+  transition: all var(--transition-fast, 150ms ease);
 }
 
 .closeButton:hover:not(:disabled) {
@@ -156,20 +162,21 @@
   align-items: center;
   gap: 0.6rem;
   padding-bottom: 0.4rem;
-  border-bottom: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.06));
+  border-bottom: 1px solid var(--admin-border, var(--border-subtle));
   margin-top: 0.25rem;
 }
 
 .sectionDividerIcon {
-  color: var(--brand-emerald-400, #34d399);
+  color: var(--admin-brand, var(--brand-primary));
 }
 
 .sectionDividerText {
-  font-size: 0.82rem;
+  font-size: 0.875rem;
+  line-height: 1.2;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: var(--text-secondary, #9cb5ab);
+  color: var(--admin-brand, var(--brand-primary));
 }
 
 .formRow {
@@ -191,9 +198,10 @@
 }
 
 .label {
-  font-size: 0.85rem;
+  font-size: 0.875rem;
+  line-height: 1.45;
   font-weight: 600;
-  color: #e2e8f0;
+  color: var(--admin-text-2, var(--text-secondary));
   display: flex;
   align-items: center;
   gap: 0.35rem;
@@ -202,12 +210,13 @@
 .input,
 .textarea,
 .select {
-  background: var(--bg-surface, #081912);
-  border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.12));
+  background: var(--admin-surface-2, var(--bg-card));
+  border: 1px solid var(--admin-border, var(--border-subtle));
   border-radius: 10px;
   padding: 0.75rem 0.95rem;
   color: var(--text-primary, #ffffff);
-  font-size: 0.92rem;
+  font-size: 0.875rem;
+  line-height: 1.45;
   outline: none;
   transition: all 0.2s ease;
   width: 100%;
@@ -224,31 +233,49 @@
 .input:focus,
 .textarea:focus,
 .select:focus {
-  border-color: var(--brand-emerald-500, #10b981);
-  background: #092017;
+  border-color: var(--admin-success, var(--brand-primary));
+  background: var(--admin-surface-2, var(--bg-card));
   box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.18);
+}
+
+.select {
+  color-scheme: light;
+}
+
+.select option {
+  background: var(--admin-surface-2, #ffffff);
+  color: var(--admin-text, var(--text-primary));
+}
+
+.input:focus-visible,
+.textarea:focus-visible,
+.select:focus-visible {
+  outline: 2px solid var(--focus-ring-on-dark, var(--brand-accent));
+  outline-offset: 1px;
 }
 
 .inputDisabled {
   opacity: 0.6;
   cursor: not-allowed;
-  background: rgba(0, 0, 0, 0.3);
+  background: var(--admin-neutral-bg, #e8ece9);
 }
 
 .helpText {
-  font-size: 0.75rem;
-  color: var(--text-muted, #5e7a6f);
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: var(--admin-text-muted, var(--text-muted));
   line-height: 1.35;
 }
 
 /* Banner de Error Amigable */
 .errorBanner {
-  background: rgba(239, 68, 68, 0.12);
-  border: 1px solid rgba(239, 68, 68, 0.35);
+  background: var(--admin-error-bg, #fbe9e1);
+  border: 1px solid rgba(180, 35, 24, 0.35);
   border-radius: 12px;
   padding: 1rem 1.15rem;
-  color: #fca5a5;
-  font-size: 0.86rem;
+  color: var(--admin-error, #b42318);
+  font-size: 0.875rem;
+  line-height: 1.45;
   display: flex;
   align-items: flex-start;
   gap: 0.75rem;
@@ -263,21 +290,17 @@
 
 .errorBannerTitle {
   font-weight: 700;
-  color: #fee2e2;
-  font-size: 0.9rem;
-}
-
-.errorBannerHelp {
-  font-size: 0.8rem;
-  color: #fecaca;
-  margin-top: 0.25rem;
+  color: var(--admin-error, #b42318);
+  font-size: 0.875rem;
+  line-height: 1.2;
 }
 
 /* Notificaciones de Estado */
 .statusNotice {
   border-radius: 10px;
   padding: 0.85rem 1rem;
-  font-size: 0.83rem;
+  font-size: 0.875rem;
+  line-height: 1.45;
   line-height: 1.45;
   display: flex;
   align-items: flex-start;
@@ -285,80 +308,95 @@
 }
 
 .statusNoticeActive {
-  background: rgba(16, 185, 129, 0.1);
-  border: 1px solid rgba(16, 185, 129, 0.25);
-  color: #a7f3d0;
+  background: var(--admin-success-bg, rgba(16, 185, 129, 0.1));
+  border: 1px solid rgba(27, 74, 46, 0.25);
+  color: var(--admin-brand, #1B4A2E);
 }
 
 .statusNoticePaused {
-  background: rgba(245, 158, 11, 0.1);
-  border: 1px solid rgba(245, 158, 11, 0.25);
-  color: #fde68a;
+  background: var(--admin-warning-bg, rgba(245, 158, 11, 0.1));
+  border: 1px solid rgba(138, 82, 0, 0.25);
+  color: var(--admin-warning, #8A5200);
 }
 
 .statusNoticeClosed {
-  background: rgba(100, 116, 139, 0.1);
-  border: 1px solid rgba(100, 116, 139, 0.25);
-  color: #cbd5e1;
+  background: var(--admin-neutral-bg, rgba(100, 116, 139, 0.1));
+  border: 1px solid var(--admin-border, #DCD5C4);
+  color: var(--admin-neutral, #5F6673);
 }
 
-/* Footer Fijo en la parte inferior */
 .modalFooter {
-  padding: 1rem 1.75rem;
-  border-top: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 0.85rem;
-  background: var(--bg-surface, #081912);
+  gap: 0.75rem;
+  padding: 1.25rem 1.5rem;
+  border-top: 1px solid var(--border-subtle);
+  background-color: var(--bg-surface);
   flex-shrink: 0;
 }
 
 .btnCancel {
   background: transparent;
-  border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.12));
-  color: var(--text-secondary, #9cb5ab);
-  padding: 0.65rem 1.25rem;
-  border-radius: 10px;
-  font-size: 0.88rem;
+  border: 1px solid var(--border-subtle, rgba(156, 181, 171, 0.25));
+  color: var(--admin-text-2, var(--text-secondary));
+  padding: 0.6rem 1.2rem;
+  border-radius: var(--radius-md, 10px);
+  font-size: 0.875rem;
+  line-height: 1.2;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 0.4rem;
+  transition: all var(--transition-fast, 150ms ease);
 }
 
 .btnCancel:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.06);
-  color: var(--text-primary, #ffffff);
-  border-color: rgba(255, 255, 255, 0.2);
+  background-color: var(--admin-success-bg, #edf5f0);
+  color: var(--admin-brand, var(--brand-primary));
+  border-color: var(--admin-border-strong, var(--brand-primary));
 }
 
 .btnSubmit {
-  background: linear-gradient(135deg, #10b981, #059669);
-  border: 1px solid rgba(52, 211, 153, 0.4);
-  color: #ffffff;
-  padding: 0.65rem 1.45rem;
-  border-radius: 10px;
-  font-size: 0.88rem;
-  font-weight: 600;
+  background: var(--admin-button-primary-bg, var(--brand-accent));
+  border: 1px solid var(--admin-button-primary-border, var(--brand-accent));
+  color: var(--admin-button-primary-ink, var(--brand-deep));
+  padding: 0.65rem 1.35rem;
+  min-height: 44px;
+  border-radius: var(--radius-md, 14px);
+  font-size: 0.875rem;
+  line-height: 1.2;
+  font-weight: 700;
   cursor: pointer;
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
-  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
-  transition: all 0.2s ease;
+  gap: 0.5rem;
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-fast, 150ms ease);
 }
 
 .btnSubmit:hover:not(:disabled) {
-  background: linear-gradient(135deg, #059669, #047857);
-  box-shadow: 0 6px 18px rgba(16, 185, 129, 0.4);
-  transform: translateY(-1px);
+  background: var(--admin-button-primary-hover, #e09015);
+  border-color: var(--admin-button-primary-hover, #e09015);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
 }
 
-.btnSubmit:disabled {
-  opacity: 0.6;
+.btnSubmit:disabled,
+.btnCancel:disabled {
+  opacity: 0.5;
   cursor: not-allowed;
   transform: none;
 }
+
+.errorBannerIcon {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.statusNoticeIcon {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+

@@ -14,7 +14,6 @@ import {
   AlertCircle,
   Loader2,
   X,
-  Sparkles,
   RotateCcw,
   ExternalLink,
   Plus,
@@ -52,7 +51,6 @@ export const SettingsView: React.FC = () => {
   const [maxTicketsPerBuyer, setMaxTicketsPerBuyer] = useState<number>(20);
   const [supportWhatsappNumber, setSupportWhatsappNumber] = useState<string>('573001234567');
   const [supportEmail, setSupportEmail] = useState<string>('soporte@manaurevive.com');
-  const [updatedAt, setUpdatedAt] = useState<string | null>(null);
 
   // Baseline comparison for dirty state
   const [initialSettings, setInitialSettings] = useState<{
@@ -81,8 +79,6 @@ export const SettingsView: React.FC = () => {
       setMaxTicketsPerBuyer(data.max_tickets_per_buyer);
       setSupportWhatsappNumber(data.support_whatsapp_number || '');
       setSupportEmail(data.support_email || '');
-      setUpdatedAt(data.updated_at);
-
       setInitialSettings({
         reservationDurationMinutes: data.reservation_duration_minutes,
         maxTicketsPerBuyer: data.max_tickets_per_buyer,
@@ -111,8 +107,6 @@ export const SettingsView: React.FC = () => {
         setMaxTicketsPerBuyer(data.max_tickets_per_buyer);
         setSupportWhatsappNumber(data.support_whatsapp_number || '');
         setSupportEmail(data.support_email || '');
-        setUpdatedAt(data.updated_at);
-
         setInitialSettings({
           reservationDurationMinutes: data.reservation_duration_minutes,
           maxTicketsPerBuyer: data.max_tickets_per_buyer,
@@ -190,7 +184,6 @@ export const SettingsView: React.FC = () => {
         message:
           result.message || 'Parámetros del sistema guardados y sincronizados con toda la web.',
       });
-      setUpdatedAt(result.settings.updated_at);
       setInitialSettings({
         reservationDurationMinutes: result.settings.reservation_duration_minutes,
         maxTicketsPerBuyer: result.settings.max_tickets_per_buyer,
@@ -228,23 +221,6 @@ export const SettingsView: React.FC = () => {
       type: 'info',
       message: 'Se han descartado las modificaciones no guardadas.',
     });
-  };
-
-  const formatLastUpdated = (dateStr: string | null) => {
-    if (!dateStr) return 'Reciente';
-    try {
-      const d = new Date(dateStr);
-      return new Intl.DateTimeFormat('es-CO', {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: true,
-      }).format(d);
-    } catch {
-      return dateStr;
-    }
   };
 
   // --- Estado para Administradores Autorizados ---
@@ -414,7 +390,7 @@ export const SettingsView: React.FC = () => {
                   : styles.alertInfo
             }`}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+            <div className={styles.alertContent}>
               {notification.type === 'success' ? (
                 <CheckCircle2 size={18} />
               ) : notification.type === 'error' ? (
@@ -449,35 +425,13 @@ export const SettingsView: React.FC = () => {
           </div>
         ) : (
           <>
-            {/* Barra de Metadatos y Estado en Tiempo Real */}
-            <div className={styles.metadataCard}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Sparkles size={16} style={{ color: '#34d399' }} />
-                <span>
-                  Configuración en vivo gobernada por <strong>public.system_settings</strong> y
-                  Supabase Realtime.
-                </span>
-              </div>
-
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                {hasUnsavedChanges && (
-                  <span className={styles.saveNotice}>
-                    <AlertCircle size={14} /> Tienes modificaciones sin guardar
-                  </span>
-                )}
-                <span>
-                  Última actualización: <strong>{formatLastUpdated(updatedAt)}</strong>
-                </span>
-              </div>
-            </div>
-
             {/* ========================================================================= */}
             {/* SECCIÓN 1: PARÁMETROS OPERATIVOS DE VENTA Y RESERVA (2 COLUMNAS BALANCEADAS) */}
             {/* ========================================================================= */}
             <div className={styles.sectionBlock}>
               <div className={styles.sectionBlockHeader}>
                 <h3 className={styles.sectionTitle}>
-                  <Sliders size={18} style={{ color: '#34d399' }} />
+                  <Sliders size={18} className={styles.titleSuccessIcon} />
                   Parámetros Operativos de Venta y Reserva
                 </h3>
                 <p className={styles.sectionSubtitle}>
@@ -524,7 +478,7 @@ export const SettingsView: React.FC = () => {
                             type="number"
                             min={1}
                             max={120}
-                            className={styles.textInput}
+                            className={`${styles.textInput} ${styles.textInputWithSuffix}`}
                             value={reservationDurationMinutes}
                             onChange={(e) =>
                               setReservationDurationMinutes(
@@ -532,7 +486,6 @@ export const SettingsView: React.FC = () => {
                               )
                             }
                             disabled={isLoading || isSaving}
-                            style={{ paddingRight: '5.5rem' }}
                           />
                           <span className={styles.inputSuffix}>Minutos</span>
                         </div>
@@ -579,10 +532,7 @@ export const SettingsView: React.FC = () => {
                 {/* Card 2: Límite por Comprador */}
                 <div className={styles.settingCard}>
                   <div className={styles.cardTop}>
-                    <div
-                      className={styles.cardIconWrapper}
-                      style={{ background: 'rgba(59, 130, 246, 0.12)', color: '#60a5fa' }}
-                    >
+                    <div className={`${styles.cardIconWrapper} ${styles.cardIconInfo}`}>
                       <Users size={20} />
                     </div>
                     <span className={styles.cardBadge}>Control Anti-Acaparamiento</span>
@@ -614,7 +564,7 @@ export const SettingsView: React.FC = () => {
                             type="number"
                             min={1}
                             max={1000}
-                            className={styles.textInput}
+                            className={`${styles.textInput} ${styles.textInputWithSuffix}`}
                             value={maxTicketsPerBuyer}
                             onChange={(e) =>
                               setMaxTicketsPerBuyer(
@@ -622,7 +572,6 @@ export const SettingsView: React.FC = () => {
                               )
                             }
                             disabled={isLoading || isSaving}
-                            style={{ paddingRight: '5.5rem' }}
                           />
                           <span className={styles.inputSuffix}>Boletos</span>
                         </div>
@@ -672,7 +621,7 @@ export const SettingsView: React.FC = () => {
             <div className={styles.sectionBlock}>
               <div className={styles.sectionBlockHeader}>
                 <h3 className={styles.sectionTitle}>
-                  <PhoneCall size={18} style={{ color: '#10b981' }} />
+                  <PhoneCall size={18} className={styles.titleSuccessIcon} />
                   Canales Oficiales de Atención al Comprador y Soporte
                 </h3>
                 <p className={styles.sectionSubtitle}>
@@ -685,10 +634,7 @@ export const SettingsView: React.FC = () => {
                 {/* Card 3: WhatsApp Oficial */}
                 <div className={styles.settingCard}>
                   <div className={styles.cardTop}>
-                    <div
-                      className={styles.cardIconWrapper}
-                      style={{ background: 'rgba(16, 185, 129, 0.12)', color: '#34d399' }}
-                    >
+                    <div className={styles.cardIconWrapper}>
                       <MessageSquare size={20} />
                     </div>
                     <span className={styles.cardBadge}>Línea Directa</span>
@@ -746,10 +692,7 @@ export const SettingsView: React.FC = () => {
                 {/* Card 4: Correo Electrónico Institucional */}
                 <div className={styles.settingCard}>
                   <div className={styles.cardTop}>
-                    <div
-                      className={styles.cardIconWrapper}
-                      style={{ background: 'rgba(245, 158, 11, 0.12)', color: '#fbbf24' }}
-                    >
+                    <div className={`${styles.cardIconWrapper} ${styles.cardIconWarning}`}>
                       <Mail size={20} />
                     </div>
                     <span className={styles.cardBadge}>Correo Institucional</span>
@@ -810,25 +753,13 @@ export const SettingsView: React.FC = () => {
             {/* SECCIÓN 3: CONTROL DE ACCESOS Y GESTIÓN DE ADMINISTRADORES */}
             {/* ========================================================================= */}
             <div className={adminStyles.cardSection}>
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  marginBottom: '1.25rem',
-                  flexWrap: 'wrap',
-                  gap: '0.75rem',
-                }}
-              >
+              <div className={styles.adminsSectionHeader}>
                 <div>
-                  <h3
-                    className={adminStyles.sectionTitle}
-                    style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}
-                  >
-                    <Shield size={20} style={{ color: '#10b981' }} />
+                  <h3 className={`${adminStyles.sectionTitle} ${styles.adminsSectionTitle}`}>
+                    <Shield size={20} className={styles.titleSuccessIcon} />
                     Administradores Autorizados
                   </h3>
-                  <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.82rem', color: '#9cb5ab' }}>
+                  <p className={styles.adminsSectionSubtitle}>
                     Usuarios pre-autorizados con acceso al panel administrativo y control granular
                     de roles.
                   </p>
@@ -866,33 +797,25 @@ export const SettingsView: React.FC = () => {
                       <th>Cuenta Auth</th>
                       <th>Estado Acceso</th>
                       <th>Fecha de Alta</th>
-                      <th style={{ textAlign: 'right' }}>Acción</th>
+                      <th className={styles.thRight}>Acción</th>
                     </tr>
                   </thead>
                   <tbody>
                     {isLoadingUsers && adminUsers.length === 0 ? (
                       <tr>
-                        <td colSpan={6} style={{ textAlign: 'center', padding: '2.5rem' }}>
+                        <td colSpan={6} className={styles.tableStatusCell}>
                           <Loader2
                             size={24}
-                            className="animate-spin"
-                            style={{
-                              margin: '0 auto 0.5rem auto',
-                              color: '#34d399',
-                              display: 'block',
-                            }}
+                            className={`animate-spin ${styles.tableStatusSpinner}`}
                           />
-                          <span style={{ color: '#9cb5ab', fontSize: '0.88rem' }}>
+                          <span className={styles.tableStatusText}>
                             Cargando administradores autorizados desde la base de datos...
                           </span>
                         </td>
                       </tr>
                     ) : adminUsers.length === 0 ? (
                       <tr>
-                        <td
-                          colSpan={6}
-                          style={{ textAlign: 'center', padding: '2.5rem', color: '#9cb5ab' }}
-                        >
+                        <td colSpan={6} className={styles.tableEmptyCell}>
                           No se encontraron administradores registrados en la base de datos.
                         </td>
                       </tr>
@@ -968,7 +891,7 @@ export const SettingsView: React.FC = () => {
                             </td>
 
                             {/* Botón Switch Acción */}
-                            <td style={{ textAlign: 'right' }}>
+                            <td className={styles.tdRight}>
                               {isSelf ? (
                                 <button
                                   type="button"

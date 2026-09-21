@@ -347,20 +347,11 @@ export const PaymentAccountsView: React.FC = () => {
       {/* Banner de Feedback */}
       {feedback && (
         <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.75rem',
-            padding: '0.85rem 1.25rem',
-            borderRadius: 'var(--radius-md, 10px)',
-            backgroundColor:
-              feedback.type === 'success' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)',
-            border: `1px solid ${
-              feedback.type === 'success' ? 'rgba(16, 185, 129, 0.35)' : 'rgba(239, 68, 68, 0.35)'
-            }`,
-            color: feedback.type === 'success' ? '#34d399' : '#f87171',
-            fontSize: '0.9rem',
-          }}
+          className={`${styles.accountFeedbackBanner} ${
+            feedback.type === 'success'
+              ? styles.accountFeedbackSuccess
+              : styles.accountFeedbackError
+          }`}
         >
           {feedback.type === 'success' ? <CheckCircle2 size={18} /> : <AlertCircle size={18} />}
           <span>{feedback.message}</span>
@@ -383,11 +374,11 @@ export const PaymentAccountsView: React.FC = () => {
         <div className={styles.metricCard}>
           <div className={styles.metricHeader}>
             <span className={styles.metricLabel}>Cuentas Activas</span>
-            <div className={styles.metricIcon} style={{ color: '#34d399' }}>
+            <div className={`${styles.metricIcon} ${styles.metricSuccess}`}>
               <Eye size={18} />
             </div>
           </div>
-          <span className={styles.metricValue} style={{ color: '#34d399' }}>
+          <span className={`${styles.metricValue} ${styles.metricSuccess}`}>
             {activeCount}
           </span>
           <span className={styles.metricHint}>
@@ -398,11 +389,11 @@ export const PaymentAccountsView: React.FC = () => {
         <div className={styles.metricCard}>
           <div className={styles.metricHeader}>
             <span className={styles.metricLabel}>Cuentas Inactivas</span>
-            <div className={styles.metricIcon} style={{ color: '#94a3b8' }}>
+            <div className={`${styles.metricIcon} ${styles.metricNeutral}`}>
               <EyeOff size={18} />
             </div>
           </div>
-          <span className={styles.metricValue} style={{ color: '#94a3b8' }}>
+          <span className={`${styles.metricValue} ${styles.metricNeutral}`}>
             {inactiveCount}
           </span>
           <span className={styles.metricHint}>Ocultas del público (pausadas o contingencia)</span>
@@ -412,7 +403,7 @@ export const PaymentAccountsView: React.FC = () => {
       {/* Barra de Filtros y Búsqueda */}
       <div className={styles.filterBar}>
         <div className={styles.searchGroup}>
-          <CreditCard size={18} color="var(--text-muted, #5e7a6f)" />
+          <CreditCard size={18} color="var(--text-muted, #7e9c90)" />
           <input
             type="text"
             placeholder="Buscar por banco, titular o número de cuenta..."
@@ -440,20 +431,8 @@ export const PaymentAccountsView: React.FC = () => {
       </div>
 
       {/* Nota Informativa */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.75rem',
-          padding: '0.9rem 1.25rem',
-          backgroundColor: 'rgba(16, 185, 129, 0.08)',
-          border: '1px solid rgba(16, 185, 129, 0.2)',
-          borderRadius: 'var(--radius-lg, 16px)',
-          color: '#e2f0ea',
-          fontSize: '0.85rem',
-        }}
-      >
-        <ShieldCheck size={20} color="#34d399" style={{ flexShrink: 0 }} />
+      <div className={styles.accountInfoNotice}>
+        <ShieldCheck size={20} className={styles.accountInfoNoticeIcon} />
         <span>
           <strong>Regla de visualización:</strong> Los compradores que ingresan al checkout
           únicamente podrán ver y copiar las cuentas marcadas como <strong>Activas</strong>. Si
@@ -477,7 +456,7 @@ export const PaymentAccountsView: React.FC = () => {
         /* Estado Vacío Cuando No Hay Cuentas en la BD */
         <div className={styles.cardSection}>
           <AdminEmptyState
-            icon={<CreditCard size={36} color="var(--color-brand-accent, #f59e0b)" />}
+            icon={<CreditCard size={36} color="var(--color-brand-accent, var(--brand-accent))" />}
             title="No hay cuentas de pago configuradas"
             description="Aún no has registrado ninguna cuenta bancaria o billetera digital oficial. Agrega las cuentas donde los compradores realizarán sus transferencias para que aparezcan en el checkout."
             actionLabel="Agregar Primera Cuenta Oficial"
@@ -487,7 +466,7 @@ export const PaymentAccountsView: React.FC = () => {
       ) : filteredAccounts.length === 0 ? (
         <div className={styles.cardSection}>
           <AdminEmptyState
-            icon={<CreditCard size={36} color="var(--color-brand-accent, #f59e0b)" />}
+            icon={<CreditCard size={36} color="var(--color-brand-accent, var(--brand-accent))" />}
             title="No se encontraron cuentas"
             description="No hay cuentas registradas que coincidan con los filtros o término de búsqueda aplicado."
             actionLabel="Restablecer Filtros"
@@ -510,11 +489,11 @@ export const PaymentAccountsView: React.FC = () => {
               <div className={styles.accountHeaderRow}>
                 <div className={styles.accountTitleGroup}>
                   {acc.account_type === 'bre_b' ? (
-                    <Zap size={20} color="#34d399" />
+                    <Zap size={20} color="var(--color-success)" />
                   ) : acc.account_type === 'digital_wallet' ? (
-                    <Smartphone size={20} color="var(--color-brand-accent, #f59e0b)" />
+                    <Smartphone size={20} color="var(--color-brand-accent, var(--brand-accent))" />
                   ) : (
-                    <Landmark size={20} color="var(--color-brand-accent, #f59e0b)" />
+                    <Landmark size={20} color="var(--color-brand-accent, var(--brand-accent))" />
                   )}
                   <h4 className={styles.accountEntityTitle}>{acc.bank_name}</h4>
                   <span className={styles.orderBadge}>Orden #{acc.display_order}</span>
@@ -535,52 +514,22 @@ export const PaymentAccountsView: React.FC = () => {
               </div>
 
               {/* Tipo de Cuenta */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-                <span
-                  style={{
-                    fontSize: '0.72rem',
-                    color: 'var(--text-muted, #5e7a6f)',
-                    textTransform: 'uppercase',
-                    fontWeight: 700,
-                  }}
-                >
+              <div className={styles.accountFieldGroup}>
+                <span className={styles.accountFieldLabel}>
                   Tipo de Método / Cuenta:
                 </span>
-                <span style={{ fontSize: '0.9rem', color: '#e2f0ea', fontWeight: 600 }}>
+                <span className={styles.accountFieldValue}>
                   {formatAccountTypeLabel(acc.account_type)}
                 </span>
               </div>
 
               {/* Número de Cuenta y Copiado */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                <span
-                  style={{
-                    fontSize: '0.72rem',
-                    color: 'var(--text-muted, #5e7a6f)',
-                    textTransform: 'uppercase',
-                    fontWeight: 700,
-                  }}
-                >
+              <div className={styles.accountNumberGroup}>
+                <span className={styles.accountFieldLabel}>
                   Número de Cuenta / Teléfono Móvil:
                 </span>
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    backgroundColor: 'var(--bg-main, #0a1410)',
-                    padding: '0.6rem 0.85rem',
-                    borderRadius: 'var(--radius-md, 10px)',
-                    border: '1px solid rgba(156, 181, 171, 0.15)',
-                  }}
-                >
-                  <strong
-                    style={{
-                      fontFamily: 'var(--font-mono, monospace)',
-                      fontSize: '1.15rem',
-                      color: 'var(--color-brand-accent, #f59e0b)',
-                    }}
-                  >
+                <div className={styles.accountNumberBox}>
+                  <strong className={styles.accountNumberText}>
                     {acc.account_number}
                   </strong>
                   <button
@@ -596,36 +545,18 @@ export const PaymentAccountsView: React.FC = () => {
               </div>
 
               {/* Datos de Titularidad */}
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '0.25rem',
-                  fontSize: '0.85rem',
-                  color: 'var(--text-secondary, #9cb5ab)',
-                }}
-              >
+              <div className={styles.accountHolderDetails}>
                 <div>
-                  Titular: <strong style={{ color: '#f3f7f5' }}>{acc.account_holder}</strong>
+                  Titular: <strong className={styles.accountHolderHighlight}>{acc.account_holder}</strong>
                 </div>
                 {acc.holder_document_id && (
                   <div>
                     Documento / NIT:{' '}
-                    <strong style={{ color: '#f3f7f5' }}>{acc.holder_document_id}</strong>
+                    <strong className={styles.accountHolderHighlight}>{acc.holder_document_id}</strong>
                   </div>
                 )}
                 {acc.instructions && (
-                  <div
-                    style={{
-                      fontSize: '0.8rem',
-                      color: '#cbd5e1',
-                      marginTop: '0.35rem',
-                      padding: '0.45rem 0.65rem',
-                      borderRadius: 'var(--radius-sm, 6px)',
-                      backgroundColor: 'rgba(0, 0, 0, 0.25)',
-                      borderLeft: '2px solid var(--color-brand-accent, #f59e0b)',
-                    }}
-                  >
+                  <div className={styles.accountInstructionsBox}>
                     <strong>Instrucciones:</strong> {acc.instructions}
                   </div>
                 )}
@@ -664,34 +595,20 @@ export const PaymentAccountsView: React.FC = () => {
       {isFormModalOpen && (
         <div className={styles.adminModalBackdrop} onClick={() => setIsFormModalOpen(false)}>
           <div
-            className={styles.adminModalCard}
+            className={`${styles.adminModalCard} ${styles.accountModalCard}`}
             onClick={(e) => e.stopPropagation()}
-            style={{ maxWidth: '680px' }}
           >
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                borderBottom: '1px solid rgba(156, 181, 171, 0.15)',
-                paddingBottom: '0.75rem',
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                <CreditCard size={22} color="var(--color-brand-accent, #f59e0b)" />
-                <h3 style={{ margin: 0, color: '#f3f7f5', fontSize: '1.2rem' }}>
+            <div className={styles.accountModalHeader}>
+              <div className={styles.accountModalTitleGroup}>
+                <CreditCard size={22} color="var(--color-brand-accent, var(--brand-accent))" />
+                <h3 className={styles.accountModalTitle}>
                   {editingAccount ? 'Editar Cuenta de Pago' : 'Nueva Cuenta Oficial de Pago'}
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => setIsFormModalOpen(false)}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: '#9cb5ab',
-                  cursor: 'pointer',
-                }}
+                className={styles.accountModalCloseBtn}
               >
                 <X size={20} />
               </button>
@@ -699,13 +616,7 @@ export const PaymentAccountsView: React.FC = () => {
 
             {/* Presets Rápidos */}
             <div>
-              <span
-                style={{
-                  fontSize: '0.75rem',
-                  color: 'var(--text-muted, #5e7a6f)',
-                  fontWeight: 600,
-                }}
-              >
+              <span className={styles.accountPresetsLabel}>
                 Sugerencias de Entidades / Billeteras Rápidas:
               </span>
               <div className={styles.presetChipsRow}>
@@ -726,7 +637,7 @@ export const PaymentAccountsView: React.FC = () => {
 
             <form
               onSubmit={handleSaveAccount}
-              style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}
+              className={styles.accountForm}
             >
               <div className={styles.formModalGrid}>
                 {/* 1. Banco / Plataforma */}
@@ -741,7 +652,7 @@ export const PaymentAccountsView: React.FC = () => {
                     required
                   />
                   {formErrors.bank_name && (
-                    <span style={{ color: '#f87171', fontSize: '0.75rem' }}>
+                    <span className={styles.accountFieldError}>
                       {formErrors.bank_name}
                     </span>
                   )}
@@ -775,7 +686,7 @@ export const PaymentAccountsView: React.FC = () => {
                     required
                   />
                   {formErrors.account_number && (
-                    <span style={{ color: '#f87171', fontSize: '0.75rem' }}>
+                    <span className={styles.accountFieldError}>
                       {formErrors.account_number}
                     </span>
                   )}
@@ -808,7 +719,7 @@ export const PaymentAccountsView: React.FC = () => {
                     required
                   />
                   {formErrors.account_holder && (
-                    <span style={{ color: '#f87171', fontSize: '0.75rem' }}>
+                    <span className={styles.accountFieldError}>
                       {formErrors.account_holder}
                     </span>
                   )}
@@ -860,17 +771,7 @@ export const PaymentAccountsView: React.FC = () => {
                 </div>
               </div>
 
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'flex-end',
-                  gap: '0.75rem',
-                  marginTop: '0.5rem',
-                  borderTop: '1px solid rgba(156, 181, 171, 0.15)',
-                  paddingTop: '1rem',
-                }}
-              >
+              <div className={styles.accountModalFooter}>
                 <button
                   type="button"
                   className={styles.btnSecondary}
@@ -898,36 +799,27 @@ export const PaymentAccountsView: React.FC = () => {
       {isDeleteModalOpen && deletingAccount && (
         <div className={styles.adminModalBackdrop} onClick={() => setIsDeleteModalOpen(false)}>
           <div
-            className={styles.adminModalCard}
+            className={`${styles.adminModalCard} ${styles.accountDeleteModalCard}`}
             onClick={(e) => e.stopPropagation()}
-            style={{ maxWidth: '480px' }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: '#f87171' }}>
+            <div className={styles.accountDeleteModalHeader}>
               <AlertCircle size={24} />
-              <h3 style={{ margin: 0, color: '#f3f7f5', fontSize: '1.15rem' }}>
+              <h3 className={styles.accountDeleteModalTitle}>
                 ¿Eliminar Cuenta de Pago?
               </h3>
             </div>
 
-            <p style={{ color: '#cbd5e1', fontSize: '0.9rem', lineHeight: 1.5, margin: 0 }}>
+            <p className={styles.accountDeleteModalText}>
               Estás a punto de eliminar la cuenta de <strong>{deletingAccount.bank_name}</strong> (
-              <span style={{ fontFamily: 'monospace' }}>{deletingAccount.account_number}</span>) a
+              <span className={styles.accountDeleteNumberMono}>{deletingAccount.account_number}</span>) a
               nombre de <strong>{deletingAccount.account_holder}</strong>.
             </p>
-            <p style={{ color: 'var(--text-muted, #5e7a6f)', fontSize: '0.8rem', margin: 0 }}>
+            <p className={styles.accountDeleteModalNotice}>
               Esta acción no puede deshacerse. Si solo deseas que no aparezca en el checkout, puedes
               marcarla como inactiva en su lugar.
             </p>
 
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'flex-end',
-                gap: '0.75rem',
-                marginTop: '0.5rem',
-              }}
-            >
+            <div className={styles.accountDeleteModalActions}>
               <button
                 type="button"
                 className={styles.btnSecondary}

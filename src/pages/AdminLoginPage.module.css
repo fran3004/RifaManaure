@@ -3,18 +3,19 @@
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background: radial-gradient(circle at top center, #172554 0%, #0a0f1d 70%);
-  padding: var(--space-4, 1rem);
+  min-height: 100dvh;
+  background: var(--admin-bg, #f4efe4);
+  padding: var(--admin-sp-4, 16px);
 }
 
 .loginCard {
-  background: var(--color-surface, #111827);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 1rem;
+  background: var(--admin-surface, #11221c);
+  border: 1px solid var(--admin-border, #234437);
+  border-radius: var(--admin-r-modal, 20px);
   padding: 2.5rem 2rem;
   max-width: 440px;
   width: 100%;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+  box-shadow: var(--admin-sh-lg, 0 16px 40px rgba(0, 0, 0, 0.45));
 }
 
 .brandHeader {
@@ -28,43 +29,43 @@
   justify-content: center;
   width: 56px;
   height: 56px;
-  border-radius: 1rem;
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  color: #ffffff;
+  border-radius: var(--admin-r-card, 14px);
+  background: linear-gradient(135deg, var(--admin-brand-fill, #2e7d4f) 0%, var(--admin-brand, var(--brand-primary)) 100%);
+  color: var(--admin-on-brand, #ffffff);
   margin-bottom: 1rem;
-  box-shadow: 0 8px 16px -4px rgba(16, 185, 129, 0.4);
+  box-shadow: var(--admin-sh-md, 0 4px 12px rgba(0, 0, 0, 0.35));
 }
 
 .title {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #ffffff;
+  color: var(--admin-text, #f3f7f5);
   margin-bottom: 0.35rem;
 }
 
 .subtitle {
   font-size: 0.875rem;
-  color: #9ca3af;
+  color: var(--admin-text-2, #b9cdbf);
 }
 
 .errorAlert {
   display: flex;
   align-items: flex-start;
   gap: 0.75rem;
-  background-color: rgba(239, 68, 68, 0.12);
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  background-color: var(--admin-error-bg, rgba(178, 58, 9, 0.18));
+  border: 1px solid var(--admin-danger-border, #e2683a);
   border-radius: 0.5rem;
   padding: 0.875rem 1rem;
   margin-bottom: 1.5rem;
-  color: #fca5a5;
+  color: var(--admin-error, #fca5a5);
   font-size: 0.875rem;
-  line-height: 1.4;
+  line-height: 1.45;
 }
 
 .errorAlert svg {
   flex-shrink: 0;
   margin-top: 0.1rem;
-  color: #ef4444;
+  color: var(--admin-error, #fca5a5);
 }
 
 .form {
@@ -83,7 +84,7 @@
 .label {
   font-size: 0.875rem;
   font-weight: 500;
-  color: #d1d5db;
+  color: var(--admin-text-2, #b9cdbf);
 }
 
 .inputWrapper {
@@ -95,31 +96,34 @@
 .inputIcon {
   position: absolute;
   left: 0.875rem;
-  color: #6b7280;
+  color: var(--admin-text-muted, #7e9c90);
   pointer-events: none;
 }
 
 .input {
   width: 100%;
   padding: 0.75rem 1rem 0.75rem 2.5rem;
-  background-color: rgba(17, 24, 39, 0.8);
-  border: 1px solid #374151;
-  border-radius: 0.5rem;
-  color: #ffffff;
-  font-size: 0.95rem;
-  transition:
-    border-color 0.2s ease,
-    box-shadow 0.2s ease;
+  background-color: var(--admin-surface-2, #ffffff);
+  border: 1px solid var(--admin-border-strong, #33604c);
+  border-radius: var(--admin-r-field, 10px);
+  color: var(--admin-text, #f3f7f5);
+  font-size: 1rem;
+  transition: border-color var(--admin-motion-fast, 150ms ease-out), box-shadow var(--admin-motion-fast, 150ms ease-out);
 }
 
 .input:focus {
   outline: none;
-  border-color: #10b981;
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+  border-color: var(--admin-accent, var(--brand-accent));
+  box-shadow: 0 0 0 3px rgba(245, 166, 35, 0.2);
+}
+
+.input:focus-visible {
+  outline: 2px solid var(--admin-accent, var(--brand-accent));
+  outline-offset: 1px;
 }
 
 .input::placeholder {
-  color: #6b7280;
+  color: var(--admin-text-muted, #7e9c90);
 }
 
 .inputWithToggle {
@@ -131,17 +135,17 @@
   right: 0.75rem;
   background: none;
   border: none;
-  color: #6b7280;
+  color: var(--admin-text-muted, #7e9c90);
   cursor: pointer;
   padding: 0.25rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: color 0.2s ease;
+  transition: color var(--admin-motion-fast, 150ms ease-out);
 }
 
 .togglePasswordBtn:hover {
-  color: #d1d5db;
+  color: var(--admin-text, #f3f7f5);
 }
 
 .submitBtn {
@@ -151,24 +155,21 @@
   gap: 0.5rem;
   width: 100%;
   padding: 0.875rem 1.5rem;
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  color: #ffffff;
+  background: linear-gradient(135deg, var(--admin-brand-fill, #2e7d4f) 0%, var(--admin-brand, var(--brand-primary)) 100%);
+  color: var(--admin-on-brand, #ffffff);
   border: none;
-  border-radius: 0.5rem;
+  border-radius: var(--admin-r-field, 10px);
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
   margin-top: 0.5rem;
-  transition:
-    opacity 0.2s ease,
-    transform 0.1s ease,
-    box-shadow 0.2s ease;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  transition: opacity var(--admin-motion-fast, 150ms ease-out), transform var(--admin-motion-fast, 150ms ease-out), box-shadow var(--admin-motion-fast, 150ms ease-out);
+  box-shadow: var(--admin-sh-md, 0 4px 12px rgba(0, 0, 0, 0.35));
 }
 
 .submitBtn:hover:not(:disabled) {
   opacity: 0.95;
-  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+  box-shadow: var(--admin-sh-lg, 0 16px 40px rgba(0, 0, 0, 0.45));
 }
 
 .submitBtn:active:not(:disabled) {
@@ -184,7 +185,7 @@
   width: 18px;
   height: 18px;
   border: 2px solid rgba(255, 255, 255, 0.3);
-  border-top-color: #ffffff;
+  border-top-color: var(--admin-on-brand, #ffffff);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
@@ -206,12 +207,12 @@
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  color: #9ca3af;
+  color: var(--admin-text-2, #b9cdbf);
   text-decoration: none;
   font-size: 0.875rem;
-  transition: color 0.2s ease;
+  transition: color var(--admin-motion-fast, 150ms ease-out);
 }
 
 .backLink:hover {
-  color: #10b981;
+  color: var(--admin-brand-fill, #2e7d4f);
 }

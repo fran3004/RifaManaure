@@ -93,12 +93,12 @@ textarea {
   border: 0;
 }
 
-/* Enlace "Ir al contenido" visible solo con teclado */
+/* Enlace "Ir al contenido" visible solo con teclado (animación compuesta transform/GPU) */
 .skip-to-content {
   position: absolute;
-  top: -100%;
+  top: 1rem;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translate(-50%, -200%);
   z-index: 9999;
   padding: 0.75rem 1.5rem;
   background: var(--color-brand-accent);
@@ -108,11 +108,11 @@ textarea {
   border-radius: var(--radius-md);
   text-decoration: none;
   box-shadow: var(--shadow-lg);
-  transition: top var(--transition-fast);
+  transition: transform var(--transition-fast);
 }
 
 .skip-to-content:focus {
-  top: 1rem;
+  transform: translate(-50%, 0);
 }
 
 /* Foco visible global para accesibilidad por teclado */

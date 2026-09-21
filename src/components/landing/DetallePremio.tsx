@@ -16,6 +16,7 @@ import {
   Plane,
   Palmtree,
   MapPin,
+  Trophy,
 } from 'lucide-react';
 import { SectionHeader } from '@/components/public/ui';
 import { ResponsiveImage } from '@/components/common/ResponsiveImage';
@@ -106,15 +107,19 @@ export const DetallePremio: React.FC = () => {
 
   const { settings, experiences } = prizeData;
 
-  const getEffectiveSlug = (slug: string | null, id: string): string => {
+  const getEffectiveSlug = (slug: string | null, id: string, title: string): string => {
     const map: Record<string, string> = {
       'exp-cuatrimotos': 'cuatrimoto-aventura-cordillera',
       'exp-glamping': 'fogata-casa-de-vidrio',
       'exp-parapente': 'parapente-bandera',
       'exp-paramo': 'serrania-perija-laguna',
-      'exp-gastronomia': 'gastronomia-local',
+      'exp-gastronomia': 'gastronomia-casa-arepas',
       'exp-fotografia': 'cuatrimoto-mirador',
     };
+
+    if (id === 'exp-gastronomia' || title.trim().toLowerCase() === 'tour gastronómico local') {
+      return map['exp-gastronomia'];
+    }
 
     if (slug && slug.trim()) {
       return slug.trim();
@@ -148,6 +153,74 @@ export const DetallePremio: React.FC = () => {
           subtitle={settings.subtitle}
         />
 
+        <section className={styles.mayorPrizeCard} aria-labelledby="titulo-premio-mayor">
+          <div className={styles.mayorPrizeHeader}>
+            <div className={styles.mayorPrizeIcon} aria-hidden="true">
+              <Trophy size={18} />
+            </div>
+            <div>
+              <span className={styles.mayorPrizeEyebrow}>PREMIO MAYOR OFICIAL</span>
+              <h3 id="titulo-premio-mayor" className={styles.mayorPrizeTitle}>
+                Tour Vive Manaure • 3 Días y 2 Noches
+              </h3>
+              <p className={styles.mayorPrizeSubtitle}>
+                Todo incluido para la pareja (2 personas). Especificación detallada del premio:
+              </p>
+            </div>
+          </div>
+
+          <ul className={styles.mayorPrizeList}>
+            <li>
+              <Sparkles size={14} aria-hidden="true" />
+              <span>
+                <strong>Viaje ida y vuelta pago:</strong> desde tu lugar de residencia hasta Manaure – Cesar para la pareja (2 personas)
+              </span>
+            </li>
+            <li>
+              <Sparkles size={14} aria-hidden="true" />
+              <span>
+                <strong>Hospedaje:</strong> en uno de los mejores hoteles / glamping campestre
+              </span>
+            </li>
+            <li>
+              <Sparkles size={14} aria-hidden="true" />
+              <span>
+                <strong>Noche romántica:</strong> velada íntima preparada especialmente para la pareja
+              </span>
+            </li>
+            <li>
+              <Sparkles size={14} aria-hidden="true" />
+              <span>
+                <strong>Alimentación completa:</strong> desayunos, almuerzos campestres y cenas típicas
+              </span>
+            </li>
+            <li>
+              <Sparkles size={14} aria-hidden="true" />
+              <span>
+                <strong>Experiencia de cuatrimoto:</strong> ruta guiada por trochas y miradores
+              </span>
+            </li>
+            <li>
+              <Sparkles size={14} aria-hidden="true" />
+              <span>
+                <strong>Experiencia del parapente:</strong> vuelo libre tándem con piloto certificado
+              </span>
+            </li>
+            <li>
+              <Sparkles size={14} aria-hidden="true" />
+              <span>
+                <strong>Ruta Casa de Vidrio:</strong> Serranía de Perijá con fogata nocturna
+              </span>
+            </li>
+            <li>
+              <Sparkles size={14} aria-hidden="true" />
+              <span>
+                <strong>Registro fotográfico:</strong> cobertura profesional en alta definición
+              </span>
+            </li>
+          </ul>
+        </section>
+
         <div className={styles.grid}>
           {experiences.map((exp: PrizeExperienceRow, idx: number) => {
             const featuresList = Array.isArray(exp.features) ? (exp.features as string[]) : [];
@@ -156,18 +229,23 @@ export const DetallePremio: React.FC = () => {
                 ? `0${exp.display_order}`
                 : `${exp.display_order}`
               : `0${idx + 1}`;
-            const media = getCardImageData(getEffectiveSlug(exp.image_slug, exp.id), exp.title);
+            const media = getCardImageData(
+              getEffectiveSlug(exp.image_slug, exp.id, exp.title),
+              exp.title
+            );
+
+            const mediaCustomProps = {
+              '--dominant': media.dominantColor,
+              '--focal-x': `${media.focalX * 100}%`,
+              '--focal-y': `${media.focalY * 100}%`,
+            } as React.CSSProperties;
 
             return (
               <article key={exp.id} className={styles.card}>
                 <div
                   className={styles.cardMedia}
                   data-fit={media.fit}
-                  style={{
-                    ['--dominant' as string]: media.dominantColor,
-                    ['--focal-x' as string]: `${media.focalX * 100}%`,
-                    ['--focal-y' as string]: `${media.focalY * 100}%`,
-                  }}
+                  style={mediaCustomProps}
                 >
                   {media.fit !== 'cover' && (
                     <img
@@ -190,7 +268,6 @@ export const DetallePremio: React.FC = () => {
                       loading="lazy"
                       decoding="async"
                       className={styles.foreground}
-                      style={{ objectPosition: 'center top' }}
                     />
                   ) : (
                     <ResponsiveImage

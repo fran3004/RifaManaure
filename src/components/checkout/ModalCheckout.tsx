@@ -566,8 +566,8 @@ export const ModalCheckout: React.FC = () => {
         {hasReservationError && (
           <div className={styles.errorState}>
             <AlertCircle size={48} className={styles.errorBigIcon} aria-hidden="true" />
-            <h4 style={{ color: '#f3f7f5', margin: 0 }}>No pudimos completar la reserva</h4>
-            <p style={{ color: '#9cb5ab', margin: 0 }}>
+            <h4 className={styles.errorTitle}>No pudimos completar la reserva</h4>
+            <p className={styles.errorTextMsg}>
               {errorMessage || 'Ocurrió un problema temporal al procesar tus boletos.'}
             </p>
             <div className={styles.errorActions}>
@@ -707,13 +707,12 @@ export const ModalCheckout: React.FC = () => {
             {/* Canal Oficial de Notificación */}
             <div className={styles.contactPreferenceContainer}>
               <label className={styles.contactPreferenceTitle}>
-                <Bell size={15} color="var(--brand-accent, #f59e0b)" aria-hidden="true" />
+                <Bell size={15} color="var(--brand-accent, var(--brand-accent))" aria-hidden="true" />
                 Canal oficial de confirmación
               </label>
-              <div className={styles.contactPreferenceGrid} style={{ gridTemplateColumns: '1fr' }}>
+              <div className={styles.contactPreferenceGrid}>
                 <div
-                  className={`${styles.contactOptionCard} ${styles.contactOptionCardSelected}`}
-                  style={{ cursor: 'default' }}
+                  className={`${styles.contactOptionCard} ${styles.contactOptionCardSelected} ${styles.contactOptionCardReadonly}`}
                 >
                   <MessageCircle size={20} className={styles.contactOptionIcon} aria-hidden="true" />
                   <span className={styles.contactOptionLabel}>
@@ -761,10 +760,9 @@ export const ModalCheckout: React.FC = () => {
         {/* ========================================================================= */}
         {!hasReservationError && currentStep === 2 && (
           <div className={styles.stepContent}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div className={styles.stepHeaderRow}>
               <h4
-                className={styles.sectionHeader}
-                style={{ borderBottom: 'none', paddingBottom: 0 }}
+                className={`${styles.sectionHeader} ${styles.sectionHeaderNoBorder}`}
               >
                 Tus Números Seleccionados
               </h4>
@@ -773,40 +771,26 @@ export const ModalCheckout: React.FC = () => {
               </span>
             </div>
 
-            <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--text-secondary, #9cb5ab)' }}>
+            <p className={styles.stepDescription}>
               Verifica los números que vas a apartar para la Gran Rifa Ecoturística Manaure Vive:
             </p>
 
             <div className={styles.ticketsGridBig}>
               {selectedTickets.map((num) => (
                 <div key={num} className={styles.ticketChipBig}>
-                  <Ticket size={18} color="#f59e0b" style={{ marginBottom: '4px' }} aria-hidden="true" />
+                  <Ticket size={18} color="var(--brand-accent)" className={styles.ticketChipIcon} aria-hidden="true" />
                   <span className={styles.ticketChipNumber}>{formatTicketNumber(num)}</span>
                   <span className={styles.ticketChipLabel}>Boleto</span>
                 </div>
               ))}
             </div>
 
-            <div
-              style={{
-                padding: '0.85rem 1rem',
-                backgroundColor: 'var(--bg-main, #0a1410)',
-                borderRadius: 'var(--radius-md, 10px)',
-                border: '1px solid rgba(156, 181, 171, 0.15)',
-              }}
-            >
-              <span style={{ fontSize: '0.8rem', color: '#9cb5ab', display: 'block' }}>
+            <div className={styles.buyerSummaryCard}>
+              <span className={styles.buyerSummaryLabel}>
                 Comprador:
               </span>
-              <strong style={{ color: '#f3f7f5', fontSize: '0.9rem' }}>{formData.fullName}</strong>
-              <span
-                style={{
-                  fontSize: '0.8rem',
-                  color: '#9cb5ab',
-                  display: 'block',
-                  marginTop: '0.2rem',
-                }}
-              >
+              <strong className={styles.buyerSummaryName}>{formData.fullName}</strong>
+              <span className={styles.buyerSummaryMeta}>
                 C.C. {formData.documentId} • Cel: {formData.phone}
               </span>
             </div>
@@ -849,7 +833,7 @@ export const ModalCheckout: React.FC = () => {
 
               <div className={styles.pricingRow}>
                 <span>Método de Pago:</span>
-                <strong style={{ color: '#f59e0b' }}>Transferencia Manual Directa</strong>
+                <strong className={styles.pricingMethodHighlight}>Transferencia Manual Directa</strong>
               </div>
 
               <div className={styles.pricingDivider} />
@@ -861,9 +845,9 @@ export const ModalCheckout: React.FC = () => {
             </div>
 
             <div className={styles.reservationNotice}>
-              <Clock size={20} style={{ flexShrink: 0, marginTop: '2px' }} aria-hidden="true" />
+              <Clock size={20} className={styles.noticeIcon} aria-hidden="true" />
               <div>
-                <strong style={{ display: 'block', color: '#f3f7f5', marginBottom: '0.2rem' }}>
+                <strong className={styles.noticeHeading}>
                   Bloqueo atómico de números:
                 </strong>
                 Al hacer clic en el botón a continuación, tus números quedarán asegurados y
@@ -891,7 +875,7 @@ export const ModalCheckout: React.FC = () => {
               >
                 {isReserving ? (
                   <>
-                    <div className={styles.spinner} style={{ width: 16, height: 16 }} />
+                    <div className={`${styles.spinner} ${styles.spinnerSm}`} />
                     <span>Reservando en Base de Datos...</span>
                   </>
                 ) : (
@@ -955,7 +939,7 @@ export const ModalCheckout: React.FC = () => {
             {/* Cuentas de Transferencia */}
             <div className={styles.bankAccounts}>
               <h5 className={styles.bankTitle}>
-                <QrCode size={18} color="var(--color-brand-accent, #f59e0b)" aria-hidden="true" />
+                <QrCode size={18} color="var(--color-brand-accent, var(--brand-accent))" aria-hidden="true" />
                 Realiza tu pago mediante una de las siguientes opciones.
               </h5>
 
@@ -963,15 +947,15 @@ export const ModalCheckout: React.FC = () => {
                 <div className={styles.emptyAccountsNotice}>
                   <AlertCircle
                     size={20}
-                    color="#f59e0b"
-                    style={{ flexShrink: 0, marginTop: '2px' }}
+                    color="var(--brand-accent)"
+                    className={styles.emptyNoticeIcon}
                     aria-hidden="true"
                   />
                   <div>
-                    <strong style={{ display: 'block', color: '#f3f7f5', fontSize: '0.9rem' }}>
+                    <strong className={styles.emptyNoticeTitle}>
                       No hay cuentas de pago activas en este momento.
                     </strong>
-                    <p style={{ margin: '0.25rem 0 0', fontSize: '0.8rem', color: '#9cb5ab' }}>
+                    <p className={styles.emptyNoticeText}>
                       Por favor comunícate con el soporte oficial de Manaure Vive para
                       instrucciones.
                     </p>
@@ -983,12 +967,11 @@ export const ModalCheckout: React.FC = () => {
                   return (
                     <div
                       key={acc.id}
-                      className={`${styles.accountOptionCard} ${isSelected ? styles.accountOptionCardSelected : ''}`}
+                      className={`${styles.accountOptionCard} ${isSelected ? styles.accountOptionCardSelected : ''} ${styles.accountOptionCardInteractive}`}
                       onClick={() => {
                         setSelectedAccountId(acc.id);
                         setSelectedPaymentMethodName(`Transferencia Manual (${acc.bank_name})`);
                       }}
-                      style={{ cursor: 'pointer' }}
                     >
                       {/* Entidad y Tipo */}
                       <div className={styles.accountOptionHeader}>
@@ -996,7 +979,7 @@ export const ModalCheckout: React.FC = () => {
                           <Building2 size={18} className={styles.accountIcon} aria-hidden="true" />
                           <span className={styles.accountEntityName}>{acc.bank_name}</span>
                         </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <div className={styles.accountBadgesRow}>
                           {isSelected && (
                             <span className={styles.selectAccountBadge}>
                               <Check size={12} aria-hidden="true" /> Seleccionada
@@ -1094,7 +1077,7 @@ export const ModalCheckout: React.FC = () => {
                 <div className={styles.instructionBody}>
                   <h5 className={styles.instructionHeading}>
                     Transfiere el monto exacto:{' '}
-                    <strong style={{ color: '#f59e0b' }}>{formatCOP(totalAmount)}</strong>
+                    <strong className={styles.instructionHighlight}>{formatCOP(totalAmount)}</strong>
                   </h5>
                   <p className={styles.instructionText}>
                     Asegúrate de enviar la cifra precisa correspondiente a tus{' '}
@@ -1108,7 +1091,7 @@ export const ModalCheckout: React.FC = () => {
                 <div className={styles.instructionBody}>
                   <h5 className={styles.instructionHeading}>
                     Indica tu Referencia:{' '}
-                    <strong style={{ color: '#f59e0b' }}>{orderReference}</strong>
+                    <strong className={styles.instructionHighlight}>{orderReference}</strong>
                   </h5>
                   <p className={styles.instructionText}>
                     Escribe este código en el campo de concepto, mensaje o descripción de la
@@ -1168,7 +1151,7 @@ export const ModalCheckout: React.FC = () => {
             <div className={styles.receiptUploadSection}>
               {!receiptPreview ? (
                 <div className={styles.dropzone} onClick={() => fileInputRef.current?.click()}>
-                  <FileImage size={32} color="#9cb5ab" aria-hidden="true" />
+                  <FileImage size={32} color="var(--text-muted)" aria-hidden="true" />
                   <p className={styles.dropzoneText}>
                     Haz clic aquí para seleccionar tu comprobante
                   </p>
@@ -1180,19 +1163,8 @@ export const ModalCheckout: React.FC = () => {
                 <div className={styles.previewContainer}>
                   <div className={styles.previewInfo}>
                     {receiptPreview === 'PDF_DOCUMENT' ? (
-                      <div
-                        style={{
-                          width: 44,
-                          height: 44,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          backgroundColor: '#1a332a',
-                          borderRadius: 6,
-                          border: '1px solid rgba(156, 181, 171, 0.2)',
-                        }}
-                      >
-                        <FileText size={24} color="#f59e0b" aria-hidden="true" />
+                      <div className={styles.previewPdfBox}>
+                        <FileText size={24} color="var(--brand-accent)" aria-hidden="true" />
                       </div>
                     ) : (
                       <img
@@ -1203,7 +1175,7 @@ export const ModalCheckout: React.FC = () => {
                     )}
                     <div>
                       <span className={styles.previewName}>{receiptFile?.name}</span>
-                      <span style={{ display: 'block', fontSize: '0.75rem', color: '#9cb5ab' }}>
+                      <span className={styles.previewSize}>
                         {(Number(receiptFile?.size || 0) / (1024 * 1024)).toFixed(2)} MB
                       </span>
                     </div>
@@ -1223,21 +1195,15 @@ export const ModalCheckout: React.FC = () => {
               <input
                 type="file"
                 ref={fileInputRef}
-                style={{ display: 'none' }}
+                className={styles.hiddenFileInput}
                 accept="image/jpeg,image/png,image/webp,application/pdf,.jpg,.jpeg,.png,.webp,.pdf"
                 onChange={handleFileChange}
               />
 
-              <div style={{ marginTop: '0.5rem' }}>
+              <div className={styles.formGroupCompact}>
                 <label
                   htmlFor="refInput"
-                  style={{
-                    display: 'block',
-                    fontSize: '0.75rem',
-                    fontWeight: 600,
-                    color: 'var(--text-secondary, #9cb5ab)',
-                    marginBottom: '0.3rem',
-                  }}
+                  className={styles.inputSubLabel}
                 >
                   Número de Aprobación / Referencia Bancaria (Opcional):
                 </label>
@@ -1278,7 +1244,7 @@ export const ModalCheckout: React.FC = () => {
               >
                 {isSubmittingProof ? (
                   <>
-                    <div className={styles.spinner} style={{ width: 16, height: 16 }} />
+                    <div className={`${styles.spinner} ${styles.spinnerSm}`} />
                     <span>Enviando Comprobante...</span>
                   </>
                 ) : (
@@ -1310,10 +1276,10 @@ export const ModalCheckout: React.FC = () => {
             </span>
 
             <div className={styles.confirmationNoticeBanner}>
-              <AlertCircle size={20} style={{ flexShrink: 0 }} aria-hidden="true" />
+              <AlertCircle size={20} className={styles.confirmationNoticeIcon} aria-hidden="true" />
               <div>
                 <strong>Tu pago será verificado manualmente.</strong>
-                <p style={{ margin: '0.2rem 0 0', fontSize: '0.8rem', color: '#fef3c7' }}>
+                <p className={styles.confirmationNoticeText}>
                   Recibirás confirmación por WhatsApp o correo electrónico una vez validada la
                   transferencia.
                 </p>
@@ -1326,22 +1292,19 @@ export const ModalCheckout: React.FC = () => {
                 <span className={styles.confirmationTableLabel}>
                   <Hash
                     size={14}
-                    style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }}
+                    className={styles.confirmationIconInline}
                     aria-hidden="true"
                   />
                   Número de Orden:
                 </span>
                 <span className={styles.confirmationTableVal}>
-                  <strong
-                    style={{ color: '#f59e0b', fontFamily: 'monospace', fontSize: '1.05rem' }}
-                  >
+                  <strong className={styles.confirmationRefCode}>
                     {orderReference}
                   </strong>
                   <button
                     type="button"
                     onClick={() => copyToClipboard(orderReference, 'confirm_ref')}
-                    className={styles.copyBtn}
-                    style={{ marginLeft: '8px', padding: '0.2rem 0.5rem', fontSize: '0.75rem', minHeight: '36px' }}
+                    className={`${styles.copyBtn} ${styles.copyBtnMini}`}
                     aria-label={copiedKey === 'confirm_ref' ? 'Número de orden copiado' : 'Copiar número de orden'}
                   >
                     {copiedKey === 'confirm_ref' ? <Check size={12} aria-hidden="true" /> : <Copy size={12} aria-hidden="true" />}
@@ -1354,7 +1317,7 @@ export const ModalCheckout: React.FC = () => {
                 <span className={styles.confirmationTableLabel}>
                   <Ticket
                     size={14}
-                    style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }}
+                    className={styles.confirmationIconInline}
                     aria-hidden="true"
                   />
                   Números Seleccionados:
@@ -1363,18 +1326,7 @@ export const ModalCheckout: React.FC = () => {
                   {confirmedTickets.map((num) => (
                     <span
                       key={num}
-                      style={{
-                        display: 'inline-block',
-                        padding: '0.15rem 0.4rem',
-                        margin: '0 2px',
-                        backgroundColor: '#1a332a',
-                        border: '1px solid #f59e0b',
-                        borderRadius: '4px',
-                        color: '#f59e0b',
-                        fontFamily: 'monospace',
-                        fontWeight: 700,
-                        fontSize: '0.85rem',
-                      }}
+                      className={styles.confirmedTicketBadge}
                     >
                       {formatTicketNumber(num)}
                     </span>
@@ -1386,15 +1338,12 @@ export const ModalCheckout: React.FC = () => {
                 <span className={styles.confirmationTableLabel}>
                   <Receipt
                     size={14}
-                    style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }}
+                    className={styles.confirmationIconInline}
                     aria-hidden="true"
                   />
                   Total Liquidado:
                 </span>
-                <span
-                  className={styles.confirmationTableVal}
-                  style={{ fontSize: '1.1rem', color: '#10b981' }}
-                >
+                <span className={`${styles.confirmationTableVal} ${styles.confirmationTotalVal}`}>
                   {formatCOP(confirmedTotalAmount > 0 ? confirmedTotalAmount : totalAmount)}
                 </span>
               </div>
@@ -1403,26 +1352,13 @@ export const ModalCheckout: React.FC = () => {
                 <span className={styles.confirmationTableLabel}>
                   <Clock
                     size={14}
-                    style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }}
+                    className={styles.confirmationIconInline}
                     aria-hidden="true"
                   />
                   Estado de la Orden:
                 </span>
                 <span className={styles.confirmationTableVal}>
-                  <span
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '4px',
-                      padding: '0.2rem 0.6rem',
-                      borderRadius: '9999px',
-                      backgroundColor: 'rgba(245, 158, 11, 0.15)',
-                      border: '1px solid rgba(245, 158, 11, 0.35)',
-                      color: '#fbbf24',
-                      fontSize: '0.8rem',
-                      fontWeight: 700,
-                    }}
-                  >
+                  <span className={styles.statusBadgeInlinePending}>
                     <Clock size={12} aria-hidden="true" /> Pendiente de verificación
                   </span>
                 </span>
@@ -1432,12 +1368,12 @@ export const ModalCheckout: React.FC = () => {
                 <span className={styles.confirmationTableLabel}>
                   <Calendar
                     size={14}
-                    style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }}
+                    className={styles.confirmationIconInline}
                     aria-hidden="true"
                   />
                   Fecha y Hora:
                 </span>
-                <span className={styles.confirmationTableVal} style={{ fontSize: '0.8rem' }}>
+                <span className={`${styles.confirmationTableVal} ${styles.confirmationValSm}`}>
                   {formatOrderDateTime(orderCreatedAt)}
                 </span>
               </div>
@@ -1446,12 +1382,12 @@ export const ModalCheckout: React.FC = () => {
                 <span className={styles.confirmationTableLabel}>
                   <Building2
                     size={14}
-                    style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }}
+                    className={styles.confirmationIconInline}
                     aria-hidden="true"
                   />
                   Método de Pago:
                 </span>
-                <span className={styles.confirmationTableVal} style={{ fontSize: '0.85rem' }}>
+                <span className={`${styles.confirmationTableVal} ${styles.confirmationValMd}`}>
                   {selectedPaymentMethodName}
                 </span>
               </div>
@@ -1460,15 +1396,12 @@ export const ModalCheckout: React.FC = () => {
                 <span className={styles.confirmationTableLabel}>
                   <Bell
                     size={14}
-                    style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }}
+                    className={styles.confirmationIconInline}
                     aria-hidden="true"
                   />
                   Canal de Notificación:
                 </span>
-                <span
-                  className={styles.confirmationTableVal}
-                  style={{ fontSize: '0.85rem', color: '#34d399' }}
-                >
+                <span className={`${styles.confirmationTableVal} ${styles.confirmationChannelVal}`}>
                   📱 WhatsApp Oficial
                 </span>
               </div>

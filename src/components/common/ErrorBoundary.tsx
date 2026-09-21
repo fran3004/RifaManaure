@@ -1,5 +1,6 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 import { AlertCircle, RotateCcw } from 'lucide-react';
+import styles from './ErrorBoundary.module.css';
 
 interface Props {
   children: ReactNode;
@@ -37,65 +38,21 @@ export class ErrorBoundary extends Component<Props, State> {
       }
 
       return (
-        <div
-          style={{
-            minHeight: '70vh',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '2rem',
-            textAlign: 'center',
-            color: '#f3f7f5',
-            backgroundColor: '#060e0a',
-          }}
-        >
-          <div
-            style={{
-              width: '64px',
-              height: '64px',
-              borderRadius: '50%',
-              backgroundColor: 'rgba(239, 68, 68, 0.12)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#ef4444',
-              marginBottom: '1rem',
-            }}
-          >
+        <div className={styles.container}>
+          <div className={styles.iconCircle}>
             <AlertCircle size={32} />
           </div>
-          <h2 style={{ fontSize: '1.4rem', fontWeight: 700, marginBottom: '0.5rem' }}>
+          <h2 className={styles.title}>
             Algo no cargó correctamente
           </h2>
-          <p
-            style={{
-              maxWidth: '500px',
-              color: '#9cb5ab',
-              fontSize: '0.92rem',
-              lineHeight: 1.5,
-              marginBottom: '1.5rem',
-            }}
-          >
+          <p className={styles.description}>
             Ocurrió una eventualidad inesperada al inicializar este módulo. Puedes intentar recargar
             la página.
           </p>
           <button
             type="button"
             onClick={this.handleReset}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              padding: '0.75rem 1.4rem',
-              borderRadius: '8px',
-              backgroundColor: '#10b981',
-              color: '#060e0a',
-              fontWeight: 700,
-              fontSize: '0.9rem',
-              border: 'none',
-              cursor: 'pointer',
-            }}
+            className={styles.retryButton}
           >
             <RotateCcw size={16} />
             <span>Recargar Página</span>

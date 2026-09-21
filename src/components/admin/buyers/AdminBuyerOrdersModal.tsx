@@ -225,47 +225,23 @@ const AdminBuyerOrdersContent: React.FC<AdminBuyerOrdersContentProps> = ({ buyer
           </div>
 
           {/* Sección de Órdenes */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+          <div className={styles.ordersSection}>
             <h4 className={styles.ordersSectionTitle}>
               <Ticket size={16} />
               <span>Detalle de Órdenes ({orders.length})</span>
             </h4>
 
             {isLoading ? (
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  padding: '2rem',
-                  gap: '0.5rem',
-                  color: '#9cb5ab',
-                }}
-              >
+              <div className={styles.ordersLoading}>
                 <Loader2 size={20} className="animate-spin" />
                 <span>Cargando historial de órdenes...</span>
               </div>
             ) : errorMessage ? (
-              <div
-                style={{
-                  padding: '1rem',
-                  color: '#fca5a5',
-                  background: 'rgba(239, 68, 68, 0.1)',
-                  borderRadius: '10px',
-                }}
-              >
+              <div className={styles.ordersError}>
                 {errorMessage}
               </div>
             ) : orders.length === 0 ? (
-              <div
-                style={{
-                  padding: '2rem',
-                  textAlign: 'center',
-                  color: '#7e9c90',
-                  background: 'rgba(255, 255, 255, 0.02)',
-                  borderRadius: '10px',
-                }}
-              >
+              <div className={styles.ordersEmpty}>
                 Este comprador aún no tiene órdenes registradas.
               </div>
             ) : (
@@ -275,10 +251,10 @@ const AdminBuyerOrdersContent: React.FC<AdminBuyerOrdersContentProps> = ({ buyer
                     <tr>
                       <th>Referencia</th>
                       <th>Fecha</th>
-                      <th>Boletos Asignados</th>
+                      <th>Boletos</th>
                       <th>Total</th>
                       <th>Estado</th>
-                      <th style={{ textAlign: 'right' }}>Comprobante</th>
+                      <th className={styles.thRight}>Comprobante</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -290,14 +266,14 @@ const AdminBuyerOrdersContent: React.FC<AdminBuyerOrdersContentProps> = ({ buyer
                         </td>
 
                         {/* 2. Fecha */}
-                        <td style={{ whiteSpace: 'nowrap', fontSize: '0.8rem' }}>
+                        <td className={styles.dateCell}>
                           {formatDate(ord.created_at)}
                         </td>
 
                         {/* 3. Boletos */}
                         <td>
                           {ord.tickets && ord.tickets.length > 0 ? (
-                            <div style={{ display: 'flex', flexWrap: 'wrap', maxWidth: '240px' }}>
+                            <div className={styles.ticketsList}>
                               {ord.tickets.map((t) => (
                                 <span
                                   key={t.id || t.ticket_number}
@@ -308,15 +284,13 @@ const AdminBuyerOrdersContent: React.FC<AdminBuyerOrdersContentProps> = ({ buyer
                               ))}
                             </div>
                           ) : (
-                            <span style={{ color: '#5e7a6f', fontSize: '0.78rem' }}>
-                              {ord.ticket_count} {ord.ticket_count === 1 ? 'boleto' : 'boletos'}
-                            </span>
+                            <span className={styles.ticketCountText}>{ord.ticket_count}</span>
                           )}
                         </td>
 
                         {/* 4. Total */}
                         <td>
-                          <strong style={{ color: '#34d399', fontSize: '0.85rem' }}>
+                          <strong className={styles.orderTotalAmount}>
                             {formatCOP(ord.total_amount)}
                           </strong>
                         </td>
@@ -325,7 +299,7 @@ const AdminBuyerOrdersContent: React.FC<AdminBuyerOrdersContentProps> = ({ buyer
                         <td>{getStatusBadge(ord.status)}</td>
 
                         {/* 6. Comprobante */}
-                        <td style={{ textAlign: 'right' }}>
+                        <td className={styles.tdRight}>
                           {ord.receipt_url ? (
                             <a
                               href={ord.receipt_url}
@@ -338,7 +312,7 @@ const AdminBuyerOrdersContent: React.FC<AdminBuyerOrdersContentProps> = ({ buyer
                               <span>Ver</span>
                             </a>
                           ) : (
-                            <span style={{ color: '#4b6358' }}>—</span>
+                            <span className={styles.receiptEmpty}>—</span>
                           )}
                         </td>
                       </tr>

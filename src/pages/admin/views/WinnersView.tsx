@@ -112,7 +112,7 @@ export const WinnersView: React.FC = () => {
             : 'Publicación de actas oficiales, verificación de boletos premiados y entrega de premios.'
         }
         actions={
-          <div style={{ display: 'flex', gap: '0.75rem' }}>
+          <div className={styles.headerActions}>
             <button
               type="button"
               onClick={loadData}
@@ -155,7 +155,7 @@ export const WinnersView: React.FC = () => {
               className={styles.searchInput}
             />
           </div>
-          <span style={{ fontSize: '0.88rem', color: '#94a3b8' }}>
+          <span className={styles.winnersCounter}>
             Total Ganadores Registrados: <strong>{winners.length}</strong>
           </span>
         </div>
@@ -204,7 +204,7 @@ export const WinnersView: React.FC = () => {
                         <span>•</span>
                         <span>
                           Premio Mayor:{' '}
-                          <strong style={{ color: '#fbbf24' }}>{winner.lottery_draw_number}</strong>
+                          <strong className={styles.lotteryDrawNumber}>{winner.lottery_draw_number}</strong>
                         </span>
                       </div>
                     </div>
@@ -221,7 +221,7 @@ export const WinnersView: React.FC = () => {
                   {/* Comprador Ganador */}
                   <div className={styles.dataGroup}>
                     <span className={styles.dataGroupLabel}>
-                      <User size={14} color="#10b981" /> Ganador Oficial
+                      <User size={14} color="var(--color-success)" /> Ganador Oficial
                     </span>
                     <span className={styles.dataGroupValue}>
                       {winner.buyer?.full_name || 'Comprador Registrado'}
@@ -243,7 +243,7 @@ export const WinnersView: React.FC = () => {
                   {/* Ciudad */}
                   <div className={styles.dataGroup}>
                     <span className={styles.dataGroupLabel}>
-                      <MapPin size={14} color="#f59e0b" /> Ubicación
+                      <MapPin size={14} color="var(--brand-accent)" /> Ubicación
                     </span>
                     <span className={styles.dataGroupValue}>
                       {winner.buyer?.city || 'No especificada'}
@@ -288,32 +288,11 @@ export const WinnersView: React.FC = () => {
                         <ExternalLink size={14} />
                       </a>
                     ) : (
-                      <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>
+                      <span className={styles.noActText}>
                         Sin acta PDF adjunta
                       </span>
                     )}
 
-                    {winner.delivery_photos && winner.delivery_photos.length > 0 && (
-                      <div className={styles.photoGallery}>
-                        <span
-                          style={{ fontSize: '0.82rem', color: '#cbd5e1', marginRight: '0.25rem' }}
-                        >
-                          Fotos de entrega:
-                        </span>
-                        {winner.delivery_photos.map((photoUrl, pIdx) => (
-                          <a
-                            key={pIdx}
-                            href={photoUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className={styles.galleryThumb}
-                            title={`Ver foto de entrega #${pIdx + 1}`}
-                          >
-                            <img src={photoUrl} alt={`Foto de entrega ${pIdx + 1}`} />
-                          </a>
-                        ))}
-                      </div>
-                    )}
                   </div>
 
                   {winner.notes && (

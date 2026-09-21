@@ -150,7 +150,7 @@ export const BuyersView: React.FC = () => {
             feedback.type === 'success' ? styles.feedbackSuccess : styles.feedbackError
           }`}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <div className={styles.feedbackContent}>
             {feedback.type === 'success' ? <CheckCircle2 size={18} /> : <XCircle size={18} />}
             <span>{feedback.message}</span>
           </div>
@@ -179,7 +179,7 @@ export const BuyersView: React.FC = () => {
         </div>
 
         <div className={styles.toolbarActions}>
-          <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary, #9cb5ab)' }}>
+          <span className={styles.toolbarSummary}>
             Mostrando <strong>{buyers.length}</strong> de <strong>{totalCount}</strong> clientes
           </span>
         </div>
@@ -214,36 +214,30 @@ export const BuyersView: React.FC = () => {
             <table className={styles.buyersTable}>
               <thead>
                 <tr>
-                  <th style={{ width: '220px' }}>Comprador / Identificación</th>
-                  <th style={{ width: '160px' }}>Teléfono / WhatsApp</th>
-                  <th style={{ width: '180px' }}>Correo Electrónico</th>
-                  <th style={{ width: '140px' }}>Ciudad / Dpto</th>
-                  <th style={{ width: '120px', textAlign: 'center' }}>Órdenes</th>
-                  <th style={{ width: '130px' }}>Total Invertido</th>
-                  <th style={{ width: '190px', textAlign: 'right' }}>Acciones</th>
+                  <th className={styles.thBuyer}>Comprador</th>
+                  <th className={styles.thPhone}>Teléfono</th>
+                  <th className={styles.thEmail}>Correo Electrónico</th>
+                  <th className={styles.thCity}>Ciudad</th>
+                  <th className={styles.thOrders}>Órdenes</th>
+                  <th className={styles.thSpent}>Total Invertido</th>
+                  <th className={styles.thActions}>Acciones</th>
                 </tr>
               </thead>
               <tbody>
                 {buyers.map((buyer) => (
                   <tr key={buyer.id} className={styles.buyersTableRow}>
-                    {/* 1. Comprador / Identificación */}
+                    {/* 1. Comprador */}
                     <td>
                       <div className={styles.buyerCell}>
                         <strong className={styles.buyerName}>{buyer.full_name}</strong>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                        <div className={styles.docGroup}>
                           <span className={styles.docBadge}>C.C. {buyer.document_id}</span>
                           <button
                             type="button"
                             onClick={() => handleCopyDoc(buyer.document_id)}
-                            style={{
-                              background: 'none',
-                              border: 'none',
-                              color: copiedDocId === buyer.document_id ? '#10b981' : '#5e7a6f',
-                              cursor: 'pointer',
-                              padding: '2px',
-                              display: 'flex',
-                              alignItems: 'center',
-                            }}
+                            className={`${styles.btnCopyDoc} ${
+                              copiedDocId === buyer.document_id ? styles.btnCopyDocSuccess : ''
+                            }`}
                             title="Copiar cédula"
                           >
                             {copiedDocId === buyer.document_id ? (
@@ -256,7 +250,7 @@ export const BuyersView: React.FC = () => {
                       </div>
                     </td>
 
-                    {/* 2. Teléfono / WhatsApp */}
+                    {/* 2. Teléfono */}
                     <td>
                       {buyer.phone ? (
                         <a
@@ -269,7 +263,7 @@ export const BuyersView: React.FC = () => {
                           <span>{buyer.phone}</span>
                         </a>
                       ) : (
-                        <span style={{ color: '#5e7a6f' }}>N/A</span>
+                        <span className={styles.phoneNotAvailable}>N/A</span>
                       )}
                     </td>
 
@@ -286,7 +280,7 @@ export const BuyersView: React.FC = () => {
                     </td>
 
                     {/* 5. Órdenes */}
-                    <td style={{ textAlign: 'center' }}>
+                    <td className={styles.tdCenter}>
                       <span
                         className={`${styles.ordersCountBadge} ${
                           (buyer.paid_orders_count || 0) > 0 ? styles.ordersCountBadgeActive : ''
@@ -342,15 +336,8 @@ export const BuyersView: React.FC = () => {
               compradores
             </div>
             <div className={commonStyles.paginationControls}>
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.4rem',
-                  marginRight: '0.5rem',
-                }}
-              >
-                <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary, #9cb5ab)' }}>
+              <div className={styles.pageSizeWrapper}>
+                <span className={styles.pageSizeLabel}>
                   Por pág.:
                 </span>
                 <select

@@ -9,7 +9,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  line-height: 1;
+  line-height: 1.2;
   width: fit-content;
   white-space: nowrap;
   box-sizing: border-box;
@@ -32,13 +32,13 @@
 
 .dark {
   background-color: rgba(15, 46, 29, 0.78);
-  border: 1px solid var(--brand-accent, #F5A623);
-  color: var(--brand-accent, #F5A623);
+  border: 1px solid var(--brand-accent, var(--brand-accent));
+  color: var(--brand-accent, var(--brand-accent));
 }
 
 .accent {
-  background-color: var(--brand-accent, #F5A623);
-  border: 1px solid var(--brand-accent, #F5A623);
+  background-color: var(--brand-accent, var(--brand-accent));
+  border: 1px solid var(--brand-accent, var(--brand-accent));
   color: var(--brand-deep, #0F2E1D); /* NUNCA blanco */
 }
 

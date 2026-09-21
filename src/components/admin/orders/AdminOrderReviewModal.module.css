@@ -1,41 +1,50 @@
 .modalBackdrop {
   position: fixed;
   inset: 0;
-  background-color: rgba(5, 12, 10, 0.85);
+  background-color: rgba(4, 15, 11, 0.85);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: var(--z-modal-backdrop);
   padding: 1rem;
   overflow-y: auto;
+  animation: fadeIn 200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .modalCard {
-  background-color: var(--bg-surface, #11221c);
-  border: 1px solid var(--border-subtle, rgba(156, 181, 171, 0.2));
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-xl, 20px);
   width: 100%;
   max-width: 860px;
   max-height: 90vh;
+  box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.6), 0 0 0 1px var(--border-subtle);
+  color: var(--text-primary);
   display: flex;
   flex-direction: column;
-  box-shadow:
-    0 25px 50px -12px rgba(0, 0, 0, 0.6),
-    0 0 30px rgba(16, 185, 129, 0.08);
-  animation: modalEnter 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   overflow: hidden;
+  animation: scaleIn 200ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-@keyframes modalEnter {
+@keyframes scaleIn {
   from {
+    transform: scale(0.96) translateY(8px);
     opacity: 0;
-    transform: scale(0.96) translateY(10px);
   }
   to {
-    opacity: 1;
     transform: scale(1) translateY(0);
+    opacity: 1;
   }
 }
 
@@ -43,9 +52,10 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1.25rem 1.75rem;
-  background-color: var(--bg-surface-elevated, #162c24);
-  border-bottom: 1px solid var(--border-subtle, rgba(156, 181, 171, 0.15));
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--border-subtle);
+  background-color: var(--bg-surface);
+  flex-shrink: 0;
 }
 
 .modalHeaderTitle {
@@ -58,18 +68,21 @@
   margin: 0;
   font-family: var(--font-heading, sans-serif);
   font-size: 1.25rem;
+  line-height: 1.2;
   font-weight: 700;
-  color: var(--text-primary, #f3f7f5);
+  color: var(--text-primary);
 }
 
 .closeButton {
-  background: none;
+  background: transparent;
   border: none;
   color: var(--text-secondary, #9cb5ab);
   cursor: pointer;
-  padding: 0.4rem;
+  padding: 0.5rem;
+  min-width: 44px;
+  min-height: 44px;
   border-radius: var(--radius-md, 8px);
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   transition: all var(--transition-fast, 150ms ease);
@@ -77,7 +90,7 @@
 
 .closeButton:hover {
   background-color: rgba(255, 255, 255, 0.08);
-  color: var(--text-primary, #ffffff);
+  color: var(--text-primary, #f3f7f5);
 }
 
 .modalBody {
@@ -101,13 +114,14 @@
 }
 
 .reviewCard {
-  background-color: var(--bg-main, #0a1410);
-  border: 1px solid var(--border-subtle, rgba(156, 181, 171, 0.12));
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg, 14px);
   padding: 1.25rem;
   display: flex;
   flex-direction: column;
   gap: 0.9rem;
+  min-width: 0;
 }
 
 .reviewCardHeader {
@@ -115,30 +129,36 @@
   align-items: center;
   gap: 0.5rem;
   padding-bottom: 0.6rem;
-  border-bottom: 1px solid rgba(156, 181, 171, 0.1);
-  color: var(--color-brand-accent, #f59e0b);
-  font-size: 0.85rem;
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--brand-accent-strong);
+  font-size: 0.875rem;
+  line-height: 1.2;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  min-width: 0;
 }
 
 .reviewCardHeaderTitle {
   color: var(--text-primary, #f3f7f5);
   font-weight: 600;
+  min-width: 0;
 }
 
 .infoRow {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 0.85rem;
+  font-size: 0.875rem;
+  line-height: 1.45;
   gap: 0.75rem;
+  min-width: 0;
 }
 
 .infoLabel {
   color: var(--text-secondary, #9cb5ab);
   font-weight: 500;
+  flex-shrink: 0;
 }
 
 .infoValue {
@@ -146,11 +166,12 @@
   font-weight: 600;
   text-align: right;
   word-break: break-word;
+  min-width: 0;
 }
 
 .infoValueMono {
   font-family: var(--font-mono, monospace);
-  color: var(--color-brand-accent, #f59e0b);
+  color: var(--color-brand-accent, var(--brand-accent));
   letter-spacing: 0.05em;
 }
 
@@ -161,26 +182,28 @@
   max-height: 140px;
   overflow-y: auto;
   padding: 0.35rem;
-  background-color: rgba(0, 0, 0, 0.25);
-  border-radius: var(--radius-md, 8px);
-  border: 1px solid rgba(156, 181, 171, 0.08);
+  background-color: var(--bg-card);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
 }
 
 .ticketChip {
   font-family: var(--font-mono, monospace);
-  font-size: 0.85rem;
+  font-size: 0.875rem;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
   font-weight: 700;
   padding: 0.25rem 0.55rem;
   border-radius: var(--radius-sm, 6px);
-  background-color: var(--bg-surface-elevated, #162c24);
-  color: #34d399;
-  border: 1px solid rgba(52, 211, 153, 0.25);
+  background-color: var(--admin-success-bg);
+  color: var(--admin-success);
+  border: 1px solid var(--admin-success);
 }
 
 .proofViewerContainer {
-  background-color: #000000;
+  background-color: var(--brand-deep);
   border-radius: var(--radius-md, 10px);
-  border: 1px solid rgba(156, 181, 171, 0.15);
+  border: 1px solid var(--overlay-neutral-subtle);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -188,6 +211,27 @@
   justify-content: center;
   min-height: 220px;
   position: relative;
+}
+
+.proofLoading,
+.proofEmptyState {
+  padding: 2rem;
+  text-align: center;
+}
+
+.proofLoading {
+  color: var(--text-on-dark-muted);
+}
+
+.proofEmptyState {
+  color: var(--brand-accent);
+}
+
+.proofEmptyText {
+  display: block;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: var(--brand-accent-soft);
 }
 
 .proofImage {
@@ -207,18 +251,19 @@
 .proofToolbar {
   width: 100%;
   padding: 0.6rem 0.9rem;
-  background-color: var(--bg-surface-elevated, #162c24);
+  background-color: var(--bg-surface);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-top: 1px solid rgba(156, 181, 171, 0.12);
-  font-size: 0.75rem;
-  color: var(--text-secondary, #9cb5ab);
+  border-top: 1px solid var(--border-subtle);
+  font-size: 0.875rem;
+  line-height: 1.2;
+  color: var(--text-secondary);
 }
 
 .rejectionSection {
-  background-color: rgba(239, 68, 68, 0.08);
-  border: 1px solid rgba(239, 68, 68, 0.25);
+  background-color: var(--admin-error-bg);
+  border: 1px solid var(--admin-danger-border);
   border-radius: var(--radius-lg, 14px);
   padding: 1.25rem;
   display: flex;
@@ -234,37 +279,39 @@
 
 .presetReasonButton {
   padding: 0.5rem 0.75rem;
-  font-size: 0.8rem;
+  font-size: 0.875rem;
+  line-height: 1.2;
   text-align: left;
-  background-color: var(--bg-main, #0a1410);
-  border: 1px solid rgba(239, 68, 68, 0.2);
-  border-radius: var(--radius-md, 8px);
-  color: var(--text-secondary, #9cb5ab);
+  background-color: var(--bg-card);
+  border: 1px solid var(--admin-danger-border);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
   cursor: pointer;
   transition: all var(--transition-fast, 150ms ease);
 }
 
 .presetReasonButton:hover {
-  border-color: #ef4444;
-  color: #ffffff;
-  background-color: rgba(239, 68, 68, 0.15);
+  border-color: var(--admin-danger);
+  color: var(--admin-danger);
+  background-color: var(--admin-error-bg);
 }
 
 .presetReasonButtonActive {
-  border-color: #ef4444;
-  background-color: rgba(239, 68, 68, 0.25);
-  color: #fca5a5;
+  border-color: var(--admin-danger);
+  background-color: var(--admin-error-bg);
+  color: var(--admin-danger);
   font-weight: 600;
 }
 
 .rejectionTextarea {
   width: 100%;
   padding: 0.75rem;
-  background-color: var(--bg-main, #0a1410);
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  border-radius: var(--radius-md, 8px);
-  color: #ffffff;
-  font-size: 0.85rem;
+  background-color: var(--bg-card);
+  border: 1px solid var(--admin-danger-border);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  line-height: 1.45;
   font-family: inherit;
   resize: vertical;
   min-height: 70px;
@@ -272,13 +319,18 @@
 
 .rejectionTextarea:focus {
   outline: none;
-  border-color: #ef4444;
-  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
+  border-color: var(--admin-danger);
+  box-shadow: 0 0 0 3px rgba(180, 35, 24, 0.14);
+}
+
+.rejectionTextarea:focus-visible {
+  outline: 2px solid var(--admin-danger);
+  outline-offset: 1px;
 }
 
 .notificationBox {
-  background-color: rgba(16, 185, 129, 0.1);
-  border: 1px solid rgba(16, 185, 129, 0.25);
+  background-color: var(--admin-success-bg);
+  border: 1px solid var(--admin-success);
   border-radius: var(--radius-lg, 14px);
   padding: 1.25rem;
   display: flex;
@@ -287,31 +339,33 @@
 }
 
 .notificationBoxRejected {
-  background-color: rgba(239, 68, 68, 0.1);
-  border-color: rgba(239, 68, 68, 0.25);
+  background-color: var(--admin-error-bg);
+  border-color: var(--admin-danger-border);
 }
 
 .notificationMessagePreview {
-  background-color: var(--bg-main, #0a1410);
+  background-color: var(--bg-card);
   padding: 0.85rem;
   border-radius: var(--radius-md, 8px);
   font-family: var(--font-mono, monospace);
-  font-size: 0.8rem;
-  color: #e2f0ea;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: var(--text-secondary);
   white-space: pre-wrap;
-  border: 1px solid rgba(156, 181, 171, 0.1);
+  border: 1px solid var(--border-subtle);
   max-height: 150px;
   overflow-y: auto;
 }
 
 .modalFooter {
-  padding: 1.25rem 1.75rem;
-  background-color: var(--bg-surface-elevated, #162c24);
-  border-top: 1px solid var(--border-subtle, rgba(156, 181, 171, 0.15));
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  border-top: 1px solid var(--border-subtle);
+  background-color: var(--bg-surface);
+  flex-shrink: 0;
   flex-wrap: wrap;
 }
 
@@ -322,13 +376,15 @@
 }
 
 .btnPrimary {
-  padding: 0.65rem 1.25rem;
-  font-size: 0.9rem;
+  padding: 0.65rem 1.35rem;
+  min-height: 44px;
+  font-size: 0.875rem;
+  line-height: 1.2;
   font-weight: 600;
-  border-radius: var(--radius-md, 10px);
-  background-color: #10b981;
-  color: #ffffff;
-  border: none;
+  border-radius: var(--radius-md, 14px);
+  background-color: var(--admin-button-primary-bg, var(--brand-accent));
+  color: var(--admin-button-primary-ink, var(--brand-deep));
+  border: 1px solid var(--admin-button-primary-border, var(--brand-accent));
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -337,16 +393,55 @@
 }
 
 .btnPrimary:hover:not(:disabled) {
-  background-color: #059669;
-  transform: translateY(-1px);
+  background-color: var(--admin-button-primary-hover, #e09015);
+  border-color: var(--admin-button-primary-hover, #e09015);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.btnPrimary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btnApprove {
+  background-color: var(--admin-success, #059669);
+}
+
+.btnReject {
+  background-color: var(--admin-error, #dc2626);
+}
+
+.btnCancel {
+  background: transparent;
+  border: 1px solid var(--border-subtle, rgba(156, 181, 171, 0.25));
+  color: var(--text-secondary, #9cb5ab);
+  padding: 0.6rem 1.2rem;
+  border-radius: var(--radius-md, 10px);
+  font-size: 0.875rem;
+  line-height: 1.2;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: all var(--transition-fast, 150ms ease);
+}
+
+.btnCancel:hover:not(:disabled) {
+  background-color: rgba(255, 255, 255, 0.06);
+  color: var(--text-primary, #f3f7f5);
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
 .btnDanger {
   padding: 0.65rem 1.25rem;
-  font-size: 0.9rem;
+  font-size: 0.875rem;
+  line-height: 1.2;
   font-weight: 600;
   border-radius: var(--radius-md, 10px);
-  background-color: #ef4444;
+  background-color: var(--admin-danger);
   color: #ffffff;
   border: none;
   cursor: pointer;
@@ -357,18 +452,19 @@
 }
 
 .btnDanger:hover:not(:disabled) {
-  background-color: #dc2626;
+  background-color: #8f1c14;
   transform: translateY(-1px);
 }
 
 .btnSecondary {
   padding: 0.65rem 1.1rem;
-  font-size: 0.85rem;
+  font-size: 0.875rem;
+  line-height: 1.2;
   font-weight: 500;
   border-radius: var(--radius-md, 10px);
-  background-color: var(--bg-surface, #11221c);
-  color: var(--text-secondary, #9cb5ab);
-  border: 1px solid var(--border-subtle, rgba(156, 181, 171, 0.2));
+  background-color: var(--bg-card);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-subtle);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -378,20 +474,19 @@
 }
 
 .btnSecondary:hover:not(:disabled) {
-  background-color: var(--bg-surface-elevated, #162c24);
-  color: var(--text-primary, #ffffff);
-  border-color: rgba(156, 181, 171, 0.35);
+  background-color: var(--brand-accent-soft);
+  color: var(--text-primary);
+  border-color: var(--brand-primary);
 }
 
 .btnWhatsApp {
-  padding: 0.65rem 1.25rem;
-  font-size: 0.9rem;
-  font-weight: 600;
-  border-radius: var(--radius-md, 10px);
   background-color: #25d366;
-  color: #000000;
-  border: none;
-  cursor: pointer;
+  color: #ffffff;
+  padding: 0.65rem 1.25rem;
+  border-radius: var(--radius-md, 10px);
+  font-size: 0.875rem;
+  line-height: 1.2;
+  font-weight: 600;
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
@@ -404,67 +499,601 @@
   transform: translateY(-1px);
 }
 
-.badgeWarning {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-  padding: 0.25rem 0.6rem;
-  border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  background-color: rgba(245, 158, 11, 0.15);
-  color: #fbbf24;
-  border: 1px solid rgba(245, 158, 11, 0.3);
-}
-
-.badgeSuccess {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-  padding: 0.25rem 0.6rem;
-  border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  background-color: rgba(16, 185, 129, 0.15);
-  color: #34d399;
-  border: 1px solid rgba(16, 185, 129, 0.3);
-}
-
-.badgeDanger {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-  padding: 0.25rem 0.6rem;
-  border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  background-color: rgba(239, 68, 68, 0.15);
-  color: #f87171;
-  border: 1px solid rgba(239, 68, 68, 0.3);
-}
-
-.badgeInfo {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-  padding: 0.25rem 0.6rem;
-  border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  background-color: rgba(59, 130, 246, 0.15);
-  color: #60a5fa;
-  border: 1px solid rgba(59, 130, 246, 0.3);
-}
-
+.badgeSuccess,
+.badgeWarning,
+.badgeDanger,
+.badgeInfo,
 .badgeNeutral {
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
-  padding: 0.25rem 0.6rem;
-  border-radius: 9999px;
-  font-size: 0.75rem;
+  gap: 0.35rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: var(--radius-full, 9999px);
+  font-size: 0.875rem;
+  line-height: 1.2;
   font-weight: 600;
-  background-color: rgba(156, 181, 171, 0.15);
-  color: #9cb5ab;
-  border: 1px solid rgba(156, 181, 171, 0.25);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  border-width: 1px;
+  border-style: solid;
+}
+
+.badgeSuccess {
+  background-color: var(--admin-success-bg, rgba(16, 185, 129, 0.12));
+  color: var(--admin-success, var(--color-success, #10b981));
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+.badgeWarning {
+  background-color: var(--admin-warning-bg, rgba(245, 158, 11, 0.12));
+  color: var(--admin-warning, #8a5200);
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
+.badgeDanger {
+  background-color: var(--admin-error-bg, rgba(239, 68, 68, 0.12));
+  color: var(--admin-error, #b42318);
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.badgeInfo {
+  background-color: var(--admin-info-bg, rgba(59, 130, 246, 0.12));
+  color: var(--admin-info, #245a8d);
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+.badgeNeutral {
+  background-color: var(--admin-neutral-bg, rgba(148, 163, 184, 0.12));
+  color: var(--admin-neutral, var(--text-muted, #7e9c90));
+  border-color: rgba(148, 163, 184, 0.25);
+}
+
+.notificationTraceCard {
+  border-left: 4px solid var(--admin-success);
+}
+
+.notificationTraceIcon,
+.notificationPhone {
+  color: var(--admin-success);
+}
+
+.notificationFailure {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background-color: var(--admin-error-bg);
+  border: 1px solid var(--admin-danger-border);
+  border-radius: var(--radius-sm);
+  color: var(--admin-danger);
+  font-size: 0.875rem;
+  line-height: 1.45;
+}
+
+.notificationHistoryLabel {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  line-height: 1.2;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.notificationLogEntry {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0.75rem 0.9rem;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+}
+
+.notificationLogEntryFailed {
+  background-color: var(--admin-error-bg);
+  border-color: var(--admin-danger-border);
+}
+
+.notificationChannelBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  line-height: 1.2;
+  font-weight: 700;
+}
+
+.notificationChannelWhatsApp {
+  background-color: var(--admin-success-bg);
+  color: var(--admin-success);
+  border: 1px solid var(--admin-success);
+}
+
+.notificationChannelEmail {
+  background-color: var(--admin-info-bg);
+  color: var(--admin-info);
+  border: 1px solid var(--admin-info);
+}
+
+.notificationEventTitle {
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  line-height: 1.2;
+}
+
+.notificationAttempts,
+.notificationMeta,
+.notificationEmpty {
+  color: var(--text-secondary);
+}
+
+.notificationAttempts {
+  font-size: 0.75rem;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+
+.notificationMeta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+}
+
+.notificationError {
+  margin-top: 0.2rem;
+  padding: 0.4rem 0.6rem;
+  border-radius: 4px;
+  background-color: var(--admin-error-bg);
+  border: 1px solid var(--admin-danger-border);
+  color: var(--admin-danger);
+  font-size: 0.875rem;
+  line-height: 1.2;
+}
+
+.notificationEmpty {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  line-height: 1.45;
+}
+
+/* --- Clases funcionales para eliminar estilos inline --- */
+.modalSubtitle {
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: var(--text-secondary, #9cb5ab);
+}
+
+.feedbackError,
+.feedbackSuccess {
+  margin: 1rem 1.75rem 0;
+  padding: 0.85rem 1.25rem;
+  border-radius: var(--radius-md, 10px);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  line-height: 1.45;
+}
+
+.feedbackError {
+  background-color: var(--admin-error-bg, var(--overlay-danger-subtle));
+  border: 1px solid var(--admin-danger-border, #ef4444);
+  color: var(--admin-danger, #b42318);
+}
+
+.feedbackSuccess {
+  background-color: var(--admin-success-bg, var(--overlay-success-subtle));
+  border: 1px solid var(--admin-success, var(--color-success));
+  color: var(--admin-success, var(--brand-primary));
+}
+
+.inlineCopyGroup,
+.inlineIconValue,
+.contactValueGroup {
+  display: flex;
+  align-items: center;
+}
+
+.inlineCopyGroup {
+  gap: 0.35rem;
+}
+
+.inlineIconValue {
+  gap: 0.3rem;
+}
+
+.copyIconButton {
+  background: none;
+  border: none;
+  color: var(--text-secondary, #9cb5ab);
+  cursor: pointer;
+  padding: 2px;
+}
+
+.badgeMuted {
+  opacity: 0.7;
+}
+
+.totalValue {
+  font-size: 1.125rem;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+  color: var(--brand-accent);
+}
+
+.rejectionReasonBox {
+  margin-top: 0.5rem;
+  padding: 0.6rem;
+  background-color: var(--admin-error-bg, rgba(239, 68, 68, 0.12));
+  border-radius: var(--radius-sm, 6px);
+  border: 1px solid var(--admin-danger-border, rgba(239, 68, 68, 0.25));
+}
+
+.rejectionReasonLabel {
+  display: block;
+  font-size: 0.875rem;
+  line-height: 1.2;
+  font-weight: 700;
+  color: var(--admin-danger, #b42318);
+  text-transform: uppercase;
+}
+
+.rejectionReasonText {
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: var(--admin-danger, #b42318);
+}
+
+.documentValue {
+  letter-spacing: 0.05em;
+}
+
+.protectedLabel {
+  font-size: 0.75rem;
+  line-height: 1.2;
+  color: var(--text-secondary, #7e9c90);
+}
+
+.contactValueGroup {
+  gap: 0.5rem;
+}
+
+.whatsappLink,
+.emailLink,
+.proofOpenLink {
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+}
+
+.whatsappLink {
+  color: var(--admin-brand, var(--brand-primary));
+  gap: 0.25rem;
+  font-weight: 600;
+}
+
+.emailLink {
+  color: var(--text-secondary, #9cb5ab);
+  gap: 0.25rem;
+  font-size: 0.875rem;
+  line-height: 1.45;
+}
+
+.contactPreferenceBadge {
+  font-size: 0.875rem;
+  line-height: 1.2;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.emptyTicketsText {
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: var(--text-secondary, #7e9c90);
+  padding: 0.5rem;
+}
+
+.paymentSectionGrid {
+  align-items: start;
+}
+
+.paymentDetailsColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.capitalizeValue {
+  text-transform: capitalize;
+}
+
+.bankReferenceValue {
+  font-size: 0.875rem;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+
+.verificationRuleBox {
+  padding: 0.75rem;
+  background-color: var(--admin-warning-bg, rgba(245, 158, 11, 0.08));
+  border-radius: var(--radius-md, 8px);
+  border: 1px solid var(--admin-warning, rgba(245, 158, 11, 0.2));
+}
+
+.verificationRuleTitle {
+  display: block;
+  font-size: 0.875rem;
+  line-height: 1.2;
+  font-weight: 700;
+  color: var(--admin-warning, #8A5200);
+  margin-bottom: 0.2rem;
+}
+
+.verificationRuleText {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.2;
+  color: var(--text-secondary, #41564A);
+  line-height: 1.45;
+}
+
+.proofLabel {
+  display: block;
+  font-size: 0.875rem;
+  line-height: 1.2;
+  color: var(--text-secondary, #41564A);
+  margin-bottom: 0.4rem;
+  font-weight: 600;
+}
+
+.proofStatusIcon {
+  display: block;
+  margin: 0 auto 0.5rem;
+}
+
+.proofLoadingText {
+  font-size: 0.875rem;
+  line-height: 1.45;
+}
+
+.proofOpenLink {
+  color: var(--color-success);
+  gap: 0.25rem;
+  font-weight: 600;
+}
+
+.rejectionHeader,
+.notificationHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.rejectionTitle {
+  margin: 0;
+  color: var(--admin-danger, #b42318);
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.cancelRejectionButton {
+  background: none;
+  border: none;
+  color: var(--text-secondary, #9cb5ab);
+  cursor: pointer;
+  font-size: 0.875rem;
+  line-height: 1.2;
+}
+
+.rejectionDescription {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: var(--text-secondary, #9cb5ab);
+}
+
+.rejectionDetailsLabel {
+  display: block;
+  font-size: 0.875rem;
+  line-height: 1.2;
+  font-weight: 600;
+  color: var(--text-primary, #16261c);
+  margin-bottom: 0.35rem;
+}
+
+.rejectionActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.notificationTitle {
+  font-size: 0.875rem;
+  line-height: 1.2;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.notificationTitleSuccess {
+  color: var(--admin-success, var(--brand-primary));
+}
+
+.notificationTitleDanger {
+  color: var(--admin-danger, #b42318);
+}
+
+.compactCopyButton {
+  padding: 0.25rem 0.6rem;
+  font-size: 0.875rem;
+  line-height: 1.2;
+}
+
+.notificationSendRow {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.25rem;
+}
+
+.notificationNoPhone {
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: var(--text-secondary, #9cb5ab);
+}
+
+.notificationContent {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.notificationSummaryGrid {
+  align-items: start;
+}
+
+.notificationFailureIcon {
+  flex-shrink: 0;
+}
+
+.notificationHistory {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.notificationLogHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.notificationLogIdentity,
+.notificationLogStatus {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.smallBadge {
+  font-size: 0.75rem;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+
+.notificationDate {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.notificationActionResult {
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-sm, 6px);
+  font-size: 0.875rem;
+  line-height: 1.45;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.notificationActionSuccess {
+  background-color: var(--admin-success-bg, var(--overlay-success-subtle));
+  color: var(--admin-success, var(--brand-primary));
+}
+
+.notificationActionWarning {
+  background-color: var(--admin-warning-bg, var(--overlay-warning-subtle));
+  color: var(--admin-warning, #8A5200);
+}
+
+.notificationActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 0.35rem;
+}
+
+.notificationRetryButton {
+  padding: 0.4rem 0.8rem;
+  font-size: 0.875rem;
+  line-height: 1.2;
+}
+
+.footerStatusText {
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--text-secondary, #9cb5ab);
+}
+
+.receiptButton {
+  border-color: var(--color-brand-accent, var(--brand-accent));
+  color: var(--color-brand-accent, var(--brand-accent));
+}
+
+
+
+@media (max-width: 640px) {
+  .modalBackdrop {
+    align-items: flex-start;
+    padding: 0;
+  }
+
+  .modalCard {
+    min-height: 100dvh;
+    max-height: 100dvh;
+    border-radius: 0;
+  }
+
+  .modalHeader,
+  .modalFooter {
+    padding-inline: 1rem;
+  }
+
+  .modalBody {
+    padding: 1rem;
+    gap: 1rem;
+  }
+
+  .reviewCard {
+    padding: 1rem;
+  }
+
+  .infoRow {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .infoValue,
+  .infoValueMono {
+    max-width: 100%;
+    text-align: left;
+  }
+
+  .modalFooter {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .footerActions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .footerActions > button,
+  .footerActions > a {
+    flex: 1 1 180px;
+  }
 }

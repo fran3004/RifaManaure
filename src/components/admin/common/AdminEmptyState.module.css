@@ -5,7 +5,7 @@
   justify-content: center;
   padding: 3.5rem 1.5rem;
   background-color: var(--bg-surface, #11221c);
-  border: 1px dashed var(--border-subtle, rgba(156, 181, 171, 0.2));
+  border: 1px dashed var(--border-subtle, var(--overlay-neutral));
   border-radius: var(--radius-lg, 16px);
   text-align: center;
   margin: 1.5rem 0;
@@ -19,7 +19,7 @@
   height: 64px;
   border-radius: var(--radius-full, 9999px);
   background-color: rgba(245, 158, 11, 0.1);
-  color: var(--color-brand-accent, #f59e0b);
+  color: var(--color-brand-accent, var(--brand-accent));
   margin-bottom: 1.25rem;
 }
 
@@ -31,11 +31,12 @@
 }
 
 .description {
-  font-size: 0.925rem;
+  font-size: 0.875rem;
+  line-height: 1.45;
   color: var(--text-secondary, #9cb5ab);
   max-width: 480px;
   margin: 0 0 1.5rem 0;
-  line-height: 1.5;
+  line-height: 1.45;
 }
 
 .actionButton {
@@ -45,11 +46,12 @@
   padding: 0.65rem 1.25rem;
   background: linear-gradient(
     135deg,
-    var(--color-brand-accent, #f59e0b) 0%,
+    var(--color-brand-accent, var(--brand-accent)) 0%,
     var(--color-brand-accent-hover, #d97706) 100%
   );
-  color: var(--text-inverse, #08120e);
-  font-size: 0.9rem;
+  color: var(--text-inverse, #0F2E1D);
+  font-size: 0.875rem;
+  line-height: 1.2;
   font-weight: 600;
   border: none;
   border-radius: var(--radius-md, 10px);

@@ -1,36 +1,63 @@
 .modalBackdrop {
   position: fixed;
   inset: 0;
-  z-index: 2500;
-  background-color: rgba(5, 12, 9, 0.88);
+  background-color: rgba(4, 15, 11, 0.85);
   backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1.5rem;
+  z-index: var(--z-modal-backdrop);
+  padding: 1rem;
+  overflow-y: auto;
+  animation: fadeIn 200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .modalCard {
-  background-color: var(--bg-surface, #11221c);
-  border: 1px solid var(--border-subtle, rgba(156, 181, 171, 0.25));
-  border-radius: var(--radius-xl, 24px);
-  max-width: 680px;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl, 20px);
   width: 100%;
+  max-width: 680px;
   max-height: 92dvh;
-  overflow-y: auto;
-  padding: 2rem;
+  box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.6), 0 0 0 1px var(--border-subtle);
+  color: var(--text-primary);
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
+  padding: 2rem;
   gap: 1.5rem;
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+  animation: scaleIn 200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.96) translateY(8px);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
 }
 
 .modalHeader {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  padding: 0 0 1.25rem 0;
+  background-color: transparent;
   border-bottom: 1px solid var(--border-subtle, rgba(156, 181, 171, 0.15));
-  padding-bottom: 1.25rem;
+  flex-shrink: 0;
 }
 
 .modalTitleGroup {
@@ -59,29 +86,30 @@
 }
 
 .modalSubtitle {
-  font-size: 0.8rem;
+  font-size: 0.875rem;
+  line-height: 1.2;
   color: var(--text-secondary, #9cb5ab);
   margin: 0.15rem 0 0 0;
 }
 
 .closeBtn {
-  background: none;
+  background: transparent;
   border: none;
-  color: var(--text-muted, #5e7a6f);
+  color: var(--text-secondary, #9cb5ab);
   cursor: pointer;
-  padding: 0.35rem;
+  padding: 0.5rem;
   min-width: 44px;
   min-height: 44px;
+  border-radius: var(--radius-md, 8px);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--radius-sm, 6px);
   transition: all var(--transition-fast, 150ms ease);
 }
 
 .closeBtn:hover {
-  color: #ffffff;
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.08);
+  color: var(--text-primary, #f3f7f5);
 }
 
 .previewContainer {
@@ -121,7 +149,7 @@
   border-radius: var(--radius-md, 12px);
   background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
   color: #08120e;
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   font-weight: 700;
   border: none;
   cursor: pointer;
@@ -145,7 +173,7 @@
   background-color: var(--bg-surface-elevated, #1a332a);
   border: 1px solid var(--border-subtle, rgba(156, 181, 171, 0.25));
   color: #f3f7f5;
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
   transition: all var(--transition-fast, 150ms ease);
@@ -166,7 +194,7 @@
   border-radius: var(--radius-md, 12px);
   background-color: #25d366;
   color: #ffffff;
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   font-weight: 700;
   border: none;
   cursor: pointer;
@@ -189,9 +217,9 @@
   background-color: rgba(16, 185, 129, 0.08);
   border: 1px solid rgba(16, 185, 129, 0.25);
   border-radius: var(--radius-md, 12px);
-  font-size: 0.8rem;
+  font-size: 0.875rem;
   color: #a7f3d0;
-  line-height: 1.4;
+  line-height: 1.45;
 }
 
 @media (max-width: 640px) {

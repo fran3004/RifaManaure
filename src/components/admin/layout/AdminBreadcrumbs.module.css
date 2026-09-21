@@ -2,27 +2,28 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-size: 0.85rem;
-  color: var(--text-muted, #5e7a6f);
+  font-size: 0.875rem;
+  line-height: 1.2;
+  color: #b9d7c3;
 }
 
 .crumbLink {
-  color: var(--text-secondary, #9cb5ab);
+  color: #cce5d2;
   text-decoration: none;
   transition: color var(--transition-fast, 150ms ease);
 }
 
 .crumbLink:hover {
-  color: var(--color-brand-accent, #f59e0b);
+  color: #f5c45f;
 }
 
 .separator {
   display: flex;
   align-items: center;
-  color: var(--border-subtle, rgba(156, 181, 171, 0.3));
+  color: #6fac82;
 }
 
 .currentCrumb {
-  color: var(--text-primary, #f3f7f5);
+  color: #f5c45f;
   font-weight: 600;
 }

@@ -1,8 +1,9 @@
 .floatingBtnWrapper {
   position: fixed;
+  /* --cart-h se define a nivel global (variables.css) y se actualiza dinámicamente en runtime por SelectorBoletos.tsx */
   bottom: calc(20px + env(safe-area-inset-bottom, 0px) + var(--cart-h, 0px));
   right: calc(20px + env(safe-area-inset-right, 0px));
-  z-index: var(--z-whatsapp, 300);
+  z-index: var(--z-whatsapp);
   width: 60px;
   height: 60px;
   pointer-events: none; /* El contenedor no captura clics ni hover */
@@ -17,8 +18,12 @@
 
 .btnHidden {
   opacity: 0;
-  pointer-events: none !important;
+  pointer-events: none;
   visibility: hidden;
+}
+
+.btnHidden .floatingBtn {
+  pointer-events: none;
 }
 
 .floatingBtn {
@@ -63,7 +68,7 @@
 }
 
 .floatingBtn:focus-visible {
-  outline: 3px solid var(--focus-ring-on-dark, #F5A623);
+  outline: 3px solid var(--focus-ring-on-dark, var(--brand-accent));
   outline-offset: 3px;
 }
 
@@ -108,13 +113,14 @@
   padding: 0.5rem 0.9rem;
   border-radius: var(--radius-full, 9999px);
   font-family: var(--font-sans, sans-serif);
-  font-size: 0.85rem;
+  font-size: 0.875rem;
+  line-height: 1.45;
   font-weight: 600;
   white-space: nowrap;
   box-shadow: var(--shadow-md, 0 6px 16px rgba(15, 46, 29, 0.16));
   opacity: 0;
   visibility: hidden;
-  pointer-events: none !important; /* CRÍTICO: el tooltip nunca captura el cursor */
+  pointer-events: none; /* CRÍTICO: el tooltip nunca captura el cursor */
   transition:
     opacity 180ms ease,
     transform 180ms ease,
@@ -134,10 +140,11 @@
   border-left: 6px solid var(--brand-deep, #0F2E1D);
 }
 
+.tooltip.tooltipVisible,
 .tooltipVisible {
-  opacity: 1 !important;
-  visibility: visible !important;
-  transform: translateY(-50%) translateX(0) !important;
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(-50%) translateX(0);
 }
 
 @media (max-width: 640px) {
@@ -154,25 +161,25 @@
   }
 
   .whatsappIcon {
-    width: 30px !important;
-    height: 30px !important;
+    width: 30px;
+    height: 30px;
   }
 
   .tooltip {
-    display: none !important;
+    display: none;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .pulseRing {
-    animation: none !important;
-    display: none !important;
+    animation: none;
+    display: none;
   }
 
   .floatingBtnWrapper,
   .floatingBtn,
   .tooltip {
-    transition: none !important;
+    transition: none;
   }
 }
 

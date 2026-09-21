@@ -40,7 +40,6 @@ export interface RegisterWinnerPayload {
   lotteryDrawNumber: string;
   drawDate?: string;
   officialActUrl?: string | null;
-  deliveryPhotos?: string[];
   notes?: string | null;
 }
 

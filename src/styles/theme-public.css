@@ -1,11 +1,11 @@
 /**
- * Sistema de Diseño - Tema Público Aislado: "Manaure Vive"
+ * Sistema de Diseño - Tema Público: "Manaure Vive"
  * Paleta: Crema cálido + Verde Bosque + Ámbar / Dorado
  *
- * Ámbito estricto: [data-theme="public"]
- * Los estilos de :root permanecen intactos para proteger el panel administrativo.
+ * Ámbito: :root (fallback por defecto) y [data-theme="public"]
  */
 
+:root,
 [data-theme="public"] {
   color-scheme: light;
 
@@ -23,7 +23,7 @@
   /* Alias de compatibilidad existentes */
   --bg-main: var(--bg-page);
   --bg-surface-elevated: var(--bg-card);
-  --bg-surface-glass: rgba(251, 248, 241, 0.92);
+  --bg-surface-glass: rgba(251, 248, 241, 0.94);
 
   /* --- Jerarquía Tipográfica y Textos --- */
   --text-primary: #16261C;
@@ -50,7 +50,7 @@
   --state-sold: #5F6673;
 
   /* --- Foco y Accesibilidad --- */
-  --focus-ring: #1B4A2E;
+  --focus-ring: var(--brand-primary);
   --focus-ring-on-dark: #F5A623;
   --border-focus: var(--focus-ring);
 
@@ -76,7 +76,7 @@
   --ticket-available-hover-bg: #EDF5F0;
   --ticket-available-hover-border: var(--brand-primary);
 
-  --ticket-selected-bg: #F5A623;
+  --ticket-selected-bg: var(--brand-accent);
   --ticket-selected-border: #8A5200;
   --ticket-selected-text: #0F2E1D;
 
@@ -113,12 +113,21 @@
   --space-16: 64px;
   --space-24: 96px;
 
-  /* --- Capas (z-index con nombre) --- */
-  --z-navbar: 100;
-  --z-cart: 200;
-  --z-whatsapp: 300;
-  --z-modal: 1000;
-  --z-lightbox: 1100;
+  /* --- Escala Canónica de Capas (z-index) --- */
+  --z-base: 0;
+  --z-raised: 10;
+  --z-sticky: 100;
+  --z-dropdown: 500;
+  --z-whatsapp: 900;
+  --z-modal-backdrop: 1000;
+  --z-modal-card: 1010;
+  --z-toast: 2000;
+
+  /* Alias de compatibilidad semántica */
+  --z-modal: var(--z-modal-backdrop);
+  --z-navbar: var(--z-sticky);
+  --z-lightbox: var(--z-modal-backdrop);
+  --z-cart: var(--z-sticky);
 
   /* --- Alturas --- */
   --navbar-h: 72px;
@@ -129,8 +138,10 @@
   --transition-base: 250ms cubic-bezier(0.2, 0.7, 0.2, 1);
   --transition-normal: var(--transition-base);
   --transition-slow: 400ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
 
-  /* --- Configuración Base del Contenedor Raíz Público --- */
+/* --- Configuración Base del Contenedor Raíz Público --- */
+[data-theme="public"] {
   font-family: var(--font-sans);
   font-weight: 400;
   line-height: 1.65;
@@ -167,43 +178,23 @@
   }
 }
 
-/* --- Escala Tipográfica en Ámbito Público --- */
-[data-theme="public"] h1 {
+/* --- Normalización Base Tipográfica en Ámbito Público --- */
+:where([data-theme="public"]) h1,
+:where([data-theme="public"]) h2,
+:where([data-theme="public"]) h3,
+:where([data-theme="public"]) h4,
+:where([data-theme="public"]) h5,
+:where([data-theme="public"]) h6 {
   font-family: var(--font-heading);
-  font-weight: 800;
-  font-size: clamp(2.4rem, 5.2vw, 4rem);
-  line-height: 1.05;
-  letter-spacing: -0.01em;
-  text-wrap: balance;
-  color: var(--text-primary);
+  color: inherit;
+  margin: 0;
 }
 
-[data-theme="public"] h2 {
-  font-family: var(--font-heading);
-  font-weight: 700;
-  font-size: clamp(1.9rem, 3.6vw, 2.75rem);
-  line-height: 1.15;
-  letter-spacing: -0.01em;
-  text-wrap: balance;
-  color: var(--text-primary);
+:where([data-theme="public"]) p {
+  margin: 0;
 }
 
-[data-theme="public"] h3 {
-  font-family: var(--font-heading);
-  font-weight: 700;
-  font-size: clamp(1.35rem, 2.5vw, 1.5rem);
-  line-height: 1.2;
-  color: var(--text-primary);
-}
-
-[data-theme="public"] p {
-  font-family: var(--font-sans);
-  font-weight: 400;
-  line-height: 1.65;
-  max-width: 65ch;
-}
-
-[data-theme="public"] small {
+:where([data-theme="public"]) small {
   font-size: 0.875rem;
 }
 
@@ -228,13 +219,14 @@
   position: absolute;
   top: -1000px;
   left: 1rem;
-  z-index: calc(var(--z-lightbox) + 100);
+  z-index: var(--z-toast);
   padding: 0.75rem 1.25rem;
   background-color: var(--brand-deep);
   color: var(--text-on-dark);
   font-family: var(--font-sans);
   font-weight: 700;
-  font-size: 0.95rem;
+  font-size: 1rem;
+  line-height: 1.45;
   border-radius: var(--radius-md);
   border: 2px solid var(--brand-accent);
   box-shadow: var(--shadow-lg);
@@ -278,14 +270,5 @@
   scroll-margin-top: calc(var(--navbar-h) + 16px);
 }
 
-/* --- Accesibilidad: Movimiento Reducido --- */
-@media (prefers-reduced-motion: reduce) {
-  [data-theme="public"],
-  [data-theme="public"] * {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
-}
+
 

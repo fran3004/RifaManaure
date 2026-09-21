@@ -18,7 +18,7 @@ export const AdminLayout: React.FC = () => {
 
   return (
     <AdminRaffleProvider>
-      <div className={styles.adminShell}>
+      <div className={styles.adminShell} data-theme="admin">
         {/* Backdrop overlay para dispositivos móviles y tablets */}
         <div
           className={`${styles.backdrop} ${isSidebarOpen ? styles.backdropVisible : ''}`}

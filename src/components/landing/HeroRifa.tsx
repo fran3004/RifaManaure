@@ -147,6 +147,13 @@ export const HeroRifa: React.FC<HeroRifaProps> = ({
 
   const activePhoto = slides[currentSlide];
 
+  const progressStyle: React.CSSProperties | undefined = stats
+    ? {
+        ['--progress-sold-width' as string]: `${Math.min(stats.percentageSold, 100)}%`,
+        ['--progress-reserved-width' as string]: `${Math.min(stats.percentageReserved, 100 - stats.percentageSold)}%`,
+      }
+    : undefined;
+
   return (
     <section
       className={styles.heroSection}
@@ -316,17 +323,12 @@ export const HeroRifa: React.FC<HeroRifaProps> = ({
                     aria-valuemax={stats.total}
                     aria-valuenow={stats.sold}
                     aria-label={`Progreso del sorteo: ${formatTicketCount(stats.sold)} de ${formatTicketCount(stats.total)} boletos vendidos`}
+                    style={progressStyle}
                   >
-                    <div
-                      className={styles.progressSold}
-                      style={{ width: `${Math.min(stats.percentageSold, 100)}%` }}
-                    />
+                    <div className={styles.progressSold} />
                     {stats.percentageReserved > 0 && (
                       <div
                         className={styles.progressReserved}
-                        style={{
-                          width: `${Math.min(stats.percentageReserved, 100 - stats.percentageSold)}%`,
-                        }}
                         title={`${formatTicketCount(stats.reserved)} boletos reservados`}
                       />
                     )}

@@ -11,10 +11,102 @@
   align-items: stretch;
 }
 
+.mayorPrizeCard {
+  margin: -0.75rem 0 2.25rem;
+  padding: 1.5rem 1.75rem;
+  color: #F5F1E8;
+  background: linear-gradient(135deg, #0F4B2C 0%, #1B6038 100%);
+  border: 1px solid rgba(245, 166, 35, 0.42);
+  border-radius: 16px;
+  box-shadow: 0 16px 32px rgba(15, 46, 29, 0.2);
+}
+
+.mayorPrizeHeader {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(238, 244, 239, 0.16);
+}
+
+.mayorPrizeIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  color: var(--brand-accent);
+  background: rgba(245, 166, 35, 0.12);
+  border: 1px solid rgba(245, 166, 35, 0.4);
+  border-radius: 7px;
+}
+
+.mayorPrizeEyebrow {
+  display: block;
+  margin: 0 0 0.2rem;
+  color: var(--brand-accent);
+  font-family: var(--font-sans, 'Outfit Variable', sans-serif);
+  font-size: 0.75rem;
+  line-height: 1.2;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.mayorPrizeTitle {
+  margin: 0;
+  color: #FFFFFF;
+  font-family: var(--font-heading, 'Playfair Display Variable', Georgia, serif);
+  font-size: 1.875rem;
+  line-height: 1.2;
+  line-height: 1.2;
+}
+
+.mayorPrizeSubtitle {
+  margin: 0.25rem 0 0;
+  color: rgba(238, 244, 239, 0.86);
+  font-family: var(--font-sans, 'Outfit Variable', sans-serif);
+  font-size: 0.875rem;
+  line-height: 1.45;
+  line-height: 1.45;
+}
+
+.mayorPrizeList {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem 2rem;
+  list-style: none;
+  margin: 1rem 0 0;
+  padding: 0;
+}
+
+.mayorPrizeList li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  color: rgba(255, 255, 255, 0.94);
+  font-family: var(--font-sans, 'Outfit Variable', sans-serif);
+  font-size: 0.875rem;
+  line-height: 1.45;
+  line-height: 1.45;
+}
+
+.mayorPrizeList li > svg {
+  flex: 0 0 auto;
+  margin-top: 0.16rem;
+  color: var(--brand-accent);
+}
+
+.mayorPrizeList strong {
+  color: #FFFFFF;
+  font-weight: 800;
+}
+
 .card {
   position: relative;
   border-radius: 24px;
-  overflow: hidden;
+  overflow: clip;
   aspect-ratio: 3 / 4;
   min-height: min-content;
   border: 1px solid rgba(255, 255, 255, 0.22);
@@ -38,9 +130,14 @@
 }
 
 .cardMedia {
+  /* Variables dinámicas inyectadas en runtime por DetallePremio.tsx (valores por defecto de respaldo) */
+  --dominant: var(--brand-deep);
+  --focal-x: 50%;
+  --focal-y: 40%;
+
   position: absolute;
   inset: 0;
-  z-index: 0;
+  z-index: var(--z-base);
   overflow: hidden;
   background-color: var(--dominant, var(--brand-deep));
 }
@@ -59,11 +156,11 @@
   object-fit: cover;
   filter: blur(24px) saturate(1.1) brightness(0.72);
   transform: scale(1.14);
-  z-index: 0;
+  z-index: var(--z-base);
 }
 
 .foreground {
-  z-index: 2;
+  z-index: var(--z-raised);
 }
 
 .foregroundImage {
@@ -72,7 +169,8 @@
 }
 
 .cardMedia[data-fit='contain'] .foregroundImage,
-.cardMedia[data-fit='asis'] .foregroundImage {
+.cardMedia[data-fit='asis'] .foregroundImage,
+.cardMedia[data-fit='asis'] .foreground {
   object-fit: contain;
   object-position: center top;
 }
@@ -82,7 +180,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  z-index: 1;
+  z-index: var(--z-base);
   background: rgba(15, 46, 29, 0.35);
 }
 
@@ -120,12 +218,12 @@
     #06130B 100%
   );
   pointer-events: none;
-  z-index: 3;
+  z-index: var(--z-raised);
 }
 
 .cardInner {
   position: relative;
-  z-index: 1;
+  z-index: var(--z-raised);
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -154,9 +252,10 @@
   border-radius: 9999px;
   background-color: rgba(12, 28, 18, 0.9);
   border: 1px solid #D4A346;
-  color: #F5A623;
+  color: var(--brand-accent);
   font-family: var(--font-sans, 'Outfit Variable', sans-serif);
-  font-size: 0.65rem;
+  font-size: 0.75rem;
+  line-height: 1.2;
   font-weight: 800;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -195,11 +294,12 @@
   background-color: #E58E26;
   color: #0A1C10;
   font-family: var(--font-sans, 'Outfit Variable', sans-serif);
-  font-size: 0.65rem;
+  font-size: 0.75rem;
+  line-height: 1.2;
   font-weight: 800;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  line-height: 1.25;
+  line-height: 1.2;
   white-space: normal;
   max-width: 100%;
 }
@@ -224,24 +324,26 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #F5A623;
+  color: var(--brand-accent);
   flex-shrink: 0;
   margin-bottom: 0.75rem;
 }
 
 .cardTitle {
   font-family: var(--font-heading, 'Playfair Display Variable', Georgia, serif);
-  font-size: clamp(1.3rem, 1.8vw, 1.55rem);
+  font-size: 1.5rem;
+  line-height: 1.2;
   font-weight: 700;
-  color: #FFFFFF !important;
-  line-height: 1.25;
+  color: #FFFFFF;
+  line-height: 1.2;
   margin: 0 0 0.65rem 0;
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
 }
 
 .cardDescription {
   font-family: var(--font-sans, 'Outfit Variable', sans-serif);
-  font-size: 0.925rem;
+  font-size: 0.875rem;
+  line-height: 1.45;
   color: rgba(255, 255, 255, 0.96);
   line-height: 1.55;
   margin: 0 0 0.85rem 0;
@@ -269,15 +371,16 @@
   align-items: flex-start;
   gap: 0.75rem;
   font-family: var(--font-sans, 'Outfit Variable', sans-serif);
-  font-size: 0.9rem;
+  font-size: 0.875rem;
+  line-height: 1.45;
   font-weight: 500;
   color: #FFFFFF;
-  line-height: 1.4;
+  line-height: 1.45;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
 }
 
 .featureIcon {
-  color: var(--brand-accent, #F5A623);
+  color: var(--brand-accent, var(--brand-accent));
   flex-shrink: 0;
   margin-top: 2px;
 }
@@ -310,6 +413,22 @@
     min-height: 500px;
   }
 
+  .mayorPrizeCard {
+    margin: -0.25rem 0 1.5rem;
+    padding: 1.15rem 1rem;
+    border-radius: 14px;
+  }
+
+  .mayorPrizeList {
+    grid-template-columns: 1fr;
+    gap: 0.7rem;
+  }
+
+  .mayorPrizeList li {
+    font-size: 0.875rem;
+  line-height: 1.45;
+  }
+
   .cardInner {
     padding: 1.15rem 1rem 1.25rem;
   }
@@ -323,17 +442,12 @@
 
 /* --- Accesibilidad: Movimiento Reducido --- */
 @media (prefers-reduced-motion: reduce) {
-  .card,
-  .cardBgImage {
-    transition: none !important;
-    transform: none !important;
+  .card {
+    transition: none;
+    transform: none;
   }
 
   .card:hover {
-    transform: none !important;
-  }
-
-  .card:hover .cardBgImage {
-    transform: none !important;
+    transform: none;
   }
 }

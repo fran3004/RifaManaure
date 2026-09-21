@@ -15,7 +15,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   // 1. Estado de carga de autenticación y verificación de rol
   if (isLoading) {
     return (
-      <div className={styles.loadingContainer}>
+      <div className={styles.loadingContainer} data-theme="admin">
         <div className={styles.spinner} role="status" aria-label="Cargando..."></div>
         <p className={styles.loadingText}>Verificando permisos administrativos...</p>
       </div>
@@ -30,7 +30,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   // 3. Usuario autenticado pero NO autorizado como administrador activo
   if (!isAdmin) {
     return (
-      <div className={styles.deniedContainer}>
+      <div className={styles.deniedContainer} data-theme="admin">
         <div className={styles.deniedCard}>
           <div className={styles.iconWrapper}>
             <ShieldAlert size={36} />
