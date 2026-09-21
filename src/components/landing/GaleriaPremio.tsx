@@ -50,8 +50,6 @@ export const galeriaItems: GaleriaItemConfig[] = [
 
   // 5. Gastronomía Tradicional Autóctona
   { id: 'gastronomia-casa-arepas', category: 'gastronomia' },
-  { id: 'gastronomia-arepa', category: 'gastronomia' },
-  { id: 'gastronomia-plato', category: 'gastronomia' },
 
   // 6. Noche Íntima & Fogata
   { id: 'fogata-casa-de-vidrio', category: 'fogata' },
@@ -363,6 +361,7 @@ export const GaleriaPremio: React.FC = () => {
                 id={fotoActualItem.id}
                 role="lightbox"
                 sizes="(max-width: 1200px) 90vw, 1600px"
+                containerClassName={styles.lightboxPicture}
                 imgClassName={styles.lightboxImg}
                 alt={fotoActualEntry.alt}
               />

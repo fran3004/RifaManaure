@@ -149,9 +149,9 @@
 
 .lightboxContent {
   position: relative;
-  max-width: 1100px;
-  max-height: 90dvh;
-  width: 100%;
+  max-width: calc(100vw - 12rem);
+  max-height: calc(100dvh - 3rem);
+  width: auto;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -161,16 +161,31 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  max-height: 85dvh;
-  width: 100%;
+  width: auto;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.lightboxPicture {
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+  border: 2px solid rgba(245, 166, 35, 0.8);
+  border-radius: 14px;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
 .lightboxImg {
+  display: block;
+  width: auto;
+  height: auto;
   max-width: 100%;
-  max-height: 72dvh;
+  max-height: calc(100dvh - 9rem);
   object-fit: contain;
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-lg);
+  border-radius: 12px;
+  box-shadow: none;
 }
 
 .lightboxCaption {
@@ -179,8 +194,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  width: 100%;
-  max-width: 800px;
+  width: min(100%, 800px);
   font-size: 0.92rem;
   color: var(--text-on-dark);
   background-color: rgba(15, 46, 29, 0.9);
@@ -235,7 +249,7 @@
 }
 
 .navArrow {
-  position: absolute;
+  position: fixed;
   top: 50%;
   transform: translateY(-50%);
   color: #FFFFFF;
@@ -251,7 +265,7 @@
   justify-content: center;
   cursor: pointer;
   transition: all var(--transition-fast);
-  z-index: 2;
+  z-index: 3;
 }
 
 .navArrow:hover {
@@ -266,11 +280,11 @@
 }
 
 .prevArrow {
-  left: -1.25rem;
+  left: clamp(1rem, 7vw, 6rem);
 }
 
 .nextArrow {
-  right: -1.25rem;
+  right: clamp(1rem, 7vw, 6rem);
 }
 
 @media (max-width: 768px) {
@@ -288,11 +302,13 @@
   }
 
   .lightboxContent {
-    max-height: 85dvh;
+    max-width: calc(100vw - 2rem);
+    max-height: calc(100dvh - 2rem);
   }
 
   .lightboxImg {
-    max-height: 65dvh;
+    max-width: 100%;
+    max-height: calc(100dvh - 8rem);
   }
 
   .lightboxCaption {

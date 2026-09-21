@@ -29,11 +29,19 @@ export interface ImageEntry {
   caption: string;
   focalPoint: { x: number; y: number };
   dominantColor: string;
+  card?: {
+    fit: 'cover' | 'contain' | 'asis';
+    focal?: { x: number; y: number };
+    dominantColor?: string;
+  };
   lqip: string;
   variants: ImageVariant[];
 }
 
 export const imageAliases: Record<string, string> = {
+  "gastronomia-casa-arepas": "gastronomia-local",
+  "gastronomia-arepa": "gastronomia-local",
+  "gastronomia-plato": "gastronomia-local",
   "fogata-circulo-piedra": "fogata-casa-de-vidrio",
   "cuatrimoto-topiario": "cuatrimoto-mirador",
   "serrania-perija-panoramica": "og-image",
@@ -41,6 +49,76 @@ export const imageAliases: Record<string, string> = {
 };
 
 export const imageManifest: Record<string, ImageEntry> = {
+  "gastronomia-local": {
+    "id": "gastronomia-local",
+    "category": "gastronomia",
+    "sourceFile": "gastronomia-local.jpg",
+    "nativeWidth": 710,
+    "nativeHeight": 960,
+    "alt": "Degustación de arepa rellena artesanal y plato típico tradicional con arroz, pollo en salsa, yuca y ensalada",
+    "caption": "Experiencia gastronómica tradicional en La Casa de las Arepas, Manaure.",
+    "focalPoint": {
+      "x": 0.5,
+      "y": 0.5
+    },
+    "dominantColor": "#23302a",
+    "card": {
+      "fit": "asis",
+      "focal": { "x": 0.5, "y": 0.5 },
+      "dominantColor": "#23302a"
+    },
+    "lqip": "data:image/webp;base64,UklGRswAAABXRUJQVlA4IMAAAABQBQCdASoUABsAPzmMwVcvKSejqAqp4CcJbACuHA+DNztXE+Pv696N5lEDokogpkjBigAA9Y+cLWzYqHaTDvzwxXG1JpT9ZnbwCi8jo5QfWyBr+X0P+DH1+WXyEiYH2oTBUKdbef8iGlpW7rtjt+o7kjhPGkZ3owf9v9a1DsV+h27OwrRf1aVW7XJvG1PbC/rvs3nAabGULe3TgQ+cyLoX1bgRWyeGxfYA5u2tdYmv63WOHuQEvhrHH5fTPjqMYAA=",
+    "variants": [
+      {
+        "role": "tarjeta",
+        "ratio": "4x5",
+        "width": 710,
+        "height": 960,
+        "webp": {
+          "url": "/images/rifa/gastronomia/gastronomia-local-710w.webp",
+          "bytes": 68000,
+          "quality": 85
+        },
+        "jpg": {
+          "url": "/images/rifa/gastronomia/gastronomia-local-710w.jpg",
+          "bytes": 95000,
+          "quality": 85
+        }
+      },
+      {
+        "role": "tarjeta",
+        "ratio": "4x5",
+        "width": 480,
+        "height": 649,
+        "webp": {
+          "url": "/images/rifa/gastronomia/gastronomia-local-480w.webp",
+          "bytes": 42000,
+          "quality": 85
+        },
+        "jpg": {
+          "url": "/images/rifa/gastronomia/gastronomia-local-480w.jpg",
+          "bytes": 62000,
+          "quality": 85
+        }
+      },
+      {
+        "role": "lightbox",
+        "ratio": "full",
+        "width": 710,
+        "height": 960,
+        "webp": {
+          "url": "/images/rifa/gastronomia/gastronomia-local.webp",
+          "bytes": 68000,
+          "quality": 85
+        },
+        "jpg": {
+          "url": "/images/rifa/gastronomia/gastronomia-local.jpg",
+          "bytes": 95000,
+          "quality": 85
+        }
+      }
+    ]
+  },
   "og-image": {
     "id": "og-image",
     "category": "serrania",
@@ -263,6 +341,11 @@ export const imageManifest: Record<string, ImageEntry> = {
       "y": 0.65
     },
     "dominantColor": "#748a9d",
+    "card": {
+      "fit": "contain",
+      "focal": { "x": 0.35, "y": 0.65 },
+      "dominantColor": "#748a9d"
+    },
     "lqip": "data:image/webp;base64,UklGRoQAAABXRUJQVlA4IHgAAABQBQCdASoYABIAPtFQpkuoJKOhsBgMAQAaCWIAnTLMAamL8zZjlNcD1bPFgXj6zzdqgAAA+pOezW9n9hPM/cKUqyU6OR/PdbfvBDjiMfqtk3kX0H/VQOFNSHGFkYqa6nZaSxP/Q0I0q/05rDmAnBwCRII+sXxwAAA=",
     "variants": [
       {
@@ -713,6 +796,11 @@ export const imageManifest: Record<string, ImageEntry> = {
       "y": 0.55
     },
     "dominantColor": "#777471",
+    "card": {
+      "fit": "cover",
+      "focal": { "x": 0.55, "y": 0.55 },
+      "dominantColor": "#777471"
+    },
     "lqip": "data:image/webp;base64,UklGRt4AAABXRUJQVlA4INIAAADQBQCdASoYABIAPtFaqE4oJKQiKAqpABoJQBOmWR3/y7BGEhf4inLDdag7aCzn4MrB3+MDSIvgAP7tqtFoVxotCS/MkwI8qFcOLJQPuoKOQTnOz+/ux1k415GNyhi7GZmYxw3USpS8Y9Ro/8GGRqX+5CI2QHiIbVM7z+5MsanbViwMET5mQH3gpne7WM5ull4J11XQjKTvxZyZlKiji3dNRGsDQe+RwkYHhKNiaogf5aLgnbvOww21mnmIqOikna0vi3c1aybnS4+BspI1AUgRgAA=",
     "variants": [
       {
@@ -1019,6 +1107,11 @@ export const imageManifest: Record<string, ImageEntry> = {
       "y": 0.5
     },
     "dominantColor": "#757975",
+    "card": {
+      "fit": "cover",
+      "focal": { "x": 0.5, "y": 0.5 },
+      "dominantColor": "#757975"
+    },
     "lqip": "data:image/webp;base64,UklGRuAAAABXRUJQVlA4INQAAADwBQCdASoYABIAPtFUpU2oJCOiMBgIAQAaCWIAuzNMjgAQKZulw174xThxbrhf2hzF/Lviye2EAAD+4cyuaSD0kMHRXmLpM7hYdHUe64qR1rtCmRKYFjHyI41LYhMOeYgQ/1p7ls+Puek+Dw0jd2HXVYKpjJwbV7Z90IAdX3RzNWAPC+Jqy7u98Fng1pMW2O6w2mf7BZ61CQLzFpU4oDqlWED7pVI0zj5uy4mCHTaMkRhEbvTQK61L1kChcqBVkUXOx9ELhhdBjh/D2g8b3jfTrOYAAA==",
     "variants": [
       {
@@ -2067,6 +2160,11 @@ export const imageManifest: Record<string, ImageEntry> = {
       "y": 0.45
     },
     "dominantColor": "#7c8786",
+    "card": {
+      "fit": "cover",
+      "focal": { "x": 0.5, "y": 0.45 },
+      "dominantColor": "#7c8786"
+    },
     "lqip": "data:image/webp;base64,UklGRvIAAABXRUJQVlA4IOYAAADwBQCdASoYAB4APtFcpk6oJSMiKAqpABoJQBdmcBS36T9PrJrKAKs0QIbKppHcMaNH6IPe0tlIaAD+9+vYRCsLV+hRhdP+UcQAz/HF9ouahyVCf4cEKeBfM8ycFzeRTCzvR6NpZtvhRoTvuF9dRKAkcGLnFeYKcrQNWauZki5pe21Nc3Ftupo8CtSexEn+WPxL6WCp/s2Gydh3q/syv4+DMeWz3UokW+Zx73K+Oa/VYJ6hqfi3YFCgnhZ3R6J/eSTtfQA3yTQRg9B2PINQ54t4/auzz7YS2zC56e033b27fsc2uJAAAA==",
     "variants": [
       {

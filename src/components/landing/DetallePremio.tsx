@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getCachedPrizeDetails, getPublicPrizeDetails } from '@/services/prizeService';
 import type { PublicPrizeData, PrizeExperienceRow } from '@/types/raffle.types';
+import { imageAliases, imageManifest } from '@/types/image-manifest';
 import {
   Sparkles,
   Flame,
@@ -50,8 +51,40 @@ function renderExperienceIcon(iconName: string): React.ReactNode {
   }
 }
 
+type CardFit = 'cover' | 'contain' | 'asis';
+
+function getCardImageData(slug: string | null, title: string) {
+  const canonicalId = imageAliases[slug || ''] || slug || 'cuatrimoto-aventura-cordillera';
+  const entry = imageManifest[canonicalId];
+
+  const fit = (entry?.card?.fit as CardFit | undefined) || 'cover';
+  const focal = entry?.card?.focal || entry?.focalPoint || { x: 0.5, y: 0.5 };
+  const dominantColor = entry?.dominantColor || entry?.card?.dominantColor || '#0f2e1d';
+
+  let primarySrc = entry?.variants.find((variant) => variant.role === 'tarjeta')?.jpg.url;
+  const fullSrc = entry?.variants.find((variant) => variant.role === 'lightbox')?.jpg.url || primarySrc;
+
+  if (fit === 'contain') {
+    primarySrc = fullSrc || primarySrc || '/images/rifa/gastronomia/gastronomia-local.jpg';
+  }
+
+  if (fit === 'asis') {
+    primarySrc = '/images/rifa/gastronomia/gastronomia-local.jpg';
+  }
+
+  return {
+    fit,
+    slug: canonicalId,
+    focalX: focal.x,
+    focalY: focal.y,
+    dominantColor,
+    primarySrc,
+    backdropSrc: primarySrc || '/images/rifa/gastronomia/gastronomia-local.jpg',
+    alt: title,
+  };
+}
+
 export const DetallePremio: React.FC = () => {
-  // Inicialización sincrónica desde caché para eliminar cualquier parpadeo de carga (FOUC)
   const [prizeData, setPrizeData] = useState<PublicPrizeData>(() => getCachedPrizeDetails());
 
   useEffect(() => {
@@ -74,20 +107,20 @@ export const DetallePremio: React.FC = () => {
   const { settings, experiences } = prizeData;
 
   const getEffectiveSlug = (slug: string | null, id: string): string => {
-    // Mapeo defensivo si Supabase tiene slugs obsoletos o parches temporales
-    if (id === 'exp-gastronomia' && (slug === 'serrania-perija-panoramica' || !slug)) {
-      return 'gastronomia-casa-arepas';
+    const map: Record<string, string> = {
+      'exp-cuatrimotos': 'cuatrimoto-aventura-cordillera',
+      'exp-glamping': 'fogata-casa-de-vidrio',
+      'exp-parapente': 'parapente-bandera',
+      'exp-paramo': 'serrania-perija-laguna',
+      'exp-gastronomia': 'gastronomia-local',
+      'exp-fotografia': 'cuatrimoto-mirador',
+    };
+
+    if (slug && slug.trim()) {
+      return slug.trim();
     }
-    if (id === 'exp-fotografia' && (slug === 'cuatrimoto-mirador' || !slug)) {
-      return 'serrania-topiarios';
-    }
-    if (id === 'exp-cuatrimotos' && (slug === 'cuatrimoto-flota' || !slug)) {
-      return 'cuatrimoto-aventura-cordillera';
-    }
-    if (id === 'exp-glamping' && (!slug || slug === 'fogata-casa-de-vidrio')) {
-      return 'hospedaje-villa-adelaida';
-    }
-    return slug || 'cuatrimoto-aventura-cordillera';
+
+    return map[id] || 'cuatrimoto-aventura-cordillera';
   };
 
   const renderSectionTitle = (rawTitle: string) => {
@@ -107,7 +140,6 @@ export const DetallePremio: React.FC = () => {
   return (
     <section id="premio" className={styles.premioSection} aria-labelledby="titulo-premio">
       <div className="container">
-        {/* Cabecera de la Sección */}
         <SectionHeader
           id="titulo-premio"
           badge={settings.badge_text}
@@ -116,7 +148,6 @@ export const DetallePremio: React.FC = () => {
           subtitle={settings.subtitle}
         />
 
-        {/* Grilla de Experiencias de Igual Altura */}
         <div className={styles.grid}>
           {experiences.map((exp: PrizeExperienceRow, idx: number) => {
             const featuresList = Array.isArray(exp.features) ? (exp.features as string[]) : [];
@@ -125,42 +156,62 @@ export const DetallePremio: React.FC = () => {
                 ? `0${exp.display_order}`
                 : `${exp.display_order}`
               : `0${idx + 1}`;
+            const media = getCardImageData(getEffectiveSlug(exp.image_slug, exp.id), exp.title);
 
             return (
               <article key={exp.id} className={styles.card}>
-                {/* Fondo de pantalla completa con <picture> optimizada y degradado atmosférico continuo */}
-                <div className={styles.cardMedia}>
-                  {exp.image_url ? (
+                <div
+                  className={styles.cardMedia}
+                  data-fit={media.fit}
+                  style={{
+                    ['--dominant' as string]: media.dominantColor,
+                    ['--focal-x' as string]: `${media.focalX * 100}%`,
+                    ['--focal-y' as string]: `${media.focalY * 100}%`,
+                  }}
+                >
+                  {media.fit !== 'cover' && (
                     <img
-                      src={exp.image_url}
-                      alt={exp.title}
-                      width={1080}
-                      height={1350}
+                      src={media.backdropSrc}
+                      alt=""
+                      aria-hidden="true"
                       loading="lazy"
                       decoding="async"
-                      className={styles.cardBgImage}
+                      fetchPriority="low"
+                      className={styles.backdrop}
+                    />
+                  )}
+
+                  {media.fit === 'asis' ? (
+                    <img
+                      src={media.primarySrc}
+                      alt={media.alt}
+                      width={710}
+                      height={960}
+                      loading="lazy"
+                      decoding="async"
+                      className={styles.foreground}
+                      style={{ objectPosition: 'center top' }}
                     />
                   ) : (
                     <ResponsiveImage
-                      id={getEffectiveSlug(exp.image_slug, exp.id)}
-                      ratio="4x5"
-                      role="tarjeta"
+                      id={media.slug}
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 380px"
-                      imgClassName={styles.cardBgImage}
-                      alt={exp.title}
+                      variantRole={media.fit === 'contain' ? 'lightbox' : 'tarjeta'}
+                      ratio={media.fit === 'contain' ? 'full' : '4x5'}
+                      className={styles.foreground}
+                      imgClassName={styles.foregroundImage}
+                      alt={media.alt}
+                      objectPosition={`${media.focalX * 100}% ${media.focalY * 100}%`}
                     />
                   )}
+
                   <div className={styles.cardScrim} />
                 </div>
 
-                {/* Contenedor interno unificado sobre la fotografía con degradado */}
                 <div className={styles.cardInner}>
-                  {/* Barra superior con píldoras de alto contraste y badge de vidrio reacomodados para lectura completa */}
                   <div className={styles.cardTopBar}>
                     <div className={styles.topBarRow}>
-                      <span className={styles.pillDarkGold}>
-                        {`EXPERIENCIA ${displayNum}`}
-                      </span>
+                      <span className={styles.pillDarkGold}>{`EXPERIENCIA ${displayNum}`}</span>
                       <div className={styles.topGlassBadge} aria-hidden="true">
                         <Compass size={16} />
                       </div>
@@ -172,7 +223,6 @@ export const DetallePremio: React.FC = () => {
                     )}
                   </div>
 
-                  {/* Cuerpo inferior: squircle de vidrio con icono arriba, título serif de ancho completo para lectura perfecta */}
                   <div className={styles.cardBody}>
                     <div className={styles.titleGlassIcon} aria-hidden="true">
                       {renderExperienceIcon(exp.icon)}
