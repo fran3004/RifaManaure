@@ -13,7 +13,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "images:build": "node scripts/build-images.mjs",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "supabase": "supabase"
   },
   "dependencies": {
     "@fontsource-variable/jetbrains-mono": "^5.3.0",
@@ -34,6 +35,7 @@
     "oxlint": "^1.81.0",
     "prettier": "^3.9.7",
     "sharp": "^0.35.4",
+    "supabase": "^2.117.0",
     "typescript": "~6.0.2",
     "vite": "^8.3.0",
     "vitest": "^5.0.1"
