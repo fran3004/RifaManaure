@@ -439,7 +439,7 @@ export const GalleryView: React.FC = () => {
       <section className={styles.controlsCard} aria-label="Filtros de galería">
         <div className={styles.controlsTop}>
           <div className={styles.searchBox}>
-            <Search size={18} color="var(--text-secondary)" aria-hidden="true" />
+            <Search size={18} className={styles.searchIcon} aria-hidden="true" />
             <input
               type="text"
               className={styles.searchInput}
@@ -452,7 +452,7 @@ export const GalleryView: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setSearchQuery('')}
-                style={{ background: 'none', border: 'none', color: '#9cb5ab', cursor: 'pointer' }}
+                className={styles.clearSearchBtn}
                 aria-label="Limpiar búsqueda"
               >
                 <X size={16} />
