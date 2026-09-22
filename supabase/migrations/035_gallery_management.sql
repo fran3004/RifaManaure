@@ -110,3 +110,4 @@ VALUES
     ('La Casa de las Arepas', 'gastronomia', 'gastronomia-casa-arepas', 'Degustación de arepa rellena artesanal y gastronomía local tradicional', 17, true),
     ('Fogata en la Casa de Vidrio', 'fogata', 'fogata-casa-de-vidrio', 'Fogata cálida al caer la tarde en la terraza mirador de la Casa de Vidrio', 18, true)
 ON CONFLICT DO NOTHING;
+

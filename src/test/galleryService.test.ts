@@ -359,3 +359,4 @@ describe('galleryService - Gestión Integral de la Galería Fotográfica', () =>
     expect(res.url).toBe('https://xyz.supabase.co/storage/v1/object/public/gallery-images/galeria-123.webp');
   });
 });
+
