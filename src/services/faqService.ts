@@ -1,6 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import { FALLBACK_FAQS } from '@/data/faqFallback';
-import type { FaqItem, FaqCachePayload } from '@/types/raffle.types';
+import type { FaqItem, FaqCachePayload, FaqItemUpdate } from '@/types/raffle.types';
 
 export const FAQ_CACHE_KEY = 'manaure_faq_cache';
 export const FAQ_CACHE_VERSION = 1;
@@ -233,7 +233,7 @@ export async function updateFaq(
       return { success: false, error: 'ID de pregunta no especificado.' };
     }
 
-    const payload: Record<string, unknown> = {};
+    const payload: FaqItemUpdate = {};
     if (updates.question !== undefined) payload.question = updates.question.trim();
     if (updates.answer !== undefined) payload.answer = updates.answer.trim();
     if (updates.sort_order !== undefined) payload.sort_order = updates.sort_order;
