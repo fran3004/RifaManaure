@@ -22,6 +22,7 @@ import {
   Clock,
   Check,
   AlertTriangle,
+  AlertCircle,
   X,
   FileText,
   ChevronLeft,
@@ -380,7 +381,7 @@ export const ReceiptsView: React.FC = () => {
                       <Clock size={12} /> Por Validar
                     </span>
                   )}
-                  {ord.status === 'paid' && (
+                  {(ord.status === 'paid' || ord.status === 'completed') && (
                     <span className={styles.badgeSuccess}>
                       <Check size={12} /> Aprobado
                     </span>
@@ -388,6 +389,26 @@ export const ReceiptsView: React.FC = () => {
                   {ord.status === 'rejected' && (
                     <span className={styles.badgeDanger}>
                       <XCircle size={12} /> Rechazado
+                    </span>
+                  )}
+                  {ord.status === 'pending' && (
+                    <span className={styles.badgeInfo}>
+                      <Clock size={12} /> Reserva
+                    </span>
+                  )}
+                  {ord.status === 'expired' && (
+                    <span className={`${styles.badgeDanger} ${styles.badgeCancelled}`}>
+                      <AlertCircle size={12} /> Expirada
+                    </span>
+                  )}
+                  {ord.status === 'cancelled' && (
+                    <span className={`${styles.badgeNeutral} ${styles.badgeCancelled}`}>
+                      <X size={12} /> Cancelada
+                    </span>
+                  )}
+                  {!['pending_verification', 'paid', 'completed', 'rejected', 'pending', 'expired', 'cancelled'].includes(ord.status) && (
+                    <span className={styles.badgeNeutral}>
+                      {ord.status}
                     </span>
                   )}
                 </div>

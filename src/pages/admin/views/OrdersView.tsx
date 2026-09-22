@@ -490,6 +490,11 @@ export const OrdersView: React.FC = () => {
                               <X size={12} /> Cancelada
                             </span>
                           )}
+                          {!['pending_verification', 'pending', 'paid', 'completed', 'rejected', 'expired', 'cancelled'].includes(ord.status) && (
+                            <span className={styles.badgeNeutral}>
+                              {ord.status}
+                            </span>
+                          )}
                         </td>
 
                         {/* 11. Acciones: la revisión contiene el comprobante cuando existe */}

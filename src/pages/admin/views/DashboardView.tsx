@@ -23,6 +23,8 @@ import {
   CheckCircle2,
   XCircle,
   AlertTriangle,
+  AlertCircle,
+  X,
   FileText,
   Eye,
   ShieldCheck,
@@ -90,6 +92,21 @@ const DashboardReceiptThumbnail: React.FC<DashboardReceiptCardProps> = ({ order,
         {order.status === 'pending' && (
           <span className={styles.badgeInfo}>
             <Clock size={12} /> Reserva
+          </span>
+        )}
+        {order.status === 'expired' && (
+          <span className={`${styles.badgeDanger} ${styles.badgeCancelled}`}>
+            <AlertCircle size={12} /> Expirada
+          </span>
+        )}
+        {order.status === 'cancelled' && (
+          <span className={`${styles.badgeNeutral} ${styles.badgeCancelled}`}>
+            <X size={12} /> Cancelada
+          </span>
+        )}
+        {!['pending_verification', 'paid', 'completed', 'rejected', 'pending', 'expired', 'cancelled'].includes(order.status) && (
+          <span className={styles.badgeNeutral}>
+            {order.status}
           </span>
         )}
       </div>
@@ -642,6 +659,13 @@ export const DashboardView: React.FC = () => {
                                     +{(ord.tickets?.length || 0) - 3}
                                   </span>
                                 )}
+                                {(!ord.tickets || ord.tickets.length === 0) && (
+                                  <span className={styles.tableMeta}>
+                                    {ord.status === 'expired' || ord.status === 'cancelled'
+                                      ? (ord.ticket_count ? `${ord.ticket_count} liberados` : 'Liberados')
+                                      : '—'}
+                                  </span>
+                                )}
                               </div>
                             </td>
                             <td className={styles.dashboardTableTotal}>
@@ -668,9 +692,19 @@ export const DashboardView: React.FC = () => {
                                   <XCircle size={12} /> Rechazada
                                 </span>
                               )}
-                              {ord.status === 'cancelled' && (
+                              {ord.status === 'expired' && (
                                 <span className={`${styles.badgeDanger} ${styles.badgeCancelled}`}>
-                                  Cancelada
+                                  <AlertCircle size={12} /> Expirada
+                                </span>
+                              )}
+                              {ord.status === 'cancelled' && (
+                                <span className={`${styles.badgeNeutral} ${styles.badgeCancelled}`}>
+                                  <X size={12} /> Cancelada
+                                </span>
+                              )}
+                              {!['pending_verification', 'paid', 'completed', 'pending', 'rejected', 'expired', 'cancelled'].includes(ord.status) && (
+                                <span className={styles.badgeNeutral}>
+                                  {ord.status}
                                 </span>
                               )}
                             </td>
