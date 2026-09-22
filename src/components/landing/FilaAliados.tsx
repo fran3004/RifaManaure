@@ -493,6 +493,13 @@ export const FilaAliados: React.FC = () => {
                         loading="lazy"
                         className={styles.aliadoLogo}
                         draggable={false}
+                        onError={(e) => {
+                          const fallback = localAliadosMap.get(aliado.slug)?.grid;
+                          if (fallback && e.currentTarget.src !== fallback) {
+                            e.currentTarget.src = fallback;
+                            e.currentTarget.srcset = '';
+                          }
+                        }}
                       />
                     ) : (
                       <div className={styles.placeholderLogo}>
@@ -527,6 +534,13 @@ export const FilaAliados: React.FC = () => {
                       loading="lazy"
                       className={styles.aliadoLogo}
                       draggable={false}
+                      onError={(e) => {
+                        const fallback = localAliadosMap.get(aliado.slug)?.grid;
+                        if (fallback && e.currentTarget.src !== fallback) {
+                          e.currentTarget.src = fallback;
+                          e.currentTarget.srcset = '';
+                        }
+                      }}
                     />
                   ) : (
                     <div className={styles.placeholderLogo}>

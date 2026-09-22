@@ -643,6 +643,12 @@ export const PartnersView: React.FC = () => {
                         alt={`Logo de ${partner.name}`}
                         className={partnerStyles.logoImg}
                         loading="lazy"
+                        onError={(e) => {
+                          const fallbackSrc = localAliadosMap.get(partner.slug);
+                          if (fallbackSrc && e.currentTarget.src !== fallbackSrc) {
+                            e.currentTarget.src = fallbackSrc;
+                          }
+                        }}
                       />
                     ) : (
                       <Building2
