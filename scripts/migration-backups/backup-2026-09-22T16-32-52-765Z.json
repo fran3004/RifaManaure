@@ -1,0 +1,11 @@
+[
+  {
+    "table": "winners",
+    "record_id": "d89645c0-ed00-4e3c-a5b5-8ed3527c09a7",
+    "column": "official_act_url",
+    "previous_value": "https://bxhzvmbbsisxqpwrgvgn.supabase.co/storage/v1/object/public/winner-documents/actas/a0000000-0000-0000-0000-000000000001/acta_sorteo_1790052588018.pdf",
+    "new_value": "https://res.cloudinary.com/ky01b0vz/image/upload/v1790094771/manaure-vive/actas-ganadores/acta_sorteo_1790052588018.pdf",
+    "public_id": "manaure-vive/actas-ganadores/acta_sorteo_1790052588018",
+    "migrated_at": "2026-09-22T16:32:52.757Z"
+  }
+]

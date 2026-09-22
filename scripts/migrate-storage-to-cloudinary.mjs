@@ -60,6 +60,7 @@ function loadLocalEnv() {
 loadLocalEnv();
 
 const isDryRun = process.argv.includes('--dry-run');
+const allowOnlyMatched = process.argv.includes('--only-matched');
 
 // 1. Validación estricta de variables de entorno
 const requiredEnvVars = [
@@ -212,11 +213,20 @@ async function runMigration() {
 
   console.log(`   Registros en tabla 'prize_experiences': ${prizeExperiences.length}`);
 
+  const matchedPrizeFiles = new Set();
+
   for (const exp of prizeExperiences) {
     const currentUrl = exp.image_url || '';
 
     // Idempotencia: Verificar si ya apunta a Cloudinary
     if (currentUrl.includes('res.cloudinary.com')) {
+      const alreadyMigratedFile = prizeFiles.find(
+        (f) => currentUrl.includes(path.parse(f.name).name) || currentUrl.includes(f.name)
+      );
+      if (alreadyMigratedFile) {
+        matchedPrizeFiles.add(alreadyMigratedFile.path);
+      }
+
       migrationSummary.push({
         bucket: 'prize-images',
         table: 'prize_experiences',
@@ -233,6 +243,10 @@ async function runMigration() {
     const matchesFile = prizeFiles.find(
       (f) => currentUrl.includes(f.name) || currentUrl.endsWith(f.path)
     );
+
+    if (matchesFile) {
+      matchedPrizeFiles.add(matchesFile.path);
+    }
 
     if (currentUrl.includes('supabase.co/storage') || matchesFile) {
       const filePath = matchesFile ? matchesFile.path : currentUrl.split('/prize-images/').pop()?.split('?')[0];
@@ -331,10 +345,19 @@ async function runMigration() {
 
   console.log(`   Registros en tabla 'partners': ${partners.length}`);
 
+  const matchedPartnerFiles = new Set();
+
   for (const partner of partners) {
     const currentUrl = partner.logo_url || '';
 
     if (currentUrl.includes('res.cloudinary.com')) {
+      const alreadyMigratedFile = partnerFiles.find(
+        (f) => currentUrl.includes(path.parse(f.name).name) || currentUrl.includes(f.name)
+      );
+      if (alreadyMigratedFile) {
+        matchedPartnerFiles.add(alreadyMigratedFile.path);
+      }
+
       migrationSummary.push({
         bucket: 'partner-logos',
         table: 'partners',
@@ -350,6 +373,10 @@ async function runMigration() {
     const matchesFile = partnerFiles.find(
       (f) => currentUrl.includes(f.name) || currentUrl.endsWith(f.path)
     );
+
+    if (matchesFile) {
+      matchedPartnerFiles.add(matchesFile.path);
+    }
 
     if (currentUrl.includes('supabase.co/storage') || matchesFile) {
       const filePath = matchesFile ? matchesFile.path : currentUrl.split('/partner-logos/').pop()?.split('?')[0];
@@ -446,10 +473,19 @@ async function runMigration() {
 
   console.log(`   Registros en tabla 'winners': ${winners.length}`);
 
+  const matchedWinnerFiles = new Set();
+
   for (const winner of winners) {
     const currentUrl = winner.official_act_url || '';
 
     if (currentUrl.includes('res.cloudinary.com')) {
+      const alreadyMigratedFile = winnerFiles.find(
+        (f) => currentUrl.includes(path.parse(f.name).name) || currentUrl.includes(f.name)
+      );
+      if (alreadyMigratedFile) {
+        matchedWinnerFiles.add(alreadyMigratedFile.path);
+      }
+
       migrationSummary.push({
         bucket: 'winner-documents',
         table: 'winners',
@@ -465,6 +501,10 @@ async function runMigration() {
     const matchesFile = winnerFiles.find(
       (f) => currentUrl.includes(f.name) || currentUrl.endsWith(f.path)
     );
+
+    if (matchesFile) {
+      matchedWinnerFiles.add(matchesFile.path);
+    }
 
     if (currentUrl.includes('supabase.co/storage') || matchesFile) {
       const filePath = matchesFile ? matchesFile.path : currentUrl.split('/winner-documents/').pop()?.split('?')[0];
@@ -540,7 +580,48 @@ async function runMigration() {
   }
 
   // -------------------------------------------------------------------------
-  // 4. GUARDAR RESPALDO LÓGICO Y REGISTRO EN AUDITORÍA
+  // 4. DETECCIÓN DE DISCREPANCIAS ENTRE STORAGE Y BASE DE DATOS
+  // -------------------------------------------------------------------------
+  const discrepancies = [];
+
+  for (const f of prizeFiles) {
+    if (!matchedPrizeFiles.has(f.path)) {
+      discrepancies.push({
+        bucket: 'prize-images',
+        file: f.path,
+        size: f.size,
+        type: 'ARCHIVO_EN_STORAGE_SIN_REGISTRO_EN_BD',
+        reason: 'El archivo existe en el bucket prize-images pero ningún premio en prize_experiences apunta a él.',
+      });
+    }
+  }
+
+  for (const f of partnerFiles) {
+    if (!matchedPartnerFiles.has(f.path)) {
+      discrepancies.push({
+        bucket: 'partner-logos',
+        file: f.path,
+        size: f.size,
+        type: 'ARCHIVO_EN_STORAGE_SIN_REGISTRO_EN_BD',
+        reason: 'El archivo existe en el bucket partner-logos pero ningún aliado en partners apunta a él.',
+      });
+    }
+  }
+
+  for (const f of winnerFiles) {
+    if (!matchedWinnerFiles.has(f.path)) {
+      discrepancies.push({
+        bucket: 'winner-documents',
+        file: f.path,
+        size: f.size,
+        type: 'ARCHIVO_EN_STORAGE_SIN_REGISTRO_EN_BD',
+        reason: 'El archivo existe en el bucket winner-documents pero ningún ganador en winners apunta a él.',
+      });
+    }
+  }
+
+  // -------------------------------------------------------------------------
+  // 5. GUARDAR RESPALDO LÓGICO Y REGISTRO EN AUDITORÍA
   // -------------------------------------------------------------------------
   if (!isDryRun && logicalBackups.length > 0) {
     const backupDir = path.join(__dirname, 'migration-backups');
@@ -576,7 +657,7 @@ async function runMigration() {
   }
 
   // -------------------------------------------------------------------------
-  // 5. RESUMEN FINAL DETALLADO
+  // 6. RESUMEN FINAL DETALLADO
   // -------------------------------------------------------------------------
   console.log('\n======================================================================');
   console.log('   RESUMEN DETALLADO DE MIGRACIÓN');
@@ -600,12 +681,22 @@ async function runMigration() {
     }
   }
 
+  if (discrepancies.length > 0) {
+    console.log('\n⚠️  DISCREPANCIAS DETECTADAS ENTRE STORAGE Y BASE DE DATOS:');
+    console.log('----------------------------------------------------------------------');
+    for (const d of discrepancies) {
+      console.log(`⚠️ [${d.bucket}] ${d.file} (${d.size} bytes)`);
+      console.log(`   Motivo: ${d.reason}`);
+    }
+  }
+
   console.log('----------------------------------------------------------------------');
   const countMigrated = migrationSummary.filter((s) => s.status === 'MIGRADO_EXITOSO').length;
   const countSkipped = migrationSummary.filter((s) => s.status === 'OMITIDO_YA_MIGRADO').length;
   const countSimulated = migrationSummary.filter((s) => s.status === 'SIMULADO_LISTO').length;
 
-  console.log(`Total analizados: ${migrationSummary.length}`);
+  console.log(`Total analizados en BD: ${migrationSummary.length}`);
+  console.log(`Discrepancias (archivos huérfanos en Storage): ${discrepancies.length}`);
   if (isDryRun) {
     console.log(`Archivos listos para migrar (simulados): ${countSimulated}`);
     console.log(`Archivos ya migrados previamente: ${countSkipped}`);
@@ -615,6 +706,14 @@ async function runMigration() {
     console.log(`Archivos ya en Cloudinary (omitidos): ${countSkipped}`);
     console.log('✅ Proceso de migración finalizado.');
   }
+
+  if (!isDryRun && discrepancies.length > 0 && !allowOnlyMatched) {
+    console.error('\n🛑 DETENCIÓN DE SEGURIDAD:');
+    console.error(`Se detectaron ${discrepancies.length} discrepancias entre Storage y la Base de Datos.`);
+    console.error('La política de migración establece detener la operación si hay discrepancias.');
+    console.error('Para confirmar y proceder únicamente con los registros coincidentes, use: --only-matched');
+    process.exit(2);
+  }
 }
 
 runMigration().catch((err) => {
@@ -622,3 +721,4 @@ runMigration().catch((err) => {
   console.error(err.message || err);
   process.exit(1);
 });
+

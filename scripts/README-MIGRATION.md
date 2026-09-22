@@ -63,8 +63,12 @@ SUPABASE_SERVICE_ROLE_KEY="..." CLOUDINARY_API_SECRET="..." node scripts/migrate
 Una vez validada la simulación, ejecuta la migración definitiva:
 
 ```bash
-node scripts/migrate-storage-to-cloudinary.mjs
+node scripts/migrate-storage-to-cloudinary.mjs [--only-matched]
 ```
+
+**Banderas y Modos:**
+- `--dry-run`: Simulación sin escrituras en base de datos ni subidas a Cloudinary.
+- `--only-matched`: Si se detectan discrepancias (archivos huérfanos en Storage sin registro asociado en base de datos), esta opción autoriza proceder exclusivamente con los registros que poseen coincidencia inequívoca 1:1, protegiendo la integridad de la base de datos y manteniendo los archivos físicos en Storage intactos.
 
 **Comportamiento en Ejecución Real:**
 1. Descarga cada archivo desde Supabase Storage hacia memoria (Buffer).
@@ -73,6 +77,7 @@ node scripts/migrate-storage-to-cloudinary.mjs
 4. Genera automáticamente un archivo de respaldo lógico en `scripts/migration-backups/backup-<timestamp>.json` con los valores previos.
 5. Registra el evento en la tabla `public.audit_logs`.
 6. Si ocurre cualquier error de actualización en la base de datos, el script se detiene de inmediato para evitar estados inconsistentes.
+7. Si existen discrepancias entre Storage y la Base de Datos, el script activa una detención de seguridad para proteger la integridad del sistema a menos que se indique `--only-matched`.
 
 ---
 
@@ -81,3 +86,5 @@ node scripts/migrate-storage-to-cloudinary.mjs
 - **No Destructivo:** El script **NUNCA** ejecuta `delete()` ni `remove()` sobre los archivos de Supabase Storage. Los archivos originales permanecen intactos como respaldo físico.
 - **Idempotencia:** Si un registro ya posee una URL de Cloudinary (`res.cloudinary.com`), se omite automáticamente (`OMITIDO_YA_MIGRADO`).
 - **Aislamiento del Frontend:** El script reside en la carpeta `scripts/` (fuera de `src/`) y **NO** se incluye en los bundles generados por `npm run build`.
+
+
