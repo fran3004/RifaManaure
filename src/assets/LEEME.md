@@ -23,13 +23,8 @@ Todo el material quedó procesado y organizado. Esta carpeta se copia tal cual d
 ## Estructura de carpetas
 
 ```
-assets-rifa/
-├── logos/
-│   ├── master/        PNG transparente, resolución completa (para imprimir, editar, exportar)
-│   ├── web/           WebP transparente, 600 px lado mayor (uso general en la página)
-│   ├── grid-400/      400×400 transparente, todos centrados igual (fila de aliados)
-│   └── grid-800/      lo mismo a 800×800 (pantallas retina, @2x)
-│
+assets/
+├── (logos alojados en Cloudinary CDN: manaure-vive/marca/ y manaure-vive/aliados/)
 ├── imagenes/
 │   ├── hero-1920x1080/      fondo grande / banner principal (16:9)
 │   ├── card-1200x800/       tarjetas de galería, secciones (3:2)

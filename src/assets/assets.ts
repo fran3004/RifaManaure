@@ -3,6 +3,8 @@
  * Carga directa mediante Vite import.meta.glob para resolución de URLs en dev y build.
  */
 
+import { getOptimizedCloudinaryUrl } from '@/services/cloudinaryService';
+
 export type Aliado = {
   slug: string;
   nombre: string;
@@ -36,33 +38,29 @@ export type Foto = {
   heroExtendido: boolean;
 };
 
-// --- Glob imports para Logos ---
-const logosWeb = import.meta.glob<string>('./logos/web/*.webp', { eager: true, import: 'default' });
-const logosGrid400 = import.meta.glob<string>('./logos/grid-400/*.webp', {
-  eager: true,
-  import: 'default',
-});
-const logosGrid800 = import.meta.glob<string>('./logos/grid-800/*.webp', {
-  eager: true,
-  import: 'default',
-});
-const logosMaster = import.meta.glob<string>('./logos/master/*.png', {
-  eager: true,
-  import: 'default',
-});
-
-const getLogo = (slug: string) => ({
-  web: logosWeb[`./logos/web/${slug}.webp`] || '',
-  grid: logosGrid400[`./logos/grid-400/${slug}.webp`] || '',
-  grid2x: logosGrid800[`./logos/grid-800/${slug}.webp`] || '',
-  master: logosMaster[`./logos/master/${slug}.png`] || '',
-});
+// --- URLs de Marca Oficiales en Cloudinary CDN ---
+const BRAND_LOGOS = {
+  principal:
+    'https://res.cloudinary.com/ky01b0vz/image/upload/v1790100541/manaure-vive/marca/logo-principal.png',
+  completo:
+    'https://res.cloudinary.com/ky01b0vz/image/upload/v1790100543/manaure-vive/marca/logo-principal-completo.png',
+};
 
 /** Versión simplificada: Isotipo colibrí + montaña + "MANAURE VIVE". Ideal para Header, Navbar, etc. */
-export const logoPrincipal = getLogo('logo-principal');
+export const logoPrincipal = {
+  master: BRAND_LOGOS.principal,
+  web: getOptimizedCloudinaryUrl(BRAND_LOGOS.principal, { width: 320 }),
+  grid: getOptimizedCloudinaryUrl(BRAND_LOGOS.principal, { width: 400 }),
+  grid2x: getOptimizedCloudinaryUrl(BRAND_LOGOS.principal, { width: 800 }),
+};
 
 /** Versión institucional completa con subtítulos y detalles ecoturísticos. */
-export const logoPrincipalCompleto = getLogo('logo-principal-completo');
+export const logoPrincipalCompleto = {
+  master: BRAND_LOGOS.completo,
+  web: getOptimizedCloudinaryUrl(BRAND_LOGOS.completo, { width: 480 }),
+  grid: getOptimizedCloudinaryUrl(BRAND_LOGOS.completo, { width: 400 }),
+  grid2x: getOptimizedCloudinaryUrl(BRAND_LOGOS.completo, { width: 800 }),
+};
 
 const rawAliados: [string, string, string][] = [
   ['photours', 'PHOTours', 'Fotografía y contenido audiovisual'],
@@ -77,16 +75,39 @@ const rawAliados: [string, string, string][] = [
   ['coruscans', 'Coruscans', 'Productos y artesanías locales'],
 ];
 
+const CLOUDINARY_PARTNER_LOGOS: Record<string, string> = {
+  photours:
+    'https://res.cloudinary.com/ky01b0vz/image/upload/v1790099148/manaure-vive/aliados/photours.png',
+  'cuatri-tours-manaure':
+    'https://res.cloudinary.com/ky01b0vz/image/upload/v1790099151/manaure-vive/aliados/cuatri-tours-manaure.png',
+  'villa-adelaida':
+    'https://res.cloudinary.com/ky01b0vz/image/upload/v1790099153/manaure-vive/aliados/villa-adelaida.png',
+  'absolom-casita-de-la-mora':
+    'https://res.cloudinary.com/ky01b0vz/image/upload/v1790099155/manaure-vive/aliados/absolom-casita-de-la-mora.png',
+  'los-pinos-manaure':
+    'https://res.cloudinary.com/ky01b0vz/image/upload/v1790099156/manaure-vive/aliados/los-pinos-manaure.png',
+  'mashiramo-glamping':
+    'https://res.cloudinary.com/ky01b0vz/image/upload/v1790099158/manaure-vive/aliados/mashiramo-glamping.png',
+  'la-casa-de-las-arepas':
+    'https://res.cloudinary.com/ky01b0vz/image/upload/v1790099159/manaure-vive/aliados/la-casa-de-las-arepas.png',
+  metallura:
+    'https://res.cloudinary.com/ky01b0vz/image/upload/v1790099161/manaure-vive/aliados/metallura.png',
+  'manaure-aventura':
+    'https://res.cloudinary.com/ky01b0vz/image/upload/v1790099162/manaure-vive/aliados/manaure-aventura.png',
+  coruscans:
+    'https://res.cloudinary.com/ky01b0vz/image/upload/v1790099164/manaure-vive/aliados/coruscans.png',
+};
+
 export const aliados: Aliado[] = rawAliados.map(([slug, nombre, categoria]) => {
-  const assets = getLogo(slug);
+  const masterUrl = CLOUDINARY_PARTNER_LOGOS[slug] || '';
   return {
     slug,
     nombre,
     categoria,
-    logoWeb: assets.web,
-    logoGrid: assets.grid,
-    logoGrid2x: assets.grid2x,
-    logoMaster: assets.master,
+    logoWeb: masterUrl ? getOptimizedCloudinaryUrl(masterUrl, { width: 600 }) : '',
+    logoGrid: masterUrl ? getOptimizedCloudinaryUrl(masterUrl, { width: 400 }) : '',
+    logoGrid2x: masterUrl ? getOptimizedCloudinaryUrl(masterUrl, { width: 800 }) : '',
+    logoMaster: masterUrl,
   };
 });
 
@@ -311,8 +332,6 @@ export const catalogoFotosManaure: CatalogoFotoItem[] = Object.values(imageManif
 /**
  * Resuelve la URL optimizada para tarjeta o previsualización a partir de un slug o URL externa.
  */
-import { getOptimizedCloudinaryUrl } from '@/services/cloudinaryService';
-
 export function resolveExperienceImage(
   imageSlug: string | null | undefined,
   imageUrl?: string | null | undefined

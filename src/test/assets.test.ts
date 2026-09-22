@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { aliados, fotos, fotosParaHero, logoPrincipal } from '@/assets/assets';
+import { aliados, fotos, fotosParaHero, logoPrincipal, logoPrincipalCompleto } from '@/assets/assets';
 
 describe('Inventario de Assets y Aliados (src/assets/assets.ts)', () => {
   it('debe contener los 10 aliados ecoturísticos oficiales', () => {
@@ -41,8 +41,21 @@ describe('Inventario de Assets y Aliados (src/assets/assets.ts)', () => {
     });
   });
 
-  it('logoPrincipal debe estar disponible', () => {
+  it('logoPrincipal y logoPrincipalCompleto deben estar disponibles y alojados en Cloudinary', () => {
     expect(logoPrincipal).toBeDefined();
+    expect(logoPrincipal.master).toContain('res.cloudinary.com');
+    expect(logoPrincipal.web).toContain('res.cloudinary.com');
+    expect(logoPrincipalCompleto).toBeDefined();
+    expect(logoPrincipalCompleto.master).toContain('res.cloudinary.com');
+    expect(logoPrincipalCompleto.web).toContain('res.cloudinary.com');
+  });
+
+  it('todos los logos de aliados deben estar alojados en Cloudinary con transformaciones optimizadas', () => {
+    aliados.forEach((aliado) => {
+      expect(aliado.logoMaster).toContain('res.cloudinary.com');
+      expect(aliado.logoWeb).toContain('res.cloudinary.com');
+      expect(aliado.logoGrid).toContain('res.cloudinary.com');
+    });
   });
 
   it('catalogoFotosManaure debe contener las 26 fotografías optimizadas de Manaure categorizadas', async () => {

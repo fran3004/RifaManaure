@@ -1,5 +1,7 @@
 import { formatCOP, formatTicketNumber } from '@/lib/utils';
-import logoImgSrc from '@/assets/logos/master/logo-principal-completo.png';
+import { logoPrincipalCompleto } from '@/assets/assets';
+
+const logoImgSrc = logoPrincipalCompleto.master;
 
 export interface DigitalReceiptData {
   orderReference: string;
