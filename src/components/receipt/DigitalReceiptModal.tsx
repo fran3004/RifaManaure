@@ -14,7 +14,9 @@ import {
   CheckCircle2,
   Copy,
   Check,
-  Smartphone,
+  Download,
+  Loader2,
+  AlertTriangle,
 } from 'lucide-react';
 import styles from './DigitalReceiptModal.module.css';
 
@@ -34,6 +36,19 @@ export const DigitalReceiptModal: React.FC<DigitalReceiptModalProps> = ({
   const [copiedLink, setCopiedLink] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
+  // Cierre mediante tecla Escape para accesibilidad
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
+  // Generación reactiva del Canvas de alta resolución
   useEffect(() => {
     let active = true;
     const generatePreview = async () => {
@@ -106,6 +121,7 @@ export const DigitalReceiptModal: React.FC<DigitalReceiptModalProps> = ({
         role="dialog"
         aria-modal="true"
         aria-labelledby="modal-receipt-title"
+        aria-busy={isGenerating}
       >
         {/* Cabecera */}
         <div className={styles.modalHeader}>
@@ -114,10 +130,15 @@ export const DigitalReceiptModal: React.FC<DigitalReceiptModalProps> = ({
               <ShieldCheck size={24} aria-hidden="true" />
             </div>
             <div>
-              <h3 id="modal-receipt-title" className={styles.modalTitle}>Comprobante Digital Oficial</h3>
+              <h3 id="modal-receipt-title" className={styles.modalTitle}>
+                Comprobante Digital Oficial
+              </h3>
               <p className={styles.modalSubtitle}>
-                Orden: <strong>{receiptData.orderReference}</strong> •{' '}
-                {receiptData.ticketNumbers.length} Boletos
+                Orden: <strong className={styles.referenceText}>{receiptData.orderReference}</strong> •{' '}
+                <span className={styles.ticketCountBadge}>
+                  {receiptData.ticketNumbers.length}{' '}
+                  {receiptData.ticketNumbers.length === 1 ? 'Boleto' : 'Boletos'}
+                </span>
               </p>
             </div>
           </div>
@@ -127,7 +148,7 @@ export const DigitalReceiptModal: React.FC<DigitalReceiptModalProps> = ({
             onClick={onClose}
             aria-label="Cerrar comprobante digital"
           >
-            <X size={22} aria-hidden="true" />
+            <X size={20} aria-hidden="true" />
           </button>
         </div>
 
@@ -135,16 +156,19 @@ export const DigitalReceiptModal: React.FC<DigitalReceiptModalProps> = ({
         <div className={styles.previewContainer}>
           {isGenerating ? (
             <div className={styles.previewLoading}>
+              <Loader2 size={36} className={styles.previewSpinner} aria-hidden="true" />
               <div className={styles.previewLoadingTitle}>
-                Generando certificado digital en alta resolución...
+                Generando comprobante digital oficial...
               </div>
               <div className={styles.previewLoadingSubtitle}>
-                Verificando validez y sellos oficiales
+                Verificando sellos de seguridad y validez de la orden
               </div>
             </div>
           ) : errorMsg ? (
             <div className={styles.previewError}>
-              <div>{errorMsg}</div>
+              <AlertTriangle size={32} className={styles.previewErrorIcon} aria-hidden="true" />
+              <div className={styles.previewErrorTitle}>No se pudo cargar el certificado</div>
+              <div className={styles.previewErrorMsg}>{errorMsg}</div>
             </div>
           ) : previewUrl ? (
             <img
@@ -155,7 +179,7 @@ export const DigitalReceiptModal: React.FC<DigitalReceiptModalProps> = ({
           ) : null}
         </div>
 
-        {/* Mensaje de Seguridad */}
+        {/* Mensaje de Seguridad / Certificado Autenticado */}
         <div className={styles.securityNotice}>
           <CheckCircle2 size={18} className={styles.securityIcon} aria-hidden="true" />
           <div>
@@ -167,14 +191,14 @@ export const DigitalReceiptModal: React.FC<DigitalReceiptModalProps> = ({
 
         {/* Botones de Acción y Descarga */}
         <div className={styles.actionsGrid}>
-          {/* Botón 1: Descargar Imagen para Celular */}
+          {/* Botón 1: Descargar Imagen PNG */}
           <button
             type="button"
             className={styles.btnDownloadImage}
             onClick={() => void handleDownloadImage()}
             disabled={isGenerating || Boolean(errorMsg)}
           >
-            <Smartphone size={18} aria-hidden="true" />
+            <Download size={18} aria-hidden="true" />
             <span>Descargar Imagen (PNG)</span>
           </button>
 
@@ -210,10 +234,10 @@ export const DigitalReceiptModal: React.FC<DigitalReceiptModalProps> = ({
               copiedLink ? styles.btnCopyShareCopied : ''
             }`}
           >
-            {copiedLink ? <Check size={14} aria-hidden="true" /> : <Copy size={14} aria-hidden="true" />}
+            {copiedLink ? <Check size={16} aria-hidden="true" /> : <Copy size={16} aria-hidden="true" />}
             <span>
               {copiedLink
-                ? '¡Texto del comprobante copiado!'
+                ? '¡Texto y resumen del comprobante copiados!'
                 : 'Copiar texto y resumen de la orden'}
             </span>
           </button>
