@@ -3,7 +3,6 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 // Mock de cloudinaryService
 vi.mock('@/services/cloudinaryService', () => ({
   uploadToCloudinary: vi.fn(),
-  deleteFromCloudinary: vi.fn(),
 }));
 
 import { uploadToCloudinary } from '@/services/cloudinaryService';

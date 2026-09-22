@@ -49,7 +49,7 @@ describe('lazyWithRetry', () => {
     const wrappedFactory = async () => {
       try {
         return await loader();
-      } catch (err) {
+      } catch {
         await new Promise((r) => setTimeout(r, 10));
         return await loader();
       }

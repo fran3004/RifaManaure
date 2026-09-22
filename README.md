@@ -12,8 +12,9 @@ Plataforma web de alta concurrencia para la promoción ecoturística del municip
 - **Estilos:** CSS Modules puros con variables CSS de diseño atómico (sin dependencias externas de CSS)
 - **Base de Datos & Backend:** [Supabase](https://supabase.com/) (PostgreSQL 15, Row Level Security, Storage privado y Auth)
 - **Lógica Transaccional:** Funciones RPC atómicas con `pg_advisory_xact_lock` (`reserve_tickets`, `confirm_order_payment`, `reject_order_payment`, `register_winner`)
-- **Edge Functions (Deno):** Manejo de webhooks, despacho transaccional y cron de liberación de boletos expirados
-- **Servicio de Email Transaccional:** [Resend](https://resend.com/)
+- **Edge Functions (Deno):** Manejo de webhooks, despacho transaccional, firma de medios (`cloudinary-sign`) y cron de liberación de boletos expirados
+- **Gestión de Medios:** [Cloudinary](https://cloudinary.com/) (Almacenamiento seguro, transformación y entrega optimizada con `f_auto,q_auto` para premios, aliados y actas)
+- **Notificaciones Transaccionales:** WhatsApp Business (vía Evolution API) y trazabilidad completa en auditoría
 - **Infraestructura de Despliegue:** [Vercel](https://vercel.com/) (SPA con enrutamiento dinámico rewrites, cabeceras CSP y caché en `vercel.json`)
 - **Calidad y Herramientas:** [Vitest 5](https://vitest.dev/), [Oxlint](https://oxc.rs/) (con plugins React, a11y, import y promise), [Prettier 3](https://prettier.io/)
 
@@ -56,6 +57,7 @@ cp .env.example .env
 | ------------------------------ | ------------------------------------------- | -------------- | -------------------------------- |
 | `VITE_SUPABASE_URL`            | Endpoint HTTPS de la API de Supabase        | Público (Vite) | `https://xyzcompany.supabase.co` |
 | `VITE_SUPABASE_ANON_KEY`       | Llave anónima pública con restricciones RLS | Público (Vite) | `eyJhbGciOi...`                  |
+| `VITE_CLOUDINARY_CLOUD_NAME`   | Cloud name configurado en Cloudinary        | Público (Vite) | `ky01b0vz`                       |
 | `VITE_SITE_URL`                | URL base canónica del portal web            | Público (Vite) | `http://localhost:5173`          |
 | `VITE_WHATSAPP_SUPPORT_NUMBER` | Teléfono de soporte alternativo (fallback)  | Público (Vite) | `+573001234567`                  |
 
@@ -68,9 +70,10 @@ Los secretos del servidor **NO** van en el archivo `.env` del frontend. Se confi
 
 ```bash
 # Configuración mediante Supabase CLI
-supabase secrets set RESEND_API_KEY="re_tu_api_key"
-supabase secrets set RESEND_FROM_EMAIL="Manaure Vive <notificaciones@tudominio.com>"
-supabase secrets set RESEND_WEBHOOK_SECRET="whsec_tu_secreto"
+supabase secrets set CRON_SECRET="tu_clave_secreta_para_cron"
+supabase secrets set CLOUDINARY_CLOUD_NAME="tu_cloud_name"
+supabase secrets set CLOUDINARY_API_KEY="tu_api_key"
+supabase secrets set CLOUDINARY_API_SECRET="tu_api_secret"
 supabase secrets set PUBLIC_APP_URL="https://tudominio.com"
 supabase secrets set EVOLUTION_API_ENDPOINT="https://tu-instancia.com"
 supabase secrets set EVOLUTION_API_KEY="tu_clave_evolution"

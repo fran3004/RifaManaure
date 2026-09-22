@@ -872,7 +872,7 @@ export const PartnersView: React.FC = () => {
                     onClick={() => setLogoTab('upload')}
                   >
                     <Upload size={14} />
-                    <span>Subir archivo al almacenamiento</span>
+                    <span>Subir archivo (Cloudinary)</span>
                   </button>
                   <button
                     type="button"
