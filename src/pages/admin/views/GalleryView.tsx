@@ -472,29 +472,36 @@ export const GalleryView: React.FC = () => {
             <div className={styles.headerIconBox} aria-hidden="true">
               <Images size={26} />
             </div>
-            <div>
-              <h1 id="gallery-admin-title" className={styles.title}>
-                Galería Fotográfica
-              </h1>
+            <div className={styles.headerTextGroup}>
+              <div className={styles.headerBadgeRow}>
+                <h1 id="gallery-admin-title" className={styles.title}>
+                  Galería Fotográfica
+                </h1>
+                <span className={styles.headerLiveBadge}>
+                  <span className={styles.liveDot} aria-hidden="true" />
+                  Catálogo Activo
+                </span>
+              </div>
               <p className={styles.subtitle}>
                 Gestiona las fotografías auténticas de Manaure visibles en la landing page y organiza futuros catálogos.
               </p>
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+          <div className={styles.headerActions}>
             <button
               type="button"
-              className={styles.btnSecondary}
+              className={styles.headerBtnCategories}
               onClick={() => setIsCategoriesModalOpen(true)}
               title="Administrar categorías de la galería"
             >
               <FolderPlus size={18} aria-hidden="true" />
-              <span>Gestionar Categorías ({categories.length})</span>
+              <span>Gestionar Categorías</span>
+              <span className={styles.headerBtnBadge}>{categories.length}</span>
             </button>
             <button
               type="button"
-              className={styles.btnPrimary}
+              className={styles.headerBtnAdd}
               onClick={handleOpenCreateModal}
             >
               <Plus size={18} aria-hidden="true" />
@@ -506,20 +513,49 @@ export const GalleryView: React.FC = () => {
         {/* Métricas en vivo */}
         <div className={styles.metricsGrid}>
           <div className={styles.metricCard}>
-            <span className={styles.metricLabel}>Total Fotos</span>
+            <div className={styles.metricCardHeader}>
+              <span className={styles.metricLabel}>Total Fotos</span>
+              <div className={`${styles.metricIconBox} ${styles.metricIconTotal}`} aria-hidden="true">
+                <Images size={18} />
+              </div>
+            </div>
             <span className={styles.metricValue}>{totalCount}</span>
+            <span className={styles.metricHint}>Catálogo general</span>
           </div>
+
           <div className={styles.metricCard}>
-            <span className={styles.metricLabel}>Visibles</span>
+            <div className={styles.metricCardHeader}>
+              <span className={styles.metricLabel}>Visibles</span>
+              <div className={`${styles.metricIconBox} ${styles.metricIconVisible}`} aria-hidden="true">
+                <Eye size={18} />
+              </div>
+            </div>
             <span className={`${styles.metricValue} ${styles.metricValueActive}`}>{activeCount}</span>
+            <span className={styles.metricHint}>Publicadas en la web</span>
           </div>
+
           <div className={styles.metricCard}>
-            <span className={styles.metricLabel}>Ocultas</span>
-            <span className={`${styles.metricValue} ${styles.metricValueHidden}`}>{hiddenCount}</span>
+            <div className={styles.metricCardHeader}>
+              <span className={styles.metricLabel}>Ocultas</span>
+              <div className={`${styles.metricIconBox} ${styles.metricIconHidden}`} aria-hidden="true">
+                <EyeOff size={18} />
+              </div>
+            </div>
+            <span className={`${styles.metricValue} ${hiddenCount > 0 ? styles.metricValueHidden : ''}`}>
+              {hiddenCount}
+            </span>
+            <span className={styles.metricHint}>Borradores o en pausa</span>
           </div>
+
           <div className={styles.metricCard}>
-            <span className={styles.metricLabel}>Categorías</span>
+            <div className={styles.metricCardHeader}>
+              <span className={styles.metricLabel}>Categorías</span>
+              <div className={`${styles.metricIconBox} ${styles.metricIconCategory}`} aria-hidden="true">
+                <Tag size={18} />
+              </div>
+            </div>
             <span className={styles.metricValue}>{categories.length}</span>
+            <span className={styles.metricHint}>Filtros activos</span>
           </div>
         </div>
       </section>
