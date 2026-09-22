@@ -36,3 +36,6 @@ coverage
 # Supabase CLI temp files
 supabase/.temp/
 .supabase/
+
+# Local migration & pre-deletion backups
+scripts/storage-backups-pre-deletion/
