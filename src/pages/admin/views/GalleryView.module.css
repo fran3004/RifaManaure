@@ -900,28 +900,6 @@
 /* --------------------------------------------------------------------------
    Gestión de Categorías
    -------------------------------------------------------------------------- */
-.addCategoryChip {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  background: #edfcf2;
-  border: 1px dashed #86efac;
-  color: #065f46;
-  border-radius: 9999px;
-  padding: 0.35rem 0.85rem;
-  font-size: 0.8rem;
-  font-weight: 700;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: all 0.2s ease;
-}
-
-.addCategoryChip:hover {
-  background: #dcfce7;
-  border-color: #10b981;
-  color: #047857;
-}
-
 .quickAddCategoryBtn {
   background: none;
   border: none;

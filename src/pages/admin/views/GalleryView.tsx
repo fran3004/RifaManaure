@@ -588,15 +588,6 @@ export const GalleryView: React.FC = () => {
               </button>
             );
           })}
-          <button
-            type="button"
-            className={styles.addCategoryChip}
-            onClick={() => setIsCategoriesModalOpen(true)}
-            title="Crear o eliminar categorías"
-          >
-            <Plus size={14} aria-hidden="true" />
-            <span>Categoría</span>
-          </button>
         </div>
       </section>
 
