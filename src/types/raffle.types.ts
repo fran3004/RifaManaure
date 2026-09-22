@@ -138,3 +138,23 @@ export interface FaqCachePayload {
   timestamp: number;
   data: FaqItem[];
 }
+
+export type GalleryItemRow = Database['public']['Tables']['gallery_items']['Row'];
+export type GalleryItemInsert = Database['public']['Tables']['gallery_items']['Insert'];
+export type GalleryItemUpdate = Database['public']['Tables']['gallery_items']['Update'];
+
+export type GalleryCategory =
+  | 'cuatrimoto'
+  | 'parapente'
+  | 'serrania'
+  | 'hospedaje'
+  | 'gastronomia'
+  | 'fogata'
+  | 'otro';
+
+export interface GalleryCachePayload {
+  version: number;
+  timestamp: number;
+  data: GalleryItemRow[];
+}
+

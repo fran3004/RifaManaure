@@ -50,6 +50,9 @@ const PaymentAccountsView = lazy(() =>
 const PrizeView = lazy(() =>
   import('@/pages/admin/views/PrizeView').then((m) => ({ default: m.PrizeView }))
 );
+const GalleryView = lazy(() =>
+  import('@/pages/admin/views/GalleryView').then((m) => ({ default: m.GalleryView }))
+);
 const PartnersView = lazy(() =>
   import('@/pages/admin/views/PartnersView').then((m) => ({ default: m.PartnersView }))
 );
@@ -100,6 +103,7 @@ export const App: React.FC = () => {
                     <Route path="compradores" element={<BuyersView />} />
                     <Route path="rifas" element={<RafflesView />} />
                     <Route path="premio" element={<PrizeView />} />
+                    <Route path="galeria" element={<GalleryView />} />
                     <Route path="cuentas" element={<PaymentAccountsView />} />
                     <Route path="aliados" element={<PartnersView />} />
                     <Route path="ganadores" element={<WinnersView />} />

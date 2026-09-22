@@ -675,6 +675,48 @@ export type Database = {
         };
         Relationships: [];
       };
+      gallery_items: {
+        Row: {
+          id: string;
+          raffle_id: string | null;
+          title: string;
+          category: string;
+          image_slug: string | null;
+          image_url: string | null;
+          alt_text: string | null;
+          display_order: number;
+          is_active: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          raffle_id?: string | null;
+          title: string;
+          category?: string;
+          image_slug?: string | null;
+          image_url?: string | null;
+          alt_text?: string | null;
+          display_order?: number;
+          is_active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          raffle_id?: string | null;
+          title?: string;
+          category?: string;
+          image_slug?: string | null;
+          image_url?: string | null;
+          alt_text?: string | null;
+          display_order?: number;
+          is_active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: {
       [_ in never]: never;

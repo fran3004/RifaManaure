@@ -3,6 +3,9 @@ import { Image, X, ChevronLeft, ChevronRight, Maximize2 } from 'lucide-react';
 import { SectionHeader } from '@/components/public/ui';
 import { ResponsiveImage } from '@/components/common/ResponsiveImage';
 import { imageManifest, type ImageEntry } from '@/types/image-manifest';
+import { resolveExperienceImage } from '@/assets/assets';
+import { getCachedGalleryItems, getPublicGalleryItems } from '@/services/galleryService';
+import type { GalleryItemRow } from '@/types/raffle.types';
 import styles from './GaleriaPremio.module.css';
 
 type CategoriaFiltro =
@@ -14,48 +17,8 @@ type CategoriaFiltro =
   | 'gastronomia'
   | 'fogata';
 
-export interface GaleriaItemConfig {
-  id: string;
-  category: 'cuatrimoto' | 'parapente' | 'serrania' | 'hospedaje' | 'gastronomia' | 'fogata';
-}
-
-/**
- * 20 fotografías canónicas curadas sin escenas repetidas,
- * ordenadas en una narrativa de 6 actos vivenciales para el turista.
- */
-export const galeriaItems: GaleriaItemConfig[] = [
-  // 1. Llegada & Hospedaje Campestre
-  { id: 'hospedaje-villa-adelaida', category: 'hospedaje' },
-  { id: 'serrania-topiarios', category: 'serrania' },
-
-  // 2. Aventura Extrema en Cuatrimotos
-  { id: 'cuatrimoto-aventura-cordillera', category: 'cuatrimoto' },
-  { id: 'cuatrimoto-ruta', category: 'cuatrimoto' },
-  { id: 'cuatrimoto-mirador', category: 'cuatrimoto' },
-  { id: 'cuatrimoto-cumbre', category: 'cuatrimoto' },
-
-  // 3. Vuelo Libre en Parapente Tándem
-  { id: 'parapente-despegue-atardecer', category: 'parapente' },
-  { id: 'parapente-bandera', category: 'parapente' },
-  { id: 'parapente-vuelo', category: 'parapente' },
-  { id: 'parapente-tandem-canon', category: 'parapente' },
-
-  // 4. Expedición Natural: Serranía y Páramo
-  { id: 'serrania-perija-laguna', category: 'serrania' },
-  { id: 'serrania-perija-frailejones', category: 'serrania' },
-  { id: 'serrania-perija-cordillera', category: 'serrania' },
-  { id: 'serrania-pozo-cristalino', category: 'serrania' },
-  { id: 'serrania-los-pinos', category: 'serrania' },
-  { id: 'serrania-sabana-rubia', category: 'serrania' },
-
-  // 5. Gastronomía Tradicional Autóctona
-  { id: 'gastronomia-casa-arepas', category: 'gastronomia' },
-
-  // 6. Noche Íntima & Fogata
-  { id: 'fogata-casa-de-vidrio', category: 'fogata' },
-];
-
 export const GaleriaPremio: React.FC = () => {
+  const [items, setItems] = useState<GalleryItemRow[]>(getCachedGalleryItems);
   const [filtroActivo, setFiltroActivo] = useState<CategoriaFiltro>('todas');
   const [fotoSeleccionadaIndex, setFotoSeleccionadaIndex] = useState<number | null>(null);
 
@@ -64,10 +27,23 @@ export const GaleriaPremio: React.FC = () => {
   const dialogRef = useRef<HTMLDivElement>(null);
   const touchStartX = useRef<number | null>(null);
 
+  // Sincronización en segundo plano con Supabase sin FOUC
+  useEffect(() => {
+    let isMounted = true;
+    getPublicGalleryItems().then((dbData) => {
+      if (isMounted && dbData && dbData.length > 0) {
+        setItems(dbData);
+      }
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   const fotosFiltradas =
     filtroActivo === 'todas'
-      ? galeriaItems
-      : galeriaItems.filter((f) => f.category === filtroActivo);
+      ? items
+      : items.filter((f) => f.category === filtroActivo);
 
   const handleOpenLightbox = (index: number, element?: HTMLElement) => {
     if (element) {
@@ -163,9 +139,15 @@ export const GaleriaPremio: React.FC = () => {
     const nextIndex =
       fotoSeleccionadaIndex === fotosFiltradas.length - 1 ? 0 : fotoSeleccionadaIndex + 1;
 
-    const preload = (item?: GaleriaItemConfig) => {
+    const preload = (item?: GalleryItemRow) => {
       if (!item) return;
-      const entry: ImageEntry | undefined = imageManifest[item.id];
+      if (item.image_url) {
+        const img = new window.Image();
+        img.src = item.image_url;
+        return;
+      }
+      const slug = item.image_slug || item.id;
+      const entry: ImageEntry | undefined = imageManifest[slug];
       if (!entry) return;
       const v = entry.variants.find((x) => x.role === 'lightbox') || entry.variants[0];
       if (v?.webp?.url) {
@@ -202,8 +184,9 @@ export const GaleriaPremio: React.FC = () => {
 
   const fotoActualItem =
     fotoSeleccionadaIndex !== null ? fotosFiltradas[fotoSeleccionadaIndex] : undefined;
-  const fotoActualEntry: ImageEntry | undefined = fotoActualItem
-    ? imageManifest[fotoActualItem.id]
+  const fotoActualSlug = fotoActualItem ? fotoActualItem.image_slug || fotoActualItem.id : undefined;
+  const fotoActualEntry: ImageEntry | undefined = fotoActualSlug
+    ? imageManifest[fotoActualSlug]
     : undefined;
 
   return (
@@ -233,7 +216,7 @@ export const GaleriaPremio: React.FC = () => {
               onClick={() => setFiltroActivo('todas')}
               aria-pressed={filtroActivo === 'todas'}
             >
-              Todas ({galeriaItems.length})
+              Todas ({items.length})
             </button>
             <button
               type="button"
@@ -294,9 +277,10 @@ export const GaleriaPremio: React.FC = () => {
         {/* Grilla de Galería */}
         <div className={styles.galleryGrid}>
           {fotosFiltradas.map((item, index) => {
-            const entry = imageManifest[item.id];
-            const altText = entry?.alt || 'Fotografía de la experiencia en Manaure';
-            const captionText = entry?.caption || altText;
+            const slug = item.image_slug || item.id;
+            const entry = imageManifest[slug];
+            const altText = item.alt_text || entry?.alt || item.title || 'Fotografía de la experiencia en Manaure';
+            const captionText = item.title || entry?.caption || altText;
 
             return (
               <button
@@ -306,14 +290,34 @@ export const GaleriaPremio: React.FC = () => {
                 onClick={(e) => handleOpenLightbox(index, e.currentTarget)}
                 aria-label={`Ver fotografía ampliada: ${altText}`}
               >
-                <ResponsiveImage
-                  id={item.id}
-                  ratio="3x2"
-                  role="galeria-thumb"
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                  imgClassName={styles.galleryImage}
-                  alt={altText}
-                />
+                {item.image_url ? (
+                  <img
+                    src={item.image_url}
+                    alt={altText}
+                    className={styles.galleryImage}
+                    loading="lazy"
+                    decoding="async"
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  />
+                ) : entry ? (
+                  <ResponsiveImage
+                    id={slug}
+                    ratio="3x2"
+                    role="galeria-thumb"
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    imgClassName={styles.galleryImage}
+                    alt={altText}
+                  />
+                ) : (
+                  <img
+                    src={resolveExperienceImage(slug)}
+                    alt={altText}
+                    className={styles.galleryImage}
+                    loading="lazy"
+                    decoding="async"
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  />
+                )}
                 <div className={styles.itemOverlay} aria-hidden="true">
                   <Maximize2 size={24} className={styles.zoomIcon} />
                   <span className={styles.itemCaption}>{captionText}</span>
@@ -325,7 +329,7 @@ export const GaleriaPremio: React.FC = () => {
       </div>
 
       {/* Visor Lightbox Modal Accesible */}
-      {fotoActualItem && fotoActualEntry && (
+      {fotoActualItem && (
         <div
           ref={dialogRef}
           className={styles.lightboxBackdrop}
@@ -357,16 +361,38 @@ export const GaleriaPremio: React.FC = () => {
             </button>
 
             <div className={styles.lightboxImageWrapper}>
-              <ResponsiveImage
-                id={fotoActualItem.id}
-                role="lightbox"
-                sizes="(max-width: 1200px) 90vw, 1600px"
-                containerClassName={styles.lightboxPicture}
-                imgClassName={styles.lightboxImg}
-                alt={fotoActualEntry.alt}
-              />
+              {fotoActualItem.image_url ? (
+                <div className={styles.lightboxPicture}>
+                  <img
+                    src={fotoActualItem.image_url}
+                    alt={fotoActualItem.alt_text || fotoActualItem.title}
+                    className={styles.lightboxImg}
+                    style={{ maxWidth: '100%', maxHeight: '78vh', objectFit: 'contain' }}
+                  />
+                </div>
+              ) : fotoActualEntry ? (
+                <ResponsiveImage
+                  id={fotoActualSlug!}
+                  role="lightbox"
+                  sizes="(max-width: 1200px) 90vw, 1600px"
+                  containerClassName={styles.lightboxPicture}
+                  imgClassName={styles.lightboxImg}
+                  alt={fotoActualItem.alt_text || fotoActualEntry.alt}
+                />
+              ) : (
+                <div className={styles.lightboxPicture}>
+                  <img
+                    src={resolveExperienceImage(fotoActualSlug)}
+                    alt={fotoActualItem.alt_text || fotoActualItem.title}
+                    className={styles.lightboxImg}
+                    style={{ maxWidth: '100%', maxHeight: '78vh', objectFit: 'contain' }}
+                  />
+                </div>
+              )}
               <div className={styles.lightboxCaption}>
-                <p className={styles.lightboxAlt}>{fotoActualEntry.caption || fotoActualEntry.alt}</p>
+                <p className={styles.lightboxAlt}>
+                  {fotoActualItem.alt_text || fotoActualEntry?.caption || fotoActualItem.title}
+                </p>
                 <span className={styles.lightboxCounter}>
                   {fotoSeleccionadaIndex! + 1} / {fotosFiltradas.length}
                 </span>
@@ -387,3 +413,4 @@ export const GaleriaPremio: React.FC = () => {
     </section>
   );
 };
+
