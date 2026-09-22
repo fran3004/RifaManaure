@@ -10,6 +10,7 @@ import {
   uploadPartnerLogo,
   generatePartnerSlug,
 } from '@/services/partnerService';
+import { getOptimizedCloudinaryUrl } from '@/services/cloudinaryService';
 import type { PartnerRow } from '@/types/raffle.types';
 import { aliados as fallbackAliados } from '@/assets/assets';
 import {
@@ -448,7 +449,7 @@ export const PartnersView: React.FC = () => {
   // Resolver el logo a renderizar
   const getPartnerLogoSrc = (partner: PartnerRow) => {
     if (partner.logo_url && partner.logo_url.trim() !== '') {
-      return partner.logo_url;
+      return getOptimizedCloudinaryUrl(partner.logo_url, { width: 200 });
     }
     return localAliadosMap.get(partner.slug) || null;
   };

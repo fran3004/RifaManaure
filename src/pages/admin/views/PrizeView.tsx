@@ -12,6 +12,7 @@ import {
   DEFAULT_PRIZE_SETTINGS,
   DEFAULT_OFFICIAL_TOUR_FEATURES,
 } from '@/services/prizeService';
+import { getOptimizedCloudinaryUrl } from '@/services/cloudinaryService';
 import type { PrizeSettingsRow, PrizeExperienceRow, OfficialTourFeature } from '@/types/raffle.types';
 import {
   catalogoFotosManaure,
@@ -560,7 +561,7 @@ export const PrizeView: React.FC = () => {
   // URL de la imagen que se está previsualizando en el modal
   const currentModalImagePreview =
     imageMode === 'upload' && expImageUrl
-      ? expImageUrl
+      ? getOptimizedCloudinaryUrl(expImageUrl, { width: 600 })
       : resolveExperienceImage(expImageSlug);
 
   if (loading) {

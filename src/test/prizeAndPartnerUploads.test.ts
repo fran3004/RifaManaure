@@ -9,6 +9,7 @@ vi.mock('@/services/cloudinaryService', () => ({
 import { uploadToCloudinary } from '@/services/cloudinaryService';
 import { uploadPrizeImage } from '@/services/prizeService';
 import { uploadPartnerLogo } from '@/services/partnerService';
+import { uploadWinnerActDocument } from '@/services/winnerService';
 
 describe('Migración de Subidas a Cloudinary - prizeService & partnerService', () => {
   beforeEach(() => {
@@ -135,4 +136,64 @@ describe('Migración de Subidas a Cloudinary - prizeService & partnerService', (
       expect(res.public_id).toBe('manaure-vive/aliados/empresa_123');
     });
   });
+
+  describe('uploadWinnerActDocument', () => {
+    it('debe rechazar archivos que no sean PDF (ej: image/png, text/plain)', async () => {
+      const imgFile = new File(['fake-png'], 'acta.png', { type: 'image/png' });
+      const res = await uploadWinnerActDocument(imgFile, 'raffle-123');
+
+      expect(res.success).toBe(false);
+      expect(res.error).toContain('formato PDF');
+      expect(uploadToCloudinary).not.toHaveBeenCalled();
+    });
+
+    it('debe rechazar actas PDF que excedan los 10 MB', async () => {
+      const largePdf = new File(['%PDF'], 'acta-pesada.pdf', { type: 'application/pdf' });
+      Object.defineProperty(largePdf, 'size', { value: 11 * 1024 * 1024 });
+
+      const res = await uploadWinnerActDocument(largePdf, 'raffle-123');
+
+      expect(res.success).toBe(false);
+      expect(res.error).toContain('no debe exceder 10 MB');
+      expect(uploadToCloudinary).not.toHaveBeenCalled();
+    });
+
+    it('debe subir el acta PDF a "manaure-vive/actas-ganadores" con resourceType auto', async () => {
+      const validPdf = new File(['%PDF-1.4'], 'acta_notarial.pdf', { type: 'application/pdf' });
+
+      vi.mocked(uploadToCloudinary).mockResolvedValue({
+        success: true,
+        secure_url: 'https://res.cloudinary.com/ky01b0vz/auto/upload/v1/manaure-vive/actas-ganadores/acta_notarial.pdf',
+        public_id: 'manaure-vive/actas-ganadores/acta_notarial',
+      });
+
+      const res = await uploadWinnerActDocument(validPdf, 'raffle-123');
+
+      expect(uploadToCloudinary).toHaveBeenCalledWith(
+        validPdf,
+        'manaure-vive/actas-ganadores',
+        { resourceType: 'auto' }
+      );
+      expect(res.success).toBe(true);
+      expect(res.url).toBe(
+        'https://res.cloudinary.com/ky01b0vz/auto/upload/v1/manaure-vive/actas-ganadores/acta_notarial.pdf'
+      );
+      expect(res.public_id).toBe('manaure-vive/actas-ganadores/acta_notarial');
+    });
+
+    it('debe propagar errores de fallo en la subida a Cloudinary', async () => {
+      const validPdf = new File(['%PDF-1.4'], 'acta.pdf', { type: 'application/pdf' });
+
+      vi.mocked(uploadToCloudinary).mockResolvedValue({
+        success: false,
+        error: 'Error de permisos en Cloudinary',
+      });
+
+      const res = await uploadWinnerActDocument(validPdf);
+
+      expect(res.success).toBe(false);
+      expect(res.error).toContain('Error de permisos en Cloudinary');
+    });
+  });
 });
+

@@ -192,3 +192,74 @@ export async function deleteFromCloudinary(publicId: string): Promise<Cloudinary
     return { success: false, error: message };
   }
 }
+
+export interface CloudinaryUrlOptions {
+  width?: number;
+  quality?: string | number;
+}
+
+/**
+ * Optimiza URLs de Cloudinary aplicando transformaciones automáticas (f_auto, q_auto y ancho opcional).
+ *
+ * Reglas de seguridad y preservación:
+ * 1. Solo transforma URLs alojadas en Cloudinary (dominio 'res.cloudinary.com').
+ * 2. Si la URL pertenece a Supabase Storage, rutas locales o URLs externas, se retorna idéntica sin alteración.
+ * 3. Si la URL ya contiene transformaciones de formato/calidad ('f_auto'), no se duplican.
+ * 4. No transforma URLs firmadas (con segmento 's--...--') para no invalidar la firma criptográfica.
+ * 5. No transforma archivos no compatibles (como documentos PDF o raw) para garantizar visualización y descarga directa.
+ *
+ * @param url URL de la imagen o recurso
+ * @param options Opciones de transformación (ej: width: 800)
+ */
+export function getOptimizedCloudinaryUrl(
+  url: string | null | undefined,
+  options: CloudinaryUrlOptions = {}
+): string {
+  if (!url || typeof url !== 'string') {
+    return '';
+  }
+
+  const trimmed = url.trim();
+  if (!trimmed) {
+    return '';
+  }
+
+  // 1. Verificar si es una URL de Cloudinary
+  if (!trimmed.includes('res.cloudinary.com') || !trimmed.includes('/upload/')) {
+    return trimmed;
+  }
+
+  // 2. Proteger archivos no compatibles (ej. PDFs o recursos raw)
+  const cleanPath = trimmed.split('?')[0].toLowerCase();
+  if (cleanPath.endsWith('.pdf') || trimmed.includes('/raw/upload/')) {
+    return trimmed;
+  }
+
+  // 3. Proteger URLs firmadas para no romper la firma HMAC de Cloudinary (ej: /s--abcdef12--/)
+  if (/\/s--[a-zA-Z0-9_-]{8}--\//.test(trimmed)) {
+    return trimmed;
+  }
+
+  // 4. Si la URL ya posee transformaciones que incluyan f_auto o q_auto, no duplicar
+  if (/\/upload\/[^/]*f_auto[^/]*\//.test(trimmed)) {
+    return trimmed;
+  }
+
+  // 5. Construir los parámetros de transformación solicitados
+  const transforms: string[] = ['f_auto', 'q_auto'];
+
+  if (options.width && options.width > 0) {
+    transforms.push(`w_${Math.round(options.width)}`);
+  }
+
+  if (options.quality) {
+    transforms.push(`q_${options.quality}`);
+  }
+
+  const transformString = transforms.join(',');
+
+  // 6. Insertar las transformaciones inmediatamente después de '/upload/'
+  return trimmed.replace('/upload/', `/upload/${transformString}/`);
+}
+
+

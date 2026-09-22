@@ -311,12 +311,14 @@ export const catalogoFotosManaure: CatalogoFotoItem[] = Object.values(imageManif
 /**
  * Resuelve la URL optimizada para tarjeta o previsualización a partir de un slug o URL externa.
  */
+import { getOptimizedCloudinaryUrl } from '@/services/cloudinaryService';
+
 export function resolveExperienceImage(
   imageSlug: string | null | undefined,
   imageUrl?: string | null | undefined
 ): string {
   if (imageUrl && imageUrl.trim()) {
-    return imageUrl.trim();
+    return getOptimizedCloudinaryUrl(imageUrl.trim(), { width: 800 });
   }
   if (!imageSlug || !imageSlug.trim()) {
     return catalogoFotosManaure[0]?.cardJpg || '/images/rifa/cuatrimoto/cuatrimoto-aventura-cordillera--4x5-768w.jpg';

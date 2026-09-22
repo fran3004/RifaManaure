@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { aliados as fallbackAliados } from '@/assets/assets';
 import { getActivePartners } from '@/services/partnerService';
+import { getOptimizedCloudinaryUrl } from '@/services/cloudinaryService';
 import type { PartnerRow } from '@/types/raffle.types';
 import { Handshake, MoveHorizontal, Pause, Play } from 'lucide-react';
 import { SectionHeader } from '@/components/public/ui';
@@ -131,7 +132,9 @@ export const FilaAliados: React.FC = () => {
           slug: p.slug,
           name: p.name,
           category: p.category,
-          logoSrc: hasCustomLogo ? p.logo_url! : localAsset?.grid || '',
+          logoSrc: hasCustomLogo
+            ? getOptimizedCloudinaryUrl(p.logo_url!, { width: 300 })
+            : localAsset?.grid || '',
           logoSrcSet: hasCustomLogo
             ? undefined
             : localAsset

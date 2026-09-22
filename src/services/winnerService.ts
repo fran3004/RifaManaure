@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+import { uploadToCloudinary } from '@/services/cloudinaryService';
 import type {
   WinnerWithDetails,
   RegisterWinnerPayload,
@@ -357,12 +358,13 @@ export async function registerWinner(
 }
 
 /**
- * Subir acta oficial en PDF al bucket 'winner-documents'
+ * Sube el acta oficial en PDF a Cloudinary (carpeta 'manaure-vive/actas-ganadores').
+ * Retorna la URL segura permanente y el public_id.
  */
 export async function uploadWinnerActDocument(
   file: File,
-  raffleId: string
-): Promise<{ success: boolean; url?: string; error?: string }> {
+  _raffleId?: string
+): Promise<{ success: boolean; url?: string; public_id?: string; error?: string }> {
   try {
     if (file.type !== 'application/pdf') {
       return { success: false, error: 'El acta oficial debe ser un archivo en formato PDF.' };
@@ -372,24 +374,22 @@ export async function uploadWinnerActDocument(
       return { success: false, error: 'El archivo PDF no debe exceder 10 MB.' };
     }
 
-    const fileExt = 'pdf';
-    const timestamp = Date.now();
-    const filePath = `actas/${raffleId}/acta_sorteo_${timestamp}.${fileExt}`;
+    const uploadRes = await uploadToCloudinary(file, 'manaure-vive/actas-ganadores', {
+      resourceType: 'auto',
+    });
 
-    const { error: uploadError } = await supabase.storage
-      .from('winner-documents')
-      .upload(filePath, file, {
-        cacheControl: '3600',
-        upsert: true,
-      });
-
-    if (uploadError) {
-      return { success: false, error: uploadError.message };
+    if (!uploadRes.success || !uploadRes.secure_url) {
+      return {
+        success: false,
+        error: uploadRes.error || 'No fue posible subir el acta oficial a Cloudinary.',
+      };
     }
 
-    const { data: publicData } = supabase.storage.from('winner-documents').getPublicUrl(filePath);
-
-    return { success: true, url: publicData.publicUrl };
+    return {
+      success: true,
+      url: uploadRes.secure_url,
+      public_id: uploadRes.public_id,
+    };
   } catch (err) {
     return {
       success: false,

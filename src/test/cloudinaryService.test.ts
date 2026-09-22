@@ -1,5 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { uploadToCloudinary, deleteFromCloudinary } from '@/services/cloudinaryService';
+import {
+  uploadToCloudinary,
+  deleteFromCloudinary,
+  getOptimizedCloudinaryUrl,
+} from '@/services/cloudinaryService';
 
 // Mock de Supabase
 vi.mock('@/lib/supabase', () => {
@@ -226,4 +230,67 @@ describe('cloudinaryService - Integración Segura con Cloudinary', () => {
       );
     });
   });
+
+  describe('getOptimizedCloudinaryUrl', () => {
+    it('debe devolver cadena vacía para entradas vacías o nulas', () => {
+      expect(getOptimizedCloudinaryUrl(null)).toBe('');
+      expect(getOptimizedCloudinaryUrl(undefined)).toBe('');
+      expect(getOptimizedCloudinaryUrl('   ')).toBe('');
+    });
+
+    it('debe preservar intactas las URLs que no pertenezcan a Cloudinary (Supabase Storage, rutas locales)', () => {
+      const supabaseUrl =
+        'https://bxhzvmbbsisxqpwrgvgn.supabase.co/storage/v1/object/public/prize-images/premio-123.jpg';
+      expect(getOptimizedCloudinaryUrl(supabaseUrl)).toBe(supabaseUrl);
+
+      const localPath = '/images/rifa/cuatrimoto/cuatrimoto-aventura-cordillera--4x5-768w.jpg';
+      expect(getOptimizedCloudinaryUrl(localPath)).toBe(localPath);
+
+      const externalUrl = 'https://images.unsplash.com/photo-123456';
+      expect(getOptimizedCloudinaryUrl(externalUrl)).toBe(externalUrl);
+    });
+
+    it('debe inyectar transformaciones f_auto y q_auto en URLs estándar de Cloudinary', () => {
+      const cloudUrl =
+        'https://res.cloudinary.com/ky01b0vz/image/upload/v1790092061/manaure-vive/premios/exp_1.webp';
+      const optimized = getOptimizedCloudinaryUrl(cloudUrl);
+
+      expect(optimized).toBe(
+        'https://res.cloudinary.com/ky01b0vz/image/upload/f_auto,q_auto/v1790092061/manaure-vive/premios/exp_1.webp'
+      );
+    });
+
+    it('debe incluir ancho opcional cuando se proporcione', () => {
+      const cloudUrl =
+        'https://res.cloudinary.com/ky01b0vz/image/upload/v1790092061/manaure-vive/aliados/logo_1.png';
+      const optimized = getOptimizedCloudinaryUrl(cloudUrl, { width: 300 });
+
+      expect(optimized).toBe(
+        'https://res.cloudinary.com/ky01b0vz/image/upload/f_auto,q_auto,w_300/v1790092061/manaure-vive/aliados/logo_1.png'
+      );
+    });
+
+    it('no debe duplicar transformaciones si la URL ya posee f_auto', () => {
+      const alreadyOptimized =
+        'https://res.cloudinary.com/ky01b0vz/image/upload/f_auto,q_auto,w_400/v1790092061/manaure-vive/premios/exp_1.webp';
+      expect(getOptimizedCloudinaryUrl(alreadyOptimized)).toBe(alreadyOptimized);
+    });
+
+    it('debe respetar y preservar URLs firmadas criptográficamente de Cloudinary', () => {
+      const signedUrl =
+        'https://res.cloudinary.com/ky01b0vz/image/upload/s--AbCdEf12--/v1790092061/manaure-vive/premios/privado.jpg';
+      expect(getOptimizedCloudinaryUrl(signedUrl)).toBe(signedUrl);
+    });
+
+    it('no debe transformar documentos PDF ni URLs raw', () => {
+      const pdfUrl =
+        'https://res.cloudinary.com/ky01b0vz/auto/upload/v1790092061/manaure-vive/actas-ganadores/acta_sorteo.pdf';
+      expect(getOptimizedCloudinaryUrl(pdfUrl)).toBe(pdfUrl);
+
+      const rawUrl =
+        'https://res.cloudinary.com/ky01b0vz/raw/upload/v1790092061/manaure-vive/documento.txt';
+      expect(getOptimizedCloudinaryUrl(rawUrl)).toBe(rawUrl);
+    });
+  });
 });
+

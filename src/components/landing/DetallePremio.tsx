@@ -5,6 +5,7 @@ import {
   DEFAULT_OFFICIAL_TOUR_FEATURES,
 } from '@/services/prizeService';
 import type { PublicPrizeData, PrizeExperienceRow, OfficialTourFeature } from '@/types/raffle.types';
+import { getOptimizedCloudinaryUrl } from '@/services/cloudinaryService';
 import { imageAliases, imageManifest } from '@/types/image-manifest';
 import {
   Sparkles,
@@ -238,7 +239,7 @@ export const DetallePremio: React.FC = () => {
                 >
                   {exp.image_url ? (
                     <img
-                      src={exp.image_url}
+                      src={getOptimizedCloudinaryUrl(exp.image_url, { width: 800 })}
                       alt={exp.title}
                       loading="lazy"
                       decoding="async"
