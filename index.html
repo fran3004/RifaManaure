@@ -4,6 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+    <!-- Prevenir retención de index.html desactualizado en caché del navegador tras nuevos despliegues -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+
     <!-- Preconnect y DNS-Prefetch para optimizar consultas a Supabase -->
     <link rel="preconnect" href="%VITE_SUPABASE_URL%" crossorigin />
     <link rel="dns-prefetch" href="%VITE_SUPABASE_URL%" />
