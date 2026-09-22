@@ -62,8 +62,21 @@ export async function uploadToCloudinary(
     }
 
     // 1. Obtener sesión de Supabase Auth para autorizar la invocación de la Edge Function
-    const { data: sessionData } = await supabase.auth.getSession();
-    const token = sessionData?.session?.access_token;
+    let { data: sessionData } = await supabase.auth.getSession();
+    let token = sessionData?.session?.access_token;
+
+    // Si no hay token o la sesión está próxima a caducar, intentar refrescar
+    if (!token) {
+      const { data: refreshData } = await supabase.auth.refreshSession();
+      token = refreshData?.session?.access_token;
+    }
+
+    if (!token) {
+      return {
+        success: false,
+        error: 'Sesión no iniciada o expirada. Por favor inicia sesión nuevamente en el panel.',
+      };
+    }
 
     // 2. Invocar la Edge Function 'cloudinary-sign' para obtener la firma HMAC-SHA1
     const { data: signData, error: signError } = await supabase.functions.invoke<CloudinarySignUploadResponse>(
@@ -73,15 +86,34 @@ export async function uploadToCloudinary(
           action: 'upload',
           folder: cleanFolder,
         },
-        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        headers: { Authorization: `Bearer ${token}` },
       }
     );
 
     if (signError || !signData || !signData.signature) {
-      const errorMsg =
-        signData?.error ||
-        signError?.message ||
-        'No fue posible obtener la firma de autorización para Cloudinary.';
+      let errorMsg = signData?.error;
+
+      // Extraer mensaje de error detallado del cuerpo devuelto por la Edge Function
+      if (!errorMsg && signError && typeof signError === 'object' && 'context' in signError) {
+        try {
+          const resp = (signError as { context: Response }).context;
+          if (resp && typeof resp.clone === 'function') {
+            const errBody = await resp.clone().json();
+            if (errBody?.error) {
+              errorMsg = errBody.error;
+            }
+          }
+        } catch {
+          // Ignorar parseo si no es JSON
+        }
+      }
+
+      if (!errorMsg) {
+        errorMsg =
+          signError?.message ||
+          'No fue posible obtener la firma de autorización para Cloudinary.';
+      }
+
       console.error('[cloudinaryService] Error al obtener firma de subida:', errorMsg);
       return { success: false, error: errorMsg };
     }
@@ -139,8 +171,20 @@ export async function deleteFromCloudinary(publicId: string): Promise<Cloudinary
       return { success: false, error: 'public_id no suministrado para eliminación.' };
     }
 
-    const { data: sessionData } = await supabase.auth.getSession();
-    const token = sessionData?.session?.access_token;
+    let { data: sessionData } = await supabase.auth.getSession();
+    let token = sessionData?.session?.access_token;
+
+    if (!token) {
+      const { data: refreshData } = await supabase.auth.refreshSession();
+      token = refreshData?.session?.access_token;
+    }
+
+    if (!token) {
+      return {
+        success: false,
+        error: 'Sesión no iniciada. Inicia sesión nuevamente para realizar esta acción.',
+      };
+    }
 
     const { data: signData, error: signError } = await supabase.functions.invoke<CloudinarySignDestroyResponse>(
       'cloudinary-sign',
@@ -149,15 +193,30 @@ export async function deleteFromCloudinary(publicId: string): Promise<Cloudinary
           action: 'destroy',
           public_id: cleanPublicId,
         },
-        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        headers: { Authorization: `Bearer ${token}` },
       }
     );
 
     if (signError || !signData || !signData.signature) {
-      const errorMsg =
-        signData?.error ||
-        signError?.message ||
-        'No fue posible obtener la firma de eliminación para Cloudinary.';
+      let errorMsg = signData?.error;
+      if (!errorMsg && signError && typeof signError === 'object' && 'context' in signError) {
+        try {
+          const resp = (signError as { context: Response }).context;
+          if (resp && typeof resp.clone === 'function') {
+            const errBody = await resp.clone().json();
+            if (errBody?.error) {
+              errorMsg = errBody.error;
+            }
+          }
+        } catch {
+          // Ignorar parseo
+        }
+      }
+      if (!errorMsg) {
+        errorMsg =
+          signError?.message ||
+          'No fue posible obtener la firma de eliminación para Cloudinary.';
+      }
       return { success: false, error: errorMsg };
     }
 

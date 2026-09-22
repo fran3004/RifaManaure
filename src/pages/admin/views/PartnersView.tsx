@@ -195,8 +195,12 @@ export const PartnersView: React.FC = () => {
     });
     setLogoUrl(partner.logo_url || '');
     setLogoFile(null);
-    setLogoPreview(partner.logo_url || localAliadosMap.get(partner.slug) || null);
-    setLogoTab(partner.logo_url ? 'url' : 'upload');
+    setLogoPreview(
+      partner.logo_url
+        ? getOptimizedCloudinaryUrl(partner.logo_url, { width: 200 })
+        : localAliadosMap.get(partner.slug) || null
+    );
+    setLogoTab('upload');
     setFormErrors({});
     setIsFormModalOpen(true);
   };
@@ -246,10 +250,20 @@ export const PartnersView: React.FC = () => {
   };
 
   const handleRemoveSelectedFile = () => {
-    setLogoFile(null);
-    setLogoPreview(
-      logoUrl || (editingPartner ? localAliadosMap.get(editingPartner.slug) || null : null)
-    );
+    if (logoFile) {
+      setLogoFile(null);
+      setLogoPreview(
+        logoUrl
+          ? getOptimizedCloudinaryUrl(logoUrl, { width: 200 })
+          : editingPartner
+            ? localAliadosMap.get(editingPartner.slug) || null
+            : null
+      );
+    } else {
+      setLogoUrl('');
+      setLogoFile(null);
+      setLogoPreview(null);
+    }
   };
 
   // Validaciones del Formulario
@@ -896,10 +910,12 @@ export const PartnersView: React.FC = () => {
                       <span className={partnerStyles.dropzoneTitle}>
                         {logoFile
                           ? logoFile.name
-                          : 'Haz clic para seleccionar o arrastra una imagen'}
+                          : editingPartner?.logo_url
+                            ? 'Haz clic o arrastra para reemplazar el logotipo actual'
+                            : 'Haz clic para seleccionar o arrastra un logotipo'}
                       </span>
                       <span className={partnerStyles.dropzoneHint}>
-                        PNG, WebP, JPG o SVG (máx. 5 MB). Se alojará en Cloudinary.
+                        PNG, WebP, JPG o SVG (máx. 5 MB). Se alojará en Cloudinary CDN.
                       </span>
                       <input
                         type="file"
@@ -935,29 +951,43 @@ export const PartnersView: React.FC = () => {
                       className={partnerStyles.logoPreviewThumb}
                     />
                     <div className={partnerStyles.logoPreviewMeta}>
-                      <strong>Vista Previa del Logotipo</strong>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                        <strong>Vista Previa del Logotipo</strong>
+                        {logoFile ? (
+                          <span className={partnerStyles.newFileBadge}>Nuevo archivo</span>
+                        ) : logoUrl?.includes('res.cloudinary.com') ? (
+                          <span className={partnerStyles.cloudinaryBadge}>Cloudinary CDN</span>
+                        ) : null}
+                      </div>
                       <div>
                         {logoFile
                           ? `${logoFile.name} (${Math.round(logoFile.size / 1024)} KB)`
-                          : 'Logo asignado'}
+                          : logoUrl?.includes('res.cloudinary.com')
+                            ? 'Alojado y optimizado en Cloudinary CDN'
+                            : 'Logo local asignado'}
                       </div>
                     </div>
-                    {(logoFile || logoUrl) && (
+                    {(logoFile || logoUrl || logoPreview) && (
                       <button
                         type="button"
                         className={partnerStyles.btnRemoveLogo}
                         onClick={handleRemoveSelectedFile}
+                        disabled={isSubmitting}
                       >
-                        Remover
+                        {logoFile ? 'Cancelar archivo' : 'Remover'}
                       </button>
                     )}
                   </div>
                 )}
 
                 {formErrors.logo && (
-                  <span className={partnerStyles.formFieldErrorSpaced}>
-                    {formErrors.logo}
-                  </span>
+                  <div
+                    className={partnerStyles.formErrorBanner}
+                    style={{ marginTop: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+                  >
+                    <AlertCircle size={15} style={{ flexShrink: 0 }} />
+                    <span>{formErrors.logo}</span>
+                  </div>
                 )}
               </div>
 
@@ -968,10 +998,9 @@ export const PartnersView: React.FC = () => {
                   placeholder="Breve reseña sobre las experiencias, rutas o platos que ofrece este aliado..."
                   className={styles.formModalTextarea}
                   value={formData.description}
-                  onChange={(e) =>
-                    setFormData((prev) => ({ ...prev, description: e.target.value }))
-                  }
+                  onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
                   disabled={isSubmitting}
+                  rows={3}
                 />
               </div>
 
@@ -1065,7 +1094,13 @@ export const PartnersView: React.FC = () => {
                   {isSubmitting ? (
                     <>
                       <Loader2 size={16} className="animate-spin" />
-                      <span>Guardando...</span>
+                      <span>
+                        {logoFile
+                          ? 'Subiendo logotipo a Cloudinary...'
+                          : editingPartner
+                            ? 'Actualizando aliado...'
+                            : 'Registrando aliado...'}
+                      </span>
                     </>
                   ) : (
                     <>

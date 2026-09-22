@@ -3,24 +3,43 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.8";
 
 function getCorsHeaders(req: Request) {
   const origin = req.headers.get("origin") || "";
+  const requestHeaders = req.headers.get("access-control-request-headers");
+
   const allowedOrigins = [
+    "https://rifa-manaure.vercel.app",
     "https://manaurevive.com",
     "https://www.manaurevive.com",
-    "http://localhost:5173",
-    "http://localhost:3000",
-    "http://localhost:4173",
-    "http://127.0.0.1:5173",
-    "http://127.0.0.1:3000",
-    "http://127.0.0.1:4173",
   ];
 
-  const isVercel = origin.endsWith(".vercel.app") && origin.startsWith("https://");
-  const isAllowed = allowedOrigins.includes(origin) || isVercel;
+  // Entornos de desarrollo locales (cualquier puerto en localhost o 127.0.0.1)
+  const isLocalhost = /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
+
+  // Despliegues en Vercel (producción, ramas de preview, pull requests)
+  const isVercel =
+    (origin.endsWith(".vercel.app") && origin.startsWith("https://")) ||
+    origin === "https://rifa-manaure.vercel.app";
+
+  // Orígenes adicionales configurados en secretos
+  const envOrigins = (Deno.env.get("ALLOWED_ORIGINS") || "")
+    .split(",")
+    .map((o) => o.trim())
+    .filter(Boolean);
+
+  const isAllowed =
+    allowedOrigins.includes(origin) ||
+    isLocalhost ||
+    isVercel ||
+    envOrigins.includes(origin);
+
+  const allowOrigin = isAllowed ? origin : (origin || "https://rifa-manaure.vercel.app");
 
   return {
-    "Access-Control-Allow-Origin": isAllowed ? origin : allowedOrigins[0],
-    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+    "Access-Control-Allow-Origin": allowOrigin,
+    "Access-Control-Allow-Headers":
+      requestHeaders ||
+      "authorization, x-client-info, apikey, content-type, x-supabase-auth, accept, prefer, *",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Access-Control-Max-Age": "86400",
   };
 }
 
