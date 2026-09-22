@@ -1,4 +1,4 @@
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from '@/context/AuthContext';
 import { SystemSettingsProvider } from '@/context/SystemSettingsContext';
@@ -6,72 +6,101 @@ import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { HomePage } from '@/pages/HomePage';
 import { PageLoadingFallback } from '@/components/common/PageLoadingFallback';
 import { ScrollToHashElement } from '@/components/common/ScrollToHashElement';
+import { lazyWithRetry } from '@/lib/lazyWithRetry';
 
-// Carga perezosa (Code Splitting) de rutas públicas secundarias
-const VerificarPage = lazy(() =>
-  import('@/pages/VerificarPage').then((m) => ({ default: m.VerificarPage }))
+// Carga perezosa con reintento resiliente de rutas públicas secundarias
+const VerificarPage = lazyWithRetry(
+  () => import('@/pages/VerificarPage').then((m) => ({ default: m.VerificarPage })),
+  'VerificarPage'
 );
-const TerminosPage = lazy(() =>
-  import('@/pages/TerminosPage').then((m) => ({ default: m.TerminosPage }))
-);
-
-// Carga perezosa de autenticación y módulo administrativo
-const AdminRouteRoot = lazy(() =>
-  import('@/components/admin/layout/AdminRouteRoot').then((m) => ({ default: m.AdminRouteRoot }))
-);
-const AdminLoginPage = lazy(() =>
-  import('@/pages/AdminLoginPage').then((m) => ({ default: m.AdminLoginPage }))
-);
-const AdminLayout = lazy(() =>
-  import('@/components/admin/layout/AdminLayout').then((m) => ({ default: m.AdminLayout }))
+const TerminosPage = lazyWithRetry(
+  () => import('@/pages/TerminosPage').then((m) => ({ default: m.TerminosPage })),
+  'TerminosPage'
 );
 
-// Carga perezosa de sub-vistas del Panel Administrativo
-const DashboardView = lazy(() =>
-  import('@/pages/admin/views/DashboardView').then((m) => ({ default: m.DashboardView }))
+// Carga perezosa con reintento resiliente de autenticación y módulo administrativo
+const AdminRouteRoot = lazyWithRetry(
+  () => import('@/components/admin/layout/AdminRouteRoot').then((m) => ({ default: m.AdminRouteRoot })),
+  'AdminRouteRoot'
 );
-const OrdersView = lazy(() =>
-  import('@/pages/admin/views/OrdersView').then((m) => ({ default: m.OrdersView }))
+const AdminLoginPage = lazyWithRetry(
+  () => import('@/pages/AdminLoginPage').then((m) => ({ default: m.AdminLoginPage })),
+  'AdminLoginPage'
 );
-const ReceiptsView = lazy(() =>
-  import('@/pages/admin/views/ReceiptsView').then((m) => ({ default: m.ReceiptsView }))
+const AdminLayout = lazyWithRetry(
+  () => import('@/components/admin/layout/AdminLayout').then((m) => ({ default: m.AdminLayout })),
+  'AdminLayout'
 );
-const TicketsView = lazy(() =>
-  import('@/pages/admin/views/TicketsView').then((m) => ({ default: m.TicketsView }))
+
+// Carga perezosa con reintento resiliente de sub-vistas del Panel Administrativo
+const DashboardView = lazyWithRetry(
+  () => import('@/pages/admin/views/DashboardView').then((m) => ({ default: m.DashboardView })),
+  'DashboardView'
 );
-const RafflesView = lazy(() =>
-  import('@/pages/admin/views/RafflesView').then((m) => ({ default: m.RafflesView }))
+const OrdersView = lazyWithRetry(
+  () => import('@/pages/admin/views/OrdersView').then((m) => ({ default: m.OrdersView })),
+  'OrdersView'
 );
-const PaymentAccountsView = lazy(() =>
-  import('@/pages/admin/views/PaymentAccountsView').then((m) => ({
-    default: m.PaymentAccountsView,
-  }))
+const ReceiptsView = lazyWithRetry(
+  () => import('@/pages/admin/views/ReceiptsView').then((m) => ({ default: m.ReceiptsView })),
+  'ReceiptsView'
 );
-const PrizeView = lazy(() =>
-  import('@/pages/admin/views/PrizeView').then((m) => ({ default: m.PrizeView }))
+const TicketsView = lazyWithRetry(
+  () => import('@/pages/admin/views/TicketsView').then((m) => ({ default: m.TicketsView })),
+  'TicketsView'
 );
-const GalleryView = lazy(() =>
-  import('@/pages/admin/views/GalleryView').then((m) => ({ default: m.GalleryView }))
+const RafflesView = lazyWithRetry(
+  () => import('@/pages/admin/views/RafflesView').then((m) => ({ default: m.RafflesView })),
+  'RafflesView'
 );
-const PartnersView = lazy(() =>
-  import('@/pages/admin/views/PartnersView').then((m) => ({ default: m.PartnersView }))
+const PaymentAccountsView = lazyWithRetry(
+  () => import('@/pages/admin/views/PaymentAccountsView').then((m) => ({ default: m.PaymentAccountsView })),
+  'PaymentAccountsView'
 );
-const WinnersView = lazy(() =>
-  import('@/pages/admin/views/WinnersView').then((m) => ({ default: m.WinnersView }))
+const PrizeView = lazyWithRetry(
+  () => import('@/pages/admin/views/PrizeView').then((m) => ({ default: m.PrizeView })),
+  'PrizeView'
 );
-const AuditView = lazy(() =>
-  import('@/pages/admin/views/AuditView').then((m) => ({ default: m.AuditView }))
+const GalleryView = lazyWithRetry(
+  () => import('@/pages/admin/views/GalleryView').then((m) => ({ default: m.GalleryView })),
+  'GalleryView'
 );
-const BuyersView = lazy(() =>
-  import('@/pages/admin/views/BuyersView').then((m) => ({ default: m.BuyersView }))
+const PartnersView = lazyWithRetry(
+  () => import('@/pages/admin/views/PartnersView').then((m) => ({ default: m.PartnersView })),
+  'PartnersView'
 );
-const SettingsView = lazy(() =>
-  import('@/pages/admin/views/SettingsView').then((m) => ({ default: m.SettingsView }))
+const WinnersView = lazyWithRetry(
+  () => import('@/pages/admin/views/WinnersView').then((m) => ({ default: m.WinnersView })),
+  'WinnersView'
+);
+const AuditView = lazyWithRetry(
+  () => import('@/pages/admin/views/AuditView').then((m) => ({ default: m.AuditView })),
+  'AuditView'
+);
+const BuyersView = lazyWithRetry(
+  () => import('@/pages/admin/views/BuyersView').then((m) => ({ default: m.BuyersView })),
+  'BuyersView'
+);
+const SettingsView = lazyWithRetry(
+  () => import('@/pages/admin/views/SettingsView').then((m) => ({ default: m.SettingsView })),
+  'SettingsView'
 );
 
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 
 export const App: React.FC = () => {
+  // Limpiar contadores de recarga si la aplicación permanece estable por 5 segundos
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      try {
+        sessionStorage.removeItem('manaure_chunk_retry_count');
+        sessionStorage.removeItem('manaure_chunk_reload_ts');
+      } catch {
+        // Ignorar entornos con almacenamiento restringido
+      }
+    }, 5000);
+    return () => clearTimeout(timer);
+  }, []);
   return (
     <BrowserRouter>
       <AuthProvider>

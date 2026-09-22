@@ -28,6 +28,12 @@ export class ErrorBoundary extends Component<Props, State> {
 
   private handleReset = () => {
     this.setState({ hasError: false, error: null });
+    try {
+      sessionStorage.removeItem('manaure_chunk_reload_ts');
+      sessionStorage.removeItem('manaure_chunk_retry_count');
+    } catch {
+      // Ignorar errores en navegadores con almacenamiento restringido
+    }
     window.location.reload();
   };
 
