@@ -4,21 +4,20 @@ import { SectionHeader } from '@/components/public/ui';
 import { ResponsiveImage } from '@/components/common/ResponsiveImage';
 import { imageManifest, type ImageEntry } from '@/types/image-manifest';
 import { resolveExperienceImage } from '@/assets/assets';
-import { getCachedGalleryItems, getPublicGalleryItems } from '@/services/galleryService';
-import type { GalleryItemRow } from '@/types/raffle.types';
+import {
+  getCachedGalleryItems,
+  getPublicGalleryItems,
+  getCachedGalleryCategories,
+  getGalleryCategories,
+} from '@/services/galleryService';
+import type { GalleryItemRow, GalleryCategoryItem } from '@/types/raffle.types';
 import styles from './GaleriaPremio.module.css';
 
-type CategoriaFiltro =
-  | 'todas'
-  | 'cuatrimoto'
-  | 'parapente'
-  | 'serrania'
-  | 'hospedaje'
-  | 'gastronomia'
-  | 'fogata';
+type CategoriaFiltro = string;
 
 export const GaleriaPremio: React.FC = () => {
   const [items, setItems] = useState<GalleryItemRow[]>(getCachedGalleryItems);
+  const [categories, setCategories] = useState<GalleryCategoryItem[]>(getCachedGalleryCategories);
   const [filtroActivo, setFiltroActivo] = useState<CategoriaFiltro>('todas');
   const [fotoSeleccionadaIndex, setFotoSeleccionadaIndex] = useState<number | null>(null);
 
@@ -35,6 +34,11 @@ export const GaleriaPremio: React.FC = () => {
         setItems(dbData);
       }
     });
+    getGalleryCategories().then((dbCats) => {
+      if (isMounted && dbCats && dbCats.length > 0) {
+        setCategories(dbCats);
+      }
+    });
     return () => {
       isMounted = false;
     };
@@ -43,7 +47,7 @@ export const GaleriaPremio: React.FC = () => {
   const fotosFiltradas =
     filtroActivo === 'todas'
       ? items
-      : items.filter((f) => f.category === filtroActivo);
+      : items.filter((f) => f.category.toLowerCase() === filtroActivo.toLowerCase());
 
   const handleOpenLightbox = (index: number, element?: HTMLElement) => {
     if (element) {
@@ -218,54 +222,25 @@ export const GaleriaPremio: React.FC = () => {
             >
               Todas ({items.length})
             </button>
-            <button
-              type="button"
-              className={`${styles.filterChip} ${filtroActivo === 'cuatrimoto' ? styles.filterChipActive : ''}`}
-              onClick={() => setFiltroActivo('cuatrimoto')}
-              aria-pressed={filtroActivo === 'cuatrimoto'}
-            >
-              Cuatrimotos
-            </button>
-            <button
-              type="button"
-              className={`${styles.filterChip} ${filtroActivo === 'parapente' ? styles.filterChipActive : ''}`}
-              onClick={() => setFiltroActivo('parapente')}
-              aria-pressed={filtroActivo === 'parapente'}
-            >
-              Parapente
-            </button>
-            <button
-              type="button"
-              className={`${styles.filterChip} ${filtroActivo === 'serrania' ? styles.filterChipActive : ''}`}
-              onClick={() => setFiltroActivo('serrania')}
-              aria-pressed={filtroActivo === 'serrania'}
-            >
-              Serranía
-            </button>
-            <button
-              type="button"
-              className={`${styles.filterChip} ${filtroActivo === 'hospedaje' ? styles.filterChipActive : ''}`}
-              onClick={() => setFiltroActivo('hospedaje')}
-              aria-pressed={filtroActivo === 'hospedaje'}
-            >
-              Hospedaje & Glamping
-            </button>
-            <button
-              type="button"
-              className={`${styles.filterChip} ${filtroActivo === 'gastronomia' ? styles.filterChipActive : ''}`}
-              onClick={() => setFiltroActivo('gastronomia')}
-              aria-pressed={filtroActivo === 'gastronomia'}
-            >
-              Gastronomía
-            </button>
-            <button
-              type="button"
-              className={`${styles.filterChip} ${filtroActivo === 'fogata' ? styles.filterChipActive : ''}`}
-              onClick={() => setFiltroActivo('fogata')}
-              aria-pressed={filtroActivo === 'fogata'}
-            >
-              Noche & Fogata
-            </button>
+            {categories.map((cat) => {
+              const count = items.filter(
+                (f) => f.category.toLowerCase() === cat.slug.toLowerCase()
+              ).length;
+              if (count === 0) return null;
+              return (
+                <button
+                  key={cat.slug}
+                  type="button"
+                  className={`${styles.filterChip} ${
+                    filtroActivo === cat.slug ? styles.filterChipActive : ''
+                  }`}
+                  onClick={() => setFiltroActivo(cat.slug)}
+                  aria-pressed={filtroActivo === cat.slug}
+                >
+                  {cat.name}
+                </button>
+              );
+            })}
           </div>
 
           {/* Región aria-live para anunciar el conteo tras filtrar */}

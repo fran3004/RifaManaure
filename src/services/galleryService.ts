@@ -4,10 +4,29 @@ import type {
   GalleryItemInsert,
   GalleryItemUpdate,
   GalleryCachePayload,
+  GalleryCategoryItem,
+  GalleryCategoryRow,
+  GalleryCategoriesCachePayload,
 } from '@/types/raffle.types';
 
 export const GALLERY_CACHE_KEY = 'manaure_gallery_cache';
 export const GALLERY_CACHE_VERSION = 1;
+
+export const GALLERY_CATEGORIES_CACHE_KEY = 'manaure_gallery_categories_cache';
+export const GALLERY_CATEGORIES_CACHE_VERSION = 1;
+
+/**
+ * Categorías oficiales canónicas de respaldo para la galería.
+ */
+export const DEFAULT_GALLERY_CATEGORIES: GalleryCategoryItem[] = [
+  { id: 'cat-cuatrimoto', slug: 'cuatrimoto', name: 'Cuatrimotos', display_order: 1, is_active: true, is_default: true },
+  { id: 'cat-parapente', slug: 'parapente', name: 'Parapente', display_order: 2, is_active: true, is_default: true },
+  { id: 'cat-serrania', slug: 'serrania', name: 'Serranía del Perijá', display_order: 3, is_active: true, is_default: true },
+  { id: 'cat-hospedaje', slug: 'hospedaje', name: 'Hospedaje & Glamping', display_order: 4, is_active: true, is_default: true },
+  { id: 'cat-gastronomia', slug: 'gastronomia', name: 'Gastronomía', display_order: 5, is_active: true, is_default: true },
+  { id: 'cat-fogata', slug: 'fogata', name: 'Noche & Fogata', display_order: 6, is_active: true, is_default: true },
+  { id: 'cat-otro', slug: 'otro', name: 'Otra Experiencia', display_order: 7, is_active: true, is_default: true },
+];
 
 /**
  * 18 fotografías canónicas de respaldo local para la landing pública
@@ -270,6 +289,14 @@ function formatGalleryError(rawError: string): string {
     rawError.includes('new row violates')
   ) {
     return 'Permisos denegados por seguridad (RLS): debes ejecutar la migración 035_gallery_management.sql en el SQL Editor y contar con rol de administrador activo.';
+  }
+
+  if (
+    rawError.includes('gallery_categories') ||
+    rawError.includes("Could not find the table 'public.gallery_categories'") ||
+    rawError.includes('relation "gallery_categories" does not exist')
+  ) {
+    return "La tabla 'public.gallery_categories' no existe en Supabase. Ejecuta la migración 036_gallery_categories.sql en el SQL Editor de tu proyecto.";
   }
 
   if (rawError.includes('bucket not found') || rawError.includes('gallery-images')) {
@@ -649,6 +676,264 @@ export async function uploadGalleryPhoto(
     return {
       success: false,
       error: err instanceof Error ? err.message : 'Error al subir la fotografía a la galería.',
+    };
+  }
+}
+
+/**
+ * Normaliza y genera un slug limpio para una categoría (sin tildes, minúsculas y separado por guiones).
+ */
+export function slugifyCategory(name: string): string {
+  return name
+    .toLowerCase()
+    .trim()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 40);
+}
+
+/**
+ * Recupera las categorías de la galería desde la caché local de localStorage.
+ */
+export function getCachedGalleryCategories(): GalleryCategoryItem[] {
+  try {
+    if (typeof localStorage !== 'undefined') {
+      const raw = localStorage.getItem(GALLERY_CATEGORIES_CACHE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw) as GalleryCategoriesCachePayload;
+        if (
+          parsed?.version === GALLERY_CATEGORIES_CACHE_VERSION &&
+          Array.isArray(parsed?.data) &&
+          parsed.data.length > 0
+        ) {
+          return parsed.data;
+        }
+      }
+    }
+  } catch {
+    // Si localStorage no está disponible o falla, fallback seguro
+  }
+
+  return DEFAULT_GALLERY_CATEGORIES;
+}
+
+/**
+ * Guarda las categorías de la galería en localStorage.
+ */
+export function setCachedGalleryCategories(data: GalleryCategoryItem[]): void {
+  try {
+    if (typeof localStorage !== 'undefined') {
+      const payload: GalleryCategoriesCachePayload = {
+        version: GALLERY_CATEGORIES_CACHE_VERSION,
+        timestamp: Date.now(),
+        data,
+      };
+      localStorage.setItem(GALLERY_CATEGORIES_CACHE_KEY, JSON.stringify(payload));
+    }
+  } catch {
+    // Ignorar si hay restricciones de almacenamiento
+  }
+}
+
+/**
+ * Consulta las categorías activas de la galería (con estrategia cache-first y fallback silencioso).
+ */
+export async function getGalleryCategories(): Promise<GalleryCategoryItem[]> {
+  try {
+    const { data, error } = await supabase
+      .from('gallery_categories')
+      .select('*')
+      .eq('is_active', true)
+      .order('display_order', { ascending: true });
+
+    if (error) {
+      if (import.meta.env.DEV) {
+        console.info('[galleryService] Usando categorías locales de respaldo:', error.message);
+      }
+      return getCachedGalleryCategories();
+    }
+
+    if (data && data.length > 0) {
+      const defaultSlugs = ['cuatrimoto', 'parapente', 'serrania', 'hospedaje', 'gastronomia', 'fogata', 'otro'];
+      const mapped: GalleryCategoryItem[] = (data as GalleryCategoryRow[]).map((r) => ({
+        id: r.id,
+        slug: r.slug,
+        name: r.name,
+        display_order: r.display_order,
+        is_active: r.is_active,
+        is_default: defaultSlugs.includes(r.slug),
+      }));
+      setCachedGalleryCategories(mapped);
+      return mapped;
+    }
+
+    return getCachedGalleryCategories();
+  } catch (err) {
+    console.error('[galleryService] Error al obtener categorías:', err);
+    return getCachedGalleryCategories();
+  }
+}
+
+/**
+ * Crea una nueva categoría de fotos para la galería.
+ */
+export async function createGalleryCategory(
+  name: string,
+  customSlug?: string
+): Promise<{ success: boolean; category?: GalleryCategoryItem; error?: string }> {
+  try {
+    const cleanName = name.trim();
+    if (!cleanName) {
+      return { success: false, error: 'El nombre de la categoría es obligatorio.' };
+    }
+
+    const slug = customSlug?.trim() ? slugifyCategory(customSlug) : slugifyCategory(cleanName);
+    if (!slug) {
+      return { success: false, error: 'No se pudo generar un identificador (slug) válido.' };
+    }
+
+    // Verificar si ya existe en la lista actual
+    const currentCategories = getCachedGalleryCategories();
+    if (currentCategories.some((c) => c.slug === slug)) {
+      return { success: false, error: `Ya existe una categoría con el identificador "${slug}".` };
+    }
+
+    const nextOrder = currentCategories.length > 0
+      ? Math.max(...currentCategories.map((c) => c.display_order)) + 1
+      : 1;
+
+    const { data, error } = await supabase
+      .from('gallery_categories')
+      .insert([
+        {
+          slug,
+          name: cleanName,
+          display_order: nextOrder,
+          is_active: true,
+        },
+      ])
+      .select()
+      .single();
+
+    if (error) {
+      console.warn('[galleryService] Error en Supabase al crear categoría, guardando en respaldo local:', error.message);
+      const newLocalCat: GalleryCategoryItem = {
+        id: `local-${slug}-${Date.now()}`,
+        slug,
+        name: cleanName,
+        display_order: nextOrder,
+        is_active: true,
+        is_default: false,
+      };
+      const updatedList = [...currentCategories, newLocalCat];
+      setCachedGalleryCategories(updatedList);
+      return { success: true, category: newLocalCat };
+    }
+
+    const newCategory: GalleryCategoryItem = {
+      id: data.id,
+      slug: data.slug,
+      name: data.name,
+      display_order: data.display_order,
+      is_active: data.is_active,
+      is_default: false,
+    };
+
+    const updatedList = [...currentCategories.filter((c) => c.slug !== slug), newCategory];
+    setCachedGalleryCategories(updatedList);
+
+    return { success: true, category: newCategory };
+  } catch (err) {
+    console.error('[galleryService] Error inesperado en createGalleryCategory:', err);
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : 'Error inesperado al crear la categoría.',
+    };
+  }
+}
+
+/**
+ * Elimina una categoría de la galería de manera segura:
+ * 1. Reasigna automáticamente todas las fotos de esa categoría a 'otro' para proteger su visibilidad.
+ * 2. Elimina la categoría de Supabase y de la caché local.
+ */
+export async function deleteGalleryCategory(
+  slug: string
+): Promise<{ success: boolean; reassignedPhotosCount: number; error?: string }> {
+  try {
+    if (slug === 'otro') {
+      return {
+        success: false,
+        reassignedPhotosCount: 0,
+        error: 'La categoría base "Otra Experiencia" (otro) no puede ser eliminada porque actúa como respaldo del sistema.',
+      };
+    }
+
+    let reassignedCount = 0;
+
+    // 1. Reasignar fotos existentes que tengan esta categoría a 'otro' en Supabase
+    try {
+      const { data: affectedPhotos } = await supabase
+        .from('gallery_items')
+        .select('id')
+        .eq('category', slug);
+
+      if (affectedPhotos && affectedPhotos.length > 0) {
+        reassignedCount = affectedPhotos.length;
+        await supabase
+          .from('gallery_items')
+          .update({ category: 'otro' })
+          .eq('category', slug);
+      }
+    } catch (reassignError) {
+      console.warn('[galleryService] Advertencia al reasignar fotos en Supabase:', reassignError);
+    }
+
+    // 2. Eliminar la categoría de Supabase
+    const { error: deleteError } = await supabase
+      .from('gallery_categories')
+      .delete()
+      .eq('slug', slug);
+
+    if (deleteError) {
+      console.warn('[galleryService] Advertencia al eliminar categoría en Supabase, aplicando localmente:', deleteError.message);
+    }
+
+    // 3. Reasignar en la caché local de fotos si existían
+    const cachedItems = getCachedGalleryItems();
+    let localReassigned = 0;
+    const updatedItems = cachedItems.map((item) => {
+      if (item.category === slug) {
+        localReassigned++;
+        return { ...item, category: 'otro' };
+      }
+      return item;
+    });
+
+    if (localReassigned > 0) {
+      setCachedGalleryItems(updatedItems);
+      if (reassignedCount === 0) {
+        reassignedCount = localReassigned;
+      }
+    }
+
+    // 4. Remover de la caché local de categorías
+    const currentCategories = getCachedGalleryCategories();
+    const updatedCategories = currentCategories.filter((c) => c.slug !== slug);
+    setCachedGalleryCategories(updatedCategories);
+
+    return {
+      success: true,
+      reassignedPhotosCount: reassignedCount,
+    };
+  } catch (err) {
+    console.error('[galleryService] Error inesperado en deleteGalleryCategory:', err);
+    return {
+      success: false,
+      reassignedPhotosCount: 0,
+      error: err instanceof Error ? err.message : 'Error inesperado al eliminar la categoría.',
     };
   }
 }

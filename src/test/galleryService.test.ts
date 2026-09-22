@@ -10,6 +10,13 @@ import {
   toggleGalleryItemActive,
   reorderGalleryItems,
   uploadGalleryPhoto,
+  getCachedGalleryCategories,
+  setCachedGalleryCategories,
+  getGalleryCategories,
+  createGalleryCategory,
+  deleteGalleryCategory,
+  slugifyCategory,
+  DEFAULT_GALLERY_CATEGORIES,
   GALLERY_CACHE_KEY,
   GALLERY_CACHE_VERSION,
   FALLBACK_GALLERY_ITEMS,
@@ -358,5 +365,131 @@ describe('galleryService - Gestión Integral de la Galería Fotográfica', () =>
     expect(res.success).toBe(true);
     expect(res.url).toBe('https://xyz.supabase.co/storage/v1/object/public/gallery-images/galeria-123.webp');
   });
+
+  // --- Pruebas de Gestión Dinámica de Categorías ---
+
+  it('slugifyCategory debe generar slugs normalizados y limpios', () => {
+    expect(slugifyCategory('Senderismo & Cascadas')).toBe('senderismo-cascadas');
+    expect(slugifyCategory('Serranía del Perijá!')).toBe('serrania-del-perija');
+    expect(slugifyCategory('  Hospedaje de Lujo  ')).toBe('hospedaje-de-lujo');
+  });
+
+  it('debe devolver DEFAULT_GALLERY_CATEGORIES si la caché local está vacía', () => {
+    const cats = getCachedGalleryCategories();
+    expect(cats).toBeDefined();
+    expect(cats).toEqual(DEFAULT_GALLERY_CATEGORIES);
+    expect(cats.length).toBe(7);
+    expect(cats.some((c) => c.slug === 'cuatrimoto')).toBe(true);
+    expect(cats.some((c) => c.slug === 'otro')).toBe(true);
+  });
+
+  it('debe almacenar y recuperar categorías en caché de localStorage', () => {
+    const customList = [
+      { id: '1', slug: 'rutas', name: 'Rutas 4x4', display_order: 1, is_active: true },
+    ];
+    setCachedGalleryCategories(customList);
+    const result = getCachedGalleryCategories();
+    expect(result).toHaveLength(1);
+    expect(result[0].slug).toBe('rutas');
+  });
+
+  it('getGalleryCategories debe retornar categorías de Supabase cuando está disponible', async () => {
+    const mockDbData = [
+      { id: 'c1', slug: 'cabalgatas', name: 'Cabalgatas', display_order: 1, is_active: true },
+    ];
+    const mockQuery = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      order: vi.fn().mockResolvedValue({ data: mockDbData, error: null }),
+    };
+    vi.mocked(supabase.from).mockReturnValue(mockQuery as any);
+
+    const cats = await getGalleryCategories();
+    expect(cats).toHaveLength(1);
+    expect(cats[0].slug).toBe('cabalgatas');
+    expect(cats[0].name).toBe('Cabalgatas');
+  });
+
+  it('getGalleryCategories debe caer a la caché local si Supabase arroja error', async () => {
+    const mockQuery = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      order: vi.fn().mockResolvedValue({ data: null, error: new Error('relation gallery_categories does not exist') }),
+    };
+    vi.mocked(supabase.from).mockReturnValue(mockQuery as any);
+
+    const cats = await getGalleryCategories();
+    expect(cats).toBeDefined();
+    expect(cats.length).toBeGreaterThan(0);
+  });
+
+  it('createGalleryCategory debe validar nombre no vacío y rechazar duplicados', async () => {
+    const emptyRes = await createGalleryCategory('   ');
+    expect(emptyRes.success).toBe(false);
+    expect(emptyRes.error).toContain('obligatorio');
+
+    // Intentar crear 'parapente' que ya existe en los defaults
+    const dupRes = await createGalleryCategory('Parapente');
+    expect(dupRes.success).toBe(false);
+    expect(dupRes.error).toContain('Ya existe');
+  });
+
+  it('createGalleryCategory debe insertar exitosamente una nueva categoría', async () => {
+    const mockInserted = {
+      id: 'cat-new-uuid',
+      slug: 'avistamiento-aves',
+      name: 'Avistamiento de Aves',
+      display_order: 8,
+      is_active: true,
+    };
+    const mockQuery = {
+      insert: vi.fn().mockReturnThis(),
+      select: vi.fn().mockReturnThis(),
+      single: vi.fn().mockResolvedValue({ data: mockInserted, error: null }),
+    };
+    vi.mocked(supabase.from).mockReturnValue(mockQuery as any);
+
+    const res = await createGalleryCategory('Avistamiento de Aves');
+    expect(res.success).toBe(true);
+    expect(res.category?.slug).toBe('avistamiento-aves');
+    expect(res.category?.name).toBe('Avistamiento de Aves');
+  });
+
+  it('deleteGalleryCategory debe proteger la categoría base "otro"', async () => {
+    const res = await deleteGalleryCategory('otro');
+    expect(res.success).toBe(false);
+    expect(res.error).toContain('no puede ser eliminada');
+  });
+
+  it('deleteGalleryCategory debe reasignar fotos huérfanas a "otro" y eliminar la categoría', async () => {
+    // 1. Mock de fotos afectadas en Supabase
+    const mockSelectQuery = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockResolvedValue({ data: [{ id: 'foto-1' }, { id: 'foto-2' }], error: null }),
+    };
+    const mockUpdateQuery = {
+      update: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockResolvedValue({ data: null, error: null }),
+    };
+    const mockDeleteQuery = {
+      delete: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockResolvedValue({ data: null, error: null }),
+    };
+
+    let callCount = 0;
+    vi.mocked(supabase.from).mockImplementation((table: string) => {
+      if (table === 'gallery_items') {
+        callCount++;
+        if (callCount === 1) return mockSelectQuery as any;
+        return mockUpdateQuery as any;
+      }
+      return mockDeleteQuery as any;
+    });
+
+    const res = await deleteGalleryCategory('parapente');
+    expect(res.success).toBe(true);
+    expect(res.reassignedPhotosCount).toBe(2);
+  });
 });
+
 

@@ -18,6 +18,9 @@ import {
   X,
   Loader2,
   Info,
+  FolderPlus,
+  Tag,
+  Shield,
 } from 'lucide-react';
 import {
   getAdminGalleryItems,
@@ -27,12 +30,16 @@ import {
   toggleGalleryItemActive,
   reorderGalleryItems,
   uploadGalleryPhoto,
+  getGalleryCategories,
+  createGalleryCategory,
+  deleteGalleryCategory,
+  DEFAULT_GALLERY_CATEGORIES,
 } from '@/services/galleryService';
 import type {
   GalleryItemRow,
   GalleryItemInsert,
   GalleryItemUpdate,
-  GalleryCategory,
+  GalleryCategoryItem,
 } from '@/types/raffle.types';
 import {
   catalogoFotosManaure,
@@ -40,15 +47,19 @@ import {
 } from '@/assets/assets';
 import styles from './GalleryView.module.css';
 
-const CATEGORY_OPTIONS: { key: GalleryCategory; label: string; badgeClass: string }[] = [
-  { key: 'cuatrimoto', label: 'Cuatrimotos', badgeClass: styles.catCuatrimoto },
-  { key: 'parapente', label: 'Parapente', badgeClass: styles.catParapente },
-  { key: 'serrania', label: 'Serranía del Perijá', badgeClass: styles.catSerrania },
-  { key: 'hospedaje', label: 'Hospedaje & Glamping', badgeClass: styles.catHospedaje },
-  { key: 'gastronomia', label: 'Gastronomía', badgeClass: styles.catGastronomia },
-  { key: 'fogata', label: 'Noche & Fogata', badgeClass: styles.catFogata },
-  { key: 'otro', label: 'Otra Experiencia', badgeClass: styles.catOtro },
-];
+const getCategoryBadgeClass = (categorySlug: string): string => {
+  switch (categorySlug.toLowerCase()) {
+    case 'cuatrimoto': return styles.catCuatrimoto;
+    case 'parapente': return styles.catParapente;
+    case 'serrania': return styles.catSerrania;
+    case 'hospedaje': return styles.catHospedaje;
+    case 'gastronomia': return styles.catGastronomia;
+    case 'fogata': return styles.catFogata;
+    case 'otro': return styles.catOtro;
+    default: return styles.catCustom;
+  }
+};
+
 
 export const GalleryView: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -91,6 +102,14 @@ export const GalleryView: React.FC = () => {
   const [deletingItem, setDeletingItem] = useState<GalleryItemRow | null>(null);
   const [deletingInProgress, setDeletingInProgress] = useState(false);
 
+  // Estados para la Gestión de Categorías
+  const [categories, setCategories] = useState<GalleryCategoryItem[]>(DEFAULT_GALLERY_CATEGORIES);
+  const [isCategoriesModalOpen, setIsCategoriesModalOpen] = useState(false);
+  const [newCatName, setNewCatName] = useState('');
+  const [creatingCat, setCreatingCat] = useState(false);
+  const [catToDelete, setCatToDelete] = useState<GalleryCategoryItem | null>(null);
+  const [deletingCatInProgress, setDeletingCatInProgress] = useState(false);
+
   // Modal Lightbox para visualización ampliada
   const [lightboxUrl, setLightboxUrl] = useState<{ url: string; title: string } | null>(null);
 
@@ -114,9 +133,69 @@ export const GalleryView: React.FC = () => {
     setLoading(false);
   };
 
+  const loadCategories = async () => {
+    const cats = await getGalleryCategories();
+    if (cats && cats.length > 0) {
+      setCategories(cats);
+    }
+  };
+
   useEffect(() => {
     loadItems();
+    loadCategories();
   }, []);
+
+  const handleCreateCategory = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const trimmed = newCatName.trim();
+    if (!trimmed) return;
+
+    setCreatingCat(true);
+    const res = await createGalleryCategory(trimmed);
+    setCreatingCat(false);
+
+    if (!res.success || !res.category) {
+      showNotification('error', res.error || 'Error al crear la categoría.');
+    } else {
+      setCategories((prev) => [...prev.filter((c) => c.slug !== res.category!.slug), res.category!]);
+      setNewCatName('');
+      showNotification('success', `Categoría "${res.category.name}" creada exitosamente.`);
+    }
+  };
+
+  const handleDeleteCategory = async (cat: GalleryCategoryItem) => {
+    setDeletingCatInProgress(true);
+    const res = await deleteGalleryCategory(cat.slug);
+    setDeletingCatInProgress(false);
+
+    if (!res.success) {
+      showNotification('error', res.error || 'Error al eliminar la categoría.');
+    } else {
+      setCategories((prev) => prev.filter((c) => c.slug !== cat.slug));
+      setCatToDelete(null);
+
+      // Si el filtro de categoría activo era el eliminado, volver a 'todas'
+      if (selectedCategory === cat.slug) {
+        setSelectedCategory('todas');
+      }
+
+      // Si el formulario de foto tenía seleccionada esta categoría, cambiar a 'serrania' o 'otro'
+      if (formCategory === cat.slug) {
+        setFormCategory('otro');
+      }
+
+      // Si se reasignaron fotos, notificar y recargar la galería
+      if (res.reassignedPhotosCount > 0) {
+        showNotification(
+          'success',
+          `Categoría eliminada. Se reasignaron ${res.reassignedPhotosCount} foto(s) a "Otra Experiencia".`
+        );
+        loadItems();
+      } else {
+        showNotification('success', `Categoría "${cat.name}" eliminada exitosamente.`);
+      }
+    }
+  };
 
   // Resolver la URL de imagen optimizada (ya sea remota o del catálogo local)
   const resolveImage = (item: { image_slug: string | null; image_url: string | null }) => {
@@ -336,7 +415,6 @@ export const GalleryView: React.FC = () => {
   const totalCount = items.length;
   const activeCount = items.filter((i) => i.is_active).length;
   const hiddenCount = totalCount - activeCount;
-  const uniqueCategoriesCount = new Set(items.map((i) => i.category)).size;
 
   // Filtrado de fotos del catálogo de Manaure en el modal
   const filteredCatalog =
@@ -404,14 +482,25 @@ export const GalleryView: React.FC = () => {
             </div>
           </div>
 
-          <button
-            type="button"
-            className={styles.btnPrimary}
-            onClick={handleOpenCreateModal}
-          >
-            <Plus size={18} aria-hidden="true" />
-            <span>Agregar Fotografía</span>
-          </button>
+          <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+            <button
+              type="button"
+              className={styles.btnSecondary}
+              onClick={() => setIsCategoriesModalOpen(true)}
+              title="Administrar categorías de la galería"
+            >
+              <FolderPlus size={18} aria-hidden="true" />
+              <span>Gestionar Categorías ({categories.length})</span>
+            </button>
+            <button
+              type="button"
+              className={styles.btnPrimary}
+              onClick={handleOpenCreateModal}
+            >
+              <Plus size={18} aria-hidden="true" />
+              <span>Agregar Fotografía</span>
+            </button>
+          </div>
         </div>
 
         {/* Métricas en vivo */}
@@ -430,7 +519,7 @@ export const GalleryView: React.FC = () => {
           </div>
           <div className={styles.metricCard}>
             <span className={styles.metricLabel}>Categorías</span>
-            <span className={styles.metricValue}>{uniqueCategoriesCount}</span>
+            <span className={styles.metricValue}>{categories.length}</span>
           </div>
         </div>
       </section>
@@ -477,7 +566,7 @@ export const GalleryView: React.FC = () => {
           </div>
         </div>
 
-        {/* Chips de Categorías */}
+        {/* Chips de Categorías Dinámicas */}
         <div className={styles.filterTabs} role="toolbar" aria-label="Filtrar por categoría">
           <button
             type="button"
@@ -486,19 +575,28 @@ export const GalleryView: React.FC = () => {
           >
             Todas ({items.length})
           </button>
-          {CATEGORY_OPTIONS.map((cat) => {
-            const count = items.filter((i) => i.category.toLowerCase() === cat.key).length;
+          {categories.map((cat) => {
+            const count = items.filter((i) => i.category.toLowerCase() === cat.slug.toLowerCase()).length;
             return (
               <button
-                key={cat.key}
+                key={cat.slug}
                 type="button"
-                className={`${styles.filterChip} ${selectedCategory === cat.key ? styles.filterChipActive : ''}`}
-                onClick={() => setSelectedCategory(cat.key)}
+                className={`${styles.filterChip} ${selectedCategory === cat.slug ? styles.filterChipActive : ''}`}
+                onClick={() => setSelectedCategory(cat.slug)}
               >
-                {cat.label} {count > 0 ? `(${count})` : ''}
+                {cat.name} {count > 0 ? `(${count})` : ''}
               </button>
             );
           })}
+          <button
+            type="button"
+            className={styles.addCategoryChip}
+            onClick={() => setIsCategoriesModalOpen(true)}
+            title="Crear o eliminar categorías"
+          >
+            <Plus size={14} aria-hidden="true" />
+            <span>Categoría</span>
+          </button>
         </div>
       </section>
 
@@ -531,7 +629,10 @@ export const GalleryView: React.FC = () => {
         <div className={styles.galleryGrid}>
           {filteredItems.map((item, index) => {
             const imageSrc = resolveImage(item);
-            const categoryMeta = CATEGORY_OPTIONS.find((c) => c.key === item.category);
+            const categoryMeta = categories.find(
+              (c) => c.slug.toLowerCase() === item.category.toLowerCase()
+            );
+            const badgeClass = getCategoryBadgeClass(item.category);
 
             return (
               <article
@@ -549,12 +650,8 @@ export const GalleryView: React.FC = () => {
 
                   <div className={styles.thumbBadges}>
                     <span className={styles.orderBadge}>#{item.display_order}</span>
-                    <span
-                      className={`${styles.categoryBadge} ${
-                        categoryMeta?.badgeClass || styles.catOtro
-                      }`}
-                    >
-                      {categoryMeta?.label || item.category}
+                    <span className={`${styles.categoryBadge} ${badgeClass}`}>
+                      {categoryMeta?.name || item.category}
                     </span>
                   </div>
 
@@ -868,18 +965,28 @@ export const GalleryView: React.FC = () => {
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                   <div className={styles.formGroup}>
-                    <label htmlFor={categorySelectId} className={styles.formLabel}>
-                      Categoría
-                    </label>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <label htmlFor={categorySelectId} className={styles.formLabel}>
+                        Categoría
+                      </label>
+                      <button
+                        type="button"
+                        className={styles.quickAddCategoryBtn}
+                        onClick={() => setIsCategoriesModalOpen(true)}
+                        title="Crear o administrar categorías"
+                      >
+                        <Plus size={13} /> Gestionar
+                      </button>
+                    </div>
                     <select
                       id={categorySelectId}
                       className={styles.formSelect}
                       value={formCategory}
                       onChange={(e) => setFormCategory(e.target.value)}
                     >
-                      {CATEGORY_OPTIONS.map((cat) => (
-                        <option key={cat.key} value={cat.key}>
-                          {cat.label}
+                      {categories.map((cat) => (
+                        <option key={cat.slug} value={cat.slug}>
+                          {cat.name}
                         </option>
                       ))}
                     </select>
@@ -1026,6 +1133,221 @@ export const GalleryView: React.FC = () => {
                 ) : (
                   'Confirmar Eliminación'
                 )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Gestión de Categorías */}
+      {isCategoriesModalOpen && (
+        <div
+          className={styles.modalBackdrop}
+          onClick={() => {
+            if (!creatingCat && !deletingCatInProgress) {
+              setIsCategoriesModalOpen(false);
+              setCatToDelete(null);
+            }
+          }}
+        >
+          <div
+            className={`${styles.modalContent} ${styles.catManagerModal}`}
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="category-manager-title"
+          >
+            <div className={styles.modalHeader}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                <div
+                  style={{
+                    background: 'rgba(16, 185, 129, 0.15)',
+                    color: '#10b981',
+                    borderRadius: 8,
+                    width: 38,
+                    height: 38,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <FolderPlus size={20} />
+                </div>
+                <div>
+                  <h2 id="category-manager-title" className={styles.modalTitle}>
+                    Gestión de Categorías
+                  </h2>
+                  <p className={styles.modalSubtitle}>
+                    Crea y administra las categorías de fotos para filtros y clasificación.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                className={styles.actionBtn}
+                onClick={() => {
+                  setIsCategoriesModalOpen(false);
+                  setCatToDelete(null);
+                }}
+                disabled={creatingCat || deletingCatInProgress}
+                aria-label="Cerrar modal de categorías"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className={styles.modalBody}>
+              {/* Formulario de Creación de Categoría */}
+              <form onSubmit={handleCreateCategory} className={styles.catCreateBox}>
+                <label className={styles.catCreateLabel}>
+                  <Tag size={15} /> Nueva Categoría
+                </label>
+                <div className={styles.catCreateRow}>
+                  <input
+                    type="text"
+                    className={styles.catCreateInput}
+                    placeholder="Ej: Senderismo y Cascadas..."
+                    value={newCatName}
+                    onChange={(e) => setNewCatName(e.target.value)}
+                    disabled={creatingCat}
+                  />
+                  <button
+                    type="submit"
+                    className={styles.btnPrimary}
+                    disabled={creatingCat || !newCatName.trim()}
+                    style={{ whiteSpace: 'nowrap' }}
+                  >
+                    {creatingCat ? (
+                      <>
+                        <Loader2 size={16} className="animate-spin" /> Creando...
+                      </>
+                    ) : (
+                      <>
+                        <Plus size={16} /> Crear
+                      </>
+                    )}
+                  </button>
+                </div>
+                <p className={styles.catCreateHint}>
+                  El identificador (slug) para enlaces y filtros se normalizará automáticamente.
+                </p>
+              </form>
+
+              {/* Sub-caja de Confirmación de Eliminación */}
+              {catToDelete && (
+                <div className={styles.catDeleteConfirmBox}>
+                  <p className={styles.catDeleteConfirmTitle}>
+                    ¿Confirmas eliminar la categoría &ldquo;{catToDelete.name}&rdquo;?
+                  </p>
+                  <p className={styles.catDeleteConfirmText}>
+                    {items.filter((i) => i.category.toLowerCase() === catToDelete.slug.toLowerCase()).length > 0 ? (
+                      <>
+                        Esta categoría tiene <strong>{items.filter((i) => i.category.toLowerCase() === catToDelete.slug.toLowerCase()).length} fotografía(s)</strong> asociadas. Al eliminarla, dichas fotos pasarán automáticamente a la categoría <strong>&ldquo;Otra Experiencia&rdquo;</strong> para garantizar que nunca se pierdan ni queden huérfanas.
+                      </>
+                    ) : (
+                      'Esta categoría no tiene fotografías vinculadas actualmente y será removida de inmediato.'
+                    )}
+                  </p>
+                  <div className={styles.catDeleteConfirmActions}>
+                    <button
+                      type="button"
+                      className={styles.btnSecondary}
+                      onClick={() => setCatToDelete(null)}
+                      disabled={deletingCatInProgress}
+                      style={{ padding: '0.4rem 0.85rem', fontSize: '0.82rem' }}
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="button"
+                      className={styles.btnDanger}
+                      onClick={() => handleDeleteCategory(catToDelete)}
+                      disabled={deletingCatInProgress}
+                      style={{ padding: '0.4rem 0.85rem', fontSize: '0.82rem' }}
+                    >
+                      {deletingCatInProgress ? (
+                        <>
+                          <Loader2 size={14} className="animate-spin" /> Eliminando...
+                        </>
+                      ) : (
+                        'Confirmar y Reasignar'
+                      )}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Listado de Categorías Registradas */}
+              <div className={styles.catListSection}>
+                <div className={styles.catListHeader}>
+                  <h3 className={styles.catListTitle}>
+                    Categorías registradas ({categories.length})
+                  </h3>
+                </div>
+
+                <div className={styles.catList}>
+                  {categories.map((cat) => {
+                    const photoCount = items.filter(
+                      (i) => i.category.toLowerCase() === cat.slug.toLowerCase()
+                    ).length;
+                    const isProtected = cat.slug === 'otro';
+
+                    return (
+                      <div key={cat.slug} className={styles.catItem}>
+                        <div className={styles.catItemLeft}>
+                          <span
+                            className={`${styles.categoryBadge} ${getCategoryBadgeClass(cat.slug)}`}
+                            style={{ fontSize: '0.72rem', pointerEvents: 'auto' }}
+                          >
+                            {cat.name}
+                          </span>
+                          <div className={styles.catItemInfo}>
+                            <div className={styles.catItemNameRow}>
+                              <span className={styles.catItemName}>{cat.name}</span>
+                              <span className={styles.catItemPhotosCount}>
+                                {photoCount} {photoCount === 1 ? 'foto' : 'fotos'}
+                              </span>
+                            </div>
+                            <span className={styles.catItemSlug}>slug: {cat.slug}</span>
+                          </div>
+                        </div>
+
+                        <div>
+                          {isProtected ? (
+                            <span className={styles.catItemProtected} title="Categoría base del sistema protegida contra borrado">
+                              <Shield size={12} /> Base protegida
+                            </span>
+                          ) : (
+                            <button
+                              type="button"
+                              className={styles.catDeleteBtn}
+                              onClick={() => setCatToDelete(cat)}
+                              disabled={deletingCatInProgress}
+                              title={`Eliminar categoría "${cat.name}"`}
+                              aria-label={`Eliminar categoría ${cat.name}`}
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            <div className={styles.modalFooter}>
+              <button
+                type="button"
+                className={styles.btnSecondary}
+                onClick={() => {
+                  setIsCategoriesModalOpen(false);
+                  setCatToDelete(null);
+                }}
+                disabled={creatingCat || deletingCatInProgress}
+              >
+                Cerrar
               </button>
             </div>
           </div>

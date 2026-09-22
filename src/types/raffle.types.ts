@@ -143,6 +143,19 @@ export type GalleryItemRow = Database['public']['Tables']['gallery_items']['Row'
 export type GalleryItemInsert = Database['public']['Tables']['gallery_items']['Insert'];
 export type GalleryItemUpdate = Database['public']['Tables']['gallery_items']['Update'];
 
+export type GalleryCategoryRow = Database['public']['Tables']['gallery_categories']['Row'];
+export type GalleryCategoryInsert = Database['public']['Tables']['gallery_categories']['Insert'];
+export type GalleryCategoryUpdate = Database['public']['Tables']['gallery_categories']['Update'];
+
+export interface GalleryCategoryItem {
+  id: string;
+  slug: string;
+  name: string;
+  display_order: number;
+  is_active: boolean;
+  is_default?: boolean;
+}
+
 export type GalleryCategory =
   | 'cuatrimoto'
   | 'parapente'
@@ -150,11 +163,18 @@ export type GalleryCategory =
   | 'hospedaje'
   | 'gastronomia'
   | 'fogata'
-  | 'otro';
+  | 'otro'
+  | (string & {});
 
 export interface GalleryCachePayload {
   version: number;
   timestamp: number;
   data: GalleryItemRow[];
+}
+
+export interface GalleryCategoriesCachePayload {
+  version: number;
+  timestamp: number;
+  data: GalleryCategoryItem[];
 }
 

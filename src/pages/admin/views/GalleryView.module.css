@@ -331,6 +331,11 @@
   color: #fff;
 }
 
+.catCustom {
+  background: rgba(13, 148, 136, 0.85);
+  color: #fff;
+}
+
 .statusBadge {
   position: absolute;
   bottom: 0.6rem;
@@ -891,4 +896,243 @@
   gap: 0.75rem;
   color: var(--text-secondary, #9cb5ab);
 }
+
+/* --------------------------------------------------------------------------
+   Gestión de Categorías
+   -------------------------------------------------------------------------- */
+.addCategoryChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: #edfcf2;
+  border: 1px dashed #86efac;
+  color: #065f46;
+  border-radius: 9999px;
+  padding: 0.35rem 0.85rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.addCategoryChip:hover {
+  background: #dcfce7;
+  border-color: #10b981;
+  color: #047857;
+}
+
+.quickAddCategoryBtn {
+  background: none;
+  border: none;
+  color: #059669;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0;
+  transition: color 0.15s ease;
+}
+
+.quickAddCategoryBtn:hover {
+  color: #047857;
+  text-decoration: underline;
+}
+
+.catManagerModal {
+  max-width: 580px;
+}
+
+.catCreateBox {
+  background: #faf8f3;
+  border: 1px solid #dcd5c4;
+  border-radius: 12px;
+  padding: 1rem 1.15rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.catCreateLabel {
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: #16261c;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.catCreateRow {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.catCreateInput {
+  flex: 1;
+  background: #ffffff;
+  border: 1px solid #dcd5c4;
+  border-radius: 8px;
+  padding: 0.6rem 0.85rem;
+  font-size: 0.88rem;
+  color: #16261c;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.catCreateInput:focus {
+  border-color: #10b981;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+}
+
+.catCreateHint {
+  font-size: 0.77rem;
+  color: #41564a;
+  margin: 0;
+}
+
+.catListSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-top: 0.5rem;
+}
+
+.catListHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.catListTitle {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #16261c;
+  margin: 0;
+}
+
+.catList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 340px;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+}
+
+.catItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #ffffff;
+  border: 1px solid #dcd5c4;
+  border-radius: 10px;
+  padding: 0.65rem 0.95rem;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.catItem:hover {
+  background: #fdfcfa;
+  border-color: #c9c1ae;
+}
+
+.catItemLeft {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.catItemInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.catItemNameRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.catItemName {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #16261c;
+}
+
+.catItemSlug {
+  font-size: 0.75rem;
+  color: #41564a;
+  font-family: var(--font-mono, monospace);
+}
+
+.catItemPhotosCount {
+  font-size: 0.72rem;
+  font-weight: 600;
+  background: #edf1ed;
+  color: #2d4536;
+  padding: 0.15rem 0.45rem;
+  border-radius: 5px;
+}
+
+.catItemProtected {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #065f46;
+  background: #edfcf2;
+  border: 1px solid #a7f3d0;
+  padding: 0.2rem 0.55rem;
+  border-radius: 6px;
+}
+
+.catDeleteBtn {
+  background: none;
+  border: none;
+  color: #dc2626;
+  cursor: pointer;
+  padding: 0.4rem;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.catDeleteBtn:hover {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.catDeleteConfirmBox {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  margin-top: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.catDeleteConfirmTitle {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #991b1b;
+  margin: 0;
+}
+
+.catDeleteConfirmText {
+  font-size: 0.82rem;
+  color: #7f1d1d;
+  margin: 0;
+  line-height: 1.45;
+}
+
+.catDeleteConfirmActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
 
