@@ -981,41 +981,55 @@ export const PrizeView: React.FC = () => {
                   key={exp.id}
                   className={`${styles.experienceCard} ${!exp.is_active ? styles.cardInactive : ''}`}
                 >
-                  <div className={styles.imageContainer}>
+                  <div className={styles.cardMedia}>
                     <img
                       src={imageSrc}
                       alt={exp.title}
                       className={styles.cardImg}
                       loading="lazy"
                     />
-                    <span className={styles.partnerBadge}>{exp.partner_name}</span>
-                    <span className={styles.orderBadge}>#{exp.display_order}</span>
+                    <div className={styles.cardScrim} />
                   </div>
 
-                  <div className={styles.cardBody}>
-                    <div className={styles.cardTitleRow}>
-                      <div className={styles.itemIconBox}>
-                        {renderExperienceIcon(exp.icon, 16)}
+                  <div className={styles.cardInner}>
+                    <div className={styles.cardTopBar}>
+                      <div className={styles.topBarRow}>
+                        <span className={styles.pillDarkGold}>
+                          {`EXPERIENCIA ${String(exp.display_order || 1).padStart(2, '0')}`}
+                        </span>
+                        <div className={styles.topGlassBadge} aria-hidden="true">
+                          <Compass size={16} />
+                        </div>
                       </div>
-                      <h3 className={styles.itemTitle}>{exp.title}</h3>
+                      {exp.partner_name && (
+                        <div className={styles.partnerRow}>
+                          <span className={styles.pillSolidAmber}>{exp.partner_name}</span>
+                        </div>
+                      )}
                     </div>
 
-                    <p className={styles.itemDescription}>{exp.description}</p>
-
-                    {featuresList.length > 0 && (
-                      <div className={styles.featureChips}>
-                        {featuresList.slice(0, 3).map((feat, idx) => (
-                          <span key={idx} className={styles.featureChip}>
-                            ✓ {feat}
-                          </span>
-                        ))}
-                        {featuresList.length > 3 && (
-                          <span className={styles.featureChip}>
-                            +{featuresList.length - 3} más
-                          </span>
-                        )}
+                    <div className={styles.cardBody}>
+                      <div className={styles.titleGlassIcon} aria-hidden="true">
+                        {renderExperienceIcon(exp.icon, 22)}
                       </div>
-                    )}
+                      <h3 className={styles.cardTitle}>{exp.title}</h3>
+
+                      <p className={styles.cardDescription}>{exp.description}</p>
+
+                      {featuresList.length > 0 && (
+                        <>
+                          <hr className={styles.divider} />
+                          <ul className={styles.featureList}>
+                            {featuresList.map((feat, idx) => (
+                              <li key={idx} className={styles.featureItem}>
+                                <Sparkles size={15} aria-hidden="true" className={styles.featureIcon} />
+                                <span>{feat}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </>
+                      )}
+                    </div>
                   </div>
 
                   <div className={styles.cardFooter}>
@@ -1334,56 +1348,73 @@ export const PrizeView: React.FC = () => {
 
                 {/* Previsualización en Vivo de la Tarjeta */}
                 <div className={styles.formGroup}>
-                  <span className={styles.label}>
-                    <Eye size={14} className={styles.labelIcon} />
-                    Vista Previa de la Tarjeta en la Landing
-                  </span>
-                  <div
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'center',
-                      background: 'var(--bg-surface, #fbf8f1)',
-                      padding: '1.25rem',
-                      borderRadius: '14px',
-                      border: '1px solid var(--border-subtle, #dcd5c4)',
-                    }}
-                  >
-                    <div
-                      className={styles.experienceCard}
-                      style={{ width: '100%', maxWidth: '340px', margin: '0 auto' }}
-                    >
-                      <div className={styles.imageContainer} style={{ height: '180px' }}>
-                        <img
-                          src={currentModalImagePreview}
-                          alt="Previsualización"
-                          className={styles.cardImg}
-                        />
-                        <span className={styles.partnerBadge}>
-                          {expPartner || 'Nombre del Aliado'}
-                        </span>
-                        <span className={styles.orderBadge}>#{expDisplayOrder}</span>
-                      </div>
-                      <div className={styles.cardBody} style={{ padding: '1rem' }}>
-                        <div className={styles.cardTitleRow}>
-                          <div className={styles.itemIconBox} style={{ width: '32px', height: '32px' }}>
-                            {renderExperienceIcon(expIcon, 15)}
-                          </div>
-                          <h3 className={styles.itemTitle} style={{ fontSize: '1rem' }}>
-                            {expTitle || 'Título de la Experiencia'}
-                          </h3>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                    <span className={styles.label} style={{ margin: 0 }}>
+                      <Eye size={14} className={styles.labelIcon} />
+                      Vista Previa de la Tarjeta en la Landing
+                    </span>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted, #7e9c90)' }}>
+                      Vista real en desktop / móvil
+                    </span>
+                  </div>
+                  <div className={styles.previewStage}>
+                    <div className={styles.previewCardWrapper}>
+                      <div className={styles.experienceCard} style={{ minHeight: '480px' }}>
+                        <div className={styles.cardMedia}>
+                          <img
+                            src={currentModalImagePreview}
+                            alt={expTitle || 'Previsualización'}
+                            className={styles.cardImg}
+                          />
+                          <div className={styles.cardScrim} />
                         </div>
-                        <p className={styles.itemDescription} style={{ fontSize: '0.8rem' }}>
-                          {expDescription || 'Descripción de la actividad para los ganadores...'}
-                        </p>
-                        {expFeatures.length > 0 && (
-                          <div className={styles.featureChips}>
-                            {expFeatures.slice(0, 3).map((feat, idx) => (
-                              <span key={idx} className={styles.featureChip}>
-                                ✓ {feat}
+
+                        <div className={styles.cardInner}>
+                          <div className={styles.cardTopBar}>
+                            <div className={styles.topBarRow}>
+                              <span className={styles.pillDarkGold}>
+                                {`EXPERIENCIA ${String(expDisplayOrder || 1).padStart(2, '0')}`}
                               </span>
-                            ))}
+                              <div className={styles.topGlassBadge} aria-hidden="true">
+                                <Compass size={16} />
+                              </div>
+                            </div>
+                            {expPartner && (
+                              <div className={styles.partnerRow}>
+                                <span className={styles.pillSolidAmber}>{expPartner}</span>
+                              </div>
+                            )}
                           </div>
-                        )}
+
+                          <div className={styles.cardBody}>
+                            <div className={styles.titleGlassIcon} aria-hidden="true">
+                              {renderExperienceIcon(expIcon, 22)}
+                            </div>
+                            <h3 className={styles.cardTitle}>
+                              {expTitle || 'Título de la Experiencia'}
+                            </h3>
+
+                            <p className={styles.cardDescription}>
+                              {expDescription || 'Descripción de la actividad para los ganadores...'}
+                            </p>
+
+                            {expFeatures.filter((f) => f.trim().length > 0).length > 0 && (
+                              <>
+                                <hr className={styles.divider} />
+                                <ul className={styles.featureList}>
+                                  {expFeatures
+                                    .filter((f) => f.trim().length > 0)
+                                    .map((feat, idx) => (
+                                      <li key={idx} className={styles.featureItem}>
+                                        <Sparkles size={15} aria-hidden="true" className={styles.featureIcon} />
+                                        <span>{feat}</span>
+                                      </li>
+                                    ))}
+                                </ul>
+                              </>
+                            )}
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
