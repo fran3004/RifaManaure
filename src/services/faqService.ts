@@ -62,7 +62,9 @@ export async function getPublicFaqs(): Promise<FaqItem[]> {
       .order('sort_order', { ascending: true });
 
     if (error) {
-      console.warn('[faqService] Error al consultar Supabase, usando respaldo local:', error.message);
+      if (import.meta.env.DEV) {
+        console.info('[faqService] Usando respaldo local de preguntas frecuentes:', error.message);
+      }
       return getCachedFaqs();
     }
 
@@ -82,7 +84,9 @@ export async function getPublicFaqs(): Promise<FaqItem[]> {
     // Si la tabla responde vacía, usar caché/respaldo
     return getCachedFaqs();
   } catch (err) {
-    console.warn('[faqService] Error inesperado en getPublicFaqs, usando respaldo local:', err);
+    if (import.meta.env.DEV) {
+      console.info('[faqService] Usando respaldo local de preguntas frecuentes:', err);
+    }
     return getCachedFaqs();
   }
 }
