@@ -839,13 +839,13 @@ export const GalleryView: React.FC = () => {
                     className={styles.previewThumb}
                   />
                   <div className={styles.previewInfo}>
-                    <strong style={{ color: '#f3f7f5' }}>Previsualización en tiempo real</strong>
-                    <span style={{ color: '#9cb5ab' }}>
+                    <strong className={styles.previewTitle}>Previsualización en tiempo real</strong>
+                    <span className={styles.previewSubtitle}>
                       {imageMode === 'upload'
                         ? formImageUrl
-                          ? 'Foto alojada en Supabase Storage'
-                          : 'Esperando archivo...'
-                        : `Foto del catálogo: ${formImageSlug}`}
+                          ? 'Fotografía alojada en Supabase Storage'
+                          : 'Esperando archivo de imagen...'
+                        : `Foto seleccionada del catálogo: ${formImageSlug}`}
                     </span>
                   </div>
                 </div>
@@ -921,7 +921,7 @@ export const GalleryView: React.FC = () => {
                     onChange={(e) => setFormIsActive(e.target.checked)}
                     style={{ accentColor: '#10b981', width: 18, height: 18, cursor: 'pointer' }}
                   />
-                  <span style={{ fontSize: '0.9rem', color: '#f3f7f5', fontWeight: 500 }}>
+                  <span className={styles.switchLabel}>
                     Fotografía activa y visible en la landing page
                   </span>
                 </div>
@@ -983,22 +983,22 @@ export const GalleryView: React.FC = () => {
             </div>
 
             <div className={styles.modalBody}>
-              <p style={{ margin: 0, color: '#f3f7f5', fontSize: '0.92rem' }}>
+              <p className={styles.deletePromptText}>
                 Estás a punto de eliminar permanentemente la foto:
               </p>
-              <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', background: 'rgba(0,0,0,0.25)', padding: '0.75rem', borderRadius: 8 }}>
+              <div className={styles.deletePhotoCard}>
                 <img
                   src={resolveImage(deletingItem)}
                   alt=""
-                  style={{ width: 60, height: 45, objectFit: 'cover', borderRadius: 4 }}
+                  className={styles.deletePhotoThumb}
                 />
                 <div>
-                  <strong style={{ color: '#fff', fontSize: '0.95rem' }}>{deletingItem.title}</strong>
-                  <p style={{ margin: 0, fontSize: '0.8rem', color: '#9cb5ab' }}>Categoría: {deletingItem.category}</p>
+                  <strong className={styles.deletePhotoTitle}>{deletingItem.title}</strong>
+                  <p className={styles.deletePhotoCat}>Categoría: {deletingItem.category}</p>
                 </div>
               </div>
               {deletingItem.image_url && (
-                <p style={{ margin: 0, color: '#f59e0b', fontSize: '0.8rem' }}>
+                <p className={styles.deleteStorageWarning}>
                   Nota: El archivo físico almacenado en Supabase Storage también será removido para liberar espacio.
                 </p>
               )}
