@@ -55,3 +55,4 @@ SET
     updated_at = NOW()
 WHERE (title ILIKE '%gastron%mico%' OR partner_name ILIKE '%arepas%')
   AND (image_slug = 'serrania-perija-panoramica' OR image_slug IS NULL OR image_slug = 'cuatrimoto-flota');
+
