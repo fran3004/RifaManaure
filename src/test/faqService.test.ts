@@ -3,6 +3,12 @@ import {
   getCachedFaqs,
   setCachedFaqs,
   getPublicFaqs,
+  getAdminFaqs,
+  createFaq,
+  updateFaq,
+  deleteFaq,
+  toggleFaqPublished,
+  reorderFaqs,
   FAQ_CACHE_KEY,
   FAQ_CACHE_VERSION,
 } from '@/services/faqService';
@@ -130,5 +136,157 @@ describe('faqService - Gestión de Preguntas Frecuentes', () => {
     // Debe devolver el fallback sin lanzar excepción
     expect(faqs).toHaveLength(6);
     expect(faqs[0].question).toBe(FALLBACK_FAQS[0].question);
+  });
+
+  it('debe consultar todas las preguntas para administradores con getAdminFaqs', async () => {
+    const mockDbData = [
+      {
+        id: 'admin-1',
+        question: 'Pregunta activa',
+        answer: 'Respuesta 1',
+        sort_order: 10,
+        is_published: true,
+      },
+      {
+        id: 'admin-2',
+        question: 'Pregunta borrador',
+        answer: 'Respuesta 2',
+        sort_order: 20,
+        is_published: false,
+      },
+    ];
+
+    const mockSelect = vi.fn().mockReturnThis();
+    const mockOrder = vi.fn().mockResolvedValue({ data: mockDbData, error: null });
+
+    (supabase.from as any).mockReturnValue({
+      select: mockSelect,
+      order: mockOrder,
+    });
+
+    const adminFaqs = await getAdminFaqs();
+    expect(adminFaqs).toHaveLength(2);
+    expect(adminFaqs[1].is_published).toBe(false);
+  });
+
+  it('debe crear una nueva pregunta con createFaq validando campos', async () => {
+    // Validación de campos vacíos
+    const emptyResult = await createFaq({ question: '', answer: '' });
+    expect(emptyResult.success).toBe(false);
+    expect(emptyResult.error).toContain('vacía');
+
+    // Inserción exitosa
+    const mockCreated = {
+      id: 'new-id',
+      question: '¿Nueva pregunta?',
+      answer: 'Nueva respuesta',
+      sort_order: 10,
+      is_published: true,
+    };
+
+    const mockInsert = vi.fn().mockReturnThis();
+    const mockSelect = vi.fn().mockReturnThis();
+    const mockSingle = vi.fn().mockResolvedValue({ data: mockCreated, error: null });
+
+    (supabase.from as any).mockReturnValue({
+      insert: mockInsert,
+      select: mockSelect,
+      single: mockSingle,
+    });
+
+    const result = await createFaq({
+      question: '¿Nueva pregunta?',
+      answer: 'Nueva respuesta',
+      sort_order: 10,
+      is_published: true,
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.data?.id).toBe('new-id');
+  });
+
+  it('debe actualizar una pregunta existente con updateFaq', async () => {
+    const mockUpdated = {
+      id: 'edit-id',
+      question: '¿Pregunta editada?',
+      answer: 'Respuesta editada',
+      sort_order: 15,
+      is_published: true,
+    };
+
+    const mockUpdate = vi.fn().mockReturnThis();
+    const mockEq = vi.fn().mockReturnThis();
+    const mockSelect = vi.fn().mockReturnThis();
+    const mockSingle = vi.fn().mockResolvedValue({ data: mockUpdated, error: null });
+
+    (supabase.from as any).mockReturnValue({
+      update: mockUpdate,
+      eq: mockEq,
+      select: mockSelect,
+      single: mockSingle,
+    });
+
+    const result = await updateFaq('edit-id', {
+      question: '¿Pregunta editada?',
+      answer: 'Respuesta editada',
+      sort_order: 15,
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.data?.question).toBe('¿Pregunta editada?');
+  });
+
+  it('debe eliminar una pregunta con deleteFaq', async () => {
+    const mockDelete = vi.fn().mockReturnThis();
+    const mockEq = vi.fn().mockResolvedValue({ error: null });
+
+    (supabase.from as any).mockReturnValue({
+      delete: mockDelete,
+      eq: mockEq,
+    });
+
+    const result = await deleteFaq('delete-id');
+    expect(result.success).toBe(true);
+  });
+
+  it('debe alternar publicación con toggleFaqPublished', async () => {
+    const mockUpdated = {
+      id: 'toggle-id',
+      question: 'Pregunta',
+      answer: 'Respuesta',
+      sort_order: 10,
+      is_published: false,
+    };
+
+    const mockUpdate = vi.fn().mockReturnThis();
+    const mockEq = vi.fn().mockReturnThis();
+    const mockSelect = vi.fn().mockReturnThis();
+    const mockSingle = vi.fn().mockResolvedValue({ data: mockUpdated, error: null });
+
+    (supabase.from as any).mockReturnValue({
+      update: mockUpdate,
+      eq: mockEq,
+      select: mockSelect,
+      single: mockSingle,
+    });
+
+    const result = await toggleFaqPublished('toggle-id', false);
+    expect(result.success).toBe(true);
+  });
+
+  it('debe reordenar preguntas con reorderFaqs', async () => {
+    const mockUpdate = vi.fn().mockReturnThis();
+    const mockEq = vi.fn().mockResolvedValue({ error: null });
+
+    (supabase.from as any).mockReturnValue({
+      update: mockUpdate,
+      eq: mockEq,
+    });
+
+    const result = await reorderFaqs([
+      { id: '1', sort_order: 20 },
+      { id: '2', sort_order: 10 },
+    ]);
+    expect(result.success).toBe(true);
   });
 });

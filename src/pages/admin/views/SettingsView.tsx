@@ -32,6 +32,7 @@ import {
   type AdminUserItem,
 } from '@/services/adminUserService';
 import { AdminInviteUserModal } from '@/components/admin/settings/AdminInviteUserModal';
+import { AdminFaqManager } from '@/components/admin/settings/AdminFaqManager';
 import { createWhatsAppLink, formatPhoneNumber } from '@/lib/utils';
 import adminStyles from './AdminViews.module.css';
 import styles from './SettingsView.module.css';
@@ -937,6 +938,11 @@ export const SettingsView: React.FC = () => {
                 </table>
               </div>
             </div>
+
+            {/* ========================================================================= */}
+            {/* SECCIÓN 4: PREGUNTAS FRECUENTES (FAQ) DEL PORTAL PÚBLICO */}
+            {/* ========================================================================= */}
+            <AdminFaqManager />
           </>
         )}
 
