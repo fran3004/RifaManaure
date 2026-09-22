@@ -229,6 +229,7 @@ export const ReceiptsView: React.FC = () => {
   const toCount = Math.min(page * pageSize, totalCount);
 
   const handleApprove = (order: OrderWithDetails) => {
+    if (!order.receipt_url || order.status === 'pending') return;
     setApprovingOrder(order);
   };
 
@@ -370,7 +371,8 @@ export const ReceiptsView: React.FC = () => {
         <div className={styles.receiptGrid}>
           {orders.map((ord) => {
             const isProcessing = actionProcessingId === ord.id;
-            const isPending = ord.status === 'pending_verification' || ord.status === 'pending';
+            const hasReceipt = Boolean(ord.receipt_url && ord.receipt_url.trim().length > 0);
+            const isPending = ord.status === 'pending_verification' && hasReceipt;
 
             return (
               <div key={ord.id} className={styles.receiptCard}>

@@ -202,8 +202,11 @@ export const OrdersView: React.FC = () => {
     setTimeout(() => setCopiedKey(null), 2000);
   };
 
-  // Abrir modal de confirmación de aprobación
+  // Abrir modal de confirmación de aprobación (requiere comprobante y estado de verificación)
   const handleApprove = (order: OrderWithDetails) => {
+    if (!order.receipt_url || order.status === 'pending') {
+      return;
+    }
     setApprovingOrder(order);
   };
 
@@ -414,8 +417,9 @@ export const OrdersView: React.FC = () => {
                       dateStyle: 'short',
                       timeStyle: 'short',
                     });
+                    const hasReceipt = Boolean(ord.receipt_url && ord.receipt_url.trim().length > 0);
                     const isPendingAction =
-                      ord.status === 'pending_verification' || ord.status === 'pending';
+                      ord.status === 'pending_verification' && hasReceipt;
 
                     return (
                       <tr key={ord.id}>

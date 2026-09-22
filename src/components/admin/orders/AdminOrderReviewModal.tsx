@@ -157,7 +157,9 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
     setTimeout(() => setCopiedKey(null), 2000);
   };
 
-  const isPendingAction = order.status === 'pending_verification' || order.status === 'pending';
+  const hasReceipt = Boolean(order.receipt_url && order.receipt_url.trim().length > 0);
+  const canReviewPayment = order.status === 'pending_verification' && hasReceipt;
+  const isPendingAction = canReviewPayment;
 
   const dateStr = new Date(order.created_at).toLocaleString('es-CO', {
     dateStyle: 'medium',
@@ -172,7 +174,7 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
 
   // APROBAR PAGO
   const handleApprove = async () => {
-    if (!order) return;
+    if (!order || !canReviewPayment) return;
 
     setIsProcessing(true);
     setActionError(null);
@@ -224,7 +226,7 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
 
   // RECHAZAR PAGO
   const handleReject = async () => {
-    if (!order) return;
+    if (!order || !canReviewPayment) return;
 
     const finalReason =
       selectedPreset === 'Otro motivo'
@@ -625,9 +627,17 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
                     Regla de Verificación Manual:
                   </span>
                   <p className={styles.verificationRuleText}>
-                    Verifique en la app bancaria correspondiente que los{' '}
-                    <strong>{formatCOP(order.total_amount)}</strong> hayan ingresado efectivamente
-                    antes de aprobar la orden.
+                    {order.status === 'pending' && !hasReceipt ? (
+                      <>
+                        Esta orden se encuentra en reserva temporal de 10 minutos. No es posible aprobar ni rechazar el pago hasta que el comprador adjunte su soporte bancario.
+                      </>
+                    ) : (
+                      <>
+                        Verifique en la app bancaria correspondiente que los{' '}
+                        <strong>{formatCOP(order.total_amount)}</strong> hayan ingresado efectivamente
+                        antes de aprobar la orden.
+                      </>
+                    )}
                   </p>
                 </div>
               </div>
@@ -651,7 +661,9 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
                         className={styles.proofStatusIcon}
                       />
                       <span className={styles.proofEmptyText}>
-                        {proofError || 'Sin archivo de comprobante adjunto'}
+                        {proofError || (order.status === 'pending'
+                          ? 'El comprador aún no ha subido el comprobante de pago (reserva temporal de 10 min).'
+                          : 'Sin archivo de comprobante adjunto')}
                       </span>
                     </div>
                   ) : isPdf ? (
@@ -967,8 +979,10 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
         {/* Pie de Acciones del Modal */}
         <div className={styles.modalFooter}>
           <div className={styles.footerStatusText}>
-            {isPendingAction ? (
-              <span>⚠️ La orden requiere verificación manual del comprobante.</span>
+            {canReviewPayment ? (
+              <span>⚠️ La orden tiene comprobante adjunto y requiere verificación manual.</span>
+            ) : order.status === 'pending' ? (
+              <span>⏳ Reserva temporal (10 min): en espera de que el comprador suba su comprobante.</span>
             ) : (
               <span>
                 Orden en estado <strong>{order.status}</strong>.
