@@ -1185,26 +1185,27 @@ export const GalleryView: React.FC = () => {
             aria-labelledby="category-manager-title"
           >
             <div className={styles.modalHeader}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                 <div
                   style={{
                     background: 'rgba(16, 185, 129, 0.15)',
                     color: '#10b981',
-                    borderRadius: 8,
-                    width: 38,
-                    height: 38,
+                    borderRadius: 10,
+                    width: 40,
+                    height: 40,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
+                    flexShrink: 0,
                   }}
                 >
-                  <FolderPlus size={20} />
+                  <FolderPlus size={22} />
                 </div>
                 <div>
                   <h2 id="category-manager-title" className={styles.modalTitle}>
                     Gestión de Categorías
                   </h2>
-                  <p className={styles.modalSubtitle}>
+                  <p className={styles.subtitle} style={{ fontSize: '0.82rem', margin: '0.15rem 0 0 0' }}>
                     Crea y administra las categorías de fotos para filtros y clasificación.
                   </p>
                 </div>
@@ -1227,22 +1228,23 @@ export const GalleryView: React.FC = () => {
               {/* Formulario de Creación de Categoría */}
               <form onSubmit={handleCreateCategory} className={styles.catCreateBox}>
                 <label className={styles.catCreateLabel}>
-                  <Tag size={15} /> Nueva Categoría
+                  <Tag size={15} color="#10b981" />
+                  <span>Agregar Nueva Categoría</span>
                 </label>
                 <div className={styles.catCreateRow}>
                   <input
                     type="text"
                     className={styles.catCreateInput}
-                    placeholder="Ej: Senderismo y Cascadas..."
+                    placeholder="Ej: Senderismo, Cascadas, Miradores..."
                     value={newCatName}
                     onChange={(e) => setNewCatName(e.target.value)}
                     disabled={creatingCat}
+                    maxLength={40}
                   />
                   <button
                     type="submit"
-                    className={styles.btnPrimary}
+                    className={styles.catCreateBtn}
                     disabled={creatingCat || !newCatName.trim()}
-                    style={{ whiteSpace: 'nowrap' }}
                   >
                     {creatingCat ? (
                       <>
@@ -1250,26 +1252,34 @@ export const GalleryView: React.FC = () => {
                       </>
                     ) : (
                       <>
-                        <Plus size={16} /> Crear
+                        <Plus size={16} /> Crear Categoría
                       </>
                     )}
                   </button>
                 </div>
                 <p className={styles.catCreateHint}>
-                  El identificador (slug) para enlaces y filtros se normalizará automáticamente.
+                  <Info size={13} /> El identificador técnico (slug) para enlaces y filtros se normaliza automáticamente.
                 </p>
               </form>
 
               {/* Sub-caja de Confirmación de Eliminación */}
               {catToDelete && (
-                <div className={styles.catDeleteConfirmBox}>
-                  <p className={styles.catDeleteConfirmTitle}>
-                    ¿Confirmas eliminar la categoría &ldquo;{catToDelete.name}&rdquo;?
-                  </p>
+                <div className={styles.catDeleteConfirmBox} role="alert">
+                  <div className={styles.catDeleteConfirmHeader}>
+                    <AlertCircle size={18} color="#b91c1c" />
+                    <h4 className={styles.catDeleteConfirmTitle}>
+                      ¿Eliminar la categoría &ldquo;{catToDelete.name}&rdquo;?
+                    </h4>
+                  </div>
                   <p className={styles.catDeleteConfirmText}>
                     {items.filter((i) => i.category.toLowerCase() === catToDelete.slug.toLowerCase()).length > 0 ? (
                       <>
-                        Esta categoría tiene <strong>{items.filter((i) => i.category.toLowerCase() === catToDelete.slug.toLowerCase()).length} fotografía(s)</strong> asociadas. Al eliminarla, dichas fotos pasarán automáticamente a la categoría <strong>&ldquo;Otra Experiencia&rdquo;</strong> para garantizar que nunca se pierdan ni queden huérfanas.
+                        Esta categoría tiene{' '}
+                        <strong>
+                          {items.filter((i) => i.category.toLowerCase() === catToDelete.slug.toLowerCase()).length} fotografía(s)
+                        </strong>{' '}
+                        asociadas. Al eliminarla, dichas fotos se reasignarán automáticamente a{' '}
+                        <strong>&ldquo;Otra Experiencia&rdquo;</strong> para garantizar que nunca se pierdan.
                       </>
                     ) : (
                       'Esta categoría no tiene fotografías vinculadas actualmente y será removida de inmediato.'
@@ -1281,7 +1291,7 @@ export const GalleryView: React.FC = () => {
                       className={styles.btnSecondary}
                       onClick={() => setCatToDelete(null)}
                       disabled={deletingCatInProgress}
-                      style={{ padding: '0.4rem 0.85rem', fontSize: '0.82rem' }}
+                      style={{ padding: '0.45rem 0.95rem', fontSize: '0.84rem' }}
                     >
                       Cancelar
                     </button>
@@ -1290,7 +1300,7 @@ export const GalleryView: React.FC = () => {
                       className={styles.btnDanger}
                       onClick={() => handleDeleteCategory(catToDelete)}
                       disabled={deletingCatInProgress}
-                      style={{ padding: '0.4rem 0.85rem', fontSize: '0.82rem' }}
+                      style={{ padding: '0.45rem 0.95rem', fontSize: '0.84rem' }}
                     >
                       {deletingCatInProgress ? (
                         <>
@@ -1308,8 +1318,10 @@ export const GalleryView: React.FC = () => {
               <div className={styles.catListSection}>
                 <div className={styles.catListHeader}>
                   <h3 className={styles.catListTitle}>
-                    Categorías registradas ({categories.length})
+                    <span>Categorías registradas</span>
+                    <span className={styles.catCountBadge}>{categories.length}</span>
                   </h3>
+                  <span className={styles.catListSubhint}>Filtros activos en web</span>
                 </div>
 
                 <div className={styles.catList}>
@@ -1322,27 +1334,23 @@ export const GalleryView: React.FC = () => {
                     return (
                       <div key={cat.slug} className={styles.catItem}>
                         <div className={styles.catItemLeft}>
-                          <span
-                            className={`${styles.categoryBadge} ${getCategoryBadgeClass(cat.slug)}`}
-                            style={{ fontSize: '0.72rem', pointerEvents: 'auto' }}
-                          >
+                          <span className={`${styles.catBadgePill} ${getCategoryBadgeClass(cat.slug)}`}>
                             {cat.name}
                           </span>
-                          <div className={styles.catItemInfo}>
-                            <div className={styles.catItemNameRow}>
-                              <span className={styles.catItemName}>{cat.name}</span>
-                              <span className={styles.catItemPhotosCount}>
-                                {photoCount} {photoCount === 1 ? 'foto' : 'fotos'}
-                              </span>
-                            </div>
+                          <div className={styles.catItemMeta}>
                             <span className={styles.catItemSlug}>slug: {cat.slug}</span>
+                            <span className={styles.catItemPhotosCount}>
+                              <ImageIcon size={12} aria-hidden="true" />
+                              {photoCount} {photoCount === 1 ? 'foto' : 'fotos'}
+                            </span>
                           </div>
                         </div>
 
-                        <div>
+                        <div className={styles.catItemRight}>
                           {isProtected ? (
-                            <span className={styles.catItemProtected} title="Categoría base del sistema protegida contra borrado">
-                              <Shield size={12} /> Base protegida
+                            <span className={styles.catItemProtected} title="Categoría base del sistema protegida contra eliminación">
+                              <Shield size={13} aria-hidden="true" />
+                              <span>Base protegida</span>
                             </span>
                           ) : (
                             <button
@@ -1353,7 +1361,7 @@ export const GalleryView: React.FC = () => {
                               title={`Eliminar categoría "${cat.name}"`}
                               aria-label={`Eliminar categoría ${cat.name}`}
                             >
-                              <Trash2 size={16} />
+                              <Trash2 size={15} aria-hidden="true" />
                             </button>
                           )}
                         </div>
