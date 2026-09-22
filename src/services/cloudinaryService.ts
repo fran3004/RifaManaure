@@ -252,6 +252,62 @@ export async function deleteFromCloudinary(publicId: string): Promise<Cloudinary
   }
 }
 
+/**
+ * Extrae el public_id de un recurso de Cloudinary a partir de su URL completa o identificador.
+ * Soporta URLs versionadas, transformadas, con o sin extensión.
+ *
+ * @param urlOrPublicId URL o identificador del recurso
+ * @returns public_id relativo (ej: 'manaure-vive/aliados/photours') o null si no es válido
+ */
+export function extractCloudinaryPublicId(urlOrPublicId: string | null | undefined): string | null {
+  if (!urlOrPublicId || typeof urlOrPublicId !== 'string') return null;
+  const trimmed = urlOrPublicId.trim();
+  if (!trimmed) return null;
+
+  // Si ya es un public_id directo (ej: 'manaure-vive/aliados/photours') sin protocolo http
+  if (!trimmed.startsWith('http://') && !trimmed.startsWith('https://')) {
+    return trimmed.replace(/\.[a-zA-Z0-9]+$/, '');
+  }
+
+  // Si es una URL de Cloudinary
+  if (!trimmed.includes('res.cloudinary.com') || !trimmed.includes('/upload/')) {
+    return null;
+  }
+
+  try {
+    const cleanUrl = trimmed.split('?')[0].split('#')[0];
+    const uploadIndex = cleanUrl.indexOf('/upload/');
+    if (uploadIndex === -1) return null;
+
+    const pathAfterUpload = cleanUrl.slice(uploadIndex + '/upload/'.length);
+    const segments = pathAfterUpload.split('/');
+    const nonMetadataSegments: string[] = [];
+    let pastMetadata = false;
+
+    for (const segment of segments) {
+      if (!pastMetadata) {
+        // Ignorar firmas s--...--
+        if (/^s--[a-zA-Z0-9_-]{8}--$/.test(segment)) continue;
+        // Ignorar versión v123456789
+        if (/^v\d+$/.test(segment)) {
+          pastMetadata = true;
+          continue;
+        }
+        // Ignorar transformaciones conocidas (ej: f_auto, w_200, c_fill, etc.)
+        if (segment.includes(',') || /^[a-z]{1,3}_[a-zA-Z0-9]+/.test(segment)) continue;
+      }
+      nonMetadataSegments.push(segment);
+    }
+
+    if (nonMetadataSegments.length === 0) return null;
+    const fullPathWithExt = nonMetadataSegments.join('/');
+    const publicId = fullPathWithExt.replace(/\.[a-zA-Z0-9]+$/, '');
+    return publicId || null;
+  } catch {
+    return null;
+  }
+}
+
 export interface CloudinaryUrlOptions {
   width?: number;
   quality?: string | number;

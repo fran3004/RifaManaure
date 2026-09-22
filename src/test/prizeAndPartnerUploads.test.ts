@@ -1,13 +1,29 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
+// Mock de Supabase
+vi.mock('@/lib/supabase', () => ({
+  supabase: {
+    from: vi.fn(),
+  },
+}));
+
 // Mock de cloudinaryService
 vi.mock('@/services/cloudinaryService', () => ({
   uploadToCloudinary: vi.fn(),
+  deleteFromCloudinary: vi.fn(),
+  extractCloudinaryPublicId: vi.fn((url: string) => {
+    if (url && url.includes('manaure-vive/aliados/')) {
+      const match = url.match(/(manaure-vive\/aliados\/[^.?#]+)/);
+      return match ? match[1] : null;
+    }
+    return null;
+  }),
 }));
 
-import { uploadToCloudinary } from '@/services/cloudinaryService';
+import { supabase } from '@/lib/supabase';
+import { uploadToCloudinary, deleteFromCloudinary } from '@/services/cloudinaryService';
 import { uploadPrizeImage } from '@/services/prizeService';
-import { uploadPartnerLogo } from '@/services/partnerService';
+import { uploadPartnerLogo, deletePartner } from '@/services/partnerService';
 import { uploadWinnerActDocument } from '@/services/winnerService';
 
 describe('Migración de Subidas a Cloudinary - prizeService & partnerService', () => {
@@ -192,6 +208,78 @@ describe('Migración de Subidas a Cloudinary - prizeService & partnerService', (
 
       expect(res.success).toBe(false);
       expect(res.error).toContain('Error de permisos en Cloudinary');
+    });
+  });
+
+  describe('deletePartner con purga automática en Cloudinary', () => {
+    it('debe eliminar de la base de datos y destruir el logo en Cloudinary si está en manaure-vive/aliados/', async () => {
+      const deleteEqMock = vi.fn().mockResolvedValue({ error: null });
+      const deleteMock = vi.fn().mockReturnValue({ eq: deleteEqMock });
+
+      vi.mocked(supabase.from).mockReturnValue({
+        delete: deleteMock,
+      } as any);
+
+      vi.mocked(deleteFromCloudinary).mockResolvedValue({ success: true });
+
+      const res = await deletePartner(
+        'partner-123',
+        'https://res.cloudinary.com/ky01b0vz/image/upload/v1790099148/manaure-vive/aliados/empresa_test.png'
+      );
+
+      expect(res.success).toBe(true);
+      expect(deleteMock).toHaveBeenCalled();
+      expect(deleteEqMock).toHaveBeenCalledWith('id', 'partner-123');
+      expect(deleteFromCloudinary).toHaveBeenCalledWith('manaure-vive/aliados/empresa_test');
+    });
+
+    it('no debe llamar a deleteFromCloudinary si el logo no pertenece a manaure-vive/aliados/', async () => {
+      const deleteEqMock = vi.fn().mockResolvedValue({ error: null });
+      const deleteMock = vi.fn().mockReturnValue({ eq: deleteEqMock });
+
+      vi.mocked(supabase.from).mockReturnValue({
+        delete: deleteMock,
+      } as any);
+
+      const res = await deletePartner(
+        'partner-456',
+        'https://res.cloudinary.com/ky01b0vz/image/upload/v1790100541/manaure-vive/marca/logo-principal.png'
+      );
+
+      expect(res.success).toBe(true);
+      expect(deleteFromCloudinary).not.toHaveBeenCalled();
+    });
+
+    it('debe consultar la DB si no se proporciona logoUrl en los argumentos', async () => {
+      const singleMock = vi.fn().mockResolvedValue({
+        data: {
+          logo_url:
+            'https://res.cloudinary.com/ky01b0vz/image/upload/v123/manaure-vive/aliados/auto_fetched.png',
+        },
+      });
+      const eqSelectMock = vi.fn().mockReturnValue({ maybeSingle: singleMock });
+      const selectMock = vi.fn().mockReturnValue({ eq: eqSelectMock });
+
+      const deleteEqMock = vi.fn().mockResolvedValue({ error: null });
+      const deleteMock = vi.fn().mockReturnValue({ eq: deleteEqMock });
+
+      vi.mocked(supabase.from).mockImplementation((table: string) => {
+        if (table === 'partners') {
+          return {
+            select: selectMock,
+            delete: deleteMock,
+          } as any;
+        }
+        return {} as any;
+      });
+
+      vi.mocked(deleteFromCloudinary).mockResolvedValue({ success: true });
+
+      const res = await deletePartner('partner-789');
+
+      expect(res.success).toBe(true);
+      expect(selectMock).toHaveBeenCalledWith('logo_url');
+      expect(deleteFromCloudinary).toHaveBeenCalledWith('manaure-vive/aliados/auto_fetched');
     });
   });
 });

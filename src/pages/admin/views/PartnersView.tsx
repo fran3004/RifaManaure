@@ -10,7 +10,11 @@ import {
   uploadPartnerLogo,
   generatePartnerSlug,
 } from '@/services/partnerService';
-import { getOptimizedCloudinaryUrl } from '@/services/cloudinaryService';
+import {
+  getOptimizedCloudinaryUrl,
+  deleteFromCloudinary,
+  extractCloudinaryPublicId,
+} from '@/services/cloudinaryService';
 import type { PartnerRow } from '@/types/raffle.types';
 import { aliados as fallbackAliados } from '@/assets/assets';
 import {
@@ -323,6 +327,17 @@ export const PartnersView: React.FC = () => {
         });
 
         if (res.success && res.data) {
+          // Si el logo fue reemplazado por uno nuevo, eliminar el anterior de Cloudinary para no dejar basura
+          const oldLogo = editingPartner.logo_url;
+          if (oldLogo && finalLogoUrl && oldLogo !== finalLogoUrl) {
+            const oldPublicId = extractCloudinaryPublicId(oldLogo);
+            if (oldPublicId && oldPublicId.startsWith('manaure-vive/aliados/')) {
+              void deleteFromCloudinary(oldPublicId).catch((err) => {
+                console.warn('[PartnersView] No se pudo purgar el logo anterior de Cloudinary:', err);
+              });
+            }
+          }
+
           setPartners((prev) => prev.map((p) => (p.id === res.data!.id ? res.data! : p)));
           setFeedback({
             type: 'success',
@@ -405,12 +420,12 @@ export const PartnersView: React.FC = () => {
     if (!deletingPartner) return;
     setIsSubmitting(true);
     try {
-      const res = await deletePartner(deletingPartner.id);
+      const res = await deletePartner(deletingPartner.id, deletingPartner.logo_url);
       if (res.success) {
         setPartners((prev) => prev.filter((p) => p.id !== deletingPartner.id));
         setFeedback({
           type: 'success',
-          message: `Aliado "${deletingPartner.name}" eliminado correctamente.`,
+          message: `Aliado "${deletingPartner.name}" y su logotipo en Cloudinary eliminados correctamente.`,
         });
         setIsDeleteModalOpen(false);
         setDeletingPartner(null);
@@ -1146,7 +1161,7 @@ export const PartnersView: React.FC = () => {
             <p className={partnerStyles.deleteModalDescription}>
               Estás a punto de eliminar a{' '}
               <strong className={partnerStyles.highlightText}>{deletingPartner.name}</strong>. Esta acción
-              removerá el convenio de la base de datos y ya no aparecerá en el sitio público.
+              removerá el convenio de la base de datos y eliminará permanentemente su logotipo de Cloudinary CDN para no dejar archivos residuales.
             </p>
 
             <div className={partnerStyles.deleteModalActions}>
@@ -1167,7 +1182,7 @@ export const PartnersView: React.FC = () => {
                 {isSubmitting ? (
                   <>
                     <Loader2 size={16} className="animate-spin" />
-                    <span>Eliminando...</span>
+                    <span>Eliminando y liberando espacio...</span>
                   </>
                 ) : (
                   <span>Sí, Eliminar Aliado</span>

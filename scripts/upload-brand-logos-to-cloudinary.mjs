@@ -196,3 +196,4 @@ main().catch((err) => {
   console.error('Error fatal no controlado:', err);
   process.exit(1);
 });
+

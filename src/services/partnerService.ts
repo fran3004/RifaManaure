@@ -1,5 +1,9 @@
 import { supabase } from '@/lib/supabase';
-import { uploadToCloudinary } from '@/services/cloudinaryService';
+import {
+  uploadToCloudinary,
+  deleteFromCloudinary,
+  extractCloudinaryPublicId,
+} from '@/services/cloudinaryService';
 import type { Database } from '@/types/database.types';
 import type { PartnerRow } from '@/types/raffle.types';
 
@@ -187,14 +191,54 @@ export async function togglePartnerActive(
 }
 
 /**
- * Elimina un aliado de la base de datos.
+ * Elimina un aliado de la base de datos y destruye su logotipo asociado en Cloudinary para liberar espacio.
+ *
+ * @param id Identificador único del aliado
+ * @param logoUrl URL opcional del logo (para evitar consulta adicional a la DB)
  */
-export async function deletePartner(id: string): Promise<{ success: boolean; error?: string }> {
+export async function deletePartner(
+  id: string,
+  logoUrl?: string | null
+): Promise<{ success: boolean; error?: string }> {
   try {
+    let targetLogoUrl = logoUrl;
+
+    // Si no se suministró logoUrl, consultar la fila antes de eliminarla
+    if (targetLogoUrl === undefined) {
+      const { data: partnerData } = await supabase
+        .from('partners')
+        .select('logo_url')
+        .eq('id', id)
+        .maybeSingle();
+      targetLogoUrl = partnerData?.logo_url;
+    }
+
+    // 1. Eliminar registro de la base de datos
     const { error } = await supabase.from('partners').delete().eq('id', id);
 
     if (error) {
       return { success: false, error: error.message };
+    }
+
+    // 2. Si tenía un logotipo en Cloudinary en la carpeta de aliados, destruirlo para no dejar basura
+    if (targetLogoUrl && targetLogoUrl.trim()) {
+      const publicId = extractCloudinaryPublicId(targetLogoUrl);
+      if (publicId && publicId.startsWith('manaure-vive/aliados/')) {
+        try {
+          const deleteRes = await deleteFromCloudinary(publicId);
+          if (!deleteRes.success) {
+            console.warn(
+              `[partnerService] Advertencia: No se pudo eliminar el logo de Cloudinary (${publicId}):`,
+              deleteRes.error
+            );
+          }
+        } catch (cloudErr) {
+          console.warn(
+            `[partnerService] Error inesperado al eliminar logo de Cloudinary (${publicId}):`,
+            cloudErr
+          );
+        }
+      }
     }
 
     return { success: true };

@@ -3,6 +3,7 @@ import {
   uploadToCloudinary,
   deleteFromCloudinary,
   getOptimizedCloudinaryUrl,
+  extractCloudinaryPublicId,
 } from '@/services/cloudinaryService';
 
 // Mock de Supabase
@@ -290,6 +291,42 @@ describe('cloudinaryService - Integración Segura con Cloudinary', () => {
       const rawUrl =
         'https://res.cloudinary.com/ky01b0vz/raw/upload/v1790092061/manaure-vive/documento.txt';
       expect(getOptimizedCloudinaryUrl(rawUrl)).toBe(rawUrl);
+    });
+  });
+
+  describe('extractCloudinaryPublicId', () => {
+    it('debe retornar null si la entrada es nula, vacía o no válida', () => {
+      expect(extractCloudinaryPublicId(null)).toBeNull();
+      expect(extractCloudinaryPublicId(undefined)).toBeNull();
+      expect(extractCloudinaryPublicId('   ')).toBeNull();
+      expect(extractCloudinaryPublicId('https://supabase.co/storage/v1/object/public/test.jpg')).toBeNull();
+    });
+
+    it('debe extraer el public_id de una URL estándar de Cloudinary con versión', () => {
+      const url =
+        'https://res.cloudinary.com/ky01b0vz/image/upload/v1790099148/manaure-vive/aliados/photours.png';
+      expect(extractCloudinaryPublicId(url)).toBe('manaure-vive/aliados/photours');
+    });
+
+    it('debe extraer el public_id de una URL transformada con f_auto, q_auto y ancho', () => {
+      const url =
+        'https://res.cloudinary.com/ky01b0vz/image/upload/f_auto,q_auto,w_200/v1790099148/manaure-vive/aliados/photours.png';
+      expect(extractCloudinaryPublicId(url)).toBe('manaure-vive/aliados/photours');
+    });
+
+    it('debe extraer el public_id de una URL sin versión', () => {
+      const url =
+        'https://res.cloudinary.com/ky01b0vz/image/upload/manaure-vive/aliados/photours.png';
+      expect(extractCloudinaryPublicId(url)).toBe('manaure-vive/aliados/photours');
+    });
+
+    it('debe admitir identificadores que ya son un public_id directo', () => {
+      expect(extractCloudinaryPublicId('manaure-vive/aliados/photours.png')).toBe(
+        'manaure-vive/aliados/photours'
+      );
+      expect(extractCloudinaryPublicId('manaure-vive/aliados/photours')).toBe(
+        'manaure-vive/aliados/photours'
+      );
     });
   });
 });
