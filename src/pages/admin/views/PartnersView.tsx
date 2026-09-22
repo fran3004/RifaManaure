@@ -279,13 +279,13 @@ export const PartnersView: React.FC = () => {
     try {
       let finalLogoUrl = logoUrl.trim() || null;
 
-      // Si se subió un archivo nuevo, subir a Supabase Storage
+      // Si se subió un archivo nuevo, subir a Cloudinary
       if (logoFile) {
         const uploadRes = await uploadPartnerLogo(logoFile, formData.slug);
         if (!uploadRes.success || !uploadRes.url) {
           setFormErrors((prev) => ({
             ...prev,
-            logo: uploadRes.error || 'Error al subir la imagen al Storage.',
+            logo: uploadRes.error || 'Error al subir el logotipo a Cloudinary.',
           }));
           setIsSubmitting(false);
           return;
@@ -898,7 +898,7 @@ export const PartnersView: React.FC = () => {
                           : 'Haz clic para seleccionar o arrastra una imagen'}
                       </span>
                       <span className={partnerStyles.dropzoneHint}>
-                        PNG, WebP, JPG o SVG (máx. 5 MB). Se alojará en Supabase Storage.
+                        PNG, WebP, JPG o SVG (máx. 5 MB). Se alojará en Cloudinary.
                       </span>
                       <input
                         type="file"

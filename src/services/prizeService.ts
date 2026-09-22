@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+import { uploadToCloudinary } from '@/services/cloudinaryService';
 import type {
   PrizeSettingsRow,
   PrizeSettingsUpdate,
@@ -504,12 +505,12 @@ export async function deletePrizeExperience(
 }
 
 /**
- * Sube una imagen personalizada al bucket 'prize-images' de Supabase Storage.
+ * Sube una imagen personalizada de experiencia de premio a Cloudinary (carpeta 'manaure-vive/premios').
  */
 export async function uploadPrizeImage(
   file: File,
-  prefix = 'premio'
-): Promise<{ success: boolean; url?: string; error?: string }> {
+  _prefix = 'premio'
+): Promise<{ success: boolean; url?: string; public_id?: string; error?: string }> {
   try {
     const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
     if (!validTypes.includes(file.type)) {
@@ -526,35 +527,21 @@ export async function uploadPrizeImage(
       };
     }
 
-    const fileExt = file.name.split('.').pop() || 'webp';
-    const cleanPrefix = prefix
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/[^a-z0-9]+/g, '-')
-      .slice(0, 30);
-    const fileName = `${cleanPrefix}-${Date.now()}.${fileExt}`;
+    const uploadRes = await uploadToCloudinary(file, 'manaure-vive/premios', {
+      resourceType: 'image',
+    });
 
-    const { error: uploadError } = await supabase.storage
-      .from('prize-images')
-      .upload(fileName, file, {
-        cacheControl: '3600',
-        upsert: true,
-      });
-
-    if (uploadError) {
-      console.error('[prizeService] Error en Storage al subir imagen de premio:', uploadError);
+    if (!uploadRes.success || !uploadRes.secure_url) {
       return {
         success: false,
-        error: uploadError.message || 'No fue posible subir la imagen.',
+        error: uploadRes.error || 'No fue posible subir la imagen del premio a Cloudinary.',
       };
     }
 
-    const { data: publicData } = supabase.storage.from('prize-images').getPublicUrl(fileName);
-
     return {
       success: true,
-      url: publicData.publicUrl,
+      url: uploadRes.secure_url,
+      public_id: uploadRes.public_id,
     };
   } catch (err) {
     console.error('[prizeService] Error inesperado en uploadPrizeImage:', err);

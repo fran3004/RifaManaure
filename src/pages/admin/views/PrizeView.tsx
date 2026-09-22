@@ -444,7 +444,7 @@ export const PrizeView: React.FC = () => {
     setExpFeatures(expFeatures.filter((_, idx) => idx !== index));
   };
 
-  // Subir imagen personalizada a Supabase Storage con análisis previo de calidad
+  // Subir imagen personalizada a Cloudinary con análisis previo de calidad
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -487,7 +487,7 @@ export const PrizeView: React.FC = () => {
         if (res.success && res.url) {
           setExpImageUrl(res.url);
           setImageMode('upload');
-          showFeedback('success', 'Imagen subida exitosamente a Supabase Storage.');
+          showFeedback('success', 'Imagen subida exitosamente a Cloudinary.');
         } else {
           showFeedback('error', res.error || 'Error al subir la imagen.');
         }
@@ -1277,7 +1277,7 @@ export const PrizeView: React.FC = () => {
                               className={`animate-spin ${styles.loaderBrand}`}
                             />
                             <span className={styles.uploadingText}>
-                              Subiendo imagen a Supabase Storage...
+                              Subiendo imagen a Cloudinary...
                             </span>
                           </>
                         ) : expImageUrl ? (

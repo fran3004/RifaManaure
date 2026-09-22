@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+import { uploadToCloudinary } from '@/services/cloudinaryService';
 import type { Database } from '@/types/database.types';
 import type { PartnerRow } from '@/types/raffle.types';
 
@@ -14,6 +15,7 @@ export interface PartnerMutationResult {
 export interface UploadLogoResult {
   success: boolean;
   url?: string;
+  public_id?: string;
   error?: string;
 }
 
@@ -205,10 +207,13 @@ export async function deletePartner(id: string): Promise<{ success: boolean; err
 }
 
 /**
- * Sube una imagen de logotipo al bucket 'partner-logos' en Supabase Storage.
- * Retorna la URL pública permanente para almacenarla en la base de datos.
+ * Sube una imagen de logotipo de aliado a Cloudinary (carpeta 'manaure-vive/aliados').
+ * Retorna la URL segura permanente y el public_id.
  */
-export async function uploadPartnerLogo(file: File, slug: string): Promise<UploadLogoResult> {
+export async function uploadPartnerLogo(
+  file: File,
+  _slug?: string
+): Promise<UploadLogoResult> {
   try {
     // Validar tipo de archivo
     const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml'];
@@ -227,31 +232,21 @@ export async function uploadPartnerLogo(file: File, slug: string): Promise<Uploa
       };
     }
 
-    const fileExt = file.name.split('.').pop() || 'webp';
-    const cleanSlug = slug.trim() || 'aliado';
-    const fileName = `${cleanSlug}-${Date.now()}.${fileExt}`;
-    const filePath = `${fileName}`;
+    const uploadRes = await uploadToCloudinary(file, 'manaure-vive/aliados', {
+      resourceType: 'auto',
+    });
 
-    const { error: uploadError } = await supabase.storage
-      .from('partner-logos')
-      .upload(filePath, file, {
-        cacheControl: '3600',
-        upsert: true,
-      });
-
-    if (uploadError) {
-      console.error('[partnerService] Error en Storage al subir logo:', uploadError);
+    if (!uploadRes.success || !uploadRes.secure_url) {
       return {
         success: false,
-        error: uploadError.message || 'No fue posible subir el archivo a Supabase Storage.',
+        error: uploadRes.error || 'No fue posible subir el logotipo a Cloudinary.',
       };
     }
 
-    const { data: publicData } = supabase.storage.from('partner-logos').getPublicUrl(filePath);
-
     return {
       success: true,
-      url: publicData.publicUrl,
+      url: uploadRes.secure_url,
+      public_id: uploadRes.public_id,
     };
   } catch (err) {
     console.error('[partnerService] Error inesperado al subir logo:', err);
