@@ -1,7 +1,20 @@
 -- ==============================================================================
--- MIGRACIÓN 028: Flexibilizar validación de emisión total de boletos
+-- MIGRACIÓN 028 (Secuencia 028.2 / Parte 2 de 2)
+-- ARCHIVO: 028_flexible_raffle_emission.sql
+-- Flexibilizar validación de emisión total de boletos
 -- Permite que el administrador defina cualquier cantidad de boletos (> 0)
 -- sin restricciones rígidas arbitrarias.
+-- ==============================================================================
+-- TRAZABILIDAD Y DETERMINISMO:
+-- 1. Historial Git: Introducida en commit bad2160 con posterioridad a la migración
+--    028_fix_public_payment_accounts_and_is_admin_grant.sql (commits cfc380a / 87d550d).
+-- 2. Orden Lexicográfico: 'fle' > 'fix'. Supabase CLI y ordenadores alfabéticos
+--    procesan este archivo en segundo lugar dentro del prefijo 028.
+-- 3. Alcance DDL: Reemplaza la función RPC public.admin_create_raffle con cálculo
+--    dinámico de relleno de dígitos (LPAD) y soporte para cualquier cantidad de boletos.
+-- 4. Ortogonalidad: 100% independiente de 028_fix_public_payment_accounts_and_is_admin_grant.sql (sin colisión de objetos).
+-- 5. Preservación: El nombre de archivo se conserva intacto para evitar reescritura
+--    destructiva de la historia de migraciones y prevenir drift en entornos desplegados.
 -- ==============================================================================
 
 CREATE OR REPLACE FUNCTION public.admin_create_raffle(

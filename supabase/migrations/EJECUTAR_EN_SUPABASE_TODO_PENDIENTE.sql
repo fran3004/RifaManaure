@@ -1,3 +1,32 @@
+-- ============================================================================
+-- SCRIPT DEPRECADO / HISTÓRICO PARCIAL - NO EJECUTAR EN PRODUCCIÓN NI BASES LIMPIAS
+-- ============================================================================
+-- ADVERTENCIA DE AUDITORÍA Y TRAZABILIDAD (AUDITORÍA 00 - FEEDBACK 03):
+-- Este archivo consolidado (EJECUTAR_EN_SUPABASE_TODO_PENDIENTE.sql) es un artefacto
+-- histórico manual incompleto y NO REPRESENTA la fuente de verdad del esquema actual.
+--
+-- ESTADO DE COMPLETITUD Y LIMITACIONES TÉCNICAS:
+-- 1. Incluye parcialmente migraciones desde la 001 hasta la 027 y salta desordenadamente
+--    a las migraciones 033, 032, 034, 035 y 036.
+-- 2. OMITE COMPLETAMENTE las siguientes migraciones críticas:
+--    - 028_fix_public_payment_accounts_and_is_admin_grant.sql (RLS payment_accounts y REPLICA IDENTITY)
+--    - 028_flexible_raffle_emission.sql (admin_create_raffle dinámico)
+--    - 029_harden_is_admin_security_definer.sql (endurecimiento anti-enumeración de auth.uid())
+--    - 030_remove_resend_email_id.sql (limpieza estructural de orders)
+--    - 031_prize_management.sql (creación fundamental de tablas prize_settings y prize_experiences)
+-- 3. ALERTA DE ERROR FATAL EN INSTALACIÓN LIMPIA:
+--    Dado que omite la migración 031, cualquier intento de ejecutar este archivo sobre
+--    una base de datos limpia fallará fatalmente en la línea 7568 al intentar ejecutar
+--    ALTER TABLE public.prize_settings antes de que dicha tabla haya sido creada.
+-- 4. DESORDEN CRONOLÓGICO:
+--    La migración 033 aparece antes de la migración 032.
+--
+-- FUENTE DE VERDAD CANÓNICA:
+-- Para inicializar o actualizar cualquier entorno (local, staging o producción), se debe
+-- ejecutar la secuencia canónica de migraciones individuales en orden numérico:
+-- `supabase/migrations/001_...sql` hasta `supabase/migrations/036_...sql`.
+-- ============================================================================
+
 -- ==========================================
 -- FILE: 001_initial_schema.sql
 -- ==========================================

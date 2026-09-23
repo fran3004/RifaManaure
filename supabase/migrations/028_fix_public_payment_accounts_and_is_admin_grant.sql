@@ -1,6 +1,19 @@
 -- ============================================================================
--- MIGRACIÓN 028: HABILITAR PERMISOS DE IS_ADMIN, CUENTAS DE PAGO Y RÉPLICA REALTIME
+-- MIGRACIÓN 028 (Secuencia 028.1 / Parte 1 de 2)
+-- ARCHIVO: 028_fix_public_payment_accounts_and_is_admin_grant.sql
+-- HABILITAR PERMISOS DE IS_ADMIN, CUENTAS DE PAGO Y RÉPLICA REALTIME
 -- PLATAFORMA "MANAURE VIVE" (PRODUCCIÓN VERCEL)
+-- ============================================================================
+-- TRAZABILIDAD Y DETERMINISMO:
+-- 1. Historial Git: Introducida en commits cfc380a / 87d550d. Precede históricamente
+--    a 028_flexible_raffle_emission.sql (commit bad2160).
+-- 2. Orden Lexicográfico: 'fix' < 'fle'. Supabase CLI y ordenadores alfabéticos
+--    procesan este archivo en primer lugar dentro del prefijo 028.
+-- 3. Alcance DDL: Grants a funciones is_admin/is_superadmin, políticas RLS en
+--    payment_accounts, REPLICA IDENTITY FULL y grant a submit_payment_proof.
+-- 4. Ortogonalidad: 100% independiente de 028_flexible_raffle_emission.sql (sin colisión de objetos).
+-- 5. Preservación: El nombre de archivo se conserva intacto para evitar reescritura
+--    destructiva de la historia de migraciones y prevenir drift en entornos desplegados.
 -- ============================================================================
 
 -- 1. Otorgar permisos de ejecución de is_admin(uuid) y is_superadmin(uuid) a anon y authenticated
