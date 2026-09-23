@@ -58,8 +58,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   border-radius: 10px;
   border: 1px solid #d4ded7;
   background: #ffffff;
@@ -239,20 +239,26 @@
   display: flex;
   align-items: center;
   gap: 0.4rem;
+  flex-wrap: wrap;
 }
 
 .actionIconBtn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 44px;
+  height: 44px;
   border-radius: 8px;
   border: 1px solid #e1ebe3;
   background: #ffffff;
   color: #4b6354;
   cursor: pointer;
   transition: all 0.15s ease;
+}
+
+.actionIconBtn svg {
+  width: 17px;
+  height: 17px;
 }
 
 .actionIconBtn:hover:not(:disabled) {

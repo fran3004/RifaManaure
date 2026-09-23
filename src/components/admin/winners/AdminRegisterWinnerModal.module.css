@@ -405,6 +405,8 @@
   align-items: center;
   gap: 0.6rem;
   overflow: hidden;
+  min-width: 0;
+  flex: 1 1 auto;
 }
 
 .fileName {
@@ -413,7 +415,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 380px;
+  max-width: min(380px, 100%);
 }
 
 .removeFileBtn {
@@ -427,6 +429,9 @@
   align-items: center;
   justify-content: center;
   transition: all 0.2s;
+  min-width: 32px;
+  min-height: 32px;
+  flex-shrink: 0;
 }
 
 .removeFileBtn:hover {
@@ -463,12 +468,18 @@
   border: none;
   color: #f87171;
   border-radius: 50%;
-  width: 22px;
-  height: 22px;
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.removePhotoBtn:hover {
+  background: rgba(180, 35, 24, 0.9);
+  color: #ffffff;
 }
 
 .modalFooter {
