@@ -190,7 +190,7 @@
   background: var(--bg-card, #ffffff);
   border: 1px solid var(--border-subtle, #dcd5c4);
   color: var(--text-primary, #16261c);
-  font-size: 0.875rem;
+  font-size: 1rem;
   line-height: 1.45;
   transition: all 0.2s;
   box-sizing: border-box;

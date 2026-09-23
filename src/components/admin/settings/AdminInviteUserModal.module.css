@@ -357,7 +357,7 @@
   border-radius: 6px;
   padding: 0.5rem 0.75rem;
   color: var(--text-primary, #16261c);
-  font-size: 0.875rem;
+  font-size: 1rem;
   line-height: 1.45;
   font-family: monospace;
 }

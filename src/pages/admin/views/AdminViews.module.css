@@ -108,7 +108,7 @@
   background: transparent;
   border: none;
   color: var(--text-primary, #f3f7f5);
-  font-size: 0.875rem;
+  font-size: 1rem;
   line-height: 1.45;
   width: 100%;
   outline: none;
@@ -131,7 +131,7 @@
   color: var(--text-secondary, #9cb5ab);
   padding: 0.5rem 0.85rem;
   border-radius: var(--radius-md, 10px);
-  font-size: 0.875rem;
+  font-size: 1rem;
   line-height: 1.2;
   outline: none;
   cursor: pointer;
@@ -969,7 +969,7 @@
   border: 1px solid var(--border-subtle, #dcd5c4);
   border-radius: var(--radius-md, 10px);
   color: var(--text-primary);
-  font-size: 0.875rem;
+  font-size: 1rem;
   line-height: 1.45;
   font-family: inherit;
   outline: none;
@@ -1436,7 +1436,7 @@
   color: var(--text-secondary, #9cb5ab);
   padding: 0.45rem 0.65rem;
   border-radius: var(--radius-md, 10px);
-  font-size: 0.875rem;
+  font-size: 1rem;
   line-height: 1.2;
   outline: none;
   cursor: pointer;
@@ -2835,7 +2835,7 @@
   border: 1px solid var(--admin-border, #dcd5c4);
   border-radius: var(--radius-md, 10px);
   color: var(--admin-text, #16261c);
-  font-size: 0.875rem;
+  font-size: 1rem;
   line-height: 1.45;
   resize: vertical;
 }
