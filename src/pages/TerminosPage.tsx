@@ -4,10 +4,12 @@ import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { FloatingWhatsAppBtn } from '@/components/common/FloatingWhatsAppBtn';
 import { ShieldCheck, FileText, CheckCircle2 } from 'lucide-react';
+import { useActiveRaffle } from '@/hooks/useActiveRaffle';
 import styles from './TerminosPage.module.css';
 
 export const TerminosPage: React.FC = () => {
   useDocumentTitle('Términos y Condiciones Oficiales');
+  const { lotteryReference, totalTickets, ticketRange, cifrasText } = useActiveRaffle();
   return (
     <div className={styles.pageLayout} data-theme="public">
       <a href="#contenido-terminos" className="skipLink">
@@ -41,8 +43,9 @@ export const TerminosPage: React.FC = () => {
             <section className={styles.section}>
               <h2>2. Mecánica del Sorteo</h2>
               <p>
-                La rifa consta de una emisión limitada de <strong>1.000 boletos</strong>, numerados
-                de forma correlativa desde el <strong>000 al 999</strong>.
+                La rifa consta de una emisión limitada de{' '}
+                <strong>{totalTickets.toLocaleString('es-CO')} boletos</strong>, numerados
+                de forma correlativa desde el <strong>{ticketRange}</strong>.
               </p>
               <ul className={styles.bulletList}>
                 <li>
@@ -50,7 +53,7 @@ export const TerminosPage: React.FC = () => {
                   <span>
                     El boleto ganador corresponderá exactamente a las{' '}
                     <strong>
-                      tres (3) últimas cifras del Premio Mayor de la Lotería de Santander
+                      {cifrasText} del Premio Mayor de {lotteryReference}
                     </strong>
                     .
                   </span>
@@ -60,7 +63,7 @@ export const TerminosPage: React.FC = () => {
                   <span>
                     En caso de que el número premiado no haya sido vendido en la fecha inicial, el
                     sorteo se reprogramará automáticamente para el siguiente sorteo ordinario de la
-                    misma lotería.
+                    misma lotería ({lotteryReference}).
                   </span>
                 </li>
               </ul>

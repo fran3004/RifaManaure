@@ -179,7 +179,10 @@ export const WinnersView: React.FC = () => {
             description={
               searchTerm
                 ? 'Intenta con otro número de boleto, documento o referencia de orden.'
-                : 'Cuando se realice el sorteo oficial con la Lotería de Santander, usa el botón "Registrar Ganador" para asociar el boleto vendido y subir las evidencias.'
+                : `Cuando se realice el sorteo oficial con ${
+                    raffles.find((r) => (selectedRaffleId ? r.id === selectedRaffleId : r.status === 'active'))
+                      ?.lottery_reference || 'la lotería asignada'
+                  }, usa el botón "Registrar Ganador" para asociar el boleto vendido y subir las evidencias.`
             }
           />
         ) : (

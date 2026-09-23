@@ -348,7 +348,7 @@ export async function verifyPublicOrderOrTickets(
       raffle: {
         title: ord.raffle?.title || 'Gran Rifa Ecoturística Manaure Vive',
         drawDate: ord.raffle?.drawDate || '',
-        lotteryReference: ord.raffle?.lotteryReference || 'Lotería de Santander',
+        lotteryReference: ord.raffle?.lotteryReference || 'Lotería Oficial',
       },
       tickets: (ord.tickets || []).map((t: any) => ({
         number: t.number,

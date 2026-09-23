@@ -4,6 +4,7 @@ import { logoPrincipalCompleto } from '@/assets/assets';
 import { ShieldCheck, MessageCircle, MapPin, Heart, Mail } from 'lucide-react';
 import { createWhatsAppLink, formatPhoneNumber } from '@/lib/utils';
 import { useSystemSettings } from '@/hooks/useSystemSettings';
+import { useActiveRaffle } from '@/hooks/useActiveRaffle';
 import { PAYMENT_METHODS } from '@/data/faqFallback';
 import styles from './Footer.module.css';
 
@@ -11,6 +12,7 @@ export const Footer: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const systemSettings = useSystemSettings();
+  const { lotteryReference } = useActiveRaffle();
 
   const whatsappNumber = systemSettings.support_whatsapp_number || '573001234567';
   const supportEmail = systemSettings.support_email || 'soporte@manaurevive.com';
@@ -156,7 +158,7 @@ export const Footer: React.FC = () => {
           </div>
           <div className={styles.guaranteeNote}>
             <ShieldCheck size={16} aria-hidden="true" />
-            <span>Sorteo auditable con Lotería Oficial de Santander</span>
+            <span>Sorteo auditable con {lotteryReference}</span>
           </div>
           <div className={styles.madeWith}>
             <span>

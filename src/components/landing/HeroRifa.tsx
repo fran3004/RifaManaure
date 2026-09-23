@@ -59,7 +59,7 @@ export const HeroRifa: React.FC<HeroRifaProps> = ({
     propTicketPrice ?? (raffle?.ticket_price ? Number(raffle.ticket_price) : unitPrice);
   const drawDateFormatted = propDrawDate ?? formatDrawDate(raffle?.draw_date);
   const lotteryReference =
-    propLottery ?? (raffle?.lottery_reference || 'Lotería de Santander (3 cifras)');
+    propLottery ?? (raffle?.lottery_reference?.trim() || 'Lotería Oficial');
 
   // --- Estado del Carrusel de Fondo Automático ---
   const slides: HeroSlideFoto[] = fotosHeroCarousel.length > 0 ? fotosHeroCarousel : [];

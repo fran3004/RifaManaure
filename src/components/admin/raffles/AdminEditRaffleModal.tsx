@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import type { RaffleRow } from '@/types/raffle.types';
 import { updateRaffleAdmin } from '@/services/raffleService';
+import { COLOMBIAN_LOTTERIES, saveCachedRaffle } from '@/hooks/useActiveRaffle';
 import {
   X,
   Sparkles,
@@ -112,6 +113,7 @@ const EditRaffleForm: React.FC<{
     setIsSubmitting(false);
 
     if (result.success && result.raffle) {
+      saveCachedRaffle(result.raffle);
       onSuccess(result.raffle);
       onClose();
     } else {
@@ -274,13 +276,40 @@ const EditRaffleForm: React.FC<{
                 </label>
                 <input
                   type="text"
+                  list="colombianLotteriesListEdit"
                   className={styles.input}
                   value={lotteryReference}
                   onChange={(e) => setLotteryReference(e.target.value)}
-                  placeholder="Ej. Lotería de Santander (Premio Mayor 3 cifras)"
+                  placeholder="Ej. Lotería del Sinuano, Lotería de Santander..."
                   required
                   disabled={isSubmitting}
                 />
+                <datalist id="colombianLotteriesListEdit">
+                  {COLOMBIAN_LOTTERIES.map((lot) => (
+                    <option key={lot} value={lot} />
+                  ))}
+                </datalist>
+                <div className={styles.lotteryChipsRow}>
+                  {[
+                    'Lotería del Sinuano',
+                    'Lotería de Santander',
+                    'Lotería de Boyacá',
+                    'Lotería de Medellín',
+                    'Lotería del Valle',
+                  ].map((preset) => (
+                    <button
+                      key={preset}
+                      type="button"
+                      className={`${styles.lotteryPresetChip} ${
+                        lotteryReference === preset ? styles.lotteryPresetChipActive : ''
+                      }`}
+                      onClick={() => setLotteryReference(preset)}
+                      title={`Seleccionar ${preset}`}
+                    >
+                      {preset}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
 

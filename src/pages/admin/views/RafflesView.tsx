@@ -354,7 +354,7 @@ export const RafflesView: React.FC = () => {
                   </div>
                 </div>
                 <div className={`${styles.metricValue} ${styles.metricValueMedium}`}>
-                  {activeRaffle.lottery_reference || 'Lotería de Santander'}
+                  {activeRaffle.lottery_reference || 'Lotería Oficial'}
                 </div>
                 <span className={styles.metricHint}>Premio mayor auditable</span>
               </div>

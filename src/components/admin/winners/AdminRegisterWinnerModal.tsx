@@ -42,6 +42,7 @@ const AdminRegisterWinnerModalContent: React.FC<AdminRegisterWinnerModalProps> =
   const defaultRaffleId =
     initialRaffleId || raffles.find((r) => r.status === 'active')?.id || raffles[0]?.id || '';
   const [selectedRaffleId, setSelectedRaffleId] = useState<string>(defaultRaffleId);
+  const selectedRaffle = raffles.find((r) => r.id === selectedRaffleId);
   const [lotteryDrawNumber, setLotteryDrawNumber] = useState<string>('');
   const [ticketNumber, setTicketNumber] = useState<string>('');
   const [drawDate, setDrawDate] = useState<string>(new Date().toISOString().slice(0, 16));
@@ -222,7 +223,9 @@ const AdminRegisterWinnerModalContent: React.FC<AdminRegisterWinnerModalProps> =
 
               <div className={styles.formGrid2}>
                 <div className={styles.formGroup}>
-                  <label className={styles.formLabel}>Número Oficial Lotería de Santander *</label>
+                  <label className={styles.formLabel}>
+                    Número Oficial {selectedRaffle?.lottery_reference ? `(${selectedRaffle.lottery_reference})` : 'de la Lotería'} *
+                  </label>
                   <input
                     type="text"
                     value={lotteryDrawNumber}

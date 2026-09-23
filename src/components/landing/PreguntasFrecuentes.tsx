@@ -2,10 +2,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import { HelpCircle, ChevronDown } from 'lucide-react';
 import { SectionHeader } from '@/components/public/ui';
 import { getCachedFaqs, getPublicFaqs } from '@/services/faqService';
+import { useActiveRaffle, formatFaqAnswer } from '@/hooks/useActiveRaffle';
 import type { FaqItem } from '@/types/raffle.types';
 import styles from './PreguntasFrecuentes.module.css';
 
 export const PreguntasFrecuentes: React.FC = () => {
+  const { lotteryReference, cifrasText } = useActiveRaffle();
   // Inicialización sincrónica desde caché o respaldo local: elimina completamente el FOUC
   const [faqs, setFaqs] = useState<FaqItem[]>(() => getCachedFaqs());
   const [openIndex, setOpenIndex] = useState<number | null>(0);
@@ -115,7 +117,9 @@ export const PreguntasFrecuentes: React.FC = () => {
                   <div className={styles.accordionInner}>
                     <div className={styles.panelDivider} aria-hidden="true" />
                     <div className={styles.answerContainer}>
-                      <p className={styles.answerText}>{faq.answer}</p>
+                      <p className={styles.answerText}>
+                        {formatFaqAnswer(faq.answer, { lotteryReference, cifrasText })}
+                      </p>
                     </div>
                   </div>
                 </div>

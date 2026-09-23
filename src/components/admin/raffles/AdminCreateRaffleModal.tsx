@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import type { RaffleRow } from '@/types/raffle.types';
 import { createRaffleAdmin } from '@/services/raffleService';
+import { COLOMBIAN_LOTTERIES, saveCachedRaffle } from '@/hooks/useActiveRaffle';
 import {
   X,
   PlusCircle,
@@ -25,13 +26,12 @@ interface AdminCreateRaffleModalProps {
 
 const slugify = (text: string): string => {
   return text
-    .toString()
     .toLowerCase()
     .trim()
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9\s-]/g, '')
     .replace(/\s+/g, '-')
-    .replace(/[^\w-]+/g, '')
     .replace(/--+/g, '-');
 };
 
@@ -47,9 +47,7 @@ const CreateRaffleForm: React.FC<{
   const [totalTickets, setTotalTickets] = useState<number>(1000);
   const [maxTicketsPerBuyer, setMaxTicketsPerBuyer] = useState<number>(50);
   const [drawDate, setDrawDate] = useState<string>('');
-  const [lotteryReference, setLotteryReference] = useState(
-    'Lotería de Santander (Premio Mayor de 3 cifras)'
-  );
+  const [lotteryReference, setLotteryReference] = useState('Lotería del Sinuano');
   const [status, setStatus] = useState<'draft' | 'active' | 'paused'>('draft');
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -127,6 +125,9 @@ const CreateRaffleForm: React.FC<{
     setIsSubmitting(false);
 
     if (result.success && result.raffle) {
+      if (result.raffle.status === 'active') {
+        saveCachedRaffle(result.raffle);
+      }
       onSuccess(result.raffle);
       onClose();
     } else {
@@ -313,13 +314,40 @@ const CreateRaffleForm: React.FC<{
                 </label>
                 <input
                   type="text"
+                  list="colombianLotteriesListCreate"
                   className={styles.input}
                   value={lotteryReference}
                   onChange={(e) => setLotteryReference(e.target.value)}
-                  placeholder="Ej. Lotería de Santander (Premio Mayor 3 cifras)"
+                  placeholder="Ej. Lotería del Sinuano, Lotería de Santander..."
                   required
                   disabled={isSubmitting}
                 />
+                <datalist id="colombianLotteriesListCreate">
+                  {COLOMBIAN_LOTTERIES.map((lot) => (
+                    <option key={lot} value={lot} />
+                  ))}
+                </datalist>
+                <div className={styles.lotteryChipsRow}>
+                  {[
+                    'Lotería del Sinuano',
+                    'Lotería de Santander',
+                    'Lotería de Boyacá',
+                    'Lotería de Medellín',
+                    'Lotería del Valle',
+                  ].map((preset) => (
+                    <button
+                      key={preset}
+                      type="button"
+                      className={`${styles.lotteryPresetChip} ${
+                        lotteryReference === preset ? styles.lotteryPresetChipActive : ''
+                      }`}
+                      onClick={() => setLotteryReference(preset)}
+                      title={`Seleccionar ${preset}`}
+                    >
+                      {preset}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
 
