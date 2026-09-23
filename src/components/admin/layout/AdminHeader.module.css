@@ -122,11 +122,6 @@
   }
 }
 
-@media (max-width: 480px) {
-  .userBadge {
-    display: none;
-  }
-}
 
 /* Selector Global de Rifa Activa en Cabecera */
 .raffleSelectorContainer {
@@ -174,8 +169,7 @@
 .raffleSelect {
   appearance: none;
   -webkit-appearance: none;
-  background: #246a40 !important;
-  color: #ffffff !important;
+  -moz-appearance: none;
   font-size: 0.875rem;
   line-height: 1.2;
   font-weight: 600;
@@ -188,10 +182,15 @@
   border-radius: 6px;
 }
 
-.raffleSelect:hover,
-.raffleSelect:focus {
-  background: #2e7d4f !important;
-  color: #ffffff !important;
+.selectWrapper .raffleSelect {
+  background: #246a40;
+  color: #ffffff;
+}
+
+.selectWrapper .raffleSelect:hover,
+.selectWrapper .raffleSelect:focus {
+  background: #2e7d4f;
+  color: #ffffff;
 }
 
 .selectWrapper::after {
@@ -258,7 +257,7 @@
     display: none;
   }
   .raffleSelect {
-    max-width: 150px;
+    max-width: 220px;
   }
 }
 

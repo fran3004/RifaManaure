@@ -47,7 +47,21 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({ onToggleSidebar }) => 
                 value={selectedRaffleId || ''}
                 onChange={(e) => setSelectedRaffleId(e.target.value)}
                 aria-label="Seleccionar rifa en gestión"
-                title="Selecciona la edición de rifa para filtrar el panel administrativo"
+                title={
+                  selectedRaffle
+                    ? `${selectedRaffle.title} (${
+                        selectedRaffle.status === 'active'
+                          ? 'Activa'
+                          : selectedRaffle.status === 'paused'
+                            ? 'Pausada'
+                            : selectedRaffle.status === 'finished'
+                              ? 'Concluida'
+                              : selectedRaffle.status === 'closed'
+                                ? 'Cerrada'
+                                : 'Borrador'
+                      })`
+                    : 'Seleccionar rifa en gestión'
+                }
               >
                 {raffles.map((r) => {
                   let statusTag = 'Activa';

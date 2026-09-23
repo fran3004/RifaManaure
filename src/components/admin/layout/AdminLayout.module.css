@@ -43,3 +43,9 @@
     padding: 1.5rem 1rem;
   }
 }
+
+@media (max-width: 480px) {
+  .mainContent {
+    padding: 1.25rem 0.75rem;
+  }
+}
