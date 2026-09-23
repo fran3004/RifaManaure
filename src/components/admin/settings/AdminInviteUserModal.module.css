@@ -464,3 +464,55 @@
   color: var(--brand-accent);
 }
 
+@media (max-width: 480px) {
+  .modalOverlay {
+    padding: 0.75rem;
+    align-items: flex-start;
+  }
+
+  .modalCard {
+    max-height: calc(100vh - 1.5rem);
+    border-radius: var(--radius-lg, 16px);
+  }
+
+  .modalHeader {
+    padding: 1rem 1.25rem;
+  }
+
+  .modalTitle {
+    font-size: 1.125rem;
+  }
+
+  .headerIcon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .modalBody {
+    padding: 1rem 1.25rem;
+    gap: 1rem;
+  }
+
+  .roleSelector {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+
+  .roleOption {
+    padding: 0.75rem 1rem;
+  }
+
+  .modalFooter {
+    flex-direction: column-reverse;
+    align-items: stretch;
+    gap: 0.6rem;
+    padding: 1rem 1.25rem;
+  }
+
+  .btnCancel,
+  .btnSubmit {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
