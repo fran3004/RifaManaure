@@ -115,9 +115,10 @@
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
   gap: 1.25rem;
   overflow-y: auto;
-  max-height: calc(88vh - 140px);
 }
 
 /* Tarjeta Resumen del Comprador */
@@ -254,7 +255,8 @@
 .tableWrapper {
   width: 100%;
   min-width: 0;
-  overflow-x: hidden;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   border-radius: var(--radius-md, 10px);
   border: 1px solid var(--border-subtle, var(--overlay-neutral-subtle));
 }
