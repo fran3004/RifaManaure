@@ -23,7 +23,8 @@ body {
   min-height: 100vh;
   background-color: var(--bg-main);
   color: var(--text-primary);
-  overflow-x: hidden;
+  /* overflow-x: clip previene desborde horizontal sin generar scroll container que interfiera con position: sticky */
+  overflow-x: clip;
   line-height: 1.6;
 }
 
