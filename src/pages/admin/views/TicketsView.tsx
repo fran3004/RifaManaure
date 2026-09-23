@@ -35,6 +35,8 @@ import {
   ShieldCheck,
   ChevronLeft,
   ChevronRight,
+  User,
+  Shield,
 } from 'lucide-react';
 import { AdminOrderReviewModal } from '@/components/admin/orders/AdminOrderReviewModal';
 import styles from './AdminViews.module.css';
@@ -46,6 +48,43 @@ const BLOCK_REASONS_PRESETS = [
   'Incidencia técnica o duplicidad reportada',
   'Otro motivo justificado',
 ];
+
+const formatOrderStatus = (status: string | undefined): string => {
+  switch (status?.toLowerCase()) {
+    case 'paid':
+      return 'Pagada';
+    case 'approved':
+      return 'Aprobada';
+    case 'pending':
+      return 'Pendiente';
+    case 'verifying':
+      return 'En Verificación';
+    case 'reserved':
+      return 'En Reserva';
+    case 'rejected':
+      return 'Rechazada';
+    case 'cancelled':
+      return 'Cancelada';
+    case 'expired':
+      return 'Expirada';
+    default:
+      return status || 'Desconocido';
+  }
+};
+
+const getOrderStatusBadgeClass = (status: string | undefined): string => {
+  switch (status?.toLowerCase()) {
+    case 'paid':
+    case 'approved':
+      return styles.orderStatusPaid;
+    case 'rejected':
+    case 'cancelled':
+    case 'expired':
+      return styles.orderStatusRejected;
+    default:
+      return styles.orderStatusPending;
+  }
+};
 
 export const TicketsView: React.FC = () => {
   const [tickets, setTickets] = useState<AdminTicketWithDetails[]>([]);
@@ -826,6 +865,7 @@ export const TicketsView: React.FC = () => {
             {/* SECCIÓN: ORDEN ASOCIADA */}
             <div className={styles.detailSection}>
               <span className={styles.detailSectionLabel}>
+                <ShoppingBag size={14} />
                 Orden de Compra
               </span>
               {selectedTicket.orders ? (
@@ -835,9 +875,16 @@ export const TicketsView: React.FC = () => {
                       {selectedTicket.orders.reference}
                     </div>
                     <div className={styles.orderMeta}>
-                      Estado: <strong>{selectedTicket.orders.status}</strong> • Total:{' '}
-                      <strong>{formatCOP(selectedTicket.orders.total_amount)}</strong> • Boletos en
-                      orden: {selectedTicket.orders.ticket_count}
+                      <span>Estado:</span>
+                      <span className={`${styles.orderStatusBadge} ${getOrderStatusBadgeClass(selectedTicket.orders.status)}`}>
+                        {formatOrderStatus(selectedTicket.orders.status)}
+                      </span>
+                      <span className={styles.metaDivider}>•</span>
+                      <span>Total:</span>
+                      <strong className={styles.metaAmount}>{formatCOP(selectedTicket.orders.total_amount)}</strong>
+                      <span className={styles.metaDivider}>•</span>
+                      <span>Boletos en orden:</span>
+                      <strong className={styles.metaCount}>{selectedTicket.orders.ticket_count}</strong>
                     </div>
                   </div>
                   <button
@@ -859,6 +906,7 @@ export const TicketsView: React.FC = () => {
             {/* SECCIÓN: DATOS DEL COMPRADOR */}
             <div className={styles.detailSection}>
               <span className={styles.detailSectionLabel}>
+                <User size={14} />
                 Datos del Comprador
               </span>
               {selectedTicket.buyers ? (
@@ -896,6 +944,7 @@ export const TicketsView: React.FC = () => {
             {/* SECCIÓN: ACCIONES ADMINISTRATIVAS */}
             <div className={styles.detailActions}>
               <span className={styles.detailActionsLabel}>
+                <Shield size={14} />
                 Acciones Administrativas
               </span>
 
