@@ -177,8 +177,7 @@
 /* --- Titular Impactante de Alto Contraste --- */
 .title {
   font-family: var(--font-heading, 'Playfair Display Variable', Georgia, serif);
-  font-size: 2.5rem;
-  line-height: 1.2;
+  font-size: clamp(1.875rem, 5vw, 2.5rem);
   font-weight: 800;
   line-height: 1.14;
   letter-spacing: -0.02em;
@@ -319,6 +318,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
   font-family: var(--font-sans, 'Outfit Variable', sans-serif);
   font-size: 0.875rem;
   line-height: 1.2;
@@ -550,9 +551,6 @@
   }
 
   .title {
-    font-size: 1.875rem;
-  line-height: 1.2;
-    line-height: 1.2;
     max-width: 100%;
     margin-bottom: 1rem;
     text-wrap: balance;

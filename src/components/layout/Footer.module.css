@@ -281,6 +281,13 @@
   vertical-align: middle;
 }
 
+@media (max-width: 1100px) {
+  .footerContainer {
+    grid-template-columns: 1.4fr 1fr 1.3fr;
+    gap: 2rem;
+  }
+}
+
 @media (max-width: 900px) {
   .footerContainer {
     grid-template-columns: 1fr;
