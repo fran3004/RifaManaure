@@ -562,7 +562,7 @@ export const PrizeView: React.FC = () => {
   const currentModalImagePreview =
     imageMode === 'upload' && expImageUrl
       ? getOptimizedCloudinaryUrl(expImageUrl, { width: 600 })
-      : resolveExperienceImage(expImageSlug);
+      : resolveExperienceImage(expImageSlug, expImageUrl);
 
   if (loading) {
     return (
@@ -645,7 +645,7 @@ export const PrizeView: React.FC = () => {
               <Users size={20} />
             </div>
             <div>
-              <h2 className={styles.cardTitle}>Encabezado de la Sección en la Landing</h2>
+              <h2 className={styles.sectionHeaderTitle}>Encabezado de la Sección en la Landing</h2>
               <p className={styles.cardSubtitle}>
                 Edita el distintivo superior, título y descripción general de la sección del premio.{' '}
                 {settings.updated_at && (
@@ -732,7 +732,7 @@ export const PrizeView: React.FC = () => {
               <Trophy size={22} />
             </div>
             <div>
-              <h2 className={styles.cardTitle}>Premio Mayor Oficial (Banner Verde)</h2>
+              <h2 className={styles.sectionHeaderTitle}>Premio Mayor Oficial (Banner Verde)</h2>
               <p className={styles.cardSubtitle}>
                 Administra el banner destacado del tour completo y los 8 ítems de especificación detallada para la pareja.
               </p>
@@ -1012,17 +1012,17 @@ export const PrizeView: React.FC = () => {
                       <div className={styles.titleGlassIcon} aria-hidden="true">
                         {renderExperienceIcon(exp.icon, 22)}
                       </div>
-                      <h3 className={styles.cardTitle}>{exp.title}</h3>
+                      <h3 className={styles.expCardTitle}>{exp.title}</h3>
 
-                      <p className={styles.cardDescription}>{exp.description}</p>
+                      <p className={styles.expCardDescription}>{exp.description}</p>
 
                       {featuresList.length > 0 && (
                         <>
-                          <hr className={styles.divider} />
-                          <ul className={styles.featureList}>
+                          <hr className={styles.expCardDivider} />
+                          <ul className={styles.cardFeatureList}>
                             {featuresList.map((feat, idx) => (
-                              <li key={idx} className={styles.featureItem}>
-                                <Sparkles size={15} aria-hidden="true" className={styles.featureIcon} />
+                              <li key={idx} className={styles.cardFeatureItem}>
+                                <Sparkles size={15} aria-hidden="true" className={styles.cardFeatureIcon} />
                                 <span>{feat}</span>
                               </li>
                             ))}
@@ -1359,7 +1359,7 @@ export const PrizeView: React.FC = () => {
                   </div>
                   <div className={styles.previewStage}>
                     <div className={styles.previewCardWrapper}>
-                      <div className={styles.experienceCard} style={{ minHeight: '480px' }}>
+                      <div className={`${styles.experienceCard} ${styles.previewCard}`}>
                         <div className={styles.cardMedia}>
                           <img
                             src={currentModalImagePreview}
@@ -1390,23 +1390,23 @@ export const PrizeView: React.FC = () => {
                             <div className={styles.titleGlassIcon} aria-hidden="true">
                               {renderExperienceIcon(expIcon, 22)}
                             </div>
-                            <h3 className={styles.cardTitle}>
+                            <h3 className={styles.expCardTitle}>
                               {expTitle || 'Título de la Experiencia'}
                             </h3>
 
-                            <p className={styles.cardDescription}>
+                            <p className={styles.expCardDescription}>
                               {expDescription || 'Descripción de la actividad para los ganadores...'}
                             </p>
 
                             {expFeatures.filter((f) => f.trim().length > 0).length > 0 && (
                               <>
-                                <hr className={styles.divider} />
-                                <ul className={styles.featureList}>
+                                <hr className={styles.expCardDivider} />
+                                <ul className={styles.cardFeatureList}>
                                   {expFeatures
                                     .filter((f) => f.trim().length > 0)
                                     .map((feat, idx) => (
-                                      <li key={idx} className={styles.featureItem}>
-                                        <Sparkles size={15} aria-hidden="true" className={styles.featureIcon} />
+                                      <li key={idx} className={styles.cardFeatureItem}>
+                                        <Sparkles size={15} aria-hidden="true" className={styles.cardFeatureIcon} />
                                         <span>{feat}</span>
                                       </li>
                                     ))}
@@ -1442,7 +1442,7 @@ export const PrizeView: React.FC = () => {
                     <CheckCircle2 size={14} className={styles.labelIconSuccess} />
                     Beneficios o Puntos Incluidos (Viñetas)
                   </span>
-                  <div className={styles.featureList}>
+                  <div className={styles.featureFormList}>
                     {expFeatures.map((feat, idx) => (
                       <div key={idx} className={styles.featureRow}>
                         <input
