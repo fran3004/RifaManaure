@@ -883,16 +883,17 @@
     display: inline-flex;
     align-items: center;
     gap: 0.25rem;
-    padding: 0.25rem 0.55rem;
+    padding: 0.35rem 0.65rem;
     border-radius: var(--radius-full);
     background: rgba(255, 255, 255, 0.12);
     border: 1px solid rgba(255, 255, 255, 0.25);
     color: #FFFFFF;
     font-size: 0.875rem;
-  line-height: 1.2;
+    line-height: 1.2;
     font-weight: 700;
     cursor: pointer;
-    min-height: 32px;
+    min-height: 44px;
+    box-sizing: border-box;
     transition: background-color var(--transition-fast);
   }
 
@@ -915,6 +916,7 @@
   .cartCountRow {
     gap: 0.35rem;
     flex-wrap: wrap;
+    align-items: center;
   }
 
   .cartTotalBox {
