@@ -9,11 +9,6 @@
 [data-theme="public"] {
   color-scheme: light;
 
-  /* --- Tipografías Oficiales --- */
-  --font-heading: 'Playfair Display Variable', Georgia, 'Times New Roman', serif;
-  --font-sans: 'Outfit Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-mono: 'JetBrains Mono Variable', ui-monospace, 'SF Mono', Consolas, monospace;
-
   /* --- Fondos y Superficies --- */
   --bg-page: #F4EFE4;
   --bg-surface: #FBF8F1;
@@ -87,57 +82,6 @@
   --ticket-sold-bg: #E8ECE9;
   --ticket-sold-border: #D0D7D2;
   --ticket-sold-text: #5F6673;
-
-  /* --- Radios de Borde --- */
-  --radius-sm: 10px;
-  --radius-md: 14px;
-  --radius-lg: 20px;
-  --radius-xl: 28px;
-  --radius-full: 999px;
-
-  /* --- Sombras Cálidas (Base rgba(15,46,29,α), nunca negro puro) --- */
-  --shadow-sm: 0 2px 6px rgba(15, 46, 29, 0.08);
-  --shadow-md: 0 6px 16px rgba(15, 46, 29, 0.12);
-  --shadow-lg: 0 12px 32px rgba(15, 46, 29, 0.16);
-  --shadow-glow: 0 0 24px rgba(245, 166, 35, 0.35);
-  --shadow-glow-amber: 0 0 24px rgba(245, 166, 35, 0.35);
-
-  /* --- Escala de Espaciado (4px) --- */
-  --space-1: 4px;
-  --space-2: 8px;
-  --space-3: 12px;
-  --space-4: 16px;
-  --space-6: 24px;
-  --space-8: 32px;
-  --space-12: 48px;
-  --space-16: 64px;
-  --space-24: 96px;
-
-  /* --- Escala Canónica de Capas (z-index) --- */
-  --z-base: 0;
-  --z-raised: 10;
-  --z-sticky: 100;
-  --z-dropdown: 500;
-  --z-whatsapp: 900;
-  --z-modal-backdrop: 1000;
-  --z-modal-card: 1010;
-  --z-toast: 2000;
-
-  /* Alias de compatibilidad semántica */
-  --z-modal: var(--z-modal-backdrop);
-  --z-navbar: var(--z-sticky);
-  --z-lightbox: var(--z-modal-backdrop);
-  --z-cart: var(--z-sticky);
-
-  /* --- Alturas --- */
-  --navbar-h: 72px;
-
-  /* --- Transiciones Modernas con Easing (.2, .7, .2, 1) --- */
-  --transition-easing: cubic-bezier(0.2, 0.7, 0.2, 1);
-  --transition-fast: 150ms cubic-bezier(0.2, 0.7, 0.2, 1);
-  --transition-base: 250ms cubic-bezier(0.2, 0.7, 0.2, 1);
-  --transition-normal: var(--transition-base);
-  --transition-slow: 400ms cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
 /* --- Configuración Base del Contenedor Raíz Público --- */

@@ -57,6 +57,7 @@
   --shadow-md: 0 6px 16px rgba(15, 46, 29, 0.12);
   --shadow-lg: 0 12px 32px rgba(15, 46, 29, 0.16);
   --shadow-glow-amber: 0 0 24px rgba(245, 166, 35, 0.35);
+  --shadow-glow: var(--shadow-glow-amber);
 
   /* --- Superficies y overlays compartidos --- */
   --overlay-neutral-subtle: rgba(156, 181, 171, 0.15);
