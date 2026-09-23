@@ -125,3 +125,25 @@ textarea {
 :focus:not(:focus-visible) {
   outline: none;
 }
+
+/* --- Animaciones Canónicas Globales (Modales, Overlays y Transiciones) --- */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.96) translateY(8px);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}
+

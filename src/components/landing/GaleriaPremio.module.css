@@ -139,15 +139,6 @@
   box-sizing: border-box;
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
 .lightboxContent {
   position: relative;
   max-width: calc(100vw - 12rem);

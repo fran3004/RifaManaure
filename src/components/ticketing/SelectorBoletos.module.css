@@ -751,10 +751,10 @@
   overflow-y: auto;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
-  animation: fadeIn 150ms ease;
+  animation: fadeInSubtle 150ms ease;
 }
 
-@keyframes fadeIn {
+@keyframes fadeInSubtle {
   from {
     opacity: 0;
     transform: translateY(-4px);

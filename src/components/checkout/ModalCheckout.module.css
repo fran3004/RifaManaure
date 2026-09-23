@@ -17,15 +17,6 @@
   animation: fadeIn 180ms ease-out;
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
 .modalCard {
   width: 100%;
   max-width: 620px;
