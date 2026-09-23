@@ -10,12 +10,12 @@ Este directorio (`supabase/migrations/`) constituye la **única fuente de verdad
    ```
    NNN_<descripcion_tecnica>.sql
    ```
-2. **Determinismo:** El motor de ordenamiento lexicográfico procesa los archivos en estricto orden alfanumérico (`001`, `002`, ..., `036`).
-3. **Nuevas Migraciones:** Cualquier migración subsiguiente debe continuar la serie iniciando en `037_<descripcion_funcional>.sql`.
+2. **Determinismo:** El motor de ordenamiento lexicográfico procesa los archivos en estricto orden alfanumérico (`001`, `002`, ..., `037`).
+3. **Nuevas Migraciones:** Cualquier migración subsiguiente debe continuar la serie iniciando en `038_<descripcion_funcional>.sql`.
 
 ---
 
-## 2. Inventario Canónico de Migraciones (001 a 036)
+## 2. Inventario Canónico de Migraciones (001 a 037)
 
 | # | Archivo | Alcance Técnico y Objetos de Negocio |
 |---|---|---|
@@ -56,6 +56,7 @@ Este directorio (`supabase/migrations/`) constituye la **única fuente de verdad
 | **034** | `034_faq_admin_policies.sql` | Políticas RLS administrativas completas para creación, edición y borrado de preguntas frecuentes. |
 | **035** | `035_gallery_management.sql` | Tabla `gallery_items`, bucket `gallery-images`, políticas RLS y semillas fotográficas de alta resolución. |
 | **036** | `036_gallery_categories.sql` | Tabla `gallery_categories`, gestión dinámica de categorías de galería fotográfica con RLS y ordenamiento. |
+| **037** | `037_fix_approve_reject_order_payment_scoping.sql` | **(DB-01 / DB-10)** Corrección transaccional de `approve_order_payment` y `reject_order_payment`: acotación estricta a `WHERE order_id = p_order_id`, bloqueo pesimista `FOR UPDATE`, validación de existencia de boletos y coherencia de recuento. |
 
 ---
 
@@ -91,5 +92,5 @@ El archivo consolidado `EJECUTAR_EN_SUPABASE_TODO_PENDIENTE.sql` es un **artefac
 
 Para configurar una base de datos idéntica a la de producción en un entorno nuevo:
 1. Conectar a la base de datos PostgreSQL de Supabase.
-2. Ejecutar secuencialmente los 36 archivos numerados (`001_initial_schema.sql` a `036_gallery_categories.sql`) en orden alfanumérico.
+2. Ejecutar secuencialmente los 37 archivos numerados (`001_initial_schema.sql` a `037_fix_approve_reject_order_payment_scoping.sql`) en orden alfanumérico.
 3. Las herramientas CLI (`supabase db push` o scripts de CI/CD) deben alimentarse directamente de `supabase/migrations/` en orden lexicográfico.
