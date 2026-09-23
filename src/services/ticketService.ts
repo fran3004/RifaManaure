@@ -1,13 +1,5 @@
 import { supabase } from '@/lib/supabase';
-import type { TicketRow, RaffleRow } from '@/types/raffle.types';
-
-export interface ReserveTicketsResult {
-  success: boolean;
-  reservedCount: number;
-  failedNumbers: string[];
-  reservationExpiresAt: string | null;
-  error?: string;
-}
+import type { TicketRow, RaffleRow, PaymentMethod } from '@/types/raffle.types';
 
 export interface BuyerRegistrationData {
   fullName: string;
@@ -89,59 +81,6 @@ export async function getTickets(raffleId: string): Promise<TicketRow[]> {
 }
 
 /**
- * Reserva boletos de forma atómica en PostgreSQL mediante la función RPC reserve_tickets.
- */
-export async function reserveTickets(
-  raffleId: string,
-  ticketNumbers: string[],
-  buyerId: string,
-  durationMinutes?: number
-): Promise<ReserveTicketsResult> {
-  try {
-    const { data, error } = await supabase.rpc('reserve_tickets', {
-      p_raffle_id: raffleId,
-      p_ticket_numbers: ticketNumbers,
-      p_buyer_id: buyerId,
-      p_duration_minutes: durationMinutes,
-    });
-
-    if (error) {
-      console.error('Error RPC al reservar boletos:', error);
-      return {
-        success: false,
-        reservedCount: 0,
-        failedNumbers: ticketNumbers,
-        reservationExpiresAt: null,
-        error: error.message,
-      };
-    }
-
-    const res = data as {
-      success: boolean;
-      reserved_count: number;
-      failed_numbers: string[];
-      reservation_expires_at: string;
-    };
-
-    return {
-      success: res.success,
-      reservedCount: res.reserved_count,
-      failedNumbers: res.failed_numbers || [],
-      reservationExpiresAt: res.reservation_expires_at,
-    };
-  } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : 'Error inesperado al reservar boletos';
-    return {
-      success: false,
-      reservedCount: 0,
-      failedNumbers: ticketNumbers,
-      reservationExpiresAt: null,
-      error: message,
-    };
-  }
-}
-
-/**
  * Registra o actualiza los datos del comprador.
  */
 export async function registerBuyer(buyerData: BuyerRegistrationData): Promise<string | null> {
@@ -184,7 +123,7 @@ export async function createOrder(
   buyerIdOrData: string | BuyerRegistrationData,
   ticketNumbers: string[],
   _clientTotalAmountIgnored?: number,
-  paymentMethod: 'wompi' | 'bold' | 'mercadopago' | 'transfer_manual' | 'cash' = 'transfer_manual',
+  paymentMethod: PaymentMethod = 'transfer_manual',
   contactPreference: 'whatsapp' | 'email' | 'both' = 'both',
   buyerDataParam?: BuyerRegistrationData
 ): Promise<CreateOrderResult> {

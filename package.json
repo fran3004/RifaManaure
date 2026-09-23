@@ -12,7 +12,6 @@
     "format:check": "prettier --check .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "images:build": "node scripts/build-images.mjs",
     "preview": "vite preview",
     "supabase": "supabase"
   },
