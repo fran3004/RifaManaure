@@ -812,7 +812,7 @@ export const TicketsView: React.FC = () => {
       {/* ========================================================================= */}
       {isDetailModalOpen && selectedTicket && (
         <div className={styles.adminModalBackdrop} onClick={handleCloseDetail}>
-          <div className={styles.adminModalCard} onClick={(e) => e.stopPropagation()}>
+          <div className={`${styles.adminModalCard} ${styles.ticketDetailModalCard}`} onClick={(e) => e.stopPropagation()}>
             <div className={styles.detailHeader}>
               <div className={styles.detailHeaderGroup}>
                 <div className={styles.ticketNumberBadge}>
