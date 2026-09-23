@@ -280,7 +280,8 @@ function formatGalleryError(rawError: string): string {
     rawError.includes("Could not find the table 'public.gallery_items'") ||
     rawError.includes('relation "gallery_items" does not exist')
   ) {
-    return "La tabla 'public.gallery_items' no existe en Supabase. Ejecuta la migración 035_gallery_management.sql en el SQL Editor de tu proyecto.";
+    console.warn('[galleryService] Tabla gallery_items no disponible en backend:', rawError);
+    return 'No fue posible acceder a los elementos de la galería. El servicio no está disponible temporalmente.';
   }
 
   if (
@@ -288,7 +289,8 @@ function formatGalleryError(rawError: string): string {
     rawError.includes('permission denied') ||
     rawError.includes('new row violates')
   ) {
-    return 'Permisos denegados por seguridad (RLS): debes ejecutar la migración 035_gallery_management.sql en el SQL Editor y contar con rol de administrador activo.';
+    console.warn('[galleryService] Permisos insuficientes para gestionar la galería:', rawError);
+    return 'Permisos denegados: tu cuenta no cuenta con privilegios de administrador autorizados para gestionar la galería.';
   }
 
   if (
@@ -296,11 +298,13 @@ function formatGalleryError(rawError: string): string {
     rawError.includes("Could not find the table 'public.gallery_categories'") ||
     rawError.includes('relation "gallery_categories" does not exist')
   ) {
-    return "La tabla 'public.gallery_categories' no existe en Supabase. Ejecuta la migración 036_gallery_categories.sql en el SQL Editor de tu proyecto.";
+    console.warn('[galleryService] Tabla gallery_categories no disponible en backend:', rawError);
+    return 'No fue posible cargar las categorías de la galería. Por favor intenta más tarde.';
   }
 
   if (rawError.includes('bucket not found') || rawError.includes('gallery-images')) {
-    return "El bucket 'gallery-images' no existe o no tiene permisos. Ejecuta la migración 035_gallery_management.sql para habilitar Supabase Storage.";
+    console.warn('[galleryService] Almacenamiento de imágenes no disponible:', rawError);
+    return 'El almacenamiento de imágenes de la galería no se encuentra disponible temporalmente.';
   }
 
   return rawError;

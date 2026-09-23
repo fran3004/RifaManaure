@@ -16,7 +16,8 @@ function formatFaqError(rawError: string): string {
     rawError.includes("Could not find the table 'public.faq_items'") ||
     rawError.includes('relation "faq_items" does not exist')
   ) {
-    return "La tabla 'public.faq_items' no existe en Supabase. Ejecuta la migración 032_faq_items.sql en el SQL Editor de tu proyecto.";
+    console.warn('[faqService] Tabla faq_items no disponible en backend:', rawError);
+    return 'No fue posible acceder al servicio de preguntas frecuentes. Por favor intenta más tarde.';
   }
 
   if (
@@ -24,7 +25,8 @@ function formatFaqError(rawError: string): string {
     rawError.includes('permission denied') ||
     rawError.includes('new row violates')
   ) {
-    return 'Permisos denegados por seguridad (RLS): debes ejecutar la migración 034_faq_admin_policies.sql en el SQL Editor de Supabase y contar con rol de administrador activo.';
+    console.warn('[faqService] Permisos insuficientes para gestionar preguntas frecuentes:', rawError);
+    return 'Permisos denegados: tu cuenta no cuenta con privilegios de administrador autorizados para modificar preguntas frecuentes.';
   }
 
   return rawError;

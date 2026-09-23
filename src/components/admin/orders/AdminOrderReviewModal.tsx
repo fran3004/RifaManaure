@@ -10,6 +10,7 @@ import {
   dispatchOrderNotifications,
   getOrderNotificationLogs,
   generateOrderNotification,
+  NOTIFICATION_EVENT_TYPES,
   type GeneratedNotification,
   type NotificationLogRow,
 } from '@/services/notificationService';
@@ -192,7 +193,7 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
         const dispatchResult = await dispatchOrderNotifications({
           orderId: order.id,
           contactPreference: 'whatsapp',
-          eventType: 'PAYMENT_APPROVED',
+          eventType: NOTIFICATION_EVENT_TYPES.PAYMENT_APPROVED,
           notificationData: {
             reference: order.reference,
             buyerName: order.buyers?.full_name || 'Comprador',
@@ -253,7 +254,7 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
         const dispatchResult = await dispatchOrderNotifications({
           orderId: order.id,
           contactPreference: 'whatsapp',
-          eventType: 'PAYMENT_REJECTED',
+          eventType: NOTIFICATION_EVENT_TYPES.PAYMENT_REJECTED,
           notificationData: {
             reference: order.reference,
             buyerName: order.buyers?.full_name || 'Comprador',

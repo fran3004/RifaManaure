@@ -11,8 +11,8 @@ Plataforma web de alta concurrencia para la promoción ecoturística del municip
 - **Enrutamiento:** [React Router 7](https://reactrouter.com/) con code splitting (`React.lazy` y `Suspense`)
 - **Estilos:** CSS Modules puros con variables CSS de diseño atómico (sin dependencias externas de CSS)
 - **Base de Datos & Backend:** [Supabase](https://supabase.com/) (PostgreSQL 15, Row Level Security, Storage privado y Auth)
-- **Lógica Transaccional:** Funciones RPC atómicas con `pg_advisory_xact_lock` (`reserve_tickets`, `confirm_order_payment`, `reject_order_payment`, `register_winner`)
-- **Edge Functions (Deno):** Manejo de webhooks, despacho transaccional, firma de medios (`cloudinary-sign`) y cron de liberación de boletos expirados
+- **Lógica Transaccional:** Funciones RPC atómicas con `pg_advisory_xact_lock` (`create_order_secure`, `approve_order_payment`, `reject_order_payment`, `register_winner`)
+- **Edge Functions (Deno):** Firma segura de medios (`cloudinary-sign`) y cron de liberación de reservas expiradas (`cron-release-expired-reservations`)
 - **Gestión de Medios:** [Cloudinary](https://cloudinary.com/) (Almacenamiento seguro, transformación y entrega optimizada con `f_auto,q_auto` para premios, aliados y actas)
 - **Notificaciones Transaccionales:** WhatsApp Business (vía Evolution API) y trazabilidad completa en auditoría
 - **Infraestructura de Despliegue:** [Vercel](https://vercel.com/) (SPA con enrutamiento dinámico rewrites, cabeceras CSP y caché en `vercel.json`)
@@ -134,8 +134,8 @@ RifaManaure/
 │   └── main.tsx                # Punto de entrada de React 19
 │
 ├── supabase/
-│   ├── functions/              # Edge Functions en Deno (emails, webhooks, cron de reservas)
-│   └── migrations/             # Migraciones SQL estructuradas (001 a 027) con políticas RLS
+│   ├── functions/              # Edge Functions en Deno (firma de medios y cron de reservas)
+│   └── migrations/             # Migraciones SQL estructuradas (001 a 036) con políticas RLS
 │
 ├── .gitignore                  # Reglas de exclusión de Git (protección estricta de .env)
 ├── .oxlintrc.json              # Configuración de Oxlint con plugins y reglas a11y
@@ -150,13 +150,13 @@ RifaManaure/
 ## 7. Base de Datos y Seguridad (Supabase)
 
 1. **Row Level Security (RLS):** Todas las tablas cuentan con RLS activo. El usuario público solo puede leer información no sensible de rifas y números de boletos libres.
-2. **Prevención de Condiciones de Carrera (Doble Venta):** La función `reserve_tickets` adquiere un bloqueo pesimista transaccional (`pg_advisory_xact_lock`) por ID de rifa para serializar solicitudes de compra concurrentes.
-3. **Liberación Automática de Boletos Expirados:** Las reservas temporales caducan a los 15 minutos si no se registra comprobante, reactivando los números automáticamente.
+2. **Prevención de Condiciones de Carrera (Doble Venta):** Las funciones de ordenamiento y reserva adquieren bloqueo pesimista transaccional (`pg_advisory_xact_lock`) por ID de rifa para serializar solicitudes de compra concurrentes.
+3. **Liberación Automática de Boletos Expirados:** Las reservas temporales caducan a los 10 minutos (configurables vía `system_settings`) si no se registra comprobante, reactivando los números automáticamente.
 4. **Almacenamiento de Comprobantes:** Los soportes de pago se guardan en el bucket privado `payment-proofs` y solo se visualizan mediante URLs firmadas con vencimiento de 15 minutos (`createSignedUrl`).
 5. **Regeneración de Tipos de Base de Datos:**
    Para sincronizar los tipos TypeScript cuando se apliquen nuevas migraciones SQL en Supabase:
    ```bash
-   supabase gen types typescript --project-id <TU_PROYECTO_ID> > src/database.types.ts
+   supabase gen types typescript --project-id <TU_PROYECTO_ID> > src/types/database.types.ts
    ```
 
 ---

@@ -28,7 +28,22 @@ import type { Database, Json } from '@/database.types';
 
 export type NotificationLogRow = Database['public']['Tables']['notification_logs']['Row'];
 export type NotificationChannel = 'whatsapp';
-export type NotificationEventType = 'payment_received' | 'payment_approved' | 'payment_rejected';
+
+export const NOTIFICATION_EVENT_TYPES = {
+  PAYMENT_RECEIVED: 'payment_received',
+  PAYMENT_APPROVED: 'payment_approved',
+  PAYMENT_REJECTED: 'payment_rejected',
+} as const;
+
+export type NotificationEventType =
+  (typeof NOTIFICATION_EVENT_TYPES)[keyof typeof NOTIFICATION_EVENT_TYPES];
+
+export type NotificationEventInputType =
+  | NotificationEventType
+  | 'PAYMENT_RECEIVED'
+  | 'PAYMENT_APPROVED'
+  | 'PAYMENT_REJECTED';
+
 export type NotificationStatus = 'pending' | 'sent' | 'failed' | 'delivered' | 'bounced';
 
 export interface OrderNotificationData {
@@ -60,7 +75,7 @@ export interface GeneratedNotification {
 export interface DispatchNotificationOptions {
   orderId: string;
   contactPreference?: ContactPreference | string;
-  eventType: 'PAYMENT_RECEIVED' | 'PAYMENT_APPROVED' | 'PAYMENT_REJECTED' | NotificationEventType;
+  eventType: NotificationEventInputType;
   notificationData: OrderNotificationData;
 }
 

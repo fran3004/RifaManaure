@@ -50,7 +50,8 @@ function formatSettingsRpcError(rawError: string): string {
     rawError.includes('Could not find the function') ||
     rawError.includes('admin_update_system_settings')
   ) {
-    return "La función 'admin_update_system_settings' no está instalada en tu base de datos de Supabase. Recuerda ejecutar la migración 022_system_settings_management.sql en el SQL Editor.";
+    console.warn('[settingsService] RPC admin_update_system_settings no disponible:', rawError);
+    return 'No fue posible actualizar la configuración del sistema. El servicio no está disponible temporalmente.';
   }
 
   if (rawError.includes('Acceso denegado') || rawError.includes('solo administradores')) {

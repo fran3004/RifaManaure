@@ -9,6 +9,7 @@ import {
   getOrderNotificationLogs,
   dispatchOrderNotifications,
   retryNotification,
+  NOTIFICATION_EVENT_TYPES,
   type OrderNotificationData,
 } from '@/services/notificationService';
 import { supabase } from '@/lib/supabase';
@@ -54,6 +55,12 @@ describe('Servicio de Notificaciones por WhatsApp (src/services/notificationServ
       expect(normalizeEventType('PAYMENT_RECEIVED')).toBe('payment_received');
       expect(normalizeEventType('receipt_received')).toBe('payment_received');
       expect(normalizeEventType('unknown_event')).toBe('payment_received');
+    });
+
+    it('debe exponer las constantes canónicas centralizadas en NOTIFICATION_EVENT_TYPES', () => {
+      expect(NOTIFICATION_EVENT_TYPES.PAYMENT_RECEIVED).toBe('payment_received');
+      expect(NOTIFICATION_EVENT_TYPES.PAYMENT_APPROVED).toBe('payment_approved');
+      expect(NOTIFICATION_EVENT_TYPES.PAYMENT_REJECTED).toBe('payment_rejected');
     });
   });
 

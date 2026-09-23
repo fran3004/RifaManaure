@@ -758,6 +758,12 @@ export type Database = {
         };
         Returns: boolean;
       };
+      is_superadmin: {
+        Args: {
+          p_user_id?: string;
+        };
+        Returns: boolean;
+      };
       reserve_tickets: {
         Args: {
           p_raffle_id: string;
@@ -771,14 +777,6 @@ export type Database = {
         Args: Record<string, never>;
         Returns: number;
       };
-      submit_order_receipt: {
-        Args: {
-          p_order_id: string;
-          p_receipt_url: string;
-          p_payment_reference?: string;
-        };
-        Returns: Json;
-      };
       approve_order_payment: {
         Args: {
           p_order_id: string;
@@ -791,14 +789,6 @@ export type Database = {
           p_reason?: string;
         };
         Returns: Json;
-      };
-      confirm_order_payment: {
-        Args: {
-          p_order_id: string;
-          p_gateway_id?: string;
-          p_gateway_data?: Json;
-        };
-        Returns: boolean;
       };
       cancel_order: {
         Args: {

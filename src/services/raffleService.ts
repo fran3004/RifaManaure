@@ -121,7 +121,8 @@ function formatRaffleRpcError(rawError: string, functionName: string): string {
     rawError.includes('Could not find the function') ||
     rawError.includes('function public.admin_')
   ) {
-    return `La función '${functionName}' no está instalada en tu base de datos de Supabase. Recuerda ejecutar la migración 020_admin_raffle_management.sql (o el archivo maestro EJECUTAR_EN_SUPABASE_TODO_PENDIENTE.sql) en el SQL Editor de tu consola de Supabase.`;
+    console.warn(`[raffleService] RPC '${functionName}' no disponible en el backend:`, rawError);
+    return 'El servicio de administración de rifas no está disponible en este momento. Por favor contacta al soporte técnico.';
   }
 
   if (rawError.includes('Acceso denegado') || rawError.includes('solo administradores')) {
