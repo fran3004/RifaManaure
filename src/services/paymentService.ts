@@ -925,29 +925,10 @@ export async function cancelOrder(
       return { success: false, error: res.error || 'Error al cancelar la orden.' };
     }
 
-    // Fallback directo
-    await supabase
-      .from('orders')
-      .update({
-        status: 'cancelled',
-        rejection_reason: reason,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', orderId);
-
-    await supabase
-      .from('tickets')
-      .update({
-        status: 'available',
-        reserved_at: null,
-        reservation_expires_at: null,
-        buyer_id: null,
-        order_id: null,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('order_id', orderId);
-
-    return { success: true, message: 'Orden cancelada.' };
+    return {
+      success: false,
+      error: error?.message || 'No fue posible ejecutar la cancelación de la orden.',
+    };
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Error al cancelar la orden';
     return { success: false, error: msg };
