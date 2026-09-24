@@ -708,3 +708,55 @@ tr.userRowSelf,
   padding: 2.5rem;
   color: var(--text-secondary, #41564a);
 }
+
+.readonlyAction {
+  display: inline-block;
+  color: var(--text-muted, #8ba194);
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 0.25rem 0.75rem;
+  user-select: none;
+}
+
+.confirmUserCard {
+  background: var(--bg-surface-elevated, #f4f7f5);
+  border: 1px solid var(--border-subtle, #dce4df);
+  border-radius: var(--radius-md, 12px);
+  padding: 0.85rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin: 0.75rem 0;
+  text-align: left;
+}
+
+.confirmUserName {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--text-primary, #16261c);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.confirmUserEmail {
+  font-size: 0.85rem;
+  color: var(--text-secondary, #41564a);
+  font-family: var(--font-mono, monospace);
+}
+
+.superadminWarningNotice {
+  background-color: var(--admin-error-bg, #fbe9e1);
+  border: 1px solid var(--admin-error, #b42318);
+  border-radius: var(--radius-md, 8px);
+  padding: 0.65rem 0.85rem;
+  color: var(--admin-error, #b42318);
+  font-size: 0.825rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  text-align: left;
+}
+

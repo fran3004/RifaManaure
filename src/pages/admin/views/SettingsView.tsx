@@ -25,6 +25,8 @@ import {
   RefreshCw,
   UserCheck,
   UserX,
+  AlertTriangle,
+  ShieldAlert,
 } from 'lucide-react';
 import { getSystemSettings, updateSystemSettingsAdmin } from '@/services/settingsService';
 import {
@@ -242,6 +244,12 @@ export const SettingsView: React.FC = () => {
   const [isLoadingUsers, setIsLoadingUsers] = useState<boolean>(true);
   const [togglingUserId, setTogglingUserId] = useState<string | null>(null);
   const [isInviteModalOpen, setIsInviteModalOpen] = useState<boolean>(false);
+  const [confirmToggleUser, setConfirmToggleUser] = useState<{
+    userItem: AdminUserItem;
+    targetState: boolean;
+  } | null>(null);
+
+  const isSuperAdmin = adminProfile?.role === 'superadmin';
 
   const loadAdminUsers = useCallback(async () => {
     setIsLoadingUsers(true);
@@ -287,8 +295,17 @@ export const SettingsView: React.FC = () => {
     };
   }, []);
 
-  const handleToggleUserStatus = async (userItem: AdminUserItem) => {
-    // REGLA CRÍTICA: Impedir autodesactivación en frontend
+  const handleOpenToggleModal = (userItem: AdminUserItem) => {
+    // 1. REGLA ESTRICTA: Solo un superadministrador puede modificar estados
+    if (!isSuperAdmin) {
+      setNotification({
+        type: 'error',
+        message: 'Acceso denegado: solo un superadministrador activo puede modificar el estado de un administrador.',
+      });
+      return;
+    }
+
+    // 2. REGLA CRÍTICA: Impedir autodesactivación en frontend
     const isSelf =
       (Boolean(user?.id) && userItem.user_id === user?.id) ||
       (Boolean(user?.email) && userItem.email.toLowerCase() === user?.email?.toLowerCase());
@@ -301,30 +318,31 @@ export const SettingsView: React.FC = () => {
       return;
     }
 
-    const nextState = !userItem.is_active;
-    const actionLabel = nextState ? 'activar' : 'desactivar';
+    setConfirmToggleUser({
+      userItem,
+      targetState: !userItem.is_active,
+    });
+  };
 
-    if (
-      !window.confirm(
-        `¿Estás seguro de que deseas ${actionLabel} el acceso al administrador "${userItem.email}"?`
-      )
-    ) {
-      return;
-    }
+  const handleExecuteToggleUserStatus = async () => {
+    if (!confirmToggleUser) return;
+    const { userItem, targetState } = confirmToggleUser;
+    const actionLabel = targetState ? 'activar' : 'desactivar';
 
     setTogglingUserId(userItem.id);
     try {
-      const res = await toggleAdminUserStatus(userItem.id, nextState);
+      const res = await toggleAdminUserStatus(userItem.id, targetState);
       if (res.success) {
         setAdminUsers((prev) =>
-          prev.map((u) => (u.id === userItem.id ? { ...u, is_active: nextState } : u))
+          prev.map((u) => (u.id === userItem.id ? { ...u, is_active: targetState } : u))
         );
         setNotification({
           type: 'success',
           message:
             res.message ||
-            `Acceso para ${userItem.email} ${nextState ? 'activado' : 'desactivado'} correctamente.`,
+            `Acceso para ${userItem.email} ${targetState ? 'activado' : 'desactivado'} correctamente.`,
         });
+        setConfirmToggleUser(null);
       } else {
         setNotification({
           type: 'error',
@@ -919,7 +937,7 @@ export const SettingsView: React.FC = () => {
                                   <UserCheck size={13} />
                                   <span>Tu Cuenta</span>
                                 </button>
-                              ) : (
+                              ) : isSuperAdmin ? (
                                 <button
                                   type="button"
                                   className={`${styles.statusToggleBtn} ${
@@ -927,7 +945,7 @@ export const SettingsView: React.FC = () => {
                                       ? styles.statusToggleActive
                                       : styles.statusToggleInactive
                                   }`}
-                                  onClick={() => void handleToggleUserStatus(item)}
+                                  onClick={() => handleOpenToggleModal(item)}
                                   disabled={isToggling}
                                   title={
                                     item.is_active
@@ -944,6 +962,13 @@ export const SettingsView: React.FC = () => {
                                   )}
                                   <span>{item.is_active ? 'Desactivar' : 'Activar'}</span>
                                 </button>
+                              ) : (
+                                <span
+                                  className={styles.readonlyAction}
+                                  title="Solo los superadministradores pueden modificar el estado de otros administradores"
+                                >
+                                  —
+                                </span>
                               )}
                             </td>
                           </tr>
@@ -981,6 +1006,143 @@ export const SettingsView: React.FC = () => {
             });
           }}
         />
+
+        {/* Modal de Confirmación para Suspender / Reactivar Acceso */}
+        {confirmToggleUser && (
+          <div
+            className={adminStyles.adminModalBackdrop}
+            onClick={() => !togglingUserId && setConfirmToggleUser(null)}
+            role="dialog"
+            aria-modal="true"
+          >
+            <div
+              className={`${adminStyles.adminModalCard} ${adminStyles.narrowModalCard}`}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div
+                className={
+                  confirmToggleUser.targetState
+                    ? adminStyles.successModalHeader
+                    : adminStyles.dangerModalHeader
+                }
+              >
+                <div
+                  className={
+                    confirmToggleUser.targetState
+                      ? adminStyles.successModalIcon
+                      : adminStyles.dangerModalIcon
+                  }
+                >
+                  {confirmToggleUser.targetState ? (
+                    <UserCheck size={22} />
+                  ) : (
+                    <AlertTriangle size={22} />
+                  )}
+                </div>
+                <div>
+                  <h3 className={adminStyles.modalTitle} style={{ margin: 0 }}>
+                    {confirmToggleUser.targetState
+                      ? 'Reactivar Acceso Administrativo'
+                      : 'Suspender Acceso Administrativo'}
+                  </h3>
+                  <span
+                    className={
+                      confirmToggleUser.targetState
+                        ? adminStyles.successModalSubtitle
+                        : adminStyles.dangerModalSubtitle
+                    }
+                  >
+                    {confirmToggleUser.targetState
+                      ? 'Habilitación inmediata de credenciales'
+                      : 'Revocación inmediata de permisos'}
+                  </span>
+                </div>
+              </div>
+
+              <div className={styles.confirmUserCard}>
+                <div className={styles.confirmUserName}>
+                  <span>{confirmToggleUser.userItem.full_name || 'Sin nombre registrado'}</span>
+                  <span
+                    className={
+                      confirmToggleUser.userItem.role === 'superadmin'
+                        ? styles.roleBadgeSuperadmin
+                        : confirmToggleUser.userItem.role === 'auditor'
+                          ? styles.roleBadgeAuditor
+                          : styles.roleBadgeAdmin
+                    }
+                  >
+                    {confirmToggleUser.userItem.role.toUpperCase()}
+                  </span>
+                </div>
+                <span className={styles.confirmUserEmail}>{confirmToggleUser.userItem.email}</span>
+              </div>
+
+              <p className={adminStyles.modalParagraph}>
+                {confirmToggleUser.targetState ? (
+                  <>
+                    ¿Confirmas que deseas <strong>reactivar</strong> a este administrador?
+                    Podrá volver a iniciar sesión en el panel y ejecutar operaciones según su rol.
+                  </>
+                ) : (
+                  <>
+                    ¿Confirmas que deseas <strong>suspender el acceso</strong> de este administrador?
+                    Su sesión activa será invalidada de inmediato y no podrá ingresar al panel hasta que un
+                    Superadministrador lo reactive.
+                  </>
+                )}
+              </p>
+
+              {!confirmToggleUser.targetState &&
+                confirmToggleUser.userItem.role === 'superadmin' && (
+                  <div className={styles.superadminWarningNotice}>
+                    <ShieldAlert size={18} />
+                    <span>
+                      Atención: Esta cuenta posee rol de Superadministrador. Asegúrate de contar con
+                      otro Superadministrador activo en el sistema.
+                    </span>
+                  </div>
+                )}
+
+              <div className={adminStyles.modalFooterActions} style={{ marginTop: '1rem' }}>
+                <button
+                  type="button"
+                  className={adminStyles.btnSecondary}
+                  onClick={() => setConfirmToggleUser(null)}
+                  disabled={Boolean(togglingUserId)}
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  className={
+                    confirmToggleUser.targetState
+                      ? adminStyles.btnPrimary
+                      : adminStyles.btnDanger
+                  }
+                  onClick={() => void handleExecuteToggleUserStatus()}
+                  disabled={Boolean(togglingUserId)}
+                >
+                  {togglingUserId ? (
+                    <>
+                      <Loader2 size={16} className="animate-spin" />
+                      <span>Procesando...</span>
+                    </>
+                  ) : confirmToggleUser.targetState ? (
+                    <>
+                      <UserCheck size={16} />
+                      <span>Sí, reactivar acceso</span>
+                    </>
+                  ) : (
+                    <>
+                      <UserX size={16} />
+                      <span>Sí, suspender acceso</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
