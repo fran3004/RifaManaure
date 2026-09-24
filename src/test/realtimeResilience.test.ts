@@ -292,7 +292,7 @@ describe('DB-02: Suscripción y Prevención de Fugas de Memoria en Canales', () 
     };
 
     const raffleId = 'raffle-123';
-    const channelName = `tickets_realtime_${raffleId}`;
+    const channelName = `ticket_public_state_realtime_${raffleId}`;
 
     // Simular creación del canal
     const createdChannel = mockSupabase
@@ -302,7 +302,7 @@ describe('DB-02: Suscripción y Prevención de Fugas de Memoria en Canales', () 
         {
           event: '*',
           schema: 'public',
-          table: 'tickets',
+          table: 'ticket_public_state',
           filter: `raffle_id=eq.${raffleId}`,
         },
         () => {}
@@ -315,7 +315,7 @@ describe('DB-02: Suscripción y Prevención de Fugas de Memoria en Canales', () 
       expect.objectContaining({
         event: '*',
         schema: 'public',
-        table: 'tickets',
+        table: 'ticket_public_state',
         filter: `raffle_id=eq.${raffleId}`,
       }),
       expect.any(Function)
@@ -339,7 +339,7 @@ describe('DB-02: Suscripción y Prevención de Fugas de Memoria en Canales', () 
     expect(() => {
       mockSubscribeWithStatus((status, err) => {
         if (err || status === 'CHANNEL_ERROR') {
-          console.warn(`[Realtime] Canal tickets_realtime_test:`, err?.message || status);
+          console.warn(`[Realtime] Canal ticket_public_state_realtime_test:`, err?.message || status);
           handledGracefully = true;
         }
       });
@@ -347,7 +347,7 @@ describe('DB-02: Suscripción y Prevención de Fugas de Memoria en Canales', () 
 
     expect(handledGracefully).toBe(true);
     expect(consoleWarnSpy).toHaveBeenCalledWith(
-      expect.stringContaining('[Realtime] Canal tickets_realtime_test:'),
+      expect.stringContaining('[Realtime] Canal ticket_public_state_realtime_test:'),
       expect.stringContaining('Subscription timed out or publication empty')
     );
 

@@ -1,5 +1,9 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import type { TicketRow, RaffleRow, WinnerWithDetails } from '@/types/raffle.types';
+import type {
+  TicketPublicStateRow,
+  RaffleRow,
+  WinnerWithDetails,
+} from '@/types/raffle.types';
 import { getActiveRaffle, getTickets } from '@/services/ticketService';
 import { getWinnerForRaffle } from '@/services/winnerService';
 import { useSystemSettings } from '@/hooks/useSystemSettings';
@@ -41,7 +45,7 @@ export const TicketCartProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const cachedRaffle = getCachedRaffle();
   const [raffle, setRaffle] = useState<RaffleRow | null>(cachedRaffle);
   const [winner, setWinner] = useState<WinnerWithDetails | null>(getCachedWinner);
-  const [tickets, setTickets] = useState<TicketRow[]>([]);
+  const [tickets, setTickets] = useState<TicketPublicStateRow[]>([]);
   const [selectedTickets, setSelectedTickets] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(() => !cachedRaffle);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState<boolean>(false);
@@ -239,18 +243,18 @@ export const TicketCartProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     if (!raffle?.id) return;
 
     const channel = supabase
-      .channel(`tickets_realtime_${raffle.id}`)
+      .channel(`ticket_public_state_realtime_${raffle.id}`)
       .on(
         'postgres_changes',
         {
           event: '*',
           schema: 'public',
-          table: 'tickets',
+          table: 'ticket_public_state',
           filter: `raffle_id=eq.${raffle.id}`,
         },
         (payload) => {
           if (payload.eventType === 'UPDATE') {
-            const updated = payload.new as TicketRow;
+            const updated = payload.new as TicketPublicStateRow;
             setTickets((prev) => prev.map((t) => (t.id === updated.id ? { ...t, ...updated } : t)));
 
             // Si un boleto que el usuario tenía seleccionado pasó a reservado o vendido por otro comprador, deseleccionarlo
@@ -258,12 +262,12 @@ export const TicketCartProvider: React.FC<{ children: React.ReactNode }> = ({ ch
               setSelectedTickets((prev) => prev.filter((num) => num !== updated.number));
             }
           } else if (payload.eventType === 'INSERT') {
-            const inserted = payload.new as TicketRow;
+            const inserted = payload.new as TicketPublicStateRow;
             setTickets((prev) =>
               [...prev, inserted].sort((a, b) => a.number.localeCompare(b.number))
             );
           } else if (payload.eventType === 'DELETE') {
-            const oldTicket = payload.old as Partial<TicketRow>;
+            const oldTicket = payload.old as Partial<TicketPublicStateRow>;
             if (oldTicket?.id) {
               setTickets((prev) => prev.filter((t) => t.id !== oldTicket.id));
               if (oldTicket.number) {
@@ -275,7 +279,7 @@ export const TicketCartProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       )
       .subscribe((status, err) => {
         if (err || status === 'CHANNEL_ERROR') {
-          console.warn(`[Realtime] Canal tickets_realtime_${raffle.id}:`, err?.message || status);
+          console.warn(`[Realtime] Canal ticket_public_state_realtime_${raffle.id}:`, err?.message || status);
         }
       });
 

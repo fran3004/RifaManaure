@@ -1,6 +1,6 @@
 import { createContext } from 'react';
 import type {
-  TicketRow,
+  TicketPublicStateRow,
   RaffleRow,
   WinnerWithDetails,
   SystemSettingsRow,
@@ -11,7 +11,7 @@ export interface TicketCartContextType {
   raffle: RaffleRow | null;
   winner: WinnerWithDetails | null;
   systemSettings: SystemSettingsRow | null;
-  tickets: TicketRow[];
+  tickets: TicketPublicStateRow[];
   ticketStats: TicketStats;
   selectedTickets: string[];
   isLoading: boolean;

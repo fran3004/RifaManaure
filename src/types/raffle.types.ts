@@ -2,6 +2,8 @@ import type { Database } from './database.types';
 
 export type RaffleRow = Database['public']['Tables']['raffles']['Row'];
 export type TicketRow = Database['public']['Tables']['tickets']['Row'];
+export type TicketPublicStateRow = Database['public']['Tables']['ticket_public_state']['Row'];
+export type PublicTicketRow = TicketPublicStateRow;
 export type BuyerRow = Database['public']['Tables']['buyers']['Row'];
 export type OrderRow = Database['public']['Tables']['orders']['Row'];
 export type PartnerRow = Database['public']['Tables']['partners']['Row'];

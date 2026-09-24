@@ -1,5 +1,9 @@
 import { supabase } from '@/lib/supabase';
-import type { TicketRow, RaffleRow, PaymentMethod } from '@/types/raffle.types';
+import type {
+  TicketPublicStateRow,
+  RaffleRow,
+  PaymentMethod,
+} from '@/types/raffle.types';
 import {
   withTimeout,
   classifyRequestError,
@@ -67,13 +71,15 @@ export async function getActiveRaffle(): Promise<RaffleRow | null> {
 }
 
 /**
- * Obtiene todos los boletos de una rifa específica.
+ * Obtiene el estado público de todos los boletos de una rifa específica
+ * desde la proyección pública segura public.ticket_public_state.
+ * Garantiza aislamiento absoluto de PII: libre de buyer_id, order_id y metadatos privados.
  */
-export async function getTickets(raffleId: string): Promise<TicketRow[]> {
+export async function getTickets(raffleId: string): Promise<TicketPublicStateRow[]> {
   try {
     const { data, error } = await supabase
-      .from('tickets')
-      .select('*')
+      .from('ticket_public_state')
+      .select('id, raffle_id, number, status, updated_at')
       .eq('raffle_id', raffleId)
       .order('number', { ascending: true });
 
@@ -82,7 +88,7 @@ export async function getTickets(raffleId: string): Promise<TicketRow[]> {
       return [];
     }
 
-    return (data || []) as TicketRow[];
+    return (data || []) as TicketPublicStateRow[];
   } catch (err) {
     console.error('Error de red al cargar boletos:', err);
     return [];

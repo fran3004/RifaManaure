@@ -227,6 +227,45 @@ export type Database = {
           },
         ];
       };
+      ticket_public_state: {
+        Row: {
+          id: string;
+          raffle_id: string;
+          number: string;
+          status: 'available' | 'reserved' | 'paid' | 'sold' | 'blocked';
+          updated_at: string;
+        };
+        Insert: {
+          id: string;
+          raffle_id: string;
+          number: string;
+          status?: 'available' | 'reserved' | 'paid' | 'sold' | 'blocked';
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          raffle_id?: string;
+          number?: string;
+          status?: 'available' | 'reserved' | 'paid' | 'sold' | 'blocked';
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'ticket_public_state_id_fkey';
+            columns: ['id'];
+            isOneToOne: true;
+            referencedRelation: 'tickets';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'ticket_public_state_raffle_id_fkey';
+            columns: ['raffle_id'];
+            isOneToOne: false;
+            referencedRelation: 'raffles';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       buyers: {
         Row: {
           id: string;

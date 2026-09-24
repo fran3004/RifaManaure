@@ -374,7 +374,7 @@ export const SelectorBoletos: React.FC = () => {
               const isSelected = selectedTickets.includes(ticket.number);
               const isAvailable = ticket.status === 'available';
               const isReserved = ticket.status === 'reserved';
-              const isSold = ticket.status === 'sold';
+              const isSold = ticket.status === 'sold' || ticket.status === 'paid';
 
               let ticketClass = styles.ticketAvailable;
               let statusLabel = 'disponible';
