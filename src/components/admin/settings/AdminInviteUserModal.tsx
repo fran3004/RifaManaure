@@ -37,6 +37,9 @@ export const AdminInviteUserModal: React.FC<AdminInviteUserModalProps> = ({
 
   // Success state
   const [createdUser, setCreatedUser] = useState<AdminUserItem | null>(null);
+  const [emailSent, setEmailSent] = useState(false);
+  const [userAlreadyExists, setUserAlreadyExists] = useState(false);
+  const [warningMsg, setWarningMsg] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
   if (!isOpen) return null;
@@ -49,6 +52,9 @@ export const AdminInviteUserModal: React.FC<AdminInviteUserModalProps> = ({
     setRole('admin');
     setErrorMsg(null);
     setCreatedUser(null);
+    setEmailSent(false);
+    setUserAlreadyExists(false);
+    setWarningMsg(null);
     setCopied(false);
     onClose();
   };
@@ -68,10 +74,13 @@ export const AdminInviteUserModal: React.FC<AdminInviteUserModalProps> = ({
     setIsSubmitting(true);
     setErrorMsg(null);
 
+    const targetRedirect = `${window.location.origin}/admin/set-password`;
+
     const res = await inviteAdminUser({
       email: email.trim(),
       role,
       fullName: fullName.trim() || undefined,
+      redirectTo: targetRedirect,
     });
 
     setIsSubmitting(false);
@@ -82,6 +91,9 @@ export const AdminInviteUserModal: React.FC<AdminInviteUserModalProps> = ({
     }
 
     setCreatedUser(res.user);
+    setEmailSent(Boolean(res.emailSent));
+    setUserAlreadyExists(Boolean(res.userAlreadyExists));
+    setWarningMsg(res.warning || null);
     onUserInvited(res.user);
   };
 
@@ -119,7 +131,9 @@ export const AdminInviteUserModal: React.FC<AdminInviteUserModalProps> = ({
               </h3>
               <p className={styles.modalSubtitle}>
                 {createdUser
-                  ? 'El usuario ha sido registrado en la lista oficial de administradores.'
+                  ? emailSent
+                    ? 'Se ha enviado un correo oficial de invitación con el enlace para crear la contraseña.'
+                    : 'El usuario ha sido registrado en la lista oficial de administradores.'
                   : 'Pre-autoriza un correo oficial con su respectivo rol de acceso y privilegios.'}
               </p>
             </div>
@@ -140,19 +154,34 @@ export const AdminInviteUserModal: React.FC<AdminInviteUserModalProps> = ({
           <div className={styles.modalBody}>
             <div className={styles.successCard}>
               <div className={styles.successIconBadge}>
-                <CheckCircle2 size={32} />
+                {emailSent ? <Mail size={32} /> : <CheckCircle2 size={32} />}
               </div>
-              <h4 className={styles.successTitle}>Usuario Pre-autorizado</h4>
+              <h4 className={styles.successTitle}>
+                {emailSent
+                  ? '¡Invitación Enviada por Correo!'
+                  : userAlreadyExists
+                  ? 'Usuario con Cuenta Existente'
+                  : 'Usuario Pre-autorizado'}
+              </h4>
               <p className={styles.successMessage}>
                 <strong>{createdUser.email}</strong> quedó registrado con rol{' '}
                 <span className={styles.createdUserRole}>
                   {createdUser.role}
                 </span>
                 .{' '}
-                {createdUser.has_auth_account
-                  ? 'Su cuenta de acceso ya se encuentra vinculada y puede ingresar de inmediato.'
+                {emailSent
+                  ? 'Le enviamos un correo electrónico oficial con un enlace seguro para que confirme su correo y cree su propia contraseña de acceso.'
+                  : userAlreadyExists
+                  ? 'Este correo ya tiene una cuenta en el sistema. Ha sido habilitado con privilegios administrativos y puede ingresar con su contraseña actual.'
                   : 'Cuando inicie sesión con este correo en el portal administrativo, su cuenta se enlazará automáticamente.'}
               </p>
+
+              {warningMsg && (
+                <div className={styles.errorBanner} style={{ marginBottom: '1rem' }} role="alert">
+                  <AlertCircle size={16} className={styles.errorBannerIcon} />
+                  <span>{warningMsg}</span>
+                </div>
+              )}
 
               <div className={styles.accessLinkBox}>
                 <span className={styles.accessLinkLabel}>
@@ -174,8 +203,9 @@ export const AdminInviteUserModal: React.FC<AdminInviteUserModalProps> = ({
                   </button>
                 </div>
                 <p className={styles.successHint}>
-                  Comparte este enlace con el usuario para que acceda con sus credenciales de
-                  Supabase Auth.
+                  {emailSent
+                    ? 'El usuario podrá ingresar desde este enlace una vez active su contraseña desde el correo.'
+                    : 'Comparte este enlace con el usuario para que acceda con sus credenciales de Supabase Auth.'}
                 </p>
               </div>
             </div>

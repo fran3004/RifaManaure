@@ -24,6 +24,7 @@ export interface InviteAdminUserParams {
   email: string;
   role: 'superadmin' | 'admin' | 'auditor';
   fullName?: string;
+  redirectTo?: string;
 }
 
 export interface InviteAdminUserResponse {
@@ -31,6 +32,9 @@ export interface InviteAdminUserResponse {
   user?: AdminUserItem;
   message?: string;
   error?: string;
+  emailSent?: boolean;
+  userAlreadyExists?: boolean;
+  warning?: string;
 }
 
 export interface ToggleAdminUserStatusResponse {
@@ -86,19 +90,64 @@ export async function fetchAdminUsers(): Promise<AdminUsersResponse> {
 
 /**
  * Invita / pre-autoriza a un nuevo administrador en el sistema.
+ * Intenta enviar el correo de invitación oficial de Supabase Auth mediante Edge Function,
+ * con fallback resiliente a la RPC de base de datos admin_invite_user.
  */
 export async function inviteAdminUser(
   params: InviteAdminUserParams
 ): Promise<InviteAdminUserResponse> {
+  const cleanEmail = params.email.trim().toLowerCase();
+  const cleanName = params.fullName ? params.fullName.trim() : null;
+  const defaultRedirect =
+    typeof window !== 'undefined'
+      ? `${window.location.origin}/admin/set-password`
+      : 'https://rifa-manaure.vercel.app/admin/set-password';
+  const targetRedirectTo = params.redirectTo || defaultRedirect;
+
   try {
-    const { data, error } = await supabase.rpc('admin_invite_user', {
-      p_email: params.email.trim().toLowerCase(),
+    // 1. Intentar invocar la Edge Function para pre-autorizar y enviar correo de invitación
+    const { data: funcData, error: funcError } = await supabase.functions.invoke(
+      'admin-invite-user',
+      {
+        body: {
+          email: cleanEmail,
+          role: params.role,
+          fullName: cleanName,
+          redirectTo: targetRedirectTo,
+        },
+      }
+    );
+
+    // Si la Edge Function respondió exitosamente
+    if (!funcError && funcData && typeof funcData === 'object' && 'success' in funcData) {
+      const payload = funcData as InviteAdminUserResponse;
+      if (payload.success) {
+        return {
+          success: true,
+          user: payload.user,
+          emailSent: Boolean(payload.emailSent),
+          userAlreadyExists: Boolean(payload.userAlreadyExists),
+          warning: payload.warning,
+          message: payload.message || 'Administrador autorizado exitosamente.',
+        };
+      } else if (payload.error) {
+        return {
+          success: false,
+          error: payload.error,
+        };
+      }
+    }
+
+    // 2. Si la Edge Function no está desplegada o responde con error de infraestructura,
+    // aplicar fallback resiliente a la RPC directa de PostgreSQL (pre-autorización estándar)
+    const { data: rpcData, error: rpcError } = await supabase.rpc('admin_invite_user', {
+      p_email: cleanEmail,
       p_role: params.role,
-      p_full_name: params.fullName ? params.fullName.trim() : null,
+      p_full_name: cleanName,
     });
 
-    if (error) {
-      const normalized = normalizeAppError(error, 'Error al invitar al administrador.');
+    if (rpcError) {
+      const normalized = normalizeAppError(rpcError, 'Error al invitar al administrador.');
       logAppError('adminUserService.inviteAdminUser.rpc', normalized);
       return {
         success: false,
@@ -106,11 +155,11 @@ export async function inviteAdminUser(
       };
     }
 
-    const payload = data as unknown as InviteAdminUserResponse;
+    const rpcPayload = rpcData as unknown as InviteAdminUserResponse;
 
-    if (!payload?.success) {
+    if (!rpcPayload?.success) {
       const normalized = normalizeAppError(
-        { message: payload?.error },
+        { message: rpcPayload?.error },
         'No se pudo autorizar al nuevo administrador.'
       );
       return {
@@ -121,8 +170,11 @@ export async function inviteAdminUser(
 
     return {
       success: true,
-      user: payload.user,
-      message: payload.message || 'Administrador autorizado exitosamente.',
+      user: rpcPayload.user,
+      emailSent: false, // Fallback sin envío de correo
+      message:
+        rpcPayload.message ||
+        'Administrador pre-autorizado exitosamente. Comparte el enlace de acceso manualmente.',
     };
   } catch (err) {
     const normalized = normalizeAppError(err, 'Error inesperado de red al invitar administrador.');

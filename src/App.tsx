@@ -27,6 +27,10 @@ const AdminLoginPage = lazyWithRetry(
   () => import('@/pages/AdminLoginPage').then((m) => ({ default: m.AdminLoginPage })),
   'AdminLoginPage'
 );
+const AdminSetPasswordPage = lazyWithRetry(
+  () => import('@/pages/AdminSetPasswordPage').then((m) => ({ default: m.AdminSetPasswordPage })),
+  'AdminSetPasswordPage'
+);
 const AdminLayout = lazyWithRetry(
   () => import('@/components/admin/layout/AdminLayout').then((m) => ({ default: m.AdminLayout })),
   'AdminLayout'
@@ -117,6 +121,7 @@ export const App: React.FC = () => {
                 {/* Subárbol Administrativo con theme-admin.css centralizado */}
                 <Route path="/admin" element={<AdminRouteRoot />}>
                   <Route path="login" element={<AdminLoginPage />} />
+                  <Route path="set-password" element={<AdminSetPasswordPage />} />
                   <Route
                     element={
                       <ProtectedRoute>
