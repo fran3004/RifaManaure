@@ -50,7 +50,7 @@ const evaluateOrderDirectUpdate = (
   }
 
   // Para administradores: permitido por RLS, pero sujeto a trigger de consistencia trg_validate_order_status
-  if (['paid', 'completed'].includes(targetOrder.status)) {
+  if (targetOrder.status === 'paid') {
     if (updates.buyer_id && updates.buyer_id !== targetOrder.buyer_id) {
       throw new Error('Violación de Integridad: Prohibido modificar el comprador de una orden pagada.');
     }

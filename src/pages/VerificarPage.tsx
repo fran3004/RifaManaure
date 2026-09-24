@@ -187,7 +187,7 @@ export const VerificarPage: React.FC = () => {
             <div className={styles.resultsContainer}>
               {orders.length > 0 ? (
                 orders.map((ord) => {
-                  const isPaid = ord.status === 'paid' || ord.status === 'completed';
+                  const isPaid = ord.status === 'paid';
                   const isPendingVerification = ord.status === 'pending_verification';
                   const isRejected = ord.status === 'rejected';
                   const isPending = ord.status === 'pending';
@@ -239,7 +239,7 @@ export const VerificarPage: React.FC = () => {
                                 onClick={() => {
                                   setSelectedReceiptData({
                                     orderReference: ord.reference,
-                                    orderStatus: ord.status === 'completed' ? 'completed' : 'paid',
+                                    orderStatus: 'paid',
                                     createdAt: ord.createdAt,
                                     totalAmount: ord.totalAmount,
                                     ticketCount: ord.ticketCount,

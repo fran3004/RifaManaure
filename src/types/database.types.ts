@@ -267,7 +267,7 @@ export type Database = {
           reference: string;
           total_amount: number;
           ticket_count: number;
-          status: 'pending' | 'pending_verification' | 'paid' | 'completed' | 'rejected' | 'expired' | 'cancelled' | 'refunded';
+          status: 'pending' | 'pending_verification' | 'paid' | 'rejected' | 'expired' | 'cancelled';
           payment_method: 'wompi' | 'bold' | 'mercadopago' | 'transfer_manual' | 'cash';
           payment_gateway_id: string | null;
           payment_gateway_data: Json | null;
@@ -288,7 +288,7 @@ export type Database = {
           reference: string;
           total_amount: number;
           ticket_count: number;
-          status?: 'pending' | 'pending_verification' | 'paid' | 'completed' | 'rejected' | 'expired' | 'cancelled' | 'refunded';
+          status?: 'pending' | 'pending_verification' | 'paid' | 'rejected' | 'expired' | 'cancelled';
           payment_method?: 'wompi' | 'bold' | 'mercadopago' | 'transfer_manual' | 'cash';
           payment_gateway_id?: string | null;
           payment_gateway_data?: Json | null;
@@ -309,7 +309,7 @@ export type Database = {
           reference?: string;
           total_amount?: number;
           ticket_count?: number;
-          status?: 'pending' | 'pending_verification' | 'paid' | 'completed' | 'rejected' | 'expired' | 'cancelled' | 'refunded';
+          status?: 'pending' | 'pending_verification' | 'paid' | 'rejected' | 'expired' | 'cancelled';
           payment_method?: 'wompi' | 'bold' | 'mercadopago' | 'transfer_manual' | 'cash';
           payment_gateway_id?: string | null;
           payment_gateway_data?: Json | null;

@@ -295,7 +295,7 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
     try {
       const eventType =
         log?.event_type ||
-        (order.status === 'paid' || order.status === 'completed'
+        (order.status === 'paid'
           ? 'payment_approved'
           : order.status === 'rejected'
             ? 'payment_rejected'
@@ -424,7 +424,7 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
                       <Clock size={12} /> Reserva Temporal
                     </span>
                   )}
-                  {(order.status === 'paid' || order.status === 'completed') && (
+                  {order.status === 'paid' && (
                     <span className={styles.badgeSuccess}>
                       <CheckCircle2 size={12} /> Pagada / Aprobada
                     </span>
@@ -992,7 +992,7 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
           </div>
 
           <div className={styles.footerActions}>
-            {(order.status === 'paid' || order.status === 'completed') && (
+            {order.status === 'paid' && (
               <button
                 type="button"
                 className={`${styles.btnSecondary} ${styles.receiptButton}`}
@@ -1039,13 +1039,13 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
         </div>
       </div>
 
-      {(order.status === 'paid' || order.status === 'completed') && isReceiptModalOpen && (
+      {order.status === 'paid' && isReceiptModalOpen && (
         <DigitalReceiptModal
           isOpen={isReceiptModalOpen}
           onClose={() => setIsReceiptModalOpen(false)}
           receiptData={{
             orderReference: order.reference,
-            orderStatus: order.status === 'completed' ? 'completed' : 'paid',
+            orderStatus: 'paid',
             createdAt: order.created_at,
             totalAmount: order.total_amount,
             ticketCount: order.tickets?.length || 0,

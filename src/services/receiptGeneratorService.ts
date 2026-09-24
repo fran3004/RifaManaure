@@ -5,7 +5,7 @@ const logoImgSrc = logoPrincipalCompleto.master;
 
 export interface DigitalReceiptData {
   orderReference: string;
-  orderStatus: 'paid' | 'completed';
+  orderStatus: 'paid';
   createdAt: string;
   totalAmount: number;
   ticketCount: number;
@@ -38,7 +38,7 @@ export async function generateDigitalReceiptCanvas(
   data: DigitalReceiptData
 ): Promise<HTMLCanvasElement> {
   // Validación estricta de seguridad
-  if (data.orderStatus !== 'paid' && data.orderStatus !== 'completed') {
+  if (data.orderStatus !== 'paid') {
     throw new Error(
       'Solo se permite generar comprobantes digitales para órdenes en estado PAGADO / CONFIRMADO.'
     );

@@ -79,7 +79,7 @@ const DashboardReceiptThumbnail: React.FC<DashboardReceiptCardProps> = ({ order,
             <Clock size={12} /> Por Validar
           </span>
         )}
-        {(order.status === 'paid' || order.status === 'completed') && (
+        {order.status === 'paid' && (
           <span className={styles.badgeSuccess}>
             <CheckCircle2 size={12} /> Aprobado
           </span>
@@ -104,7 +104,7 @@ const DashboardReceiptThumbnail: React.FC<DashboardReceiptCardProps> = ({ order,
             <X size={12} /> Cancelada
           </span>
         )}
-        {!['pending_verification', 'paid', 'completed', 'rejected', 'pending', 'expired', 'cancelled'].includes(order.status) && (
+        {!['pending_verification', 'paid', 'rejected', 'pending', 'expired', 'cancelled'].includes(order.status) && (
           <span className={styles.badgeNeutral}>
             {order.status}
           </span>
@@ -677,7 +677,7 @@ export const DashboardView: React.FC = () => {
                                   <Clock size={12} /> Por Validar
                                 </span>
                               )}
-                              {(ord.status === 'paid' || ord.status === 'completed') && (
+                              {ord.status === 'paid' && (
                                 <span className={styles.badgeSuccess}>
                                   <CheckCircle2 size={12} /> Pagada
                                 </span>
@@ -702,7 +702,7 @@ export const DashboardView: React.FC = () => {
                                   <X size={12} /> Cancelada
                                 </span>
                               )}
-                              {!['pending_verification', 'paid', 'completed', 'pending', 'rejected', 'expired', 'cancelled'].includes(ord.status) && (
+                              {!['pending_verification', 'paid', 'pending', 'rejected', 'expired', 'cancelled'].includes(ord.status) && (
                                 <span className={styles.badgeNeutral}>
                                   {ord.status}
                                 </span>

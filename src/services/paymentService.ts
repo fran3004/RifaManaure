@@ -592,7 +592,7 @@ export async function fetchAdminOrdersPaginated(
     // 1. Filtrar por estado si no es 'ALL'
     if (statusFilter && statusFilter !== 'ALL') {
       if (statusFilter === 'paid') {
-        query = query.in('status', ['paid', 'completed']);
+        query = query.eq('status', 'paid');
       } else {
         query = query.eq('status', statusFilter as PaymentStatus);
       }
@@ -845,7 +845,7 @@ export async function fetchAdminDashboardMetrics(
       const amount = Number(ord.total_amount || 0);
       const st = ord.status;
 
-      if (st === 'paid' || st === 'completed') {
+      if (st === 'paid') {
         confirmedMoney += amount;
         paidOrdersCount++;
       } else if (st === 'pending_verification') {
@@ -1376,7 +1376,7 @@ export async function adminBlockTicket(
           .eq('id', ticket.order_id)
           .single();
 
-        if (ord && (ord.status === 'paid' || ord.status === 'completed')) {
+        if (ord && ord.status === 'paid') {
           return {
             success: false,
             error: `Acción bloqueada: No se puede modificar o bloquear un boleto ya vendido con orden pagada (${ord.reference}).`,

@@ -64,14 +64,13 @@ const AdminBuyerOrdersContent: React.FC<AdminBuyerOrdersContentProps> = ({ buyer
     };
   }, [buyer.id]);
 
-  const paidOrders = orders.filter((o) => o.status === 'paid' || o.status === 'completed');
+  const paidOrders = orders.filter((o) => o.status === 'paid');
   const totalSpent = paidOrders.reduce((sum, o) => sum + o.total_amount, 0);
   const totalTickets = paidOrders.reduce((sum, o) => sum + o.ticket_count, 0);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'paid':
-      case 'completed':
         return (
           <span className={styles.statusPaid}>
             <CheckCircle2 size={12} />

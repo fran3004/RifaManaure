@@ -256,7 +256,7 @@ describe('Integridad de Órdenes: Inmutabilidad Comercial de Órdenes Pagadas (f
 
   it('rechaza modificación de términos comerciales (buyer_id, total_amount, ticket_count, raffle_id) en orden pagada', () => {
     const validateOrderUpdate = (oldO: typeof paidOrder, newO: typeof paidOrder) => {
-      if (['paid', 'completed'].includes(oldO.status)) {
+      if (oldO.status === 'paid') {
         if (newO.buyer_id !== oldO.buyer_id) {
           throw new Error(`Violación de Integridad: Prohibido modificar el comprador de una orden pagada (${oldO.reference}).`);
         }
@@ -284,7 +284,7 @@ describe('Integridad de Órdenes: Inmutabilidad Comercial de Órdenes Pagadas (f
 
   it('rechaza que una orden pagada retroceda a pending, pending_verification, expired o rejected', () => {
     const validateStatusTransition = (oldStatus: string, newStatus: string) => {
-      if (['paid', 'completed'].includes(oldStatus)) {
+      if (oldStatus === 'paid') {
         if (['pending', 'pending_verification', 'expired', 'rejected', 'cancelled'].includes(newStatus)) {
           throw new Error(`Integridad violada: Una orden pagada y confirmada no puede retroceder al estado ${newStatus}.`);
         }

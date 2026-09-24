@@ -212,7 +212,6 @@ export interface PublicOrderVerification {
     | 'pending'
     | 'pending_verification'
     | 'paid'
-    | 'completed'
     | 'rejected'
     | 'expired'
     | 'cancelled';

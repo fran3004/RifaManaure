@@ -121,7 +121,7 @@ export async function fetchBuyersPaginated(
     const buyers: BuyerItem[] = rawList.map((b) => {
       const orders = b.orders || [];
       const totalOrders = orders.length;
-      const paidOrders = orders.filter((o) => o.status === 'paid' || o.status === 'completed');
+      const paidOrders = orders.filter((o) => o.status === 'paid');
       const totalSpent = paidOrders.reduce((sum, o) => sum + (Number(o.total_amount) || 0), 0);
       const totalTickets = paidOrders.reduce((sum, o) => sum + (Number(o.ticket_count) || 0), 0);
 

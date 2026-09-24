@@ -383,7 +383,7 @@ export const ReceiptsView: React.FC = () => {
                       <Clock size={12} /> Por Validar
                     </span>
                   )}
-                  {(ord.status === 'paid' || ord.status === 'completed') && (
+                  {ord.status === 'paid' && (
                     <span className={styles.badgeSuccess}>
                       <Check size={12} /> Aprobado
                     </span>
@@ -408,7 +408,7 @@ export const ReceiptsView: React.FC = () => {
                       <X size={12} /> Cancelada
                     </span>
                   )}
-                  {!['pending_verification', 'paid', 'completed', 'rejected', 'pending', 'expired', 'cancelled'].includes(ord.status) && (
+                  {!['pending_verification', 'paid', 'rejected', 'pending', 'expired', 'cancelled'].includes(ord.status) && (
                     <span className={styles.badgeNeutral}>
                       {ord.status}
                     </span>
