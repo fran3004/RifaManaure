@@ -16,6 +16,8 @@ export interface CreateOrderResult {
   buyerId?: string;
   totalAmount?: number;
   reservationExpiresAt?: string;
+  idempotencyReplayed?: boolean;
+  code?: string;
   error?: string;
 }
 
@@ -117,6 +119,10 @@ export async function registerBuyer(buyerData: BuyerRegistrationData): Promise<s
  * Crea una orden de compra de forma segura mediante la RPC create_order_secure en PostgreSQL.
  * El cálculo de total_amount, la reserva atómica y la asignación se ejecutan
  * exclusivamente en el servidor (cero confianza en totales enviados por el cliente).
+ *
+ * Incluye soporte integral de idempotencia transaccional (Auditoría 03):
+ * Si se envía idempotencyKey (o se genera uno), reintentos idénticos
+ * devuelven la misma orden sin duplicar registros ni reasignar boletos.
  */
 export async function createOrder(
   raffleId: string,
@@ -125,7 +131,8 @@ export async function createOrder(
   _clientTotalAmountIgnored?: number,
   paymentMethod: PaymentMethod = 'transfer_manual',
   contactPreference: 'whatsapp' | 'email' | 'both' = 'both',
-  buyerDataParam?: BuyerRegistrationData
+  buyerDataParam?: BuyerRegistrationData,
+  idempotencyKey?: string
 ): Promise<CreateOrderResult> {
   try {
     const buyerData = typeof buyerIdOrData === 'object' ? buyerIdOrData : buyerDataParam;
@@ -133,6 +140,12 @@ export async function createOrder(
     if (!buyerData) {
       return { success: false, error: 'Datos del comprador requeridos para crear la orden.' };
     }
+
+    const clientKey =
+      idempotencyKey ||
+      (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+        ? crypto.randomUUID()
+        : undefined);
 
     const { data, error } = await supabase.rpc('create_order_secure', {
       p_raffle_id: raffleId,
@@ -146,6 +159,7 @@ export async function createOrder(
       },
       p_payment_method: paymentMethod,
       p_contact_preference: contactPreference,
+      p_client_idempotency_key: clientKey,
     });
 
     if (error) {
@@ -161,11 +175,17 @@ export async function createOrder(
       total_amount?: number;
       ticket_count?: number;
       reservation_expires_at?: string;
+      idempotency_replayed?: boolean;
+      code?: string;
       error?: string;
     };
 
     if (!res.success) {
-      return { success: false, error: res.error || 'No se pudo generar la orden.' };
+      return {
+        success: false,
+        error: res.error || 'No se pudo generar la orden.',
+        code: res.code,
+      };
     }
 
     return {
@@ -175,6 +195,7 @@ export async function createOrder(
       buyerId: res.buyer_id,
       totalAmount: res.total_amount,
       reservationExpiresAt: res.reservation_expires_at,
+      idempotencyReplayed: res.idempotency_replayed,
     };
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Error inesperado al crear orden';

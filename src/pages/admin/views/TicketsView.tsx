@@ -331,6 +331,8 @@ export const TicketsView: React.FC = () => {
       verified_by: null,
       created_at: selectedTicket.orders.created_at,
       updated_at: selectedTicket.orders.created_at,
+      client_idempotency_key: '',
+      idempotency_fingerprint: null,
       buyers: selectedTicket.buyers,
       tickets: [
         { id: selectedTicket.id, number: selectedTicket.number, status: selectedTicket.status },

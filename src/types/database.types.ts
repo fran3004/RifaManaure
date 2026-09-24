@@ -276,6 +276,8 @@ export type Database = {
           contact_preference: 'whatsapp' | 'email' | 'both';
           verified_at: string | null;
           verified_by: string | null;
+          client_idempotency_key: string;
+          idempotency_fingerprint: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -295,6 +297,8 @@ export type Database = {
           contact_preference?: 'whatsapp' | 'email' | 'both';
           verified_at?: string | null;
           verified_by?: string | null;
+          client_idempotency_key?: string;
+          idempotency_fingerprint?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -314,6 +318,8 @@ export type Database = {
           contact_preference?: 'whatsapp' | 'email' | 'both';
           verified_at?: string | null;
           verified_by?: string | null;
+          client_idempotency_key?: string;
+          idempotency_fingerprint?: string | null;
           updated_at?: string;
         };
         Relationships: [
@@ -829,6 +835,7 @@ export type Database = {
           p_buyer_data: Json;
           p_payment_method?: string;
           p_contact_preference?: string;
+          p_client_idempotency_key?: string | null;
         };
         Returns: Json;
       };

@@ -107,6 +107,11 @@ export const ModalCheckout: React.FC = () => {
   const [isReserving, setIsReserving] = useState<boolean>(false);
   const [isSubmittingProof, setIsSubmittingProof] = useState<boolean>(false);
   const [hasReservationError, setHasReservationError] = useState<boolean>(false);
+  const [idempotencyKey, setIdempotencyKey] = useState<string>(() =>
+    typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+      ? crypto.randomUUID()
+      : ''
+  );
 
   // Datos del Comprador (Paso 1)
   const [formData, setFormData] = useState<{
@@ -163,6 +168,11 @@ export const ModalCheckout: React.FC = () => {
       setReceiptFile(null);
       setReceiptPreview(null);
       setHasReservationError(false);
+      setIdempotencyKey(
+        typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+          ? crypto.randomUUID()
+          : ''
+      );
     }
     closeCheckout();
   }, [currentStep, closeCheckout]);
@@ -354,7 +364,9 @@ export const ModalCheckout: React.FC = () => {
         selectedTickets,
         undefined, // Total calculado exclusivamente en el servidor
         'transfer_manual',
-        formData.contactPreference
+        formData.contactPreference,
+        undefined,
+        idempotencyKey
       );
 
       if (!orderResult.success || !orderResult.reference || !orderResult.orderId) {
@@ -577,6 +589,11 @@ export const ModalCheckout: React.FC = () => {
                 onClick={() => {
                   setHasReservationError(false);
                   setCurrentStep(1);
+                  setIdempotencyKey(
+                    typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+                      ? crypto.randomUUID()
+                      : ''
+                  );
                 }}
               >
                 Intentar de nuevo
