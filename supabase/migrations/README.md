@@ -61,6 +61,9 @@ Este directorio (`supabase/migrations/`) constituye la **única fuente de verdad
 | **039** | `039_harden_rls_orders_and_notification_logs.sql` | **(DB-03 / DB-14)** Endurecimiento de RLS: eliminación de subconsulta a `auth.users` en `notification_logs` (anti-error 42501), erradicación del UPDATE público genérico en `orders`, políticas administrativas exclusivas vía `is_admin()` y canalización atómica de comprobantes por `submit_payment_proof`. |
 | **040** | `040_enable_realtime_for_operational_tables.sql` | **(DB-02)** Habilitación defensiva e idempotente de Supabase Realtime para tablas operativas (`tickets`, `orders`, `raffles`, `winners`, `system_settings`) con control de excepciones y `REPLICA IDENTITY FULL`. |
 | **041** | `041_storage_cleanup_and_integrity_hardenings.sql` | **(DB-12 / DB-15 / DB-16)** Limpieza de 13 políticas RLS huérfanas en `storage.objects` (aliados, premios, actas migrados a Cloudinary), constraint UNIQUE `uq_winners_raffle_ticket` e idempotencia concurrente en `register_winner`, y blindaje anti-suplantación en `is_admin` / `is_superadmin`. |
+| **042** | `042_revoke_reserve_tickets_public_access.sql` | **(SEC-02)** Revocación de acceso público a la RPC legacy `reserve_tickets`, cierre de vector de bypass de validaciones y preservación de `create_order_secure`. |
+| **043** | `043_harden_cancel_order_admin_only.sql` | **(SEC-03)** Blindaje de `cancel_order` para uso exclusivo administrativo (`is_admin`), eliminación de vulnerabilidad IDOR y bloqueo pesimista `FOR UPDATE`. |
+| **044** | `044_harden_admin_users_superadmin_only.sql` | **(SEC-04)** Hardening integral de `admin_users`: política RLS exclusiva para `is_superadmin()`, revocación a `anon/PUBLIC`, trigger anti-autodesactivación, anti-escalación y anti-orfandad, y blindaje de RPCs `admin_toggle_user_status` y `admin_invite_user`. |
 
 ---
 
