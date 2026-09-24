@@ -179,7 +179,7 @@ BEGIN
     END IF;
 
     -- Obtener rol del invocador verificando que sea un administrador activo y confirmado
-    SELECT role INTO v_caller_role
+    SELECT a.role INTO v_caller_role
     FROM public.admin_users a
     JOIN auth.users u ON u.id = v_caller_id
     WHERE (a.user_id = v_caller_id 
