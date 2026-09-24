@@ -12,6 +12,7 @@ import {
 import { useAdminRaffle } from '@/context/AdminRaffleContext';
 import { supabase } from '@/lib/supabase';
 import { formatCOP } from '@/lib/utils';
+import { normalizeAppError, logAppError } from '@/lib/errorHandling';
 import {
   ShoppingCart,
   Search,
@@ -45,6 +46,7 @@ export const OrdersView: React.FC = () => {
   const [totalPages, setTotalPages] = useState<number>(1);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [isForbidden, setIsForbidden] = useState<boolean>(false);
 
   // Filtros, búsqueda y ordenamiento
   const [searchTerm, setSearchTerm] = useState<string>('');
@@ -92,9 +94,12 @@ export const OrdersView: React.FC = () => {
       setOrders(res.orders);
       setTotalCount(res.totalCount);
       setTotalPages(res.totalPages || 1);
+      setIsForbidden(false);
     } catch (err: unknown) {
-      console.error('Error al cargar órdenes:', err);
-      setError(err instanceof Error ? err.message : 'Error al consultar las órdenes de compra');
+      const normalized = normalizeAppError(err, 'Error al consultar las órdenes de compra');
+      logAppError('OrdersView.loadOrders', normalized);
+      setError(normalized.userMessage);
+      setIsForbidden(normalized.kind === 'FORBIDDEN' || normalized.kind === 'UNAUTHORIZED');
     } finally {
       setIsLoading(false);
     }
@@ -120,12 +125,15 @@ export const OrdersView: React.FC = () => {
           setOrders(res.orders);
           setTotalCount(res.totalCount);
           setTotalPages(res.totalPages || 1);
+          setIsForbidden(false);
           setIsLoading(false);
         }
       } catch (err: unknown) {
         if (isMounted) {
-          console.error('Error al cargar órdenes:', err);
-          setError(err instanceof Error ? err.message : 'Error al consultar las órdenes de compra');
+          const normalized = normalizeAppError(err, 'Error al consultar las órdenes de compra');
+          logAppError('OrdersView.init', normalized);
+          setError(normalized.userMessage);
+          setIsForbidden(normalized.kind === 'FORBIDDEN' || normalized.kind === 'UNAUTHORIZED');
           setIsLoading(false);
         }
       }
@@ -147,7 +155,11 @@ export const OrdersView: React.FC = () => {
           }
         }
       )
-      .subscribe();
+      .subscribe((status, err) => {
+        if (err || status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          console.warn('[Realtime] Canal admin_orders_realtime_channel:', err?.message || status);
+        }
+      });
 
     return () => {
       isMounted = false;
@@ -227,9 +239,14 @@ export const OrdersView: React.FC = () => {
       setApprovingOrder(null);
       await loadOrders();
     } else {
+      const normalized = normalizeAppError(
+        { message: result.error, code: result.code },
+        'No se pudo aprobar el pago de la orden.'
+      );
+      logAppError('OrdersView.handleConfirmApprove', normalized);
       setActionMessage({
         type: 'error',
-        text: result.error || 'No se pudo aprobar el pago de la orden.',
+        text: normalized.userMessage,
       });
     }
 
@@ -253,9 +270,14 @@ export const OrdersView: React.FC = () => {
       setRejectingOrder(null);
       await loadOrders();
     } else {
+      const normalized = normalizeAppError(
+        { message: result.error, code: result.code },
+        'No se pudo rechazar la orden.'
+      );
+      logAppError('OrdersView.handleConfirmReject', normalized);
       setActionMessage({
         type: 'error',
-        text: result.error || 'No se pudo rechazar la orden.',
+        text: normalized.userMessage,
       });
     }
 
@@ -386,8 +408,9 @@ export const OrdersView: React.FC = () => {
           <AdminLoadingState message="Consultando órdenes en Supabase..." />
         ) : error ? (
           <AdminErrorState
-            title="Error al cargar órdenes"
+            title={isForbidden ? 'Acceso Restringido' : 'Error al cargar órdenes'}
             message={error}
+            isForbidden={isForbidden}
             onRetry={() => void loadOrders()}
           />
         ) : orders.length === 0 ? (

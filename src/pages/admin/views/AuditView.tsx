@@ -6,6 +6,7 @@ import { AdminErrorState } from '@/components/admin/common/AdminErrorState';
 import { fetchAuditLogsPaginated, type AuditLogItem } from '@/services/paymentService';
 import { useAdminRaffle } from '@/context/AdminRaffleContext';
 import { formatCOP, formatTicketNumber } from '@/lib/utils';
+import { normalizeAppError, logAppError } from '@/lib/errorHandling';
 import {
   History,
   Search,
@@ -849,6 +850,7 @@ export const AuditView: React.FC = () => {
   const [totalPages, setTotalPages] = useState<number>(1);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [isForbidden, setIsForbidden] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [actionType, setActionType] = useState<string>('ALL');
   const [viewMode, setViewMode] = useState<'timeline' | 'table'>('timeline');
@@ -874,9 +876,12 @@ export const AuditView: React.FC = () => {
       setLogs(res.logs);
       setTotalCount(res.totalCount);
       setTotalPages(res.totalPages || 1);
+      setIsForbidden(false);
     } catch (err: unknown) {
-      console.error('Error al cargar bitácora:', err);
-      setError(err instanceof Error ? err.message : 'Error al cargar la bitácora de auditoría');
+      const normalized = normalizeAppError(err, 'Error al cargar la bitácora de auditoría');
+      logAppError('AuditView.loadLogs', normalized);
+      setError(normalized.userMessage);
+      setIsForbidden(normalized.kind === 'FORBIDDEN' || normalized.kind === 'UNAUTHORIZED');
     } finally {
       setIsLoading(false);
     }
@@ -896,12 +901,15 @@ export const AuditView: React.FC = () => {
         setLogs(res.logs);
         setTotalCount(res.totalCount);
         setTotalPages(res.totalPages || 1);
+        setIsForbidden(false);
         setIsLoading(false);
       })
       .catch((err: unknown) => {
         if (!isMounted) return;
-        console.warn('Error al cargar bitácora:', err);
-        setError(err instanceof Error ? err.message : 'Error al cargar la bitácora de auditoría');
+        const normalized = normalizeAppError(err, 'Error al cargar la bitácora de auditoría');
+        logAppError('AuditView.init', normalized);
+        setError(normalized.userMessage);
+        setIsForbidden(normalized.kind === 'FORBIDDEN' || normalized.kind === 'UNAUTHORIZED');
         setIsLoading(false);
       });
 
@@ -1035,8 +1043,9 @@ export const AuditView: React.FC = () => {
       ) : error ? (
         <div className={commonStyles.cardSection}>
           <AdminErrorState
-            title="Error al cargar auditoría"
+            title={isForbidden ? 'Acceso Restringido' : 'Error al cargar auditoría'}
             message={error}
+            isForbidden={isForbidden}
             onRetry={() => void loadLogs()}
           />
         </div>

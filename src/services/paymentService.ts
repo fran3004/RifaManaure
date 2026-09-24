@@ -15,6 +15,7 @@ import {
   classifyRequestError,
   DEFAULT_REQUEST_TIMEOUT_MS,
 } from '@/lib/requestTimeout';
+import { normalizeAppError, logAppError } from '@/lib/errorHandling';
 
 export interface SubmitReceiptResult {
   success: boolean;
@@ -392,10 +393,12 @@ export async function uploadPaymentProof(
     );
 
     if (rpcError) {
+      const normalized = normalizeAppError(rpcError, 'Error al registrar el comprobante de pago.');
+      logAppError('paymentService.uploadPaymentProof.rpc', normalized);
       return {
         success: false,
-        error: rpcError.message || 'Error al registrar el comprobante de pago.',
-        code: rpcError.code || 'RPC_ERROR',
+        error: normalized.userMessage,
+        code: normalized.code || rpcError.code || 'RPC_ERROR',
       };
     }
 
@@ -421,9 +424,14 @@ export async function uploadPaymentProof(
           isReplacement: res.is_replacement,
         };
       }
+      const normalized = normalizeAppError(
+        { message: res.error, code: res.code },
+        'Error al validar el comprobante de pago.'
+      );
+      logAppError('paymentService.uploadPaymentProof.res', normalized);
       return {
         success: false,
-        error: res.error || 'Error al validar el comprobante de pago.',
+        error: normalized.userMessage,
         code: res.code,
       };
     }
@@ -444,23 +452,13 @@ export async function uploadPaymentProof(
         isTimeout: true,
       };
     }
-    if (classified.isNetworkError) {
-      return {
-        success: false,
-        error:
-          'Problema de conexión al enviar el comprobante. Por favor verifica tu red e intenta nuevamente.',
-        code: 'NETWORK_ERROR',
-      };
-    }
-    if (classified.isAborted) {
-      return {
-        success: false,
-        error: 'El envío del comprobante fue cancelado.',
-        code: 'REQUEST_ABORTED',
-      };
-    }
-    const msg = err instanceof Error ? err.message : 'Error inesperado al enviar comprobante';
-    return { success: false, error: msg, code: 'UNKNOWN_ERROR' };
+    const normalized = normalizeAppError(err, 'Error inesperado al enviar comprobante');
+    logAppError('paymentService.uploadPaymentProof.catch', normalized);
+    return {
+      success: false,
+      error: normalized.userMessage,
+      code: normalized.code || classified.code || 'UNKNOWN_ERROR',
+    };
   }
 }
 
@@ -571,10 +569,12 @@ export async function approveOrderPayment(
     );
 
     if (error) {
+      const normalized = normalizeAppError(error, 'Error al aprobar orden');
+      logAppError('paymentService.approveOrderPayment.rpc', normalized);
       return {
         success: false,
-        error: error.message || 'Error al aprobar orden',
-        code: error.code || 'RPC_ERROR',
+        error: normalized.userMessage,
+        code: normalized.code || error.code || 'RPC_ERROR',
       };
     }
 
@@ -594,7 +594,12 @@ export async function approveOrderPayment(
           ticketsCount: res.tickets_sold_count ?? res.tickets_sold,
         };
       }
-      return { success: false, error: res.error || 'Error al aprobar orden', code: res.code };
+      const normalized = normalizeAppError(
+        { message: res.error, code: res.code },
+        'Error al aprobar orden'
+      );
+      logAppError('paymentService.approveOrderPayment.res', normalized);
+      return { success: false, error: normalized.userMessage, code: res.code };
     }
 
     return {
@@ -613,8 +618,13 @@ export async function approveOrderPayment(
         isTimeout: true,
       };
     }
-    const msg = err instanceof Error ? err.message : 'Error al procesar la aprobación';
-    return { success: false, error: msg, code: classified.code };
+    const normalized = normalizeAppError(err, 'Error al procesar la aprobación');
+    logAppError('paymentService.approveOrderPayment.catch', normalized);
+    return {
+      success: false,
+      error: normalized.userMessage,
+      code: normalized.code || classified.code,
+    };
   }
 }
 
@@ -645,10 +655,12 @@ export async function rejectOrderPayment(
     );
 
     if (error) {
+      const normalized = normalizeAppError(error, 'Error al rechazar orden');
+      logAppError('paymentService.rejectOrderPayment.rpc', normalized);
       return {
         success: false,
-        error: error.message || 'Error al rechazar orden',
-        code: error.code || 'RPC_ERROR',
+        error: normalized.userMessage,
+        code: normalized.code || error.code || 'RPC_ERROR',
       };
     }
 
@@ -668,7 +680,12 @@ export async function rejectOrderPayment(
           ticketsCount: res.released_tickets_count ?? res.tickets_released,
         };
       }
-      return { success: false, error: res.error || 'Error al rechazar orden', code: res.code };
+      const normalized = normalizeAppError(
+        { message: res.error, code: res.code },
+        'Error al rechazar orden'
+      );
+      logAppError('paymentService.rejectOrderPayment.res', normalized);
+      return { success: false, error: normalized.userMessage, code: res.code };
     }
 
     return {
@@ -687,8 +704,13 @@ export async function rejectOrderPayment(
         isTimeout: true,
       };
     }
-    const msg = err instanceof Error ? err.message : 'Error al procesar el rechazo';
-    return { success: false, error: msg, code: classified.code };
+    const normalized = normalizeAppError(err, 'Error al procesar el rechazo');
+    logAppError('paymentService.rejectOrderPayment.catch', normalized);
+    return {
+      success: false,
+      error: normalized.userMessage,
+      code: normalized.code || classified.code,
+    };
   }
 }
 
@@ -1108,13 +1130,23 @@ export async function cancelOrder(
           ticketsCount: res.tickets_released,
         };
       }
-      return { success: false, error: res.error || 'Error al cancelar la orden.', code: res.code };
+      const normalized = normalizeAppError(
+        { message: res.error, code: res.code },
+        'Error al cancelar la orden.'
+      );
+      logAppError('paymentService.cancelOrder.res', normalized);
+      return { success: false, error: normalized.userMessage, code: res.code };
     }
 
+    const normalized = normalizeAppError(
+      error,
+      'No fue posible ejecutar la cancelación de la orden.'
+    );
+    logAppError('paymentService.cancelOrder.rpc', normalized);
     return {
       success: false,
-      error: error?.message || 'No fue posible ejecutar la cancelación de la orden.',
-      code: error?.code || 'RPC_ERROR',
+      error: normalized.userMessage,
+      code: normalized.code || error?.code || 'RPC_ERROR',
     };
   } catch (err: unknown) {
     const classified = classifyRequestError(err);
@@ -1127,8 +1159,13 @@ export async function cancelOrder(
         isTimeout: true,
       };
     }
-    const msg = err instanceof Error ? err.message : 'Error al cancelar la orden';
-    return { success: false, error: msg, code: classified.code };
+    const normalized = normalizeAppError(err, 'Error al cancelar la orden');
+    logAppError('paymentService.cancelOrder.catch', normalized);
+    return {
+      success: false,
+      error: normalized.userMessage,
+      code: normalized.code || classified.code,
+    };
   }
 }
 

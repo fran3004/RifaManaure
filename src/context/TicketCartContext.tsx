@@ -203,7 +203,11 @@ export const TicketCartProvider: React.FC<{ children: React.ReactNode }> = ({ ch
           await loadData();
         }
       )
-      .subscribe();
+      .subscribe((status, err) => {
+        if (err || status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          console.warn('[Realtime] Canal raffles_realtime_channel:', err?.message || status);
+        }
+      });
 
     // 2. Suscripción inmediata al registro oficial de ganadores
     const winnersChannel = supabase
@@ -219,7 +223,11 @@ export const TicketCartProvider: React.FC<{ children: React.ReactNode }> = ({ ch
           await loadData();
         }
       )
-      .subscribe();
+      .subscribe((status, err) => {
+        if (err || status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          console.warn('[Realtime] Canal winners_realtime_channel:', err?.message || status);
+        }
+      });
 
     return () => {
       void supabase.removeChannel(raffleChannel);

@@ -5,6 +5,7 @@ import {
   classifyRequestError,
   DEFAULT_REQUEST_TIMEOUT_MS,
 } from '@/lib/requestTimeout';
+import { normalizeAppError, logAppError } from '@/lib/errorHandling';
 
 export interface BuyerRegistrationData {
   fullName: string;
@@ -179,8 +180,13 @@ export async function createOrder(
     );
 
     if (error) {
-      console.error('Error RPC al crear orden segura:', error);
-      return { success: false, error: error.message, code: error.code || 'RPC_ERROR' };
+      const normalized = normalizeAppError(error, 'Error al procesar la reserva de boletos.');
+      logAppError('ticketService.createOrder.rpc', normalized);
+      return {
+        success: false,
+        error: normalized.userMessage,
+        code: normalized.code || error.code || 'RPC_ERROR',
+      };
     }
 
     const res = data as {
@@ -197,9 +203,14 @@ export async function createOrder(
     };
 
     if (!res.success) {
+      const normalized = normalizeAppError(
+        { message: res.error, code: res.code },
+        'No se pudo generar la orden.'
+      );
+      logAppError('ticketService.createOrder.res', normalized);
       return {
         success: false,
-        error: res.error || 'No se pudo generar la orden.',
+        error: normalized.userMessage,
         code: res.code,
       };
     }
@@ -224,23 +235,13 @@ export async function createOrder(
         isTimeout: true,
       };
     }
-    if (classified.isNetworkError) {
-      return {
-        success: false,
-        error:
-          'No se pudo conectar con el servidor. Por favor verifica tu conexión a internet e intenta nuevamente.',
-        code: 'NETWORK_ERROR',
-      };
-    }
-    if (classified.isAborted) {
-      return {
-        success: false,
-        error: 'La solicitud de reserva fue cancelada.',
-        code: 'REQUEST_ABORTED',
-      };
-    }
-    const message = err instanceof Error ? err.message : 'Error inesperado al crear orden';
-    return { success: false, error: message, code: 'UNKNOWN_ERROR' };
+    const normalized = normalizeAppError(err, 'Error inesperado al crear orden');
+    logAppError('ticketService.createOrder.catch', normalized);
+    return {
+      success: false,
+      error: normalized.userMessage,
+      code: normalized.code || classified.code || 'UNKNOWN_ERROR',
+    };
   }
 }
 
@@ -324,14 +325,15 @@ export async function verifyPublicOrderOrTickets(
     );
 
     if (error) {
-      console.warn('Aviso al invocar verify_public_order_or_tickets:', error.message);
+      const normalized = normalizeAppError(error, 'Error al consultar boletos y órdenes.');
+      logAppError('ticketService.verifyPublicOrderOrTickets.rpc', normalized);
       return {
         success: false,
         searchedBy: fallbackSearchBy,
         searchTerm: raw,
         orders: [],
-        error: error.message || 'Error al consultar boletos y órdenes.',
-        code: error.code || 'RPC_ERROR',
+        error: normalized.userMessage,
+        code: normalized.code || error.code || 'RPC_ERROR',
       };
     }
 
@@ -345,12 +347,17 @@ export async function verifyPublicOrderOrTickets(
     };
 
     if (!res || !res.success) {
+      const normalized = normalizeAppError(
+        { message: res?.error, code: res?.code },
+        'No se pudo consultar el estado de los boletos.'
+      );
+      logAppError('ticketService.verifyPublicOrderOrTickets.res', normalized);
       return {
         success: false,
         searchedBy: res?.searchedBy || fallbackSearchBy,
         searchTerm: raw,
         orders: [],
-        error: res?.error || 'No se pudo consultar el estado de los boletos.',
+        error: normalized.userMessage,
         code: res?.code,
       };
     }
@@ -397,25 +404,15 @@ export async function verifyPublicOrderOrTickets(
         isTimeout: true,
       };
     }
-    if (classified.isNetworkError) {
-      return {
-        success: false,
-        searchedBy: fallbackSearchBy,
-        searchTerm: raw,
-        orders: [],
-        error:
-          'Problema de conexión con el servidor. Revisa tu acceso a internet e intenta nuevamente.',
-        code: 'NETWORK_ERROR',
-      };
-    }
-    const msg = err instanceof Error ? err.message : 'Error inesperado al consultar boletos';
+    const normalized = normalizeAppError(err, 'Error inesperado al consultar boletos');
+    logAppError('ticketService.verifyPublicOrderOrTickets.catch', normalized);
     return {
       success: false,
       searchedBy: fallbackSearchBy,
       searchTerm: searchQuery,
       orders: [],
-      error: msg,
-      code: 'UNKNOWN_ERROR',
+      error: normalized.userMessage,
+      code: normalized.code || classified.code || 'UNKNOWN_ERROR',
     };
   }
 }

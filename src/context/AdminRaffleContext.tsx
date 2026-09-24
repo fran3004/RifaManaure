@@ -74,7 +74,11 @@ export const AdminRaffleProvider: React.FC<{ children: React.ReactNode }> = ({ c
           void reloadRaffles();
         }
       )
-      .subscribe();
+      .subscribe((status, err) => {
+        if (err || status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          console.warn('[Realtime] Aviso en canal admin_raffles_realtime_channel:', err?.message || status);
+        }
+      });
 
     return () => {
       void supabase.removeChannel(channel);

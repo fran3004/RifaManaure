@@ -72,7 +72,11 @@ export const SystemSettingsProvider: React.FC<{ children: React.ReactNode }> = (
           }
         }
       )
-      .subscribe();
+      .subscribe((status, err) => {
+        if (err || status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          console.warn('[Realtime] Aviso en canal system_settings_global_channel:', err?.message || status);
+        }
+      });
 
     return () => {
       isMounted = false;

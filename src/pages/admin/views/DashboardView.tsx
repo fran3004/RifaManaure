@@ -12,6 +12,7 @@ import {
 } from '@/services/paymentService';
 import { formatCOP, formatTicketNumber } from '@/lib/utils';
 import { supabase } from '@/lib/supabase';
+import { normalizeAppError, logAppError } from '@/lib/errorHandling';
 import {
   TrendingUp,
   Ticket,
@@ -205,6 +206,7 @@ export const DashboardView: React.FC = () => {
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isForbidden, setIsForbidden] = useState<boolean>(false);
 
   const loadData = useCallback(async () => {
     try {
@@ -226,11 +228,15 @@ export const DashboardView: React.FC = () => {
 
       setRecentReceipts(sortedReceipts);
       setError(null);
+      setIsForbidden(false);
     } catch (err: unknown) {
-      console.error('Error al cargar datos del Dashboard:', err);
-      const errMsg =
-        err instanceof Error ? err.message : 'Error inesperado de red al consultar métricas.';
-      setError(errMsg);
+      const normalized = normalizeAppError(
+        err,
+        'Error inesperado de red al consultar métricas del Dashboard.'
+      );
+      logAppError('DashboardView.loadData', normalized);
+      setError(normalized.userMessage);
+      setIsForbidden(normalized.kind === 'FORBIDDEN' || normalized.kind === 'UNAUTHORIZED');
     } finally {
       setIsLoading(false);
     }
@@ -253,7 +259,11 @@ export const DashboardView: React.FC = () => {
           void loadData();
         }
       })
-      .subscribe();
+      .subscribe((status, err) => {
+        if (err || status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          console.warn('[Realtime] Canal dashboard_orders_realtime:', err?.message || status);
+        }
+      });
 
     const ticketsChannel = supabase
       .channel('dashboard_tickets_realtime')
@@ -262,7 +272,11 @@ export const DashboardView: React.FC = () => {
           void loadData();
         }
       })
-      .subscribe();
+      .subscribe((status, err) => {
+        if (err || status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          console.warn('[Realtime] Canal dashboard_tickets_realtime:', err?.message || status);
+        }
+      });
 
     return () => {
       isMounted = false;
@@ -354,8 +368,9 @@ export const DashboardView: React.FC = () => {
         <AdminLoadingState message="Calculando métricas en vivo desde Supabase..." />
       ) : error ? (
         <AdminErrorState
-          title="Error al cargar métricas del Dashboard"
+          title={isForbidden ? 'Acceso Restringido' : 'Error al cargar métricas del Dashboard'}
           message={error}
+          isForbidden={isForbidden}
           onRetry={handleRefresh}
         />
       ) : (

@@ -21,6 +21,7 @@ import { AdminEditBuyerModal } from '@/components/admin/buyers/AdminEditBuyerMod
 import { AdminBuyerOrdersModal } from '@/components/admin/buyers/AdminBuyerOrdersModal';
 import { fetchBuyersPaginated, type BuyerItem } from '@/services/buyerService';
 import { formatCOP } from '@/lib/utils';
+import { normalizeAppError, logAppError } from '@/lib/errorHandling';
 import commonStyles from './AdminViews.module.css';
 import styles from './BuyersView.module.css';
 
@@ -32,6 +33,7 @@ export const BuyersView: React.FC = () => {
   const [totalPages, setTotalPages] = useState<number>(1);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [isForbidden, setIsForbidden] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>('');
 
   // Modales
@@ -57,9 +59,12 @@ export const BuyersView: React.FC = () => {
       setBuyers(res.buyers);
       setTotalCount(res.totalCount);
       setTotalPages(res.totalPages);
+      setIsForbidden(false);
     } catch (err: unknown) {
-      console.error('Error al cargar compradores:', err);
-      setError(err instanceof Error ? err.message : 'Error al cargar compradores');
+      const normalized = normalizeAppError(err, 'Error al cargar compradores');
+      logAppError('BuyersView.loadBuyers', normalized);
+      setError(normalized.userMessage);
+      setIsForbidden(normalized.kind === 'FORBIDDEN' || normalized.kind === 'UNAUTHORIZED');
     } finally {
       setIsLoading(false);
     }
@@ -80,12 +85,15 @@ export const BuyersView: React.FC = () => {
           setBuyers(res.buyers);
           setTotalCount(res.totalCount);
           setTotalPages(res.totalPages);
+          setIsForbidden(false);
           setIsLoading(false);
         }
       } catch (err: unknown) {
         if (isMounted) {
-          console.error('Error al cargar compradores:', err);
-          setError(err instanceof Error ? err.message : 'Error al cargar compradores');
+          const normalized = normalizeAppError(err, 'Error al cargar compradores');
+          logAppError('BuyersView.init', normalized);
+          setError(normalized.userMessage);
+          setIsForbidden(normalized.kind === 'FORBIDDEN' || normalized.kind === 'UNAUTHORIZED');
           setIsLoading(false);
         }
       }
@@ -193,8 +201,9 @@ export const BuyersView: React.FC = () => {
       ) : error ? (
         <div className={commonStyles.cardSection}>
           <AdminErrorState
-            title="Error al cargar compradores"
+            title={isForbidden ? 'Acceso Restringido' : 'Error al cargar compradores'}
             message={error}
+            isForbidden={isForbidden}
             onRetry={() => void loadBuyers()}
           />
         </div>

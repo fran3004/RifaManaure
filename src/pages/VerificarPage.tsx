@@ -15,6 +15,7 @@ import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { formatTicketNumber, formatCOP, createWhatsAppLink } from '@/lib/utils';
 import { verifyPublicOrderOrTickets, type PublicOrderVerification } from '@/services/ticketService';
+import { normalizeAppError, logAppError } from '@/lib/errorHandling';
 import { DigitalReceiptModal } from '@/components/receipt/DigitalReceiptModal';
 import type { DigitalReceiptData } from '@/services/receiptGeneratorService';
 import { FloatingWhatsAppBtn } from '@/components/common/FloatingWhatsAppBtn';
@@ -71,14 +72,20 @@ export const VerificarPage: React.FC = () => {
           setErrorMsg('');
         }
       } else {
-        setErrorMsg(result.error || 'No se pudo realizar la consulta.');
+        const normalized = normalizeAppError(
+          { code: result.code, message: result.error },
+          'No se pudo realizar la consulta.'
+        );
+        setErrorMsg(normalized.userMessage);
         setOrders([]);
       }
     } catch (err) {
-      console.error('Error al consultar boletos:', err);
-      setErrorMsg(
+      const normalized = normalizeAppError(
+        err,
         'Ocurrió un problema de conexión al verificar los datos. Por favor intenta nuevamente.'
       );
+      logAppError('VerificarPage.handleSearch', normalized);
+      setErrorMsg(normalized.userMessage);
       setOrders([]);
     } finally {
       setIsLoading(false);
