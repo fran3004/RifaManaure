@@ -398,6 +398,8 @@ export type Database = {
           rejection_reason: string | null;
           verified_by: string | null;
           verified_at: string | null;
+          client_idempotency_key: string;
+          idempotency_fingerprint: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -415,6 +417,8 @@ export type Database = {
           rejection_reason?: string | null;
           verified_by?: string | null;
           verified_at?: string | null;
+          client_idempotency_key?: string;
+          idempotency_fingerprint?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -432,6 +436,8 @@ export type Database = {
           rejection_reason?: string | null;
           verified_by?: string | null;
           verified_at?: string | null;
+          client_idempotency_key?: string;
+          idempotency_fingerprint?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -811,6 +817,7 @@ export type Database = {
           p_file_size: number;
           p_mime_type: string;
           p_payment_reference?: string;
+          p_client_idempotency_key?: string | null;
         };
         Returns: Json;
       };

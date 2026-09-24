@@ -216,6 +216,9 @@ export interface SubmitProofResult {
   proofId?: string;
   status?: string;
   error?: string;
+  code?: string;
+  idempotencyReplayed?: boolean;
+  isReplacement?: boolean;
 }
 
 /**
@@ -317,14 +320,21 @@ export async function uploadPaymentProof(
   orderId: string,
   raffleId: string,
   _buyerId: string,
-  paymentReference?: string
+  paymentReference?: string,
+  idempotencyKey?: string
 ): Promise<SubmitProofResult> {
   try {
     // 1. Validaciones estrictas de archivo
     const val = validateProofFile(file);
     if (!val.valid) {
-      return { success: false, error: val.error };
+      return { success: false, error: val.error, code: 'INVALID_FILE' };
     }
+
+    const clientKey =
+      idempotencyKey ||
+      (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+        ? crypto.randomUUID()
+        : undefined);
 
     // 2. Preparar ruta interna en bucket privado 'payment-proofs'
     const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg';
@@ -354,6 +364,7 @@ export async function uploadPaymentProof(
       p_file_size: file.size,
       p_mime_type: file.type || 'image/jpeg',
       p_payment_reference: paymentReference?.trim() || undefined,
+      p_client_idempotency_key: clientKey,
     });
 
     if (rpcError) {
@@ -367,21 +378,28 @@ export async function uploadPaymentProof(
       const res = rpcData as {
         success: boolean;
         proof_id?: string;
+        order_id?: string;
         status?: string;
         error?: string;
+        code?: string;
         message?: string;
+        idempotency_replayed?: boolean;
+        is_replacement?: boolean;
       };
       if (res.success) {
         return {
           success: true,
-          orderId,
+          orderId: res.order_id || orderId,
           proofId: res.proof_id,
           status: 'pending_verification',
+          idempotencyReplayed: res.idempotency_replayed,
+          isReplacement: res.is_replacement,
         };
       }
       return {
         success: false,
         error: res.error || 'Error al validar el comprobante de pago.',
+        code: res.code,
       };
     }
 
@@ -402,9 +420,16 @@ export async function uploadPaymentProof(
 export async function submitOrderReceipt(
   orderId: string,
   receiptUrl: string,
-  paymentReference?: string
+  paymentReference?: string,
+  idempotencyKey?: string
 ): Promise<SubmitReceiptResult> {
   try {
+    const clientKey =
+      idempotencyKey ||
+      (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+        ? crypto.randomUUID()
+        : undefined);
+
     const { data, error } = await supabase.rpc('submit_payment_proof', {
       p_order_id: orderId,
       p_file_path: receiptUrl,
@@ -412,6 +437,7 @@ export async function submitOrderReceipt(
       p_file_size: 1024,
       p_mime_type: 'image/jpeg',
       p_payment_reference: paymentReference?.trim() || undefined,
+      p_client_idempotency_key: clientKey,
     });
 
     if (error) {

@@ -154,6 +154,11 @@ export const ModalCheckout: React.FC = () => {
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
   const [receiptPreview, setReceiptPreview] = useState<string | null>(null);
   const [paymentReferenceInput, setPaymentReferenceInput] = useState<string>('');
+  const [proofIdempotencyKey, setProofIdempotencyKey] = useState<string>(() =>
+    typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+      ? crypto.randomUUID()
+      : ''
+  );
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const modalCardRef = useRef<HTMLDivElement | null>(null);
   const triggerElementRef = useRef<HTMLElement | null>(null);
@@ -424,6 +429,11 @@ export const ModalCheckout: React.FC = () => {
 
     setErrorMessage('');
     setReceiptFile(file);
+    setProofIdempotencyKey(
+      typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+        ? crypto.randomUUID()
+        : ''
+    );
 
     if (file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) {
       setReceiptPreview('PDF_DOCUMENT');
@@ -436,6 +446,11 @@ export const ModalCheckout: React.FC = () => {
   const handleRemoveReceipt = () => {
     setReceiptFile(null);
     setReceiptPreview(null);
+    setProofIdempotencyKey(
+      typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+        ? crypto.randomUUID()
+        : ''
+    );
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -457,7 +472,8 @@ export const ModalCheckout: React.FC = () => {
         createdOrderId,
         raffle.id,
         createdBuyerId,
-        paymentReferenceInput.trim() || undefined
+        paymentReferenceInput.trim() || undefined,
+        proofIdempotencyKey
       );
 
       if (!uploadRes.success) {
