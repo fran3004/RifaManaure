@@ -26,16 +26,27 @@
 -- ==============================================================================
 
 -- ------------------------------------------------------------------------------
--- 1. CREACIÓN DE TABLA: public.ticket_public_state
+-- 1. CREACIÓN Y DEFINICIÓN DE TABLA: public.ticket_public_state
 -- ------------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS public.ticket_public_state (
     id UUID PRIMARY KEY REFERENCES public.tickets(id) ON DELETE CASCADE,
     raffle_id UUID NOT NULL REFERENCES public.raffles(id) ON DELETE CASCADE,
     number VARCHAR(10) NOT NULL,
-    status VARCHAR(20) NOT NULL DEFAULT 'available' CHECK (status IN ('available', 'reserved', 'paid', 'blocked')),
+    status VARCHAR(20) NOT NULL DEFAULT 'available',
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     CONSTRAINT uq_ticket_public_state_raffle_number UNIQUE (raffle_id, number)
 );
+
+-- Asegurar / actualizar restricción de verificación de estados
+-- Admite los estados canónicos ('available', 'reserved', 'sold', 'blocked') así como alias
+-- seguros y de compatibilidad ('paid', 'vendido') para garantizar resiliencia total frente
+-- a datos legados y ejecuciones previas parciales.
+ALTER TABLE public.ticket_public_state 
+    DROP CONSTRAINT IF EXISTS ticket_public_state_status_check;
+
+ALTER TABLE public.ticket_public_state 
+    ADD CONSTRAINT ticket_public_state_status_check 
+    CHECK (status IN ('available', 'reserved', 'sold', 'paid', 'blocked', 'vendido'));
 
 -- Índices de alto rendimiento para filtros por rifa, estado y búsqueda de número
 CREATE INDEX IF NOT EXISTS idx_ticket_public_state_raffle_status 
@@ -45,8 +56,37 @@ CREATE INDEX IF NOT EXISTS idx_ticket_public_state_number
     ON public.ticket_public_state(number);
 
 -- ------------------------------------------------------------------------------
--- 2. BACKFILL TRANSPARENTE DESDE public.tickets
+-- 2. SANEAMIENTO PREVENTIVO Y BACKFILL DESDE public.tickets
 -- ------------------------------------------------------------------------------
+-- Paso 2.1: Saneamiento de datos históricos en public.tickets si existen valores en español
+DO $$
+BEGIN
+    BEGIN
+        ALTER TABLE public.tickets DISABLE TRIGGER trg_validate_ticket_status_transition;
+    EXCEPTION
+        WHEN undefined_object THEN NULL;
+        WHEN insufficient_privilege THEN NULL;
+    END;
+
+    UPDATE public.tickets
+    SET status = CASE LOWER(TRIM(status))
+        WHEN 'vendido' THEN 'sold'
+        WHEN 'disponible' THEN 'available'
+        WHEN 'reservado' THEN 'reserved'
+        WHEN 'bloqueado' THEN 'blocked'
+        ELSE status
+    END
+    WHERE status IN ('vendido', 'disponible', 'reservado', 'bloqueado');
+
+    BEGIN
+        ALTER TABLE public.tickets ENABLE TRIGGER trg_validate_ticket_status_transition;
+    EXCEPTION
+        WHEN undefined_object THEN NULL;
+        WHEN insufficient_privilege THEN NULL;
+    END;
+END $$;
+
+-- Paso 2.2: Poblado de proyección pública con normalización canónica de estados
 INSERT INTO public.ticket_public_state (
     id,
     raffle_id,
@@ -58,7 +98,13 @@ SELECT
     t.id,
     t.raffle_id,
     t.number,
-    t.status,
+    CASE LOWER(TRIM(t.status))
+        WHEN 'vendido' THEN 'sold'
+        WHEN 'disponible' THEN 'available'
+        WHEN 'reservado' THEN 'reserved'
+        WHEN 'bloqueado' THEN 'blocked'
+        ELSE t.status
+    END AS status,
     COALESCE(t.updated_at, t.created_at, NOW())
 FROM public.tickets t
 ON CONFLICT (id) DO UPDATE SET
@@ -76,8 +122,18 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public, pg_temp
 AS $$
+DECLARE
+    v_norm_status VARCHAR(20);
 BEGIN
     IF TG_OP = 'INSERT' THEN
+        v_norm_status := CASE LOWER(TRIM(NEW.status))
+            WHEN 'vendido' THEN 'sold'
+            WHEN 'disponible' THEN 'available'
+            WHEN 'reservado' THEN 'reserved'
+            WHEN 'bloqueado' THEN 'blocked'
+            ELSE NEW.status
+        END;
+
         INSERT INTO public.ticket_public_state (
             id,
             raffle_id,
@@ -88,7 +144,7 @@ BEGIN
             NEW.id,
             NEW.raffle_id,
             NEW.number,
-            NEW.status,
+            v_norm_status,
             COALESCE(NEW.updated_at, NOW())
         )
         ON CONFLICT (id) DO UPDATE SET
@@ -105,10 +161,18 @@ BEGIN
            OR OLD.raffle_id IS DISTINCT FROM NEW.raffle_id 
            OR OLD.updated_at IS DISTINCT FROM NEW.updated_at THEN
             
+            v_norm_status := CASE LOWER(TRIM(NEW.status))
+                WHEN 'vendido' THEN 'sold'
+                WHEN 'disponible' THEN 'available'
+                WHEN 'reservado' THEN 'reserved'
+                WHEN 'bloqueado' THEN 'blocked'
+                ELSE NEW.status
+            END;
+
             UPDATE public.ticket_public_state
             SET raffle_id = NEW.raffle_id,
                 number = NEW.number,
-                status = NEW.status,
+                status = v_norm_status,
                 updated_at = COALESCE(NEW.updated_at, NOW())
             WHERE id = NEW.id;
 
@@ -124,7 +188,7 @@ BEGIN
                     NEW.id,
                     NEW.raffle_id,
                     NEW.number,
-                    NEW.status,
+                    v_norm_status,
                     COALESCE(NEW.updated_at, NOW())
                 )
                 ON CONFLICT (id) DO UPDATE SET

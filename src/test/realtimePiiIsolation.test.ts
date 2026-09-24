@@ -19,7 +19,7 @@ interface RawDatabaseTicket {
   id: string;
   raffle_id: string;
   number: string;
-  status: 'available' | 'reserved' | 'paid' | 'blocked';
+  status: 'available' | 'reserved' | 'paid' | 'sold' | 'blocked';
   reserved_at: string | null;
   reservation_expires_at: string | null;
   buyer_id: string | null;
@@ -97,7 +97,16 @@ function createSimulatedDatabase(): SimulatedDatabase {
   };
 }
 
-// Simulación de la función trigger fn_sync_ticket_public_state de PostgreSQL
+// Simulación de la función trigger fn_sync_ticket_public_state de PostgreSQL con normalización de estados
+function normalizeTicketStatus(status: string): 'available' | 'reserved' | 'paid' | 'sold' | 'blocked' {
+  const s = status.trim().toLowerCase();
+  if (s === 'vendido') return 'sold';
+  if (s === 'disponible') return 'available';
+  if (s === 'reservado') return 'reserved';
+  if (s === 'bloqueado') return 'blocked';
+  return s as 'available' | 'reserved' | 'paid' | 'sold' | 'blocked';
+}
+
 function triggerSyncTicketPublicState(
   db: SimulatedDatabase,
   operation: 'INSERT' | 'UPDATE' | 'DELETE',
@@ -109,7 +118,7 @@ function triggerSyncTicketPublicState(
       id: newRow.id,
       raffle_id: newRow.raffle_id,
       number: newRow.number,
-      status: newRow.status,
+      status: normalizeTicketStatus(newRow.status),
       updated_at: newRow.updated_at,
     });
   } else if (operation === 'UPDATE' && newRow) {
@@ -117,7 +126,7 @@ function triggerSyncTicketPublicState(
       id: newRow.id,
       raffle_id: newRow.raffle_id,
       number: newRow.number,
-      status: newRow.status,
+      status: normalizeTicketStatus(newRow.status),
       updated_at: newRow.updated_at,
     });
   } else if (operation === 'DELETE' && oldRow) {
@@ -457,5 +466,30 @@ describe('PERSISTENCIA Y SINCRONIZACIÓN ATÓMICA DE LOS 6 MUTADORES', () => {
     triggerSyncTicketPublicState(db, 'DELETE', undefined, oldT);
 
     expect(db.ticket_public_state.has('ticket-001')).toBe(false);
+  });
+
+  it('Mutador 7: Normalización de estados legados ("vendido", "disponible") a canónicos en ticket_public_state', () => {
+    // Caso de base de datos viva: boleto histórico con status = 'vendido'
+    const legacyT: RawDatabaseTicket = {
+      id: 'ticket-legacy-004',
+      raffle_id: 'a0000000-0000-0000-0000-000000000001',
+      number: '004',
+      status: 'vendido' as unknown as 'sold',
+      buyer_id: 'buyer-999',
+      order_id: 'order-999',
+      reserved_at: null,
+      reservation_expires_at: null,
+      created_at: '2026-09-22T04:48:55.363766Z',
+      updated_at: '2026-09-22T04:48:55.363766Z',
+    };
+    db.tickets.set(legacyT.id, legacyT);
+    triggerSyncTicketPublicState(db, 'INSERT', legacyT);
+
+    const publicState = db.ticket_public_state.get(legacyT.id)!;
+    expect(publicState).toBeDefined();
+    expect(publicState.number).toBe('004');
+    expect(publicState.status).toBe('sold'); // Normalizado a 'sold' sin violar CHECK constraint
+    expect((publicState as unknown as Record<string, unknown>).buyer_id).toBeUndefined();
+    expect((publicState as unknown as Record<string, unknown>).order_id).toBeUndefined();
   });
 });
