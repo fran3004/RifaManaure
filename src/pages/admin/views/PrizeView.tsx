@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useId } from 'react';
 import { AdminPageHeader } from '@/components/admin/common/AdminPageHeader';
 import { AdminErrorState } from '@/components/admin/common/AdminErrorState';
+import { normalizeAppError, logAppError } from '@/lib/errorHandling';
 import {
   getAdminPrizeDetails,
   updatePrizeSettings,
@@ -124,6 +125,7 @@ export const PrizeView: React.FC = () => {
   const [experiences, setExperiences] = useState<PrizeExperienceRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isForbidden, setIsForbidden] = useState(false);
 
   // Estado del formulario de cabecera general
   const [savingSettings, setSavingSettings] = useState(false);
@@ -222,9 +224,15 @@ export const PrizeView: React.FC = () => {
 
       setOfficialTourFeatures(tourFeats);
       setExperiences(data.experiences);
+      setIsForbidden(false);
     } catch (err) {
-      console.error('[PrizeView] Error al cargar detalles del premio:', err);
-      setError('No fue posible cargar la información del premio.');
+      const normalized = normalizeAppError(
+        err,
+        'No fue posible cargar la información del premio.'
+      );
+      logAppError('PrizeView.loadPrizeData', normalized);
+      setError(normalized.userMessage);
+      setIsForbidden(normalized.kind === 'FORBIDDEN' || normalized.kind === 'UNAUTHORIZED');
     } finally {
       setLoading(false);
     }
@@ -587,7 +595,12 @@ export const PrizeView: React.FC = () => {
           description="Error al cargar la información."
           badge="Error"
         />
-        <AdminErrorState message={error} onRetry={loadPrizeData} />
+        <AdminErrorState
+          title={isForbidden ? 'Acceso Restringido' : 'Error al cargar información del premio'}
+          message={error}
+          isForbidden={isForbidden}
+          onRetry={loadPrizeData}
+        />
       </div>
     );
   }
