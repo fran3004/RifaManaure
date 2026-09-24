@@ -401,4 +401,91 @@ Se construyó una suite integral con 19 pruebas que validan exhaustivamente:
 2. **Compatibilidad con Entornos Nuevos:**
    - La migración 055 fue diseñada de manera estrictamente idempotente (`CREATE OR REPLACE FUNCTION`, `ALTER FUNCTION`, `DROP FUNCTION IF EXISTS`), asegurando su aplicación limpia tanto en entornos existentes como en nuevas instancias de base de datos.
 
+---
+
+## REMEDIACIÓN 5 — CONSOLIDACIÓN DE PG_CRON, ENDPOINT DE CONTINGENCIA BREAK-GLASS Y RETENCIÓN (PROMPT 05.5)
+
+### 1. OBJETIVO Y HALLAZGOS ABORDADOS
+- **CRIT-04:** Desacople operacional entre `pg_cron` interno (activo en base de datos cada 5 minutos) y la Edge Function de expiración (`cron-release-expired-reservations`).
+- **EVENT-08:** Microservicio expuesto sin caller externo activo; riesgo de superficie de ataque innecesaria y credenciales compartidas.
+- **EVENT-10:** Política de retención y mantenimiento de bitácoras de pg_cron (`cron.job_run_details`).
+
+### 2. ARQUITECTURA DEL PROGRAMADOR PRIMARIO (PG_CRON)
+1. **Scheduler Primario Exclusivo:**
+   - Se ratifica **`pg_cron`** como el único programador primario de producción.
+   - **Job Único:** `release-expired-reservations-job`
+   - **Frecuencia:** Cada 5 minutos (`*/5 * * * *`).
+   - **Comando:** `SELECT public.release_expired_reservations();`
+   - **Usuario / Permisos:** Ejecutado por el rol de sistema `postgres` con acceso a `public` y `cron`.
+2. **Prevención de Solapamiento Concurrente (Advisory Locks):**
+   - Se incorporó en `public.release_expired_reservations()` una verificación atómica mediante `pg_try_advisory_xact_lock(hashtext('release_expired_reservations'))`.
+   - Si una ejecución previa de pg_cron o un llamado manual de contingencia se encuentra en proceso, cualquier invocación concurrente sale limpiamente retornando `0` de inmediato, eliminando colisiones, contención de CPU y bloqueos en cascada.
+3. **Linearización de Bloqueo a Nivel de Fila:**
+   - Búsqueda con `SELECT o.id FROM public.orders o ... FOR UPDATE SKIP LOCKED` para órdenes `pending` expiradas.
+   - Bloqueo pesimista `FOR UPDATE` sobre los boletos asociados.
+   - Liberación atómica de boletos (`status = 'available'`, `reserved_at = NULL`, `reservation_expires_at = NULL`, `buyer_id = NULL`, `order_id = NULL`) y transición de orden a `expired`.
+   - Inmunidad total para órdenes en `pending_verification`, `paid` o `completed`.
+
+### 3. ENDPOINT DE CONTINGENCIA (BREAK-GLASS): EDGE FUNCTION
+La función `supabase/functions/cron-release-expired-reservations/index.ts` fue blindada y redefinida estrictamente como un **mecanismo de contingencia fuera de banda (Break-Glass)**:
+1. **Restricción de Método HTTP:**
+   - Rechaza taxativamente peticiones `GET` y otros verbos no autorizados con código `405 Method Not Allowed`, cabecera `Allow: POST` y payload JSON estructurado (`METHOD_NOT_ALLOWED`).
+   - Solo acepta el método `POST`.
+2. **Autenticación Estricta con Secreto Dedicado (`CRON_SECRET`):**
+   - Requiere obligatoriamente el secreto `CRON_SECRET` transmitido vía `Authorization: Bearer <CRON_SECRET>` o `x-cron-secret: <CRON_SECRET>`.
+   - **Prohibición de Credenciales Maestras:** Se prohíbe explícitamente el uso de `SUPABASE_SERVICE_ROLE_KEY` como bearer HTTP. Si un cliente intenta enviar la clave de servicio en la cabecera, la petición es denegada con `401 Unauthorized` (`FORBIDDEN_CREDENTIAL`) y registrada como advertencia de seguridad.
+   - Si `CRON_SECRET` no está configurado en el entorno de la función, responde `500 Configuration Error` sin revelar detalles internos.
+3. **Aislamiento de Navegador (Sin CORS Permisivo):**
+   - Se eliminaron las cabeceras permisivas `Access-Control-Allow-Origin: *` y las listas blancas de dominios de navegador.
+   - Se establecen cabeceras seguras de API: `Content-Type: application/json` y `X-Content-Type-Options: nosniff`.
+   - El endpoint no es consumible ni visible desde el frontend cliente.
+4. **Cero Exposición de Secretos:**
+   - Ningún log de error ni respuesta JSON hace eco de tokens, cadenas de conexión ni claves criptográficas.
+
+### 4. POLÍTICA OFICIAL DE RETENCIÓN DE HISTORIAL (`cron.job_run_details`)
+1. **Rechazo de Purga Agresiva a 7 Días:**
+   - La propuesta de purgar a 7 días fue **rechazada categóricamente** debido a que destruiría la evidencia histórica y métricas requeridas para auditorías de cumplimiento y respuesta a incidentes operativos (incident response).
+2. **Política Canónica de 30 Días:**
+   - Se estableció una política de retención oficial de **30 días** para ejecuciones concluidas en `cron.job_run_details` (`end_time < NOW() - INTERVAL '30 days'`).
+   - Se implementó la función segura de mantenimiento:
+     ```sql
+     public.cleanup_cron_job_run_details(p_retention_days integer DEFAULT 30)
+     ```
+   - Restringida exclusivamente al rol `service_role` (revocada de `PUBLIC, anon, authenticated`).
+   - Incluye salvaguarda de seguridad que fuerza un piso mínimo de 15 días (`GREATEST(p_retention_days, 15)`) impidiendo purgas accidentales destructivas.
+3. **Job Programado de Mantenimiento:**
+   - Job programado en `pg_cron`: `cleanup-cron-history-job`.
+   - Frecuencia: Diario a las 03:00 UTC (`0 3 * * *`), minimizando impacto durante horas pico.
+
+### 5. SUITE DE PRUEBAS AUTOMATIZADAS (src/test/cronAndContingencyScheduler.test.ts)
+Se desarrollaron 18 pruebas automatizadas que verifican:
+- **Parte A: Edge Function Break-Glass (10 tests):**
+  - Rechazo de GET con 405 y cabecera `Allow: POST`.
+  - Rechazo de PUT/DELETE/PATCH con 405.
+  - Rechazo de peticiones sin token con 401 (`UNAUTHORIZED`).
+  - Rechazo de token inválido con 401.
+  - **Rechazo estricto de `SERVICE_ROLE_KEY` como bearer HTTP con 401 (`FORBIDDEN_CREDENTIAL`).**
+  - Aceptación de `CRON_SECRET` válido en `Authorization: Bearer` (200 OK con metadata de contingencia).
+  - Aceptación de `CRON_SECRET` en header `x-cron-secret` (200 OK).
+  - Manejo seguro de 500 ante variable `CRON_SECRET` no configurada en el servidor.
+  - Ausencia total de cabeceras CORS permisivas de navegador.
+  - Cero filtración de secretos en logs y respuestas.
+- **Parte B: Contrato de pg_cron y Concurrencia (4 tests):**
+  - Contrato canónico de pg_cron (frecuencia cada 5 min `*/5 * * * *` y nombre único).
+  - Prevención de solapamiento mediante `pg_try_advisory_xact_lock` (salida limpia de ejecución concurrente).
+  - Semántica `FOR UPDATE SKIP LOCKED` para aislamiento transaccional.
+  - Inmunidad total a órdenes en verificación (`pending_verification`) y pagadas frente al proceso de expiración.
+- **Parte C: Retención de Historial (4 tests):**
+  - Política de retención de 30 días y programación de mantenimiento a las 03:00 UTC.
+  - Rechazo de purga a 7 días y elevación forzada a mínimo 15 días.
+  - Simulación de depuración en `cron.job_run_details` según marcas temporales.
+  - Restricción estricta de `cleanup_cron_job_run_details` al rol `service_role`.
+
+### 6. VERIFICACIÓN Y GATES DE CALIDAD
+- **Vitest:** 399 pruebas pasando al 100% en 33 suites (`399 passed, 0 failed`).
+- **TypeScript (`tsc -b`):** 0 errores de tipado.
+- **Linter (`oxlint`):** 0 errores de sintaxis.
+- **Vite Build:** Compilación limpia para producción (`dist/` generado exitosamente).
+
+
 
