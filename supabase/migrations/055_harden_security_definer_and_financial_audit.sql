@@ -1206,7 +1206,7 @@ GRANT EXECUTE ON FUNCTION public.admin_update_system_settings(INTEGER, INTEGER, 
 -- SECCIÓN 4: BLINDAJE MASIVO DE SEARCH_PATH EN FUNCIONES SECURITY DEFINER RESTANTES
 -- ==============================================================================
 
--- 4.1 RPCs Públicas
+-- 4.1 RPCs Públicas (Recreadas y aseguradas en esta migración)
 ALTER FUNCTION public.create_order_secure(uuid, text[], jsonb, character varying, character varying, uuid) 
     SET search_path = pg_catalog, public, extensions, pg_temp;
 
@@ -1216,92 +1216,131 @@ ALTER FUNCTION public.submit_payment_proof(uuid, text, text, integer, character 
 ALTER FUNCTION public.verify_public_order_or_tickets(text, text) 
     SET search_path = pg_catalog, public, pg_temp;
 
--- 4.2 RPCs y Helpers de Autenticación
-ALTER FUNCTION public.is_admin(uuid) 
-    SET search_path = pg_catalog, public, auth, pg_temp;
+-- 4.2 RPCs y Helpers de Autenticación, Sistema, Cron y Triggers (Introspección Dinámica Resiliente)
+-- Se utiliza un bloque anónimo DO $$ para descubrir e iterar sobre las firmas reales registradas en pg_proc.
+-- Esto elimina completamente errores 42883 si existen variaciones de sobrecargas o firmas entre entornos.
+DO $$
+DECLARE
+    r RECORD;
+BEGIN
+    -- 1. Funciones con auth en search_path (pg_catalog, public, auth, pg_temp)
+    FOR r IN 
+        SELECT p.oid::regprocedure AS regproc, p.proname
+        FROM pg_proc p
+        JOIN pg_namespace n ON n.oid = p.pronamespace
+        WHERE n.nspname = 'public' 
+          AND p.proname IN (
+              'is_admin', 
+              'is_superadmin', 
+              'admin_invite_user', 
+              'admin_list_users', 
+              'admin_toggle_user_status', 
+              'admin_update_buyer', 
+              'admin_create_raffle', 
+              'get_dashboard_kpis',
+              'fn_protect_admin_users',
+              'fn_audit_payment_accounts',
+              'sync_admin_user_id'
+          )
+    LOOP
+        EXECUTE 'ALTER FUNCTION ' || r.regproc || ' SET search_path = pg_catalog, public, auth, pg_temp';
+    END LOOP;
 
-ALTER FUNCTION public.is_superadmin(uuid) 
-    SET search_path = pg_catalog, public, auth, pg_temp;
+    -- 2. Funciones sin auth en search_path (pg_catalog, public, pg_temp)
+    FOR r IN 
+        SELECT p.oid::regprocedure AS regproc, p.proname
+        FROM pg_proc p
+        JOIN pg_namespace n ON n.oid = p.pronamespace
+        WHERE n.nspname = 'public' 
+          AND p.proname IN (
+              'release_expired_reservations',
+              'reserve_tickets',
+              'fn_is_order_pending_proof',
+              'fn_check_order_ticket_matrix',
+              'fn_check_ticket_order_matrix',
+              'fn_validate_raffle_status_transition',
+              'fn_validate_ticket_status_transition',
+              'fn_sync_ticket_public_state'
+          )
+    LOOP
+        EXECUTE 'ALTER FUNCTION ' || r.regproc || ' SET search_path = pg_catalog, public, pg_temp';
+    END LOOP;
 
-ALTER FUNCTION public.admin_invite_user(text, text, text) 
-    SET search_path = pg_catalog, public, auth, pg_temp;
+    -- 3. Revocación de acceso anónimo/público para funciones administrativas preexistentes
+    FOR r IN 
+        SELECT p.oid::regprocedure AS regproc, p.proname
+        FROM pg_proc p
+        JOIN pg_namespace n ON n.oid = p.pronamespace
+        WHERE n.nspname = 'public' 
+          AND p.proname IN (
+              'admin_create_raffle',
+              'admin_invite_user',
+              'admin_list_users',
+              'admin_toggle_user_status',
+              'admin_update_buyer',
+              'get_dashboard_kpis',
+              'release_expired_reservations'
+          )
+    LOOP
+        EXECUTE 'REVOKE ALL ON FUNCTION ' || r.regproc || ' FROM PUBLIC, anon';
+        EXECUTE 'GRANT EXECUTE ON FUNCTION ' || r.regproc || ' TO authenticated, service_role';
+    END LOOP;
 
-ALTER FUNCTION public.admin_list_users() 
-    SET search_path = pg_catalog, public, auth, pg_temp;
+    -- 4. reserve_tickets: restringido exclusivamente a service_role (revocado de anon y authenticated)
+    FOR r IN 
+        SELECT p.oid::regprocedure AS regproc
+        FROM pg_proc p
+        JOIN pg_namespace n ON n.oid = p.pronamespace
+        WHERE n.nspname = 'public' AND p.proname = 'reserve_tickets'
+    LOOP
+        EXECUTE 'REVOKE ALL ON FUNCTION ' || r.regproc || ' FROM PUBLIC, anon, authenticated';
+        EXECUTE 'GRANT EXECUTE ON FUNCTION ' || r.regproc || ' TO service_role';
+    END LOOP;
 
-ALTER FUNCTION public.admin_toggle_user_status(uuid, boolean) 
-    SET search_path = pg_catalog, public, auth, pg_temp;
-
-ALTER FUNCTION public.admin_update_buyer(uuid, text, text, text, text, text) 
-    SET search_path = pg_catalog, public, auth, pg_temp;
-
-ALTER FUNCTION public.admin_create_raffle(text, text, text, numeric, integer, integer, timestamptz, text, text) 
-    SET search_path = pg_catalog, public, auth, pg_temp;
-
-ALTER FUNCTION public.get_dashboard_kpis(uuid) 
-    SET search_path = pg_catalog, public, auth, pg_temp;
-
--- 4.3 Sistema y Cron
-ALTER FUNCTION public.release_expired_reservations() 
-    SET search_path = pg_catalog, public, pg_temp;
-
-ALTER FUNCTION public.reserve_tickets(uuid, text[], uuid) 
-    SET search_path = pg_catalog, public, pg_temp;
-
--- 4.4 Funciones Trigger y Storage Helpers (SECURITY DEFINER)
-ALTER FUNCTION public.fn_is_order_pending_proof(text) 
-    SET search_path = pg_catalog, public, pg_temp;
-
-ALTER FUNCTION public.fn_protect_admin_users() 
-    SET search_path = pg_catalog, public, auth, pg_temp;
-
-ALTER FUNCTION public.fn_audit_payment_accounts() 
-    SET search_path = pg_catalog, public, auth, pg_temp;
-
-ALTER FUNCTION public.fn_check_order_ticket_matrix() 
-    SET search_path = pg_catalog, public, pg_temp;
-
-ALTER FUNCTION public.fn_check_ticket_order_matrix() 
-    SET search_path = pg_catalog, public, pg_temp;
-
-ALTER FUNCTION public.fn_validate_raffle_status_transition() 
-    SET search_path = pg_catalog, public, pg_temp;
-
-ALTER FUNCTION public.fn_validate_ticket_status_transition() 
-    SET search_path = pg_catalog, public, pg_temp;
-
-ALTER FUNCTION public.fn_sync_ticket_public_state() 
-    SET search_path = pg_catalog, public, pg_temp;
-
-ALTER FUNCTION public.sync_admin_user_id() 
-    SET search_path = pg_catalog, public, auth, pg_temp;
+    -- 5. is_admin e is_superadmin: preservados para anon, authenticated, service_role
+    FOR r IN 
+        SELECT p.oid::regprocedure AS regproc
+        FROM pg_proc p
+        JOIN pg_namespace n ON n.oid = p.pronamespace
+        WHERE n.nspname = 'public' AND p.proname IN ('is_admin', 'is_superadmin')
+    LOOP
+        EXECUTE 'GRANT EXECUTE ON FUNCTION ' || r.regproc || ' TO anon, authenticated, service_role';
+    END LOOP;
+END $$;
 
 
 -- ==============================================================================
 -- SECCIÓN 5: REAFIRMACIÓN DE PRIVILEGIOS Y POLÍTICA DE MÍNIMO PRIVILEGIO (LEAST PRIVILEGE)
 -- ==============================================================================
 
--- Preservar acceso anónimo y autenticado solo para las 3 RPCs públicas y los helpers de verificación
+-- Preservar acceso anónimo y autenticado solo para las 3 RPCs públicas
 GRANT EXECUTE ON FUNCTION public.create_order_secure(uuid, text[], jsonb, character varying, character varying, uuid) TO anon, authenticated, service_role;
 GRANT EXECUTE ON FUNCTION public.submit_payment_proof(uuid, text, text, integer, character varying, text, uuid) TO anon, authenticated, service_role;
 GRANT EXECUTE ON FUNCTION public.verify_public_order_or_tickets(text, text) TO anon, authenticated, service_role;
-GRANT EXECUTE ON FUNCTION public.is_admin(uuid) TO anon, authenticated, service_role;
-GRANT EXECUTE ON FUNCTION public.is_superadmin(uuid) TO anon, authenticated, service_role;
 
--- Revocación defensiva contra acceso público en RPCs administrativas y de sistema
+-- Revocación defensiva contra acceso público en RPCs administrativas recreadas en esta migración
 REVOKE ALL ON FUNCTION public.admin_block_ticket(uuid, text) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.admin_block_ticket(uuid, text) TO authenticated, service_role;
+
 REVOKE ALL ON FUNCTION public.admin_unblock_ticket(uuid, text) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.admin_unblock_ticket(uuid, text) TO authenticated, service_role;
+
 REVOKE ALL ON FUNCTION public.admin_update_raffle(uuid, text, text, numeric, timestamptz, text, text, integer) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.admin_update_raffle(uuid, text, text, numeric, timestamptz, text, text, integer) TO authenticated, service_role;
+
 REVOKE ALL ON FUNCTION public.admin_update_system_settings(integer, integer, text, text) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.admin_update_system_settings(integer, integer, text, text) TO authenticated, service_role;
+
 REVOKE ALL ON FUNCTION public.approve_order_payment(uuid) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.approve_order_payment(uuid) TO authenticated, service_role;
+
 REVOKE ALL ON FUNCTION public.reject_order_payment(uuid, text) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.reject_order_payment(uuid, text) TO authenticated, service_role;
+
 REVOKE ALL ON FUNCTION public.cancel_order(uuid, text) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.cancel_order(uuid, text) TO authenticated, service_role;
+
 REVOKE ALL ON FUNCTION public.register_winner(uuid, text, text, timestamptz, text, text[], text) FROM PUBLIC, anon;
-REVOKE ALL ON FUNCTION public.admin_create_raffle(text, text, text, numeric, integer, integer, timestamptz, text, text) FROM PUBLIC, anon;
-REVOKE ALL ON FUNCTION public.admin_invite_user(text, text, text) FROM PUBLIC, anon;
-REVOKE ALL ON FUNCTION public.admin_list_users() FROM PUBLIC, anon;
-REVOKE ALL ON FUNCTION public.admin_toggle_user_status(uuid, boolean) FROM PUBLIC, anon;
-REVOKE ALL ON FUNCTION public.admin_update_buyer(uuid, text, text, text, text, text) FROM PUBLIC, anon;
-REVOKE ALL ON FUNCTION public.get_dashboard_kpis(uuid) FROM PUBLIC, anon;
-REVOKE ALL ON FUNCTION public.release_expired_reservations() FROM PUBLIC, anon;
-REVOKE ALL ON FUNCTION public.reserve_tickets(uuid, text[], uuid) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.register_winner(uuid, text, text, timestamptz, text, text[], text) TO authenticated, service_role;
+
+

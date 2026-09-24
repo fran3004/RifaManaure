@@ -209,7 +209,7 @@ describe('PROMPT 05.4: Hardening de SECURITY DEFINER, Contrato de Errores y Audi
     },
     {
       name: 'admin_update_buyer',
-      signature: 'admin_update_buyer(uuid, text, text, text, text, text)',
+      signature: 'admin_update_buyer(uuid, text, text, text, text)',
       type: 'RPC_ADMIN',
       searchPath: ['pg_catalog', 'public', 'auth', 'pg_temp'],
       allowedGrants: ['authenticated', 'service_role'],
@@ -237,7 +237,7 @@ describe('PROMPT 05.4: Hardening de SECURITY DEFINER, Contrato de Errores y Audi
     },
     {
       name: 'reserve_tickets',
-      signature: 'reserve_tickets(uuid, text[], uuid)',
+      signature: 'reserve_tickets(uuid, text[], uuid, integer)',
       type: 'RPC_SYSTEM',
       searchPath: ['pg_catalog', 'public', 'pg_temp'],
       allowedGrants: ['service_role'], // Revocado de anon y authenticated
