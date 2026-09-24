@@ -254,13 +254,25 @@ export const TicketCartProvider: React.FC<{ children: React.ReactNode }> = ({ ch
             setTickets((prev) =>
               [...prev, inserted].sort((a, b) => a.number.localeCompare(b.number))
             );
+          } else if (payload.eventType === 'DELETE') {
+            const oldTicket = payload.old as Partial<TicketRow>;
+            if (oldTicket?.id) {
+              setTickets((prev) => prev.filter((t) => t.id !== oldTicket.id));
+              if (oldTicket.number) {
+                setSelectedTickets((prev) => prev.filter((num) => num !== oldTicket.number));
+              }
+            }
           }
         }
       )
-      .subscribe();
+      .subscribe((status, err) => {
+        if (err || status === 'CHANNEL_ERROR') {
+          console.warn(`[Realtime] Canal tickets_realtime_${raffle.id}:`, err?.message || status);
+        }
+      });
 
     return () => {
-      supabase.removeChannel(channel);
+      void supabase.removeChannel(channel);
     };
   }, [raffle?.id]);
 
