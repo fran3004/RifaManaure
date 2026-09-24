@@ -38,12 +38,13 @@ DROP POLICY IF EXISTS "Solo administradores pueden subir documentos de ganadores
 DROP POLICY IF EXISTS "Solo administradores pueden actualizar documentos de ganadores" ON storage.objects;
 DROP POLICY IF EXISTS "Solo administradores pueden eliminar documentos de ganadores" ON storage.objects;
 
--- 1.4 Limpieza defensiva en storage.buckets si existieran registros vacíos para estos buckets
-DELETE FROM storage.buckets 
-WHERE id IN ('partner-logos', 'prize-images', 'winner-documents')
-  AND NOT EXISTS (
-    SELECT 1 FROM storage.objects WHERE bucket_id = storage.buckets.id
-  );
+-- 1.4 Nota sobre storage.buckets:
+-- Supabase bloquea eliminaciones directas de tipo DELETE FROM storage.buckets
+-- mediante la función de seguridad storage.protect_delete().
+-- En producción, estos 3 buckets ('partner-logos', 'prize-images', 'winner-documents')
+-- nunca fueron creados en storage.buckets. Si en algún entorno llegaran a existir,
+-- Supabase exige su eliminación manual desde el Dashboard (Storage > Settings > Delete bucket)
+-- o mediante la Storage API (supabase.storage.deleteBucket), nunca por SQL directo.
 
 
 -- ============================================================================
@@ -344,3 +345,4 @@ $$;
 
 GRANT EXECUTE ON FUNCTION public.is_admin(UUID) TO anon, authenticated, service_role;
 GRANT EXECUTE ON FUNCTION public.is_superadmin(UUID) TO anon, authenticated, service_role;
+
