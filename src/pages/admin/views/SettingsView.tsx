@@ -3,6 +3,7 @@ import { AdminPageHeader } from '@/components/admin/common/AdminPageHeader';
 import { AdminLoadingState } from '@/components/admin/common/AdminLoadingState';
 import { AdminErrorState } from '@/components/admin/common/AdminErrorState';
 import { useAuth } from '@/context/useAuth';
+import { normalizeAppError, logAppError } from '@/lib/errorHandling';
 import {
   Clock,
   MessageSquare,
@@ -45,6 +46,7 @@ export const SettingsView: React.FC = () => {
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [isForbidden, setIsForbidden] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
 
   // Form State
@@ -86,11 +88,15 @@ export const SettingsView: React.FC = () => {
         supportWhatsappNumber: data.support_whatsapp_number || '',
         supportEmail: data.support_email || '',
       });
+      setIsForbidden(false);
     } catch (err: unknown) {
-      console.error('Error al cargar configuración:', err);
-      setError(
-        err instanceof Error ? err.message : 'No fue posible cargar los parámetros de configuración'
+      const normalized = normalizeAppError(
+        err,
+        'No fue posible cargar los parámetros de configuración'
       );
+      logAppError('SettingsView.loadSettings', normalized);
+      setError(normalized.userMessage);
+      setIsForbidden(normalized.kind === 'FORBIDDEN' || normalized.kind === 'UNAUTHORIZED');
     } finally {
       setIsLoading(false);
     }
@@ -114,14 +120,16 @@ export const SettingsView: React.FC = () => {
           supportWhatsappNumber: data.support_whatsapp_number || '',
           supportEmail: data.support_email || '',
         });
+        setIsForbidden(false);
       } catch (err: unknown) {
         if (!ignore) {
-          console.error('Error al cargar configuración:', err);
-          setError(
-            err instanceof Error
-              ? err.message
-              : 'No fue posible cargar los parámetros de configuración'
+          const normalized = normalizeAppError(
+            err,
+            'No fue posible cargar los parámetros de configuración'
           );
+          logAppError('SettingsView.init', normalized);
+          setError(normalized.userMessage);
+          setIsForbidden(normalized.kind === 'FORBIDDEN' || normalized.kind === 'UNAUTHORIZED');
         }
       } finally {
         if (!ignore) {
@@ -192,9 +200,14 @@ export const SettingsView: React.FC = () => {
         supportEmail: result.settings.support_email || '',
       });
     } else {
+      const normalized = normalizeAppError(
+        { message: result.error },
+        'Ocurrió un error al persistir los cambios.'
+      );
+      logAppError('SettingsView.handleSave', normalized);
       setNotification({
         type: 'error',
-        message: result.error || 'Ocurrió un error al persistir los cambios.',
+        message: normalized.userMessage,
       });
     }
   }, [reservationDurationMinutes, maxTicketsPerBuyer, supportWhatsappNumber, supportEmail]);
@@ -419,8 +432,9 @@ export const SettingsView: React.FC = () => {
         ) : error ? (
           <div className={adminStyles.cardSection}>
             <AdminErrorState
-              title="Error al cargar configuración"
+              title={isForbidden ? 'Acceso Restringido' : 'Error al cargar configuración'}
               message={error}
+              isForbidden={isForbidden}
               onRetry={() => void loadSettings()}
             />
           </div>

@@ -12,6 +12,7 @@ import {
 } from '@/services/paymentService';
 import { useAdminRaffle } from '@/context/AdminRaffleContext';
 import { formatCOP } from '@/lib/utils';
+import { normalizeAppError, logAppError } from '@/lib/errorHandling';
 import {
   Search,
   Filter,
@@ -130,6 +131,7 @@ export const ReceiptsView: React.FC = () => {
   const [totalPages, setTotalPages] = useState<number>(1);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [isForbidden, setIsForbidden] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [statusFilter, setStatusFilter] = useState<string>('pending_verification');
   const [selectedReviewOrder, setSelectedReviewOrder] = useState<OrderWithDetails | null>(null);
@@ -168,9 +170,12 @@ export const ReceiptsView: React.FC = () => {
       setOrders(res.orders);
       setTotalCount(res.totalCount);
       setTotalPages(res.totalPages || 1);
+      setIsForbidden(false);
     } catch (err: unknown) {
-      console.error('Error al cargar comprobantes:', err);
-      setError(err instanceof Error ? err.message : 'Error al cargar los comprobantes de pago');
+      const normalized = normalizeAppError(err, 'Error al cargar los comprobantes de pago');
+      logAppError('ReceiptsView.loadReceipts', normalized);
+      setError(normalized.userMessage);
+      setIsForbidden(normalized.kind === 'FORBIDDEN' || normalized.kind === 'UNAUTHORIZED');
     } finally {
       setIsLoading(false);
     }
@@ -194,12 +199,15 @@ export const ReceiptsView: React.FC = () => {
           setOrders(res.orders);
           setTotalCount(res.totalCount);
           setTotalPages(res.totalPages || 1);
+          setIsForbidden(false);
           setIsLoading(false);
         }
       } catch (err: unknown) {
         if (isMounted) {
-          console.error('Error al cargar comprobantes:', err);
-          setError(err instanceof Error ? err.message : 'Error al cargar los comprobantes de pago');
+          const normalized = normalizeAppError(err, 'Error al cargar los comprobantes de pago');
+          logAppError('ReceiptsView.init', normalized);
+          setError(normalized.userMessage);
+          setIsForbidden(normalized.kind === 'FORBIDDEN' || normalized.kind === 'UNAUTHORIZED');
           setIsLoading(false);
         }
       }
@@ -249,7 +257,12 @@ export const ReceiptsView: React.FC = () => {
       setApprovingOrder(null);
       await loadReceipts();
     } else {
-      setActionMessage({ type: 'error', text: result.error || 'No se pudo aprobar el pago.' });
+      const normalized = normalizeAppError(
+        { message: result.error, code: result.code },
+        'No se pudo aprobar el pago.'
+      );
+      logAppError('ReceiptsView.handleConfirmApprove', normalized);
+      setActionMessage({ type: 'error', text: normalized.userMessage });
     }
 
     setActionProcessingId(null);
@@ -271,7 +284,12 @@ export const ReceiptsView: React.FC = () => {
       setRejectingOrder(null);
       await loadReceipts();
     } else {
-      setActionMessage({ type: 'error', text: result.error || 'No se pudo rechazar la orden.' });
+      const normalized = normalizeAppError(
+        { message: result.error, code: result.code },
+        'No se pudo rechazar la orden.'
+      );
+      logAppError('ReceiptsView.handleConfirmReject', normalized);
+      setActionMessage({ type: 'error', text: normalized.userMessage });
     }
 
     setActionProcessingId(null);
@@ -354,8 +372,9 @@ export const ReceiptsView: React.FC = () => {
       ) : error ? (
         <div className={styles.cardSection}>
           <AdminErrorState
-            title="Error al cargar comprobantes"
+            title={isForbidden ? 'Acceso Restringido' : 'Error al cargar comprobantes'}
             message={error}
+            isForbidden={isForbidden}
             onRetry={() => void loadReceipts()}
           />
         </div>

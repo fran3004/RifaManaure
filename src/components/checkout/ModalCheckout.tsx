@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { formatCOP, isValidDocument, isValidPhone, isValidEmail } from '@/lib/utils';
 import { createOrder } from '@/services/ticketService';
+import { normalizeAppError, logAppError } from '@/lib/errorHandling';
 import {
   getPaymentAccounts,
   uploadPaymentProof,
@@ -393,6 +394,14 @@ export const ModalCheckout: React.FC = () => {
           return;
         }
 
+        if (orderResult.code === 'CONFLICT' || orderResult.code === '23505') {
+          setErrorMessage(
+            'Ya existe una orden registrada para esta solicitud. Consulta el estado de tus boletos en el módulo de verificación.'
+          );
+          setHasReservationError(true);
+          return;
+        }
+
         throw new Error(orderResult.error || 'Error al generar la orden de compra.');
       }
 
@@ -415,8 +424,9 @@ export const ModalCheckout: React.FC = () => {
       setCurrentStep(4);
       void refreshTickets();
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Error inesperado al generar la reserva';
-      setErrorMessage(msg);
+      const normalized = normalizeAppError(err, 'Error inesperado al generar la reserva');
+      logAppError('ModalCheckout.handleConfirmReservation', normalized);
+      setErrorMessage(normalized.userMessage);
       setHasReservationError(true);
     } finally {
       setIsReserving(false);
@@ -495,7 +505,11 @@ export const ModalCheckout: React.FC = () => {
       );
 
       if (!uploadRes.success) {
-        setErrorMessage(uploadRes.error || 'No se pudo procesar el comprobante de pago.');
+        const normalized = normalizeAppError(
+          { code: uploadRes.code, message: uploadRes.error },
+          'No se pudo procesar el comprobante de pago.'
+        );
+        setErrorMessage(normalized.userMessage);
         return;
       }
 
@@ -504,8 +518,9 @@ export const ModalCheckout: React.FC = () => {
       clearSelection();
       void refreshTickets();
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Error al procesar el comprobante.';
-      setErrorMessage(msg);
+      const normalized = normalizeAppError(err, 'Error al procesar el comprobante.');
+      logAppError('ModalCheckout.handleSubmitProof', normalized);
+      setErrorMessage(normalized.userMessage);
     } finally {
       setIsSubmittingProof(false);
     }

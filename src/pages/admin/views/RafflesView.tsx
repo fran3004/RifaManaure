@@ -8,6 +8,7 @@ import { AdminErrorState } from '@/components/admin/common/AdminErrorState';
 import { AdminEditRaffleModal } from '@/components/admin/raffles/AdminEditRaffleModal';
 import { AdminCreateRaffleModal } from '@/components/admin/raffles/AdminCreateRaffleModal';
 import { formatCOP } from '@/lib/utils';
+import { normalizeAppError, logAppError } from '@/lib/errorHandling';
 import {
   Sparkles,
   Calendar,
@@ -51,6 +52,7 @@ export const RafflesView: React.FC = () => {
   const [raffles, setRaffles] = useState<RaffleWithStats[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isForbidden, setIsForbidden] = useState(false);
   const [selectedRaffleToEdit, setSelectedRaffleToEdit] = useState<RaffleRow | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(
@@ -64,16 +66,24 @@ export const RafflesView: React.FC = () => {
       const res = await fetchAdminRaffles();
       if (res.success) {
         setRaffles(res.raffles);
+        setIsForbidden(false);
       } else {
-        setError(res.error || 'No fue posible cargar las rifas desde la base de datos.');
+        const normalized = normalizeAppError(
+          { message: res.error },
+          'No fue posible cargar las rifas desde la base de datos.'
+        );
+        logAppError('RafflesView.loadRaffles.res', normalized);
+        setError(normalized.userMessage);
+        setIsForbidden(normalized.kind === 'FORBIDDEN' || normalized.kind === 'UNAUTHORIZED');
       }
     } catch (err: unknown) {
-      console.error('Error al cargar rifas:', err);
-      setError(
-        err instanceof Error
-          ? err.message
-          : 'Error inesperado de red al consultar el catálogo de rifas.'
+      const normalized = normalizeAppError(
+        err,
+        'Error inesperado de red al consultar el catálogo de rifas.'
       );
+      logAppError('RafflesView.loadRaffles.catch', normalized);
+      setError(normalized.userMessage);
+      setIsForbidden(normalized.kind === 'FORBIDDEN' || normalized.kind === 'UNAUTHORIZED');
     } finally {
       setIsLoading(false);
     }
@@ -89,15 +99,24 @@ export const RafflesView: React.FC = () => {
         if (active) {
           if (res.success) {
             setRaffles(res.raffles);
+            setIsForbidden(false);
           } else {
-            setError(res.error || 'No fue posible cargar las rifas desde la base de datos.');
+            const normalized = normalizeAppError(
+              { message: res.error },
+              'No fue posible cargar las rifas desde la base de datos.'
+            );
+            logAppError('RafflesView.init.res', normalized);
+            setError(normalized.userMessage);
+            setIsForbidden(normalized.kind === 'FORBIDDEN' || normalized.kind === 'UNAUTHORIZED');
           }
           setIsLoading(false);
         }
       } catch (err: unknown) {
         if (active) {
-          console.error('Error al cargar rifas:', err);
-          setError(err instanceof Error ? err.message : 'Error al cargar las rifas.');
+          const normalized = normalizeAppError(err, 'Error al cargar las rifas.');
+          logAppError('RafflesView.init.catch', normalized);
+          setError(normalized.userMessage);
+          setIsForbidden(normalized.kind === 'FORBIDDEN' || normalized.kind === 'UNAUTHORIZED');
           setIsLoading(false);
         }
       }
@@ -237,8 +256,9 @@ export const RafflesView: React.FC = () => {
       ) : error ? (
         <div className={adminStyles.cardSection}>
           <AdminErrorState
-            title="Error al cargar rifas"
+            title={isForbidden ? 'Acceso Restringido' : 'Error al cargar rifas'}
             message={error}
+            isForbidden={isForbidden}
             onRetry={() => void loadRaffles()}
           />
         </div>

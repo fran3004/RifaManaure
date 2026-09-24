@@ -16,6 +16,7 @@ import {
 import { useAdminRaffle } from '@/context/AdminRaffleContext';
 import { supabase } from '@/lib/supabase';
 import { formatCOP, formatTicketNumber, maskDocumentId } from '@/lib/utils';
+import { normalizeAppError, logAppError } from '@/lib/errorHandling';
 import {
   Ticket,
   Search,
@@ -99,6 +100,7 @@ export const TicketsView: React.FC = () => {
   });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isForbidden, setIsForbidden] = useState(false);
   const [searchTicket, setSearchTicket] = useState('');
   const [ticketStatus, setTicketStatus] = useState('ALL');
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
@@ -157,9 +159,12 @@ export const TicketsView: React.FC = () => {
       setTickets(result.tickets);
       setTotalFilteredCount(result.totalCount);
       setTotalPages(result.totalPages || 1);
+      setIsForbidden(false);
     } catch (err: unknown) {
-      console.error('Error al cargar boletos con detalles:', err);
-      setError(err instanceof Error ? err.message : 'Error al cargar el inventario de boletos');
+      const normalized = normalizeAppError(err, 'Error al cargar el inventario de boletos');
+      logAppError('TicketsView.loadTickets', normalized);
+      setError(normalized.userMessage);
+      setIsForbidden(normalized.kind === 'FORBIDDEN' || normalized.kind === 'UNAUTHORIZED');
     } finally {
       setIsLoading(false);
     }
@@ -184,12 +189,15 @@ export const TicketsView: React.FC = () => {
         setTickets(result.tickets);
         setTotalFilteredCount(result.totalCount);
         setTotalPages(result.totalPages || 1);
+        setIsForbidden(false);
         setIsLoading(false);
       })
       .catch((err: unknown) => {
         if (!isMounted) return;
-        console.error('Error al cargar boletos con detalles:', err);
-        setError(err instanceof Error ? err.message : 'Error al cargar el inventario de boletos');
+        const normalized = normalizeAppError(err, 'Error al cargar el inventario de boletos');
+        logAppError('TicketsView.init', normalized);
+        setError(normalized.userMessage);
+        setIsForbidden(normalized.kind === 'FORBIDDEN' || normalized.kind === 'UNAUTHORIZED');
         setIsLoading(false);
       });
 
@@ -209,7 +217,11 @@ export const TicketsView: React.FC = () => {
           }
         }
       )
-      .subscribe();
+      .subscribe((status, err) => {
+        if (err || status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          console.warn(`[Realtime] Canal admin_tickets_realtime_${selectedRaffleId || 'all'}:`, err?.message || status);
+        }
+      });
 
     return () => {
       isMounted = false;
@@ -272,10 +284,17 @@ export const TicketsView: React.FC = () => {
             : null
         );
       } else {
-        setActionError(res.error || 'No se pudo bloquear el boleto.');
+        const normalized = normalizeAppError(
+          { message: res.error },
+          'No se pudo bloquear el boleto.'
+        );
+        logAppError('TicketsView.handleConfirmBlock', normalized);
+        setActionError(normalized.userMessage);
       }
     } catch (err: unknown) {
-      setActionError(err instanceof Error ? err.message : 'Error inesperado al bloquear.');
+      const normalized = normalizeAppError(err, 'Error inesperado al bloquear el boleto.');
+      logAppError('TicketsView.handleConfirmBlock.catch', normalized);
+      setActionError(normalized.userMessage);
     } finally {
       setIsProcessingAction(false);
     }
@@ -301,10 +320,17 @@ export const TicketsView: React.FC = () => {
         await loadTickets();
         setSelectedTicket((prev) => (prev ? { ...prev, status: 'available' } : null));
       } else {
-        setActionError(res.error || 'No se pudo desbloquear el boleto.');
+        const normalized = normalizeAppError(
+          { message: res.error },
+          'No se pudo desbloquear el boleto.'
+        );
+        logAppError('TicketsView.handleConfirmUnblock', normalized);
+        setActionError(normalized.userMessage);
       }
     } catch (err: unknown) {
-      setActionError(err instanceof Error ? err.message : 'Error inesperado al desbloquear.');
+      const normalized = normalizeAppError(err, 'Error inesperado al desbloquear el boleto.');
+      logAppError('TicketsView.handleConfirmUnblock.catch', normalized);
+      setActionError(normalized.userMessage);
     } finally {
       setIsProcessingAction(false);
     }
@@ -530,8 +556,9 @@ export const TicketsView: React.FC = () => {
           <AdminLoadingState message="Cargando inventario de boletos desde Supabase..." />
         ) : error ? (
           <AdminErrorState
-            title="Error al cargar boletos"
+            title={isForbidden ? 'Acceso Restringido' : 'Error al cargar boletos'}
             message={error}
+            isForbidden={isForbidden}
             onRetry={() => void loadTickets()}
           />
         ) : tickets.length === 0 ? (

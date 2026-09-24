@@ -23,6 +23,7 @@ import { fetchAdminRaffles } from '@/services/raffleService';
 import type { WinnerWithDetails, RaffleRow } from '@/types/raffle.types';
 import { useAdminRaffle } from '@/context/AdminRaffleContext';
 import { formatCOP } from '@/lib/utils';
+import { normalizeAppError, logAppError } from '@/lib/errorHandling';
 import styles from './WinnersView.module.css';
 
 export const WinnersView: React.FC = () => {
@@ -31,6 +32,7 @@ export const WinnersView: React.FC = () => {
   const [raffles, setRaffles] = useState<RaffleRow[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [isForbidden, setIsForbidden] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState<boolean>(false);
   const [successToast, setSuccessToast] = useState<string | null>(null);
@@ -45,9 +47,12 @@ export const WinnersView: React.FC = () => {
       ]);
       setWinners(winnersList);
       setRaffles(rafflesRes.raffles || []);
+      setIsForbidden(false);
     } catch (err: unknown) {
-      console.error('Error al cargar datos de ganadores:', err);
-      setError(err instanceof Error ? err.message : 'Error al cargar los datos de ganadores');
+      const normalized = normalizeAppError(err, 'Error al cargar los datos de ganadores');
+      logAppError('WinnersView.loadData', normalized);
+      setError(normalized.userMessage);
+      setIsForbidden(normalized.kind === 'FORBIDDEN' || normalized.kind === 'UNAUTHORIZED');
     } finally {
       setIsLoading(false);
     }
@@ -164,8 +169,9 @@ export const WinnersView: React.FC = () => {
           <AdminLoadingState message="Cargando historial de sorteos y ganadores..." />
         ) : error ? (
           <AdminErrorState
-            title="Error al cargar ganadores"
+            title={isForbidden ? 'Acceso Restringido' : 'Error al cargar ganadores'}
             message={error}
+            isForbidden={isForbidden}
             onRetry={() => void loadData()}
           />
         ) : filteredWinners.length === 0 ? (
