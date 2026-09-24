@@ -792,14 +792,16 @@ export const SettingsView: React.FC = () => {
                     <RefreshCw size={15} className={isLoadingUsers ? 'animate-spin' : ''} />
                   </button>
 
-                  <button
-                    type="button"
-                    className={styles.inviteUserBtn}
-                    onClick={() => setIsInviteModalOpen(true)}
-                  >
-                    <UserPlus size={16} />
-                    <span>Invitar Administrador</span>
-                  </button>
+                  {adminProfile?.role === 'superadmin' && (
+                    <button
+                      type="button"
+                      className={styles.inviteUserBtn}
+                      onClick={() => setIsInviteModalOpen(true)}
+                    >
+                      <UserPlus size={16} />
+                      <span>Invitar Administrador</span>
+                    </button>
+                  )}
                 </div>
               </div>
 

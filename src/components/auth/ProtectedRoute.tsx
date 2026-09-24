@@ -6,10 +6,14 @@ import styles from './ProtectedRoute.module.css';
 
 interface ProtectedRouteProps {
   children?: React.ReactNode;
+  requireSuperAdmin?: boolean;
 }
 
-export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const { user, isAdmin, isLoading, signOut } = useAuth();
+export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
+  children,
+  requireSuperAdmin = false,
+}) => {
+  const { user, isAdmin, adminProfile, isLoading, signOut } = useAuth();
   const location = useLocation();
 
   // 1. Estado de carga de autenticación y verificación de rol
@@ -59,6 +63,34 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     );
   }
 
-  // 4. Usuario autenticado y con rol de administrador activo
+  // 4. Si la ruta requiere estrictamente rol de Superadministrador
+  if (requireSuperAdmin && adminProfile?.role !== 'superadmin') {
+    return (
+      <div className={styles.deniedContainer} data-theme="admin">
+        <div className={styles.deniedCard}>
+          <div className={styles.iconWrapper}>
+            <ShieldAlert size={36} />
+          </div>
+          <h1 className={styles.title}>Privilegios Insuficientes</h1>
+          <p className={styles.message}>
+            Esta sección contiene configuraciones críticas y está reservada
+            exclusivamente para cuentas con rol de <strong>Superadministrador</strong>.
+          </p>
+
+          <div className={styles.userInfo}>
+            <span>{adminProfile?.email || user.email} ({adminProfile?.role || 'admin'})</span>
+          </div>
+
+          <div className={styles.actions}>
+            <Link to="/admin" className={styles.homeLink}>
+              Volver al Panel Principal
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // 5. Usuario autenticado y con privilegios requeridos
   return <>{children}</>;
 };

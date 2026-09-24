@@ -138,8 +138,22 @@ export const App: React.FC = () => {
                     <Route path="rifas" element={<RafflesView />} />
                     <Route path="premio" element={<PrizeView />} />
                     <Route path="galeria" element={<GalleryView />} />
-                    <Route path="cuentas" element={<PaymentAccountsView />} />
-                    <Route path="aliados" element={<PartnersView />} />
+                    <Route
+                      path="cuentas"
+                      element={
+                        <ProtectedRoute requireSuperAdmin>
+                          <PaymentAccountsView />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="aliados"
+                      element={
+                        <ProtectedRoute requireSuperAdmin>
+                          <PartnersView />
+                        </ProtectedRoute>
+                      }
+                    />
                     <Route path="ganadores" element={<WinnersView />} />
                     <Route path="auditoria" element={<AuditView />} />
                     <Route path="configuracion" element={<SettingsView />} />

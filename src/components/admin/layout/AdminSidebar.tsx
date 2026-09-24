@@ -36,6 +36,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({ isOpen, onClose }) =
     }
   };
 
+  const isSuperAdmin = adminProfile?.role === 'superadmin';
   const initial = (adminProfile?.full_name || user?.email || 'A')[0].toUpperCase();
 
   return (
@@ -162,27 +163,31 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({ isOpen, onClose }) =
             <span>Galería</span>
           </NavLink>
 
-          <NavLink
-            to="/admin/cuentas"
-            className={({ isActive }) =>
-              `${styles.navLink} ${isActive ? styles.navLinkActive : ''}`
-            }
-            onClick={handleLinkClick}
-          >
-            <CreditCard size={18} className={styles.linkIcon} />
-            <span>Cuentas de pago</span>
-          </NavLink>
+          {isSuperAdmin && (
+            <>
+              <NavLink
+                to="/admin/cuentas"
+                className={({ isActive }) =>
+                  `${styles.navLink} ${isActive ? styles.navLinkActive : ''}`
+                }
+                onClick={handleLinkClick}
+              >
+                <CreditCard size={18} className={styles.linkIcon} />
+                <span>Cuentas de pago</span>
+              </NavLink>
 
-          <NavLink
-            to="/admin/aliados"
-            className={({ isActive }) =>
-              `${styles.navLink} ${isActive ? styles.navLinkActive : ''}`
-            }
-            onClick={handleLinkClick}
-          >
-            <Building2 size={18} className={styles.linkIcon} />
-            <span>Aliados</span>
-          </NavLink>
+              <NavLink
+                to="/admin/aliados"
+                className={({ isActive }) =>
+                  `${styles.navLink} ${isActive ? styles.navLinkActive : ''}`
+                }
+                onClick={handleLinkClick}
+              >
+                <Building2 size={18} className={styles.linkIcon} />
+                <span>Aliados</span>
+              </NavLink>
+            </>
+          )}
 
           <NavLink
             to="/admin/ganadores"

@@ -104,22 +104,22 @@ describe('SEC-04: Hardening de admin_users y Erradicación de Escalación de Pri
     expect(res.user?.email).toBe('colleague@test.com');
   });
 
-  it('5. inviteAdminUser debe propagar el error cuando un admin regular intenta invitar a un superadmin', async () => {
+  it('5. inviteAdminUser debe propagar el error cuando un admin regular intenta invitar usuarios (exclusividad de superadmin)', async () => {
     vi.spyOn(supabase, 'rpc').mockResolvedValueOnce({
       data: {
         success: false,
-        error: 'Acción denegada: Solo un superadministrador puede designar a otro superadministrador.',
+        error: 'Acceso denegado: solo los superadministradores pueden invitar a nuevos administradores al sistema.',
       },
       error: null,
     } as unknown as ReturnType<typeof supabase.rpc>);
 
     const res = await adminUserService.inviteAdminUser({
       email: 'unauthorized_super@test.com',
-      role: 'superadmin',
+      role: 'admin',
     });
 
     expect(res.success).toBe(false);
-    expect(res.error).toBe('Acción denegada: Solo un superadministrador puede designar a otro superadministrador.');
+    expect(res.error).toBe('Acceso denegado: solo los superadministradores pueden invitar a nuevos administradores al sistema.');
   });
 
   it('6. toggleAdminUserStatus debe invocar admin_toggle_user_status y manejar la respuesta', async () => {

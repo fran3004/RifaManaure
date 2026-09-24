@@ -66,8 +66,8 @@ export const AdminInviteUserModal: React.FC<AdminInviteUserModalProps> = ({
       return;
     }
 
-    if (role === 'superadmin' && !isSuperadmin) {
-      setErrorMsg('Solo un Superadministrador puede asignar el rol de Superadmin.');
+    if (!isSuperadmin) {
+      setErrorMsg('Acceso denegado: solo los superadministradores pueden invitar a nuevos administradores al sistema.');
       return;
     }
 

@@ -149,21 +149,11 @@ serve(async (req: Request) => {
       );
     }
 
-    if (callerAdmin.role === "auditor") {
+    if (callerAdmin.role !== "superadmin") {
       return new Response(
         JSON.stringify({
           success: false,
-          error: "Acceso denegado: los auditores no tienen permiso para invitar administradores.",
-        }),
-        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    if (role === "superadmin" && callerAdmin.role !== "superadmin") {
-      return new Response(
-        JSON.stringify({
-          success: false,
-          error: "Solo un Superadministrador puede otorgar el rol de Superadmin.",
+          error: "Acceso denegado: solo los superadministradores pueden invitar usuarios al sistema.",
         }),
         { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
