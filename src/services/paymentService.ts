@@ -901,11 +901,12 @@ export async function fetchAdminDashboardMetrics(
 }
 
 /**
- * Cancela una orden en 'pending' y libera los boletos asociados inmediatamente.
+ * Cancela una orden pendiente y libera sus boletos asociados inmediatamente.
+ * Exclusivo para administradores autorizados mediante la RPC cancel_order (SEC-03).
  */
 export async function cancelOrder(
   orderId: string,
-  reason: string = 'Cancelada por el usuario o administrador'
+  reason: string = 'Cancelación administrativa de orden'
 ): Promise<AdminActionPaymentResult> {
   try {
     const { data, error } = await supabase.rpc('cancel_order', {
