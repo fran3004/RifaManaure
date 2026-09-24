@@ -629,7 +629,7 @@ export async function uploadGalleryPhoto(
   prefix = 'galeria'
 ): Promise<{ success: boolean; url?: string; error?: string }> {
   try {
-    const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'image/svg+xml'];
+    const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/avif'];
     if (!validTypes.includes(file.type)) {
       return {
         success: false,

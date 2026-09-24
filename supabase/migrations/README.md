@@ -64,6 +64,7 @@ Este directorio (`supabase/migrations/`) constituye la **única fuente de verdad
 | **042** | `042_revoke_reserve_tickets_public_access.sql` | **(SEC-02)** Revocación de acceso público a la RPC legacy `reserve_tickets`, cierre de vector de bypass de validaciones y preservación de `create_order_secure`. |
 | **043** | `043_harden_cancel_order_admin_only.sql` | **(SEC-03)** Blindaje de `cancel_order` para uso exclusivo administrativo (`is_admin`), eliminación de vulnerabilidad IDOR y bloqueo pesimista `FOR UPDATE`. |
 | **044** | `044_harden_admin_users_superadmin_only.sql` | **(SEC-04)** Hardening integral de `admin_users`: política RLS exclusiva para `is_superadmin()`, revocación a `anon/PUBLIC`, trigger anti-autodesactivación, anti-escalación y anti-orfandad, y blindaje de RPCs `admin_toggle_user_status` y `admin_invite_user`. |
+| **045** | `045_storage_hardening_sec05.sql` | **(SEC-05)** Hardening controlado de Supabase Storage: revocación de subida anónima en `receipts` (privatización y cuota 5 MB), erradicación de `image/svg+xml` como vector de Stored XSS en `gallery-images`, y validación atómica `SECURITY DEFINER` (`fn_is_order_pending_proof`) en `payment-proofs`. |
 
 ---
 
