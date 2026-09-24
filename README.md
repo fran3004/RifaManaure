@@ -135,7 +135,7 @@ RifaManaure/
 │
 ├── supabase/
 │   ├── functions/              # Edge Functions en Deno (firma de medios y cron de reservas)
-│   └── migrations/             # Migraciones SQL estructuradas (001 a 037) con políticas RLS
+│   └── migrations/             # Migraciones SQL estructuradas (001 a 038) con políticas RLS
 │
 ├── .gitignore                  # Reglas de exclusión de Git (protección estricta de .env)
 ├── .oxlintrc.json              # Configuración de Oxlint con plugins y reglas a11y
@@ -159,7 +159,7 @@ RifaManaure/
    supabase gen types typescript --project-id <TU_PROYECTO_ID> > src/types/database.types.ts
    ```
 6. **Fuente Canónica de Verdad de Migraciones:**
-   La carpeta `supabase/migrations/` (archivos `001_initial_schema.sql` a `037_fix_approve_reject_order_payment_scoping.sql`) constituye la **única fuente de verdad histórica y evolutiva**.
+   La carpeta `supabase/migrations/` (archivos `001_initial_schema.sql` a `038_harden_ticket_order_structural_integrity.sql`) constituye la **única fuente de verdad histórica y evolutiva**.
    - **Trazabilidad de prefijo 028:** Existen dos archivos con prefijo 028 conservados de manera no destructiva por historial de producción (`028_fix_public_payment_accounts_and_is_admin_grant.sql` y `028_flexible_raffle_emission.sql`), ejecutados en estricto orden lexicográfico y cronológico sin colisión de DDL.
    - **Script consolidado deprecado:** El archivo `EJECUTAR_EN_SUPABASE_TODO_PENDIENTE.sql` está formalmente **deprecado** y no debe ejecutarse en entornos limpios (omite migraciones 028a, 028b, 029, 030 y 031).
    - Para mayor detalle sobre el inventario y reglas de despliegue, consultar [`supabase/migrations/README.md`](supabase/migrations/README.md).

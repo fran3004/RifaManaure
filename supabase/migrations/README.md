@@ -57,6 +57,7 @@ Este directorio (`supabase/migrations/`) constituye la **única fuente de verdad
 | **035** | `035_gallery_management.sql` | Tabla `gallery_items`, bucket `gallery-images`, políticas RLS y semillas fotográficas de alta resolución. |
 | **036** | `036_gallery_categories.sql` | Tabla `gallery_categories`, gestión dinámica de categorías de galería fotográfica con RLS y ordenamiento. |
 | **037** | `037_fix_approve_reject_order_payment_scoping.sql` | **(DB-01 / DB-10)** Corrección transaccional de `approve_order_payment` y `reject_order_payment`: acotación estricta a `WHERE order_id = p_order_id`, bloqueo pesimista `FOR UPDATE`, validación de existencia de boletos y coherencia de recuento. |
+| **038** | `038_harden_ticket_order_structural_integrity.sql` | **(DB-06 / DB-07 / DB-08 / DB-09 / DB-11)** Fortalecimiento de integridad estructural: irreversibilidad de boletos vendidos, inmutabilidad de titularidad en `sold`, FK compuesta `(order_id, raffle_id)` con `ON DELETE RESTRICT`, `status NOT NULL` en `tickets` y `orders`, restricciones CHECK de estados y triggers `BEFORE UPDATE` sin omisión de columnas. |
 
 ---
 
@@ -92,5 +93,5 @@ El archivo consolidado `EJECUTAR_EN_SUPABASE_TODO_PENDIENTE.sql` es un **artefac
 
 Para configurar una base de datos idéntica a la de producción en un entorno nuevo:
 1. Conectar a la base de datos PostgreSQL de Supabase.
-2. Ejecutar secuencialmente los 37 archivos numerados (`001_initial_schema.sql` a `037_fix_approve_reject_order_payment_scoping.sql`) en orden alfanumérico.
+2. Ejecutar secuencialmente los 38 archivos numerados (`001_initial_schema.sql` a `038_harden_ticket_order_structural_integrity.sql`) en orden alfanumérico.
 3. Las herramientas CLI (`supabase db push` o scripts de CI/CD) deben alimentarse directamente de `supabase/migrations/` en orden lexicográfico.
