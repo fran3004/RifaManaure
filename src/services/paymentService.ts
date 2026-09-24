@@ -10,12 +10,19 @@ import type {
   PaymentMethod,
 } from '@/types/raffle.types';
 import type { Database } from '@/database.types';
+import {
+  withTimeout,
+  classifyRequestError,
+  DEFAULT_REQUEST_TIMEOUT_MS,
+} from '@/lib/requestTimeout';
 
 export interface SubmitReceiptResult {
   success: boolean;
   orderId?: string;
   status?: string;
   error?: string;
+  code?: string;
+  isTimeout?: boolean;
 }
 
 export interface AdminActionPaymentResult {
@@ -23,6 +30,8 @@ export interface AdminActionPaymentResult {
   message?: string;
   ticketsCount?: number;
   error?: string;
+  code?: string;
+  isTimeout?: boolean;
 }
 
 export interface OrderWithDetails extends OrderRow {
@@ -219,6 +228,7 @@ export interface SubmitProofResult {
   code?: string;
   idempotencyReplayed?: boolean;
   isReplacement?: boolean;
+  isTimeout?: boolean;
 }
 
 /**
@@ -321,7 +331,8 @@ export async function uploadPaymentProof(
   raffleId: string,
   _buyerId: string,
   paymentReference?: string,
-  idempotencyKey?: string
+  idempotencyKey?: string,
+  timeoutMs: number = DEFAULT_REQUEST_TIMEOUT_MS
 ): Promise<SubmitProofResult> {
   try {
     // 1. Validaciones estrictas de archivo
@@ -342,35 +353,49 @@ export async function uploadPaymentProof(
     const filePath = `proofs/${raffleId}/${orderId}/${cleanFileName}`;
 
     // 3. Subida al bucket PRIVADO 'payment-proofs'
-    const { error: uploadError } = await supabase.storage
-      .from('payment-proofs')
-      .upload(filePath, file, {
-        cacheControl: '3600',
-        upsert: false,
-      });
+    const { error: uploadError } = await withTimeout(
+      supabase.storage
+        .from('payment-proofs')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false,
+        }),
+      { timeoutMs }
+    );
 
     if (uploadError) {
       return {
         success: false,
         error: `Error al subir el comprobante al almacenamiento: ${uploadError.message}`,
+        code: 'STORAGE_UPLOAD_ERROR',
       };
     }
 
     // 4. Invocar procedimiento backend atómico submit_payment_proof
-    const { data: rpcData, error: rpcError } = await supabase.rpc('submit_payment_proof', {
-      p_order_id: orderId,
-      p_file_path: filePath,
-      p_file_name: file.name,
-      p_file_size: file.size,
-      p_mime_type: file.type || 'image/jpeg',
-      p_payment_reference: paymentReference?.trim() || undefined,
-      p_client_idempotency_key: clientKey,
-    });
+    const { data: rpcData, error: rpcError } = await withTimeout(
+      (signal) => {
+        const query = supabase.rpc('submit_payment_proof', {
+          p_order_id: orderId,
+          p_file_path: filePath,
+          p_file_name: file.name,
+          p_file_size: file.size,
+          p_mime_type: file.type || 'image/jpeg',
+          p_payment_reference: paymentReference?.trim() || undefined,
+          p_client_idempotency_key: clientKey,
+        });
+        if (query && typeof (query as any).abortSignal === 'function') {
+          (query as any).abortSignal(signal);
+        }
+        return query;
+      },
+      { timeoutMs }
+    );
 
     if (rpcError) {
       return {
         success: false,
         error: rpcError.message || 'Error al registrar el comprobante de pago.',
+        code: rpcError.code || 'RPC_ERROR',
       };
     }
 
@@ -406,10 +431,36 @@ export async function uploadPaymentProof(
     return {
       success: false,
       error: 'Respuesta inesperada del servidor al procesar el comprobante.',
+      code: 'UNEXPECTED_RESPONSE',
     };
   } catch (err: unknown) {
+    const classified = classifyRequestError(err);
+    if (classified.isTimeout) {
+      return {
+        success: false,
+        error:
+          'El envío del comprobante tardó más de 15 segundos en responder. Tu comprobante y datos se mantienen intactos. Por favor haz clic en "Confirmar y Enviar Comprobante" para reintentar de forma segura.',
+        code: 'CLIENT_TIMEOUT',
+        isTimeout: true,
+      };
+    }
+    if (classified.isNetworkError) {
+      return {
+        success: false,
+        error:
+          'Problema de conexión al enviar el comprobante. Por favor verifica tu red e intenta nuevamente.',
+        code: 'NETWORK_ERROR',
+      };
+    }
+    if (classified.isAborted) {
+      return {
+        success: false,
+        error: 'El envío del comprobante fue cancelado.',
+        code: 'REQUEST_ABORTED',
+      };
+    }
     const msg = err instanceof Error ? err.message : 'Error inesperado al enviar comprobante';
-    return { success: false, error: msg };
+    return { success: false, error: msg, code: 'UNKNOWN_ERROR' };
   }
 }
 
@@ -421,7 +472,8 @@ export async function submitOrderReceipt(
   orderId: string,
   receiptUrl: string,
   paymentReference?: string,
-  idempotencyKey?: string
+  idempotencyKey?: string,
+  timeoutMs: number = DEFAULT_REQUEST_TIMEOUT_MS
 ): Promise<SubmitReceiptResult> {
   try {
     const clientKey =
@@ -430,23 +482,40 @@ export async function submitOrderReceipt(
         ? crypto.randomUUID()
         : undefined);
 
-    const { data, error } = await supabase.rpc('submit_payment_proof', {
-      p_order_id: orderId,
-      p_file_path: receiptUrl,
-      p_file_name: receiptUrl.split('/').pop() || 'comprobante.jpg',
-      p_file_size: 1024,
-      p_mime_type: 'image/jpeg',
-      p_payment_reference: paymentReference?.trim() || undefined,
-      p_client_idempotency_key: clientKey,
-    });
+    const { data, error } = await withTimeout(
+      (signal) => {
+        const query = supabase.rpc('submit_payment_proof', {
+          p_order_id: orderId,
+          p_file_path: receiptUrl,
+          p_file_name: receiptUrl.split('/').pop() || 'comprobante.jpg',
+          p_file_size: 1024,
+          p_mime_type: 'image/jpeg',
+          p_payment_reference: paymentReference?.trim() || undefined,
+          p_client_idempotency_key: clientKey,
+        });
+        if (query && typeof (query as any).abortSignal === 'function') {
+          (query as any).abortSignal(signal);
+        }
+        return query;
+      },
+      { timeoutMs }
+    );
 
     if (error) {
-      return { success: false, error: error.message || 'Error al registrar comprobante' };
+      return {
+        success: false,
+        error: error.message || 'Error al registrar comprobante',
+        code: error.code || 'RPC_ERROR',
+      };
     }
 
-    const res = data as { success: boolean; error?: string };
+    const res = data as { success: boolean; error?: string; code?: string };
     if (!res?.success) {
-      return { success: false, error: res?.error || 'Error al registrar comprobante' };
+      return {
+        success: false,
+        error: res?.error || 'Error al registrar comprobante',
+        code: res?.code,
+      };
     }
 
     return {
@@ -455,8 +524,25 @@ export async function submitOrderReceipt(
       status: 'pending_verification',
     };
   } catch (err: unknown) {
+    const classified = classifyRequestError(err);
+    if (classified.isTimeout) {
+      return {
+        success: false,
+        error:
+          'El registro del comprobante tardó más de 15 segundos en responder. Por favor intenta nuevamente.',
+        code: 'CLIENT_TIMEOUT',
+        isTimeout: true,
+      };
+    }
+    if (classified.isNetworkError) {
+      return {
+        success: false,
+        error: 'Problema de conexión con el servidor. Revisa tu acceso a internet.',
+        code: 'NETWORK_ERROR',
+      };
+    }
     const msg = err instanceof Error ? err.message : 'Error al registrar comprobante';
-    return { success: false, error: msg };
+    return { success: false, error: msg, code: 'UNKNOWN_ERROR' };
   }
 }
 
@@ -467,15 +553,29 @@ export async function submitOrderReceipt(
  */
 export async function approveOrderPayment(
   orderId: string,
-  _adminId?: string
+  _adminId?: string,
+  timeoutMs: number = DEFAULT_REQUEST_TIMEOUT_MS
 ): Promise<AdminActionPaymentResult> {
   try {
-    const { data, error } = await supabase.rpc('approve_order_payment', {
-      p_order_id: orderId,
-    });
+    const { data, error } = await withTimeout(
+      (signal) => {
+        const query = supabase.rpc('approve_order_payment', {
+          p_order_id: orderId,
+        });
+        if (query && typeof (query as any).abortSignal === 'function') {
+          (query as any).abortSignal(signal);
+        }
+        return query;
+      },
+      { timeoutMs }
+    );
 
     if (error) {
-      return { success: false, error: error.message || 'Error al aprobar orden' };
+      return {
+        success: false,
+        error: error.message || 'Error al aprobar orden',
+        code: error.code || 'RPC_ERROR',
+      };
     }
 
     if (data) {
@@ -485,6 +585,7 @@ export async function approveOrderPayment(
         tickets_sold?: number;
         error?: string;
         message?: string;
+        code?: string;
       };
       if (res.success) {
         return {
@@ -493,13 +594,27 @@ export async function approveOrderPayment(
           ticketsCount: res.tickets_sold_count ?? res.tickets_sold,
         };
       }
-      return { success: false, error: res.error || 'Error al aprobar orden' };
+      return { success: false, error: res.error || 'Error al aprobar orden', code: res.code };
     }
 
-    return { success: false, error: 'Respuesta inesperada al aprobar orden' };
+    return {
+      success: false,
+      error: 'Respuesta inesperada al aprobar orden',
+      code: 'UNEXPECTED_RESPONSE',
+    };
   } catch (err: unknown) {
+    const classified = classifyRequestError(err);
+    if (classified.isTimeout) {
+      return {
+        success: false,
+        error:
+          'La solicitud de aprobación tardó más de 15 segundos en responder. Por favor verifica si el estado se actualizó o reintenta.',
+        code: 'CLIENT_TIMEOUT',
+        isTimeout: true,
+      };
+    }
     const msg = err instanceof Error ? err.message : 'Error al procesar la aprobación';
-    return { success: false, error: msg };
+    return { success: false, error: msg, code: classified.code };
   }
 }
 
@@ -511,16 +626,30 @@ export async function approveOrderPayment(
 export async function rejectOrderPayment(
   orderId: string,
   reason: string,
-  _adminId?: string
+  _adminId?: string,
+  timeoutMs: number = DEFAULT_REQUEST_TIMEOUT_MS
 ): Promise<AdminActionPaymentResult> {
   try {
-    const { data, error } = await supabase.rpc('reject_order_payment', {
-      p_order_id: orderId,
-      p_reason: reason.trim(),
-    });
+    const { data, error } = await withTimeout(
+      (signal) => {
+        const query = supabase.rpc('reject_order_payment', {
+          p_order_id: orderId,
+          p_reason: reason.trim(),
+        });
+        if (query && typeof (query as any).abortSignal === 'function') {
+          (query as any).abortSignal(signal);
+        }
+        return query;
+      },
+      { timeoutMs }
+    );
 
     if (error) {
-      return { success: false, error: error.message || 'Error al rechazar orden' };
+      return {
+        success: false,
+        error: error.message || 'Error al rechazar orden',
+        code: error.code || 'RPC_ERROR',
+      };
     }
 
     if (data) {
@@ -530,6 +659,7 @@ export async function rejectOrderPayment(
         tickets_released?: number;
         error?: string;
         message?: string;
+        code?: string;
       };
       if (res.success) {
         return {
@@ -538,13 +668,27 @@ export async function rejectOrderPayment(
           ticketsCount: res.released_tickets_count ?? res.tickets_released,
         };
       }
-      return { success: false, error: res.error || 'Error al rechazar orden' };
+      return { success: false, error: res.error || 'Error al rechazar orden', code: res.code };
     }
 
-    return { success: false, error: 'Respuesta inesperada al rechazar orden' };
+    return {
+      success: false,
+      error: 'Respuesta inesperada al rechazar orden',
+      code: 'UNEXPECTED_RESPONSE',
+    };
   } catch (err: unknown) {
+    const classified = classifyRequestError(err);
+    if (classified.isTimeout) {
+      return {
+        success: false,
+        error:
+          'La solicitud de rechazo tardó más de 15 segundos en responder. Por favor verifica si el estado se actualizó o reintenta.',
+        code: 'CLIENT_TIMEOUT',
+        isTimeout: true,
+      };
+    }
     const msg = err instanceof Error ? err.message : 'Error al procesar el rechazo';
-    return { success: false, error: msg };
+    return { success: false, error: msg, code: classified.code };
   }
 }
 
@@ -932,16 +1076,31 @@ export async function fetchAdminDashboardMetrics(
  */
 export async function cancelOrder(
   orderId: string,
-  reason: string = 'Cancelación administrativa de orden'
+  reason: string = 'Cancelación administrativa de orden',
+  timeoutMs: number = DEFAULT_REQUEST_TIMEOUT_MS
 ): Promise<AdminActionPaymentResult> {
   try {
-    const { data, error } = await supabase.rpc('cancel_order', {
-      p_order_id: orderId,
-      p_reason: reason,
-    });
+    const { data, error } = await withTimeout(
+      (signal) => {
+        const query = supabase.rpc('cancel_order', {
+          p_order_id: orderId,
+          p_reason: reason,
+        });
+        if (query && typeof (query as any).abortSignal === 'function') {
+          (query as any).abortSignal(signal);
+        }
+        return query;
+      },
+      { timeoutMs }
+    );
 
     if (!error && data) {
-      const res = data as { success: boolean; tickets_released?: number; error?: string };
+      const res = data as {
+        success: boolean;
+        tickets_released?: number;
+        error?: string;
+        code?: string;
+      };
       if (res.success) {
         return {
           success: true,
@@ -949,16 +1108,27 @@ export async function cancelOrder(
           ticketsCount: res.tickets_released,
         };
       }
-      return { success: false, error: res.error || 'Error al cancelar la orden.' };
+      return { success: false, error: res.error || 'Error al cancelar la orden.', code: res.code };
     }
 
     return {
       success: false,
       error: error?.message || 'No fue posible ejecutar la cancelación de la orden.',
+      code: error?.code || 'RPC_ERROR',
     };
   } catch (err: unknown) {
+    const classified = classifyRequestError(err);
+    if (classified.isTimeout) {
+      return {
+        success: false,
+        error:
+          'La solicitud de cancelación tardó más de 15 segundos en responder. Por favor verifica si el estado se actualizó o reintenta.',
+        code: 'CLIENT_TIMEOUT',
+        isTimeout: true,
+      };
+    }
     const msg = err instanceof Error ? err.message : 'Error al cancelar la orden';
-    return { success: false, error: msg };
+    return { success: false, error: msg, code: classified.code };
   }
 }
 
@@ -1536,9 +1706,20 @@ export async function adminUnblockTicket(
  * Invoca el procedimiento seguro de base de datos para liberar reservas expiradas.
  * Protege estrictamente comprobantes en estado 'pending_verification' y órdenes 'paid'.
  */
-export async function triggerReleaseExpiredReservations(): Promise<number> {
+export async function triggerReleaseExpiredReservations(
+  timeoutMs: number = DEFAULT_REQUEST_TIMEOUT_MS
+): Promise<number> {
   try {
-    const { data, error } = await supabase.rpc('release_expired_reservations');
+    const { data, error } = await withTimeout(
+      (signal) => {
+        const query = supabase.rpc('release_expired_reservations');
+        if (query && typeof (query as any).abortSignal === 'function') {
+          (query as any).abortSignal(signal);
+        }
+        return query;
+      },
+      { timeoutMs }
+    );
     if (!error && typeof data === 'number') {
       return data;
     }

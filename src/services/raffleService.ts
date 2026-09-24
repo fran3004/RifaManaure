@@ -1,5 +1,10 @@
 import { supabase } from '@/lib/supabase';
 import type { RaffleRow } from '@/types/raffle.types';
+import {
+  withTimeout,
+  classifyRequestError,
+  DEFAULT_REQUEST_TIMEOUT_MS,
+} from '@/lib/requestTimeout';
 
 export interface RaffleWithStats extends RaffleRow {
   available_tickets: number;
@@ -136,29 +141,40 @@ function formatRaffleRpcError(rawError: string, functionName: string): string {
  * Actualiza los parámetros de una rifa mediante la RPC segura admin_update_raffle.
  */
 export async function updateRaffleAdmin(
-  params: UpdateRaffleParams
-): Promise<{ success: boolean; raffle?: RaffleRow; error?: string }> {
+  params: UpdateRaffleParams,
+  timeoutMs: number = DEFAULT_REQUEST_TIMEOUT_MS
+): Promise<{ success: boolean; raffle?: RaffleRow; error?: string; code?: string; isTimeout?: boolean }> {
   try {
-    const { data, error } = await supabase.rpc('admin_update_raffle', {
-      p_raffle_id: params.raffleId,
-      p_title: params.title.trim(),
-      p_description: params.description.trim(),
-      p_ticket_price: params.ticketPrice,
-      p_draw_date: new Date(params.drawDate).toISOString(),
-      p_lottery_reference: params.lotteryReference.trim(),
-      p_status: params.status,
-      p_max_tickets_per_buyer: params.maxTicketsPerBuyer,
-    });
+    const { data, error } = await withTimeout(
+      (signal) => {
+        const query = supabase.rpc('admin_update_raffle', {
+          p_raffle_id: params.raffleId,
+          p_title: params.title.trim(),
+          p_description: params.description.trim(),
+          p_ticket_price: params.ticketPrice,
+          p_draw_date: new Date(params.drawDate).toISOString(),
+          p_lottery_reference: params.lotteryReference.trim(),
+          p_status: params.status,
+          p_max_tickets_per_buyer: params.maxTicketsPerBuyer,
+        });
+        if (query && typeof (query as any).abortSignal === 'function') {
+          (query as any).abortSignal(signal);
+        }
+        return query;
+      },
+      { timeoutMs }
+    );
 
     if (error) {
       console.error('[raffleService] Error en admin_update_raffle:', error);
       return {
         success: false,
         error: formatRaffleRpcError(error.message, 'admin_update_raffle'),
+        code: error.code || 'RPC_ERROR',
       };
     }
 
-    const response = data as { success: boolean; raffle?: RaffleRow; error?: string } | null;
+    const response = data as { success: boolean; raffle?: RaffleRow; error?: string; code?: string } | null;
     if (response?.success && response.raffle) {
       return { success: true, raffle: response.raffle };
     }
@@ -168,14 +184,33 @@ export async function updateRaffleAdmin(
       error: response?.error
         ? formatRaffleRpcError(response.error, 'admin_update_raffle')
         : 'No fue posible guardar los cambios de la rifa.',
+      code: response?.code,
     };
-  } catch (err) {
+  } catch (err: unknown) {
+    const classified = classifyRequestError(err);
+    if (classified.isTimeout) {
+      return {
+        success: false,
+        error:
+          'La actualización de la rifa tardó más de 15 segundos en responder. Por favor verifica si el estado se guardó o reintenta.',
+        code: 'CLIENT_TIMEOUT',
+        isTimeout: true,
+      };
+    }
+    if (classified.isNetworkError) {
+      return {
+        success: false,
+        error: 'Problema de conexión al actualizar la rifa. Por favor verifica tu red.',
+        code: 'NETWORK_ERROR',
+      };
+    }
     return {
       success: false,
       error:
         err instanceof Error
           ? formatRaffleRpcError(err.message, 'admin_update_raffle')
           : 'Error de conexión al actualizar la rifa.',
+      code: 'UNKNOWN_ERROR',
     };
   }
 }

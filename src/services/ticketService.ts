@@ -1,5 +1,10 @@
 import { supabase } from '@/lib/supabase';
 import type { TicketRow, RaffleRow, PaymentMethod } from '@/types/raffle.types';
+import {
+  withTimeout,
+  classifyRequestError,
+  DEFAULT_REQUEST_TIMEOUT_MS,
+} from '@/lib/requestTimeout';
 
 export interface BuyerRegistrationData {
   fullName: string;
@@ -19,6 +24,7 @@ export interface CreateOrderResult {
   idempotencyReplayed?: boolean;
   code?: string;
   error?: string;
+  isTimeout?: boolean;
 }
 
 /**
@@ -132,7 +138,8 @@ export async function createOrder(
   paymentMethod: PaymentMethod = 'transfer_manual',
   contactPreference: 'whatsapp' | 'email' | 'both' = 'both',
   buyerDataParam?: BuyerRegistrationData,
-  idempotencyKey?: string
+  idempotencyKey?: string,
+  timeoutMs: number = DEFAULT_REQUEST_TIMEOUT_MS
 ): Promise<CreateOrderResult> {
   try {
     const buyerData = typeof buyerIdOrData === 'object' ? buyerIdOrData : buyerDataParam;
@@ -147,24 +154,33 @@ export async function createOrder(
         ? crypto.randomUUID()
         : undefined);
 
-    const { data, error } = await supabase.rpc('create_order_secure', {
-      p_raffle_id: raffleId,
-      p_ticket_numbers: ticketNumbers,
-      p_buyer_data: {
-        fullName: buyerData.fullName.trim(),
-        documentId: buyerData.documentId.trim(),
-        phone: buyerData.phone.trim(),
-        email: buyerData.email.trim().toLowerCase(),
-        city: buyerData.city.trim(),
+    const { data, error } = await withTimeout(
+      (signal) => {
+        const query = supabase.rpc('create_order_secure', {
+          p_raffle_id: raffleId,
+          p_ticket_numbers: ticketNumbers,
+          p_buyer_data: {
+            fullName: buyerData.fullName.trim(),
+            documentId: buyerData.documentId.trim(),
+            phone: buyerData.phone.trim(),
+            email: buyerData.email.trim().toLowerCase(),
+            city: buyerData.city.trim(),
+          },
+          p_payment_method: paymentMethod,
+          p_contact_preference: contactPreference,
+          p_client_idempotency_key: clientKey,
+        });
+        if (query && typeof (query as any).abortSignal === 'function') {
+          (query as any).abortSignal(signal);
+        }
+        return query;
       },
-      p_payment_method: paymentMethod,
-      p_contact_preference: contactPreference,
-      p_client_idempotency_key: clientKey,
-    });
+      { timeoutMs }
+    );
 
     if (error) {
       console.error('Error RPC al crear orden segura:', error);
-      return { success: false, error: error.message };
+      return { success: false, error: error.message, code: error.code || 'RPC_ERROR' };
     }
 
     const res = data as {
@@ -198,8 +214,33 @@ export async function createOrder(
       idempotencyReplayed: res.idempotency_replayed,
     };
   } catch (err: unknown) {
+    const classified = classifyRequestError(err);
+    if (classified.isTimeout) {
+      return {
+        success: false,
+        error:
+          'La solicitud de reserva tardó más de 15 segundos en responder. Es posible que el servidor aún esté procesando tu orden. Por favor haz clic en "Reintentar" para verificar o reintentar con la misma clave sin perder tus boletos.',
+        code: 'CLIENT_TIMEOUT',
+        isTimeout: true,
+      };
+    }
+    if (classified.isNetworkError) {
+      return {
+        success: false,
+        error:
+          'No se pudo conectar con el servidor. Por favor verifica tu conexión a internet e intenta nuevamente.',
+        code: 'NETWORK_ERROR',
+      };
+    }
+    if (classified.isAborted) {
+      return {
+        success: false,
+        error: 'La solicitud de reserva fue cancelada.',
+        code: 'REQUEST_ABORTED',
+      };
+    }
     const message = err instanceof Error ? err.message : 'Error inesperado al crear orden';
-    return { success: false, error: message };
+    return { success: false, error: message, code: 'UNKNOWN_ERROR' };
   }
 }
 
@@ -238,6 +279,8 @@ export interface PublicVerificationResult {
   searchTerm: string;
   orders: PublicOrderVerification[];
   error?: string;
+  code?: string;
+  isTimeout?: boolean;
 }
 
 /**
@@ -247,11 +290,15 @@ export interface PublicVerificationResult {
  */
 export async function verifyPublicOrderOrTickets(
   searchQuery: string,
-  secondaryQuery?: string
+  secondaryQuery?: string,
+  timeoutMs: number = DEFAULT_REQUEST_TIMEOUT_MS
 ): Promise<PublicVerificationResult> {
+  const raw = searchQuery.trim();
+  const secondary = secondaryQuery?.trim() || null;
+  const isRef = raw.toUpperCase().startsWith('MV-');
+  const fallbackSearchBy: 'reference' | 'document' = isRef ? 'reference' : 'document';
+
   try {
-    const raw = searchQuery.trim();
-    const secondary = secondaryQuery?.trim() || null;
     if (!raw) {
       return {
         success: false,
@@ -262,19 +309,29 @@ export async function verifyPublicOrderOrTickets(
       };
     }
 
-    const { data, error } = await supabase.rpc('verify_public_order_or_tickets', {
-      p_search_term: raw,
-      p_secondary_term: secondary,
-    });
+    const { data, error } = await withTimeout(
+      (signal) => {
+        const query = supabase.rpc('verify_public_order_or_tickets', {
+          p_search_term: raw,
+          p_secondary_term: secondary,
+        });
+        if (query && typeof (query as any).abortSignal === 'function') {
+          (query as any).abortSignal(signal);
+        }
+        return query;
+      },
+      { timeoutMs }
+    );
 
     if (error) {
       console.warn('Aviso al invocar verify_public_order_or_tickets:', error.message);
       return {
         success: false,
-        searchedBy: raw.toUpperCase().startsWith('MV-') ? 'reference' : 'document',
+        searchedBy: fallbackSearchBy,
         searchTerm: raw,
         orders: [],
         error: error.message || 'Error al consultar boletos y órdenes.',
+        code: error.code || 'RPC_ERROR',
       };
     }
 
@@ -283,16 +340,18 @@ export async function verifyPublicOrderOrTickets(
       searchTerm: string;
       searchedBy: 'reference' | 'document';
       orders: any[];
+      code?: string;
       error?: string;
     };
 
     if (!res || !res.success) {
       return {
         success: false,
-        searchedBy: res?.searchedBy || 'reference',
+        searchedBy: res?.searchedBy || fallbackSearchBy,
         searchTerm: raw,
         orders: [],
         error: res?.error || 'No se pudo consultar el estado de los boletos.',
+        code: res?.code,
       };
     }
 
@@ -320,18 +379,43 @@ export async function verifyPublicOrderOrTickets(
 
     return {
       success: true,
-      searchedBy: res.searchedBy,
+      searchedBy: res.searchedBy || fallbackSearchBy,
       searchTerm: raw,
       orders: formattedOrders,
     };
   } catch (err: unknown) {
+    const classified = classifyRequestError(err);
+    if (classified.isTimeout) {
+      return {
+        success: false,
+        searchedBy: fallbackSearchBy,
+        searchTerm: raw,
+        orders: [],
+        error:
+          'La consulta tardó más de 15 segundos en responder. Por favor verifica tu conexión a internet o intenta de nuevo.',
+        code: 'CLIENT_TIMEOUT',
+        isTimeout: true,
+      };
+    }
+    if (classified.isNetworkError) {
+      return {
+        success: false,
+        searchedBy: fallbackSearchBy,
+        searchTerm: raw,
+        orders: [],
+        error:
+          'Problema de conexión con el servidor. Revisa tu acceso a internet e intenta nuevamente.',
+        code: 'NETWORK_ERROR',
+      };
+    }
     const msg = err instanceof Error ? err.message : 'Error inesperado al consultar boletos';
     return {
       success: false,
-      searchedBy: 'reference',
+      searchedBy: fallbackSearchBy,
       searchTerm: searchQuery,
       orders: [],
       error: msg,
+      code: 'UNKNOWN_ERROR',
     };
   }
 }

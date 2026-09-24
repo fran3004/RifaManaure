@@ -375,6 +375,24 @@ export const ModalCheckout: React.FC = () => {
       );
 
       if (!orderResult.success || !orderResult.reference || !orderResult.orderId) {
+        // En caso de timeout del cliente o fallo transitorio de red:
+        // Preservar la clave de idempotencia y mantener al usuario en el Paso 3 para permitir reintento seguro
+        if (orderResult.code === 'CLIENT_TIMEOUT' || orderResult.isTimeout) {
+          setErrorMessage(
+            orderResult.error ||
+              'La solicitud de reserva tardó más de 15 segundos en responder. Tu selección y clave única de compra se mantienen protegidas. Por favor haz clic en "Confirmar Reserva y Ver Cuentas" para reintentar sin perder tus boletos.'
+          );
+          return;
+        }
+
+        if (orderResult.code === 'NETWORK_ERROR') {
+          setErrorMessage(
+            orderResult.error ||
+              'Problema de conexión con el servidor. Revisa tu acceso a internet y haz clic en "Confirmar Reserva y Ver Cuentas" para reintentar.'
+          );
+          return;
+        }
+
         throw new Error(orderResult.error || 'Error al generar la orden de compra.');
       }
 
@@ -477,7 +495,8 @@ export const ModalCheckout: React.FC = () => {
       );
 
       if (!uploadRes.success) {
-        throw new Error(uploadRes.error || 'No se pudo procesar el comprobante de pago.');
+        setErrorMessage(uploadRes.error || 'No se pudo procesar el comprobante de pago.');
+        return;
       }
 
       // Transición exitosa a confirmación definitiva (Paso 7)
@@ -604,6 +623,16 @@ export const ModalCheckout: React.FC = () => {
                 className={styles.submitBtn}
                 onClick={() => {
                   setHasReservationError(false);
+                  void handleConfirmReservation();
+                }}
+              >
+                Reintentar Reserva
+              </button>
+              <button
+                type="button"
+                className={styles.cancelBtn}
+                onClick={() => {
+                  setHasReservationError(false);
                   setCurrentStep(1);
                   setIdempotencyKey(
                     typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
@@ -612,7 +641,7 @@ export const ModalCheckout: React.FC = () => {
                   );
                 }}
               >
-                Intentar de nuevo
+                Elegir otros boletos
               </button>
               <button type="button" className={styles.cancelBtn} onClick={handleClose}>
                 Cerrar
@@ -888,6 +917,13 @@ export const ModalCheckout: React.FC = () => {
                 transferencia bancaria.
               </div>
             </div>
+
+            {errorMessage && (
+              <div className={styles.errorMessageBox} role="alert">
+                <AlertCircle size={16} aria-hidden="true" />
+                <span>{errorMessage}</span>
+              </div>
+            )}
 
             <div className={styles.stepNavigation}>
               <button
