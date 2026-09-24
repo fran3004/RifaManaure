@@ -480,18 +480,21 @@ DECLARE
     v_released_tickets_count INTEGER := 0;
 BEGIN
     -- 1. Identificar y bloquear pesimistamente las órdenes pendientes cuyas reservas ya expiraron
-    -- FOR UPDATE OF o SKIP LOCKED evita deadlocks con procesos concurrentes de aprobación/pago
+    -- FOR UPDATE SKIP LOCKED evita deadlocks con procesos concurrentes de aprobación/pago
     SELECT array_agg(id)
     INTO v_expired_order_ids
     FROM (
         SELECT o.id
         FROM public.orders o
-        JOIN public.tickets t ON t.order_id = o.id
         WHERE o.status = 'pending'
-          AND t.status = 'reserved'
-          AND t.reservation_expires_at < NOW()
-        GROUP BY o.id
-        FOR UPDATE OF o SKIP LOCKED
+          AND EXISTS (
+              SELECT 1
+              FROM public.tickets t
+              WHERE t.order_id = o.id
+                AND t.status = 'reserved'
+                AND t.reservation_expires_at < NOW()
+          )
+        FOR UPDATE SKIP LOCKED
     ) sub;
 
     IF v_expired_order_ids IS NULL OR array_length(v_expired_order_ids, 1) IS NULL THEN
