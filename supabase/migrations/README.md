@@ -60,6 +60,7 @@ Este directorio (`supabase/migrations/`) constituye la **única fuente de verdad
 | **038** | `038_harden_ticket_order_structural_integrity.sql` | **(DB-06 / DB-07 / DB-08 / DB-09 / DB-11)** Fortalecimiento de integridad estructural: irreversibilidad de boletos vendidos, inmutabilidad de titularidad en `sold`, FK compuesta `(order_id, raffle_id)` con `ON DELETE RESTRICT`, `status NOT NULL` en `tickets` y `orders`, restricciones CHECK de estados y triggers `BEFORE UPDATE` sin omisión de columnas. |
 | **039** | `039_harden_rls_orders_and_notification_logs.sql` | **(DB-03 / DB-14)** Endurecimiento de RLS: eliminación de subconsulta a `auth.users` en `notification_logs` (anti-error 42501), erradicación del UPDATE público genérico en `orders`, políticas administrativas exclusivas vía `is_admin()` y canalización atómica de comprobantes por `submit_payment_proof`. |
 | **040** | `040_enable_realtime_for_operational_tables.sql` | **(DB-02)** Habilitación defensiva e idempotente de Supabase Realtime para tablas operativas (`tickets`, `orders`, `raffles`, `winners`, `system_settings`) con control de excepciones y `REPLICA IDENTITY FULL`. |
+| **041** | `041_storage_cleanup_and_integrity_hardenings.sql` | **(DB-12 / DB-15 / DB-16)** Limpieza de 13 políticas RLS huérfanas en `storage.objects` (aliados, premios, actas migrados a Cloudinary), constraint UNIQUE `uq_winners_raffle_ticket` e idempotencia concurrente en `register_winner`, y blindaje anti-suplantación en `is_admin` / `is_superadmin`. |
 
 ---
 
@@ -95,5 +96,5 @@ El archivo consolidado `EJECUTAR_EN_SUPABASE_TODO_PENDIENTE.sql` es un **artefac
 
 Para configurar una base de datos idéntica a la de producción en un entorno nuevo:
 1. Conectar a la base de datos PostgreSQL de Supabase.
-2. Ejecutar secuencialmente los 40 archivos numerados (`001_initial_schema.sql` a `040_enable_realtime_for_operational_tables.sql`) en orden alfanumérico.
+2. Ejecutar secuencialmente los 41 archivos numerados (`001_initial_schema.sql` a `041_storage_cleanup_and_integrity_hardenings.sql`) en orden alfanumérico.
 3. Las herramientas CLI (`supabase db push` o scripts de CI/CD) deben alimentarse directamente de `supabase/migrations/` en orden lexicográfico.
