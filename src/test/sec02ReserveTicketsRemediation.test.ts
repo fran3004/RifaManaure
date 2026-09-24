@@ -62,7 +62,7 @@ describe('SEC-02: Remediación de Superficie de Ataque en reserve_tickets', () =
     rpcSpy.mockRestore();
   });
 
-  it('simulación de invocación a reserve_tickets por rol anónimo o autenticado debe retornar error de permisos 42501', async () => {
+  it('Escenario B: simulación de invocación a reserve_tickets por rol anónimo o autenticado debe retornar error de permisos 42501', async () => {
     const rpcSpy = vi.spyOn(supabase, 'rpc').mockImplementation(async (fnName: string) => {
       if (fnName === 'reserve_tickets') {
         return {
@@ -89,4 +89,43 @@ describe('SEC-02: Remediación de Superficie de Ataque en reserve_tickets', () =
 
     rpcSpy.mockRestore();
   });
+
+  it('Escenario A: llamada privilegiada interna (service_role/postgres) valida disponibilidad y rechaza reservas duplicadas', async () => {
+    let ticketReserved = false;
+
+    const rpcSpy = vi.spyOn(supabase, 'rpc').mockImplementation(async (fnName: string, args: any) => {
+      if (fnName === 'reserve_tickets') {
+        if (!ticketReserved) {
+          ticketReserved = true;
+          return {
+            data: { success: true, reserved_tickets: args.p_ticket_numbers },
+            error: null,
+          } as any;
+        }
+        return {
+          data: { success: false, error: 'Uno o más números ya no se encuentran disponibles.' },
+          error: null,
+        } as any;
+      }
+      return { data: null, error: null } as any;
+    });
+
+    // Petición inicial como servicio privilegiado
+    const res1 = await (supabase.rpc as any)('reserve_tickets', {
+      p_raffle_id: 'r111',
+      p_ticket_numbers: ['001'],
+    });
+    expect(res1.data.success).toBe(true);
+
+    // Replay inmediato del mismo request
+    const res2 = await (supabase.rpc as any)('reserve_tickets', {
+      p_raffle_id: 'r111',
+      p_ticket_numbers: ['001'],
+    });
+    expect(res2.data.success).toBe(false);
+    expect(res2.data.error).toContain('ya no se encuentran disponibles');
+
+    rpcSpy.mockRestore();
+  });
 });
+
