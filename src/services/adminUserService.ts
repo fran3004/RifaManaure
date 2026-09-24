@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+import { normalizeAppError, logAppError } from '@/lib/errorHandling';
 
 export interface AdminUserItem {
   id: string;
@@ -48,19 +49,24 @@ export async function fetchAdminUsers(): Promise<AdminUsersResponse> {
     const { data, error } = await supabase.rpc('admin_list_users');
 
     if (error) {
-      console.error('Error al invocar admin_list_users:', error);
+      const normalized = normalizeAppError(error, 'Error al obtener la lista de administradores.');
+      logAppError('adminUserService.fetchAdminUsers.rpc', normalized);
       return {
         success: false,
-        error: error.message || 'Error al obtener la lista de administradores.',
+        error: normalized.userMessage,
       };
     }
 
     const payload = data as unknown as AdminUsersResponse;
 
     if (!payload?.success) {
+      const normalized = normalizeAppError(
+        { message: payload?.error },
+        'No fue posible consultar los administradores.'
+      );
       return {
         success: false,
-        error: payload?.error || 'No fue posible consultar los administradores.',
+        error: normalized.userMessage,
       };
     }
 
@@ -69,10 +75,11 @@ export async function fetchAdminUsers(): Promise<AdminUsersResponse> {
       users: payload.users || [],
     };
   } catch (err) {
-    console.error('Error inesperado en fetchAdminUsers:', err);
+    const normalized = normalizeAppError(err, 'Error inesperado de red al consultar administradores.');
+    logAppError('adminUserService.fetchAdminUsers.catch', normalized);
     return {
       success: false,
-      error: err instanceof Error ? err.message : 'Error inesperado de red.',
+      error: normalized.userMessage,
     };
   }
 }
@@ -91,19 +98,24 @@ export async function inviteAdminUser(
     });
 
     if (error) {
-      console.error('Error al invocar admin_invite_user:', error);
+      const normalized = normalizeAppError(error, 'Error al invitar al administrador.');
+      logAppError('adminUserService.inviteAdminUser.rpc', normalized);
       return {
         success: false,
-        error: error.message || 'Error al invitar al administrador.',
+        error: normalized.userMessage,
       };
     }
 
     const payload = data as unknown as InviteAdminUserResponse;
 
     if (!payload?.success) {
+      const normalized = normalizeAppError(
+        { message: payload?.error },
+        'No se pudo autorizar al nuevo administrador.'
+      );
       return {
         success: false,
-        error: payload?.error || 'No se pudo autorizar al nuevo administrador.',
+        error: normalized.userMessage,
       };
     }
 
@@ -113,10 +125,11 @@ export async function inviteAdminUser(
       message: payload.message || 'Administrador autorizado exitosamente.',
     };
   } catch (err) {
-    console.error('Error inesperado en inviteAdminUser:', err);
+    const normalized = normalizeAppError(err, 'Error inesperado de red al invitar administrador.');
+    logAppError('adminUserService.inviteAdminUser.catch', normalized);
     return {
       success: false,
-      error: err instanceof Error ? err.message : 'Error inesperado de red.',
+      error: normalized.userMessage,
     };
   }
 }
@@ -135,19 +148,24 @@ export async function toggleAdminUserStatus(
     });
 
     if (error) {
-      console.error('Error al invocar admin_toggle_user_status:', error);
+      const normalized = normalizeAppError(error, 'Error al modificar el estado del administrador.');
+      logAppError('adminUserService.toggleAdminUserStatus.rpc', normalized);
       return {
         success: false,
-        error: error.message || 'Error al modificar el estado del administrador.',
+        error: normalized.userMessage,
       };
     }
 
     const payload = data as unknown as ToggleAdminUserStatusResponse;
 
     if (!payload?.success) {
+      const normalized = normalizeAppError(
+        { message: payload?.error },
+        'No fue posible actualizar el estado del administrador.'
+      );
       return {
         success: false,
-        error: payload?.error || 'No fue posible actualizar el estado del administrador.',
+        error: normalized.userMessage,
       };
     }
 
@@ -158,10 +176,11 @@ export async function toggleAdminUserStatus(
       message: payload.message,
     };
   } catch (err) {
-    console.error('Error inesperado en toggleAdminUserStatus:', err);
+    const normalized = normalizeAppError(err, 'Error inesperado de red al cambiar estado de administrador.');
+    logAppError('adminUserService.toggleAdminUserStatus.catch', normalized);
     return {
       success: false,
-      error: err instanceof Error ? err.message : 'Error inesperado de red.',
+      error: normalized.userMessage,
     };
   }
 }

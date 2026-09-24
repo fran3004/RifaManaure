@@ -12,6 +12,7 @@ import {
   type PaymentAccountInsert,
 } from '@/services/paymentService';
 import type { PaymentAccountRow } from '@/types/raffle.types';
+import { normalizeAppError, logAppError } from '@/lib/errorHandling';
 import {
   CreditCard,
   Plus,
@@ -100,6 +101,7 @@ export const PaymentAccountsView: React.FC = () => {
 
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isForbidden, setIsForbidden] = useState(false);
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(
     null
   );
@@ -110,10 +112,13 @@ export const PaymentAccountsView: React.FC = () => {
     void getAllPaymentAccountsAdmin()
       .then((data) => {
         setAccounts(data);
+        setIsForbidden(false);
       })
       .catch((err: unknown) => {
-        console.error('Error al cargar cuentas de pago:', err);
-        setError(err instanceof Error ? err.message : 'Error al cargar las cuentas de pago');
+        const normalized = normalizeAppError(err, 'Error al cargar las cuentas de pago');
+        logAppError('PaymentAccountsView.loadAccounts', normalized);
+        setError(normalized.userMessage);
+        setIsForbidden(normalized.kind === 'FORBIDDEN' || normalized.kind === 'UNAUTHORIZED');
       })
       .finally(() => {
         setLoading(false);
@@ -126,13 +131,16 @@ export const PaymentAccountsView: React.FC = () => {
       .then((data) => {
         if (isMounted) {
           setAccounts(data);
+          setIsForbidden(false);
           setLoading(false);
         }
       })
       .catch((err: unknown) => {
         if (isMounted) {
-          console.error('Error al cargar cuentas de pago:', err);
-          setError(err instanceof Error ? err.message : 'Error al cargar las cuentas de pago');
+          const normalized = normalizeAppError(err, 'Error al cargar las cuentas de pago');
+          logAppError('PaymentAccountsView.init', normalized);
+          setError(normalized.userMessage);
+          setIsForbidden(normalized.kind === 'FORBIDDEN' || normalized.kind === 'UNAUTHORIZED');
           setLoading(false);
         }
       });
@@ -447,8 +455,9 @@ export const PaymentAccountsView: React.FC = () => {
       ) : error ? (
         <div className={styles.cardSection}>
           <AdminErrorState
-            title="Error al cargar cuentas de pago"
+            title={isForbidden ? 'Acceso Restringido' : 'Error al cargar cuentas de pago'}
             message={error}
+            isForbidden={isForbidden}
             onRetry={loadAccounts}
           />
         </div>

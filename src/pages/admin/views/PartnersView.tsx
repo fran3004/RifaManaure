@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { AdminPageHeader } from '@/components/admin/common/AdminPageHeader';
 import { AdminErrorState } from '@/components/admin/common/AdminErrorState';
+import { normalizeAppError, logAppError } from '@/lib/errorHandling';
 import {
   getAllPartnersAdmin,
   createPartner,
@@ -79,6 +80,7 @@ export const PartnersView: React.FC = () => {
   const [partners, setPartners] = useState<PartnerRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isForbidden, setIsForbidden] = useState<boolean>(false);
 
   // Filtros
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'inactive'>('all');
@@ -120,9 +122,12 @@ export const PartnersView: React.FC = () => {
     try {
       const data = await getAllPartnersAdmin();
       setPartners(data);
+      setIsForbidden(false);
     } catch (err: unknown) {
-      console.error('Error al cargar aliados:', err);
-      setError(err instanceof Error ? err.message : 'Error al cargar los aliados');
+      const normalized = normalizeAppError(err, 'Error al cargar los aliados');
+      logAppError('PartnersView.loadPartners', normalized);
+      setError(normalized.userMessage);
+      setIsForbidden(normalized.kind === 'FORBIDDEN' || normalized.kind === 'UNAUTHORIZED');
     } finally {
       setLoading(false);
     }
@@ -137,10 +142,13 @@ export const PartnersView: React.FC = () => {
         const data = await getAllPartnersAdmin();
         if (ignore) return;
         setPartners(data);
+        setIsForbidden(false);
       } catch (err: unknown) {
         if (!ignore) {
-          console.error('Error al cargar aliados iniciales:', err);
-          setError(err instanceof Error ? err.message : 'Error al cargar los aliados');
+          const normalized = normalizeAppError(err, 'Error al cargar los aliados');
+          logAppError('PartnersView.fetchInitialPartners', normalized);
+          setError(normalized.userMessage);
+          setIsForbidden(normalized.kind === 'FORBIDDEN' || normalized.kind === 'UNAUTHORIZED');
         }
       } finally {
         if (!ignore) {
@@ -610,14 +618,15 @@ export const PartnersView: React.FC = () => {
           />
           <h3 className={styles.emptyStateTitle}>Cargando Aliados</h3>
           <p className={styles.emptyStateDescription}>
-            Consultando la tabla public.partners en Supabase...
+            Consultando el catálogo oficial de aliados comerciales...
           </p>
         </div>
       ) : error ? (
         <div className={styles.cardSection}>
           <AdminErrorState
-            title="Error al cargar aliados"
+            title={isForbidden ? 'Acceso Restringido' : 'Error al cargar aliados'}
             message={error}
+            isForbidden={isForbidden}
             onRetry={() => void loadPartners()}
           />
         </div>
