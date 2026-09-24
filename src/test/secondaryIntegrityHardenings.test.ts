@@ -34,7 +34,7 @@ describe('DB-12: Clasificación de Buckets y Arquitectura Híbrida de Almacenami
       id: 'receipts',
       status: 'legado',
       storageProvider: 'supabase_storage',
-      isPublic: true,
+      isPublic: false,
       hasActiveOrphanedPolicies: false,
     },
     {

@@ -143,3 +143,80 @@ Se creó la suite [src/test/realtimePiiIsolation.test.ts](file:///c:/Users/frani
   3. **Normalización en Backfill y Trigger:** Tanto la consulta de backfill como la función trigger `fn_sync_ticket_public_state()` normalizan automáticamente mediante `CASE LOWER(TRIM(status))` cualquier valor legado a su contraparte canónica antes de escribir en la proyección pública.
   4. **Cobertura en Pruebas:** Se añadió la prueba unitaria *Mutador 7* en `realtimePiiIsolation.test.ts` verificando que un boleto con status `'vendido'` se sincroniza deterministamente como `'sold'` sin violar ninguna restricción de integridad.
 
+---
+
+## REMEDIACIÓN 3 (PROMPT 05.3): CIERRE TOTAL DEL BUCKET LEGACY 'receipts' Y SANEAMIENTO DE STORAGE
+
+### 1. OBJETIVO Y HALLAZGOS ATENDIDOS
+- **EVENT-03:** Riesgo de exposición de datos bancarios e información financiera sensible mediante acceso público directo en el bucket legacy `receipts`.
+- **EVENT-04:** Necesidad de cerrar toda posibilidad de subida anónima o mutación no autorizada sobre el bucket legacy `receipts`.
+- **EVENT-09:** Presencia de políticas RLS huérfanas en `storage.objects` asociadas a buckets que ya no existen (`partner-logos`, `prize-images`, `winner-documents`).
+
+### 2. MATRIZ DE INVENTARIO ANTES Y DESPUÉS (storage.buckets)
+
+| Bucket ID | Estado Previo | Configuración Remediada (Migración 054) | Propósito / Flujo |
+|---|---|---|---|
+| `receipts` | `public = true` (en entornos vivos no migrados) / `public = false` (en DDL 045) | `public = false`<br>Cuota: 5 MB (5.242.880 bytes)<br>MIME: `image/jpeg`, `image/png`, `image/webp`, `application/pdf` | **Bucket Legacy de Comprobantes:** Cerrado al 100% para escrituras y mutaciones. Cero descargas públicas directas por CDN. Preservación íntegra de objetos históricos mediante URLs firmadas exclusivas para administradores (`is_admin`). |
+| `payment-proofs` | `public = false`<br>Cuota: 5 MB<br>MIME: JPEG, PNG, WebP, PDF | `public = false`<br>Cuota: 5 MB<br>MIME: JPEG, PNG, WebP, PDF | **Bucket Activo de Comprobantes:** Inserción condicionada a orden pendiente por `fn_is_order_pending_proof`. Lectura exclusiva para administradores autenticados. |
+| `gallery-images` | `public = true`<br>Cuota: 10 MB<br>MIME: JPEG, PNG, WebP, AVIF | `public = true`<br>Cuota: 10 MB (10.485.760 bytes)<br>MIME: `image/jpeg`, `image/png`, `image/webp`, `image/avif` | **Galería Pública Comunitaria:** Formatos fotográficos comprimidos para web. **Exclusión taxativa y definitiva de `image/svg+xml`** (prevención de Stored XSS). Subida/edición exclusiva para administradores. |
+| `partner-logos` | Inexistente en Storage (migrado a Cloudinary) | **No creado / Políticas huérfanas purgadas** | Aliados operan 100% sobre Cloudinary vía Edge Function `cloudinary-sign`. |
+| `prize-images` | Inexistente en Storage (migrado a Cloudinary) | **No creado / Políticas huérfanas purgadas** | Premios operan 100% sobre Cloudinary vía Edge Function `cloudinary-sign`. |
+| `winner-documents` | Inexistente en Storage (migrado a Cloudinary) | **No creado / Políticas huérfanas purgadas** | Actas y evidencias operan 100% sobre Cloudinary. |
+
+### 3. MIGRACIÓN DEL FLUJO ACTIVO Y PRESERVACIÓN HISTÓRICA
+1. **Flujo Activo Unificado:**
+   - Se certificó que el 100% de los nuevos comprobantes de pago se cargan exclusivamente en `payment-proofs` a través de `paymentService.uploadPaymentProof()`.
+   - Cero escrituras, subidas o modificaciones dirigidas a `receipts` en el frontend, Edge Functions o backend.
+2. **Preservación Transparente de Objetos Históricos:**
+   - **Ningún archivo fue eliminado:** Los comprobantes históricos existentes en `receipts` permanecen intactos.
+   - En el frontend, `paymentService.getSignedProofUrl()` detecta si la ruta o URL histórica apunta a `receipts` y solicita una URL firmada temporal (`createSignedUrl`) con 15 minutos de vigencia contra el bucket `receipts`.
+   - Como la política RLS exige `is_admin(auth.uid())`, solo los administradores autorizados pueden generar y acceder a los comprobantes históricos. Usuarios anónimos y compradores regulares quedan bloqueados.
+
+### 4. REVOCACIÓN TOTAL DE ESCRITURA PÚBLICA EN 'receipts'
+- Se eliminaron todas las políticas de mutación e inserción (`DROP POLICY IF EXISTS "Subida pública de comprobantes"`, etc.).
+- No existe ninguna política `INSERT`, `UPDATE` ni `DELETE` sobre `receipts`. PostgreSQL aplica por defecto denegación total (*deny-all*).
+- Descargas públicas directas (`/storage/v1/object/public/receipts/...`) son rechazadas automáticamente por Supabase Storage al estar marcado `public = false`.
+
+### 5. ANÁLISIS FORENSE DE SVG EN 'gallery-images' (ANTI-STORED XSS)
+1. **Inspección de Archivos y Renderizado:**
+   - No existen archivos `.svg` almacenados en el catálogo de fotos ni en las semillas de la galería.
+   - En la aplicación (`HeroRifa.tsx`, `GalleryView.tsx`), las imágenes se renderizan estrictamente mediante etiquetas `<img>` con lazy loading y fondos CSS. NUNCA se utiliza `dangerouslySetInnerHTML`, `object` ni `iframe` para desplegar contenido fotográfico.
+2. **Evaluación del Vector de Riesgo:**
+   - Si un archivo SVG fuera admitido en un bucket público y servido con cabecera `Content-Type: image/svg+xml`, al ser abierto directamente en una pestaña del navegador podría ejecutar código JavaScript arbitrario (`<script>` o atributos `onload`) bajo el origen del dominio de Supabase Storage.
+3. **Decisión Arquitectónica:**
+   - Al tratarse de una galería fotográfica turística, los gráficos vectoriales no tienen ninguna utilidad funcional.
+   - Se ratifica la eliminación definitiva de `image/svg+xml` tanto en `storage.buckets.allowed_mime_types` como en la validación del frontend (`galleryService.uploadGalleryPhoto`).
+
+### 6. PURGA INTEGRAL DE POLÍTICAS RLS HUÉRFANAS
+En la migración 054 se ejecutaron sentencias `DROP POLICY IF EXISTS` para eliminar 18 variantes de políticas huérfanas que pudieron haber sido creadas por scripts manuales antiguos:
+- `partner-logos`: políticas de lectura pública, subida, actualización y eliminación.
+- `prize-images`: políticas de lectura pública, subida, actualización y eliminación.
+- `winner-documents`: políticas de lectura pública, subida, actualización y eliminación.
+
+### 7. SUITE DE PRUEBAS AUTOMATIZADAS (src/test/storageClosureAndOrphanPurge.test.ts)
+Se implementó una nueva suite con 18 pruebas unitarias y de integración que validan:
+1. `receipts.public === false` y límites de cuota/MIME.
+2. Rechazo de peticiones GET públicas directas a `receipts`.
+3. Ausencia absoluta de políticas de mutación (INSERT/UPDATE/DELETE) en `receipts`.
+4. Denegación de subidas anónimas en `receipts`.
+5. Bloqueo de descargas anónimas y de usuarios regulares en `receipts`.
+6. Generación exitosa de Signed URLs en `receipts` para administradores.
+7. Subida legítima en `payment-proofs` para órdenes pendientes mediante `fn_is_order_pending_proof`.
+8. Rechazo de subidas con path arbitrario o sin UUID en `payment-proofs`.
+9. Rechazo de subidas para órdenes en estados terminales (`paid`, `rejected`, `expired`).
+10. Rechazo de archivos > 5 MB en `payment-proofs`.
+11. Rechazo de archivos con MIME inválido (ejecutables, scripts, etc.).
+12. Lectura de `payment-proofs` restringida exclusivamente a administradores.
+13. Exclusión de `image/svg+xml` en `gallery-images`.
+14. Rechazo taxativo de subida de SVG en `galleryService`.
+15. Aceptación de formatos fotográficos válidos (WebP, JPEG, PNG, AVIF).
+16. Inexistencia de políticas huérfanas en el catálogo activo.
+17. Inexistencia de buckets huérfanos en `storage.buckets`.
+18. Restricción estricta de políticas solo a buckets legítimos (`receipts`, `payment-proofs`, `gallery-images`).
+
+### 8. VALIDACIONES TÉCNICAS GLOBALES
+- **Vitest:** 362 pruebas pasando al 100% en 31 suites (`362 passed, 0 failed`).
+- **TypeScript (`tsc -b`):** 0 errores de tipado.
+- **Linter (`oxlint`):** 0 errores de sintaxis.
+- **Vite Build:** Compilación limpia para producción en 5.51s sin errores.
+
