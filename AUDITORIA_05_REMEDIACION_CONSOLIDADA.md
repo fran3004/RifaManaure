@@ -123,10 +123,10 @@ Se creó la suite [src/test/realtimePiiIsolation.test.ts](file:///c:/Users/frani
 9. Persistencia de los 6 mutadores transaccionales: verificación de sincronización atómica.
 
 ### 8. VALIDACIONES TÉCNICAS COMPLETADAS
-- **Vitest:** 343 pruebas pasando al 100% en 30 archivos de prueba (`343 passed`).
+- **Vitest:** 344 pruebas pasando al 100% en 30 archivos de prueba (`344 passed`).
 - **TypeScript:** `tsc -b` limpio con 0 errores de tipado.
 - **Linter:** `oxlint` limpio con 0 errores de sintaxis o importación.
-- **Vite Build:** Compilación limpia para producción en 8.89s sin advertencias de resolución.
+- **Vite Build:** Compilación limpia para producción sin advertencias de resolución.
 
 ### 9. RIESGOS RESIDUALES Y NOTAS DE DESPLIEGUE
 - **Permisos de Infraestructura en Supabase:** En entornos gestionados Supabase Cloud donde el runner de migración no sea superusuario ni propietario de la publicación preexistente `supabase_realtime`, la migración 053 captura defensivamente la excepción `insufficient_privilege`. Si esto ocurre, la sincronización de la publicación se efectúa en 10 segundos desde el Dashboard de Supabase:
@@ -134,3 +134,12 @@ Se creó la suite [src/test/realtimePiiIsolation.test.ts](file:///c:/Users/frani
   2. Desactivar el toggle de `tickets`.
   3. Activar el toggle de `ticket_public_state`.
 - La seguridad a nivel de datos (RLS) en `public.tickets` es independiente de la publicación y queda blindada automáticamente por la migración SQL.
+
+### 10. REMEDIACIÓN FORENSE: NORMALIZACIÓN DE ESTADOS LEGADOS (ERROR 23514)
+- **Diagnóstico del Error:** Al ejecutar la versión inicial de la migración 053 en Supabase, la sentencia de backfill arrojó `ERROR: 23514: la nueva fila para la relación "ticket_public_state" viola la restricción de verificación "ticket_public_state_status_check"` debido a que la base de datos viva contenía filas históricas con el estado en español `'vendido'` (ej: fila `(5d2a48bd-5bb0-4a7c-86e7-9c5b88ad2825, a0000000-0000-0000-0000-000000000001, 004, vendido)`). Adicionalmente, el estado canónico `'sold'` no había sido incluido explícitamente en el `CHECK` inicial.
+- **Corrección Aplicada:**
+  1. **Saneamiento Defensivo:** Se incorporó un bloque `DO $$` previo que normaliza de forma segura estados históricos en español (`'vendido'` -> `'sold'`, `'disponible'` -> `'available'`, `'reservado'` -> `'reserved'`, `'bloqueado'` -> `'blocked'`) deshabilitando temporalmente el trigger de transiciones comerciales para evitar colisiones de validación durante el saneamiento.
+  2. **Ampliación Defensiva del CHECK Constraint:** La restricción `ticket_public_state_status_check` se actualizó explícitamente mediante `ALTER TABLE DROP CONSTRAINT IF EXISTS / ADD CONSTRAINT` para admitir tanto los estados canónicos (`'available'`, `'reserved'`, `'sold'`, `'blocked'`) como los alias de compatibilidad (`'paid'`, `'vendido'`).
+  3. **Normalización en Backfill y Trigger:** Tanto la consulta de backfill como la función trigger `fn_sync_ticket_public_state()` normalizan automáticamente mediante `CASE LOWER(TRIM(status))` cualquier valor legado a su contraparte canónica antes de escribir en la proyección pública.
+  4. **Cobertura en Pruebas:** Se añadió la prueba unitaria *Mutador 7* en `realtimePiiIsolation.test.ts` verificando que un boleto con status `'vendido'` se sincroniza deterministamente como `'sold'` sin violar ninguna restricción de integridad.
+
