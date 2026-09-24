@@ -66,6 +66,7 @@ Este directorio (`supabase/migrations/`) constituye la **única fuente de verdad
 | **044** | `044_harden_admin_users_superadmin_only.sql` | **(SEC-04)** Hardening integral de `admin_users`: política RLS exclusiva para `is_superadmin()`, revocación a `anon/PUBLIC`, trigger anti-autodesactivación, anti-escalación y anti-orfandad, y blindaje de RPCs `admin_toggle_user_status` y `admin_invite_user`. |
 | **045** | `045_storage_hardening_sec05.sql` | **(SEC-05)** Hardening controlado de Supabase Storage: revocación de subida anónima en `receipts` (privatización y cuota 5 MB), erradicación de `image/svg+xml` como vector de Stored XSS en `gallery-images`, y validación atómica `SECURITY DEFINER` (`fn_is_order_pending_proof`) en `payment-proofs`. |
 | **046** | `046_harden_admin_user_sync_email_confirmation.sql` | **(SEC-08)** Condicionamiento de sincronización de `admin_users` y privilegios administrativos a verificación estricta de correo: trigger en `auth.users` reactivo a `email_confirmed_at`, defensa en profundidad en `is_admin` / `is_superadmin`, índice único `LOWER(email)` y saneamiento en `admin_invite_user` y `admin_list_users`. |
+| **047** | `047_harden_public_verification_anti_enumeration.sql` | **(SEC-09)** Blindaje anti-enumeración en `verify_public_order_or_tickets`: obligatoriedad de segundo factor (teléfono o últimos 4 dígitos) para consulta por cédula, coincidencia exacta estricta en referencias (anti-wildcard) y rate limiting transaccional con tabla `verification_rate_limits`. |
 
 ---
 

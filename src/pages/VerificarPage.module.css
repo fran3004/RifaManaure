@@ -103,6 +103,17 @@
   gap: 0.75rem;
 }
 
+.secondaryFieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  padding: 1rem;
+  background-color: rgba(15, 46, 29, 0.03);
+  border-radius: var(--radius-md, 14px);
+  border: 1px dashed var(--border-subtle, #DCD5C4);
+}
+
 .input {
   flex: 1;
   padding: 0.95rem 1.25rem;

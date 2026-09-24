@@ -226,10 +226,12 @@ export interface PublicVerificationResult {
  * sin exponer jamás comprobantes, teléfonos, correos, datos bancarios ni metadatos administrativos.
  */
 export async function verifyPublicOrderOrTickets(
-  searchQuery: string
+  searchQuery: string,
+  secondaryQuery?: string
 ): Promise<PublicVerificationResult> {
   try {
     const raw = searchQuery.trim();
+    const secondary = secondaryQuery?.trim() || null;
     if (!raw) {
       return {
         success: false,
@@ -242,6 +244,7 @@ export async function verifyPublicOrderOrTickets(
 
     const { data, error } = await supabase.rpc('verify_public_order_or_tickets', {
       p_search_term: raw,
+      p_secondary_term: secondary,
     });
 
     if (error) {

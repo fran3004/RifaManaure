@@ -28,6 +28,7 @@ export const VerificarPage: React.FC = () => {
   const supportPhone = systemSettings.support_whatsapp_number || '573001234567';
 
   const [searchQuery, setSearchQuery] = useState('');
+  const [secondaryQuery, setSecondaryQuery] = useState('');
   const [hasSearched, setHasSearched] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
@@ -35,6 +36,8 @@ export const VerificarPage: React.FC = () => {
   const [searchedTerm, setSearchedTerm] = useState('');
   const [selectedReceiptData, setSelectedReceiptData] = useState<DigitalReceiptData | null>(null);
   const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
+
+  const isNumericSearch = searchQuery.trim().length > 0 && /^[0-9]+$/.test(searchQuery.trim());
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,12 +51,20 @@ export const VerificarPage: React.FC = () => {
       return;
     }
 
+    const isNumeric = /^[0-9]+$/.test(query);
+    if (isNumeric && (!secondaryQuery || secondaryQuery.trim().length < 4)) {
+      setErrorMsg(
+        'Para consultar por número de cédula es obligatorio ingresar tu teléfono registrado o al menos sus últimos 4 dígitos.'
+      );
+      return;
+    }
+
     setIsLoading(true);
     setHasSearched(true);
     setSearchedTerm(query);
 
     try {
-      const result = await verifyPublicOrderOrTickets(query);
+      const result = await verifyPublicOrderOrTickets(query, secondaryQuery.trim());
       if (result.success) {
         setOrders(result.orders);
         if (result.orders.length === 0) {
@@ -125,14 +136,44 @@ export const VerificarPage: React.FC = () => {
                   className={styles.input}
                   maxLength={50}
                 />
-                <button type="submit" className={styles.submitBtn} disabled={isLoading}>
-                  <Search size={18} /> {isLoading ? 'Consultando...' : 'Consultar Estado'}
-                </button>
+                {!isNumericSearch && (
+                  <button type="submit" className={styles.submitBtn} disabled={isLoading}>
+                    <Search size={18} /> {isLoading ? 'Consultando...' : 'Consultar Estado'}
+                  </button>
+                )}
               </div>
-              <span className={styles.searchHint}>
-                Puedes ingresar tu número de cédula completo o la referencia que recibiste al
-                completar el pedido.
-              </span>
+
+              {isNumericSearch && (
+                <div className={styles.secondaryFieldGroup}>
+                  <label htmlFor="secondaryInput" className={styles.label}>
+                    Teléfono Registrado o Últimos 4 Dígitos
+                  </label>
+                  <div className={styles.inputWrapper}>
+                    <input
+                      id="secondaryInput"
+                      type="tel"
+                      placeholder="Ej: 3001234567 o 4567"
+                      value={secondaryQuery}
+                      onChange={(e) => setSecondaryQuery(e.target.value)}
+                      className={styles.input}
+                      maxLength={20}
+                    />
+                    <button type="submit" className={styles.submitBtn} disabled={isLoading}>
+                      <Search size={18} /> {isLoading ? 'Consultando...' : 'Consultar Estado'}
+                    </button>
+                  </div>
+                  <span className={styles.searchHint}>
+                    Por seguridad y para proteger la privacidad de los participantes, la consulta por cédula requiere confirmar el teléfono registrado.
+                  </span>
+                </div>
+              )}
+
+              {!isNumericSearch && (
+                <span className={styles.searchHint}>
+                  Puedes ingresar la referencia que recibiste al completar el pedido (ej. MV-...) o tu número de cédula.
+                </span>
+              )}
+
               {errorMsg && (
                 <p className={styles.errorText}>
                   <AlertCircle size={14} /> {errorMsg}

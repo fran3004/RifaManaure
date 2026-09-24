@@ -835,6 +835,7 @@ export type Database = {
       verify_public_order_or_tickets: {
         Args: {
           p_search_term: string;
+          p_secondary_term?: string | null;
         };
         Returns: Json;
       };
