@@ -178,6 +178,7 @@ export function normalizeAppError(
   if (
     rawCode === '42501' ||
     rawCode === '403' ||
+    rawCode === 'FORBIDDEN' ||
     errObj.status === 403 ||
     errObj.statusCode === 403 ||
     /permission denied|not authorized|violates row-level security|acceso denegado/i.test(rawMsg)
@@ -241,6 +242,7 @@ export function normalizeAppError(
     rawCode === 'P0002' ||
     rawCode === 'PGRST116' ||
     rawCode === '404' ||
+    rawCode === 'NOT_FOUND' ||
     errObj.status === 404 ||
     /not found|no encontrado|no rows/i.test(rawMsg)
   ) {
@@ -264,6 +266,9 @@ export function normalizeAppError(
     rawCode === '23502' ||
     rawCode === '23503' ||
     rawCode === '400' ||
+    rawCode === 'VALIDATION_ERROR' ||
+    rawCode === 'INVALID_STATE' ||
+    rawCode === 'INTEGRITY_ERROR' ||
     errObj.status === 400
   ) {
     // If it's a clean Spanish business validation message, sanitize and present it safely

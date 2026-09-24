@@ -2,15 +2,15 @@
 **Plataforma "Manaure Vive"**  
 **Fecha:** 24 de Septiembre de 2026  
 **Rama de Trabajo:** `remediacion/auditoria-05`  
-**Estado:** En Progreso (Remediación 1 y Remediación 2 completadas)
+**Estado:** En Progreso (Remediaciones 1, 2, 3 y 4 completadas)
 
 ---
 
 ## ÍNDICE DE REMEDIACIONES AUDITORÍA 05
 1. [Remediación 1: Reconciliación Forense del Baseline y Cierre de Regresiones (Prompt 05.1)](#remediación-1-reconciliación-forense-del-baseline-y-cierre-de-regresiones)
 2. [Remediación 2: Realtime sin Fuga de PII — EVENT-02 / CRIT-01 (Prompt 05.2)](#remediación-2-realtime-sin-fuga-de-pii--event-02--crit-01)
-3. [Remediación 3: Bucket Receipts y Privacidad (Prompt 05.3 - Pendiente)](#remediación-3-bucket-receipts-y-privacidad)
-4. [Remediación 4: Endurecimiento de search_path y Funciones (Prompt 05.4 - Pendiente)](#remediación-4-endurecimiento-de-search_path-y-funciones)
+3. [Remediación 3: Cierre Total del Bucket Legacy receipts y Saneamiento de Storage — EVENT-03 / EVENT-04 / EVENT-09 (Prompt 05.3)](#remediación-3-cierre-total-del-bucket-legacy-receipts-y-saneamiento-de-storage-event-03--event-04--event-09)
+4. [Remediación 4: Hardening de SECURITY DEFINER, Protocolo de Errores y Auditoría Financiera — CRIT-03 / CRIT-05 / EVENT-05 / EVENT-06 / EVENT-07 (Prompt 05.4)](#remediación-4-hardening-de-security-definer-protocolo-de-errores-y-auditoría-financiera)
 5. [Remediación 5: Consolidación y Trazabilidad de Cron Schedulers (Prompt 05.5 - Pendiente)](#remediación-5-consolidación-y-trazabilidad-de-cron-schedulers)
 
 ---
@@ -219,4 +219,186 @@ Se implementó una nueva suite con 18 pruebas unitarias y de integración que va
 - **TypeScript (`tsc -b`):** 0 errores de tipado.
 - **Linter (`oxlint`):** 0 errores de sintaxis.
 - **Vite Build:** Compilación limpia para producción en 5.51s sin errores.
+
+---
+
+## REMEDIACIÓN 4: HARDENING DE SECURITY DEFINER, PROTOCOLO DE ERRORES Y AUDITORÍA FINANCIERA (CRIT-03 / CRIT-05 / EVENT-05 / EVENT-06 / EVENT-07)
+
+### 1. OBJETIVO Y HALLAZGOS ATENDIDOS
+- **CRIT-03 / EVENT-06:** Divergencia arquitectónica en el manejo de errores en RPCs transaccionales (`RAISE EXCEPTION` arrojando HTTP 400 vs `jsonb` arrojando HTTP 200 con payload).
+- **CRIT-05 / EVENT-07:** Riesgo de vulnerabilidad por *Search Path Hijacking* en funciones `SECURITY DEFINER` al carecer de una cláusula `SET search_path` explícita que anteponga el catálogo del sistema (`pg_catalog`).
+- **EVENT-05:** Omisión de trazabilidad financiera explícita dentro de `approve_order_payment` y `reject_order_payment`.
+- **Funciones Obsoletas:** Presencia residual en el catálogo de procedimientos arcaicos deprecados (`confirm_order_payment`, `submit_order_receipt`).
+
+### 2. INVENTARIO EXHAUSTIVO DE FUNCIONES SECURITY DEFINER Y SEARCH_PATH (ANTES VS DESPUÉS)
+
+Se auditó el 100% de los objetos con `prosecdef = true` en el catálogo `pg_proc` del esquema `public`. A continuación se detalla la matriz de hardening aplicada en la **Migración 055**:
+
+| Nombre de la Función | Tipo | search_path Previo | search_path Remediado (055) | Grants Permitidos |
+|---|---|---|---|---|
+| `create_order_secure` | RPC Pública | `public, extensions, pg_temp` | `pg_catalog, public, extensions, pg_temp` | `anon, authenticated, service_role` |
+| `submit_payment_proof` | RPC Pública | `public, extensions, pg_temp` | `pg_catalog, public, extensions, pg_temp` | `anon, authenticated, service_role` |
+| `verify_public_order_or_tickets` | RPC Pública | `public, pg_temp` | `pg_catalog, public, pg_temp` | `anon, authenticated, service_role` |
+| `is_admin` | Helper Auth | `public, auth, pg_temp` | `pg_catalog, public, auth, pg_temp` | `anon, authenticated, service_role` |
+| `is_superadmin` | Helper Auth | `public, auth, pg_temp` | `pg_catalog, public, auth, pg_temp` | `anon, authenticated, service_role` |
+| `approve_order_payment` | RPC Admin | `public, pg_temp` | `pg_catalog, public, auth, pg_temp` | `authenticated, service_role` (REVOCADO de anon) |
+| `reject_order_payment` | RPC Admin | `public, pg_temp` | `pg_catalog, public, auth, pg_temp` | `authenticated, service_role` (REVOCADO de anon) |
+| `cancel_order` | RPC Admin | `public, pg_temp` | `pg_catalog, public, auth, pg_temp` | `authenticated, service_role` (REVOCADO de anon) |
+| `register_winner` | RPC Admin | `public, pg_temp` | `pg_catalog, public, auth, pg_temp` | `authenticated, service_role` (REVOCADO de anon) |
+| `admin_block_ticket` | RPC Admin | `public, pg_temp` | `pg_catalog, public, auth, pg_temp` | `authenticated, service_role` (REVOCADO de anon) |
+| `admin_unblock_ticket` | RPC Admin | `public, pg_temp` | `pg_catalog, public, auth, pg_temp` | `authenticated, service_role` (REVOCADO de anon) |
+| `admin_update_raffle` | RPC Admin | `public, pg_temp` | `pg_catalog, public, auth, pg_temp` | `authenticated, service_role` (REVOCADO de anon) |
+| `admin_update_system_settings` | RPC Admin | `public, pg_temp` | `pg_catalog, public, auth, pg_temp` | `authenticated, service_role` (REVOCADO de anon) |
+| `admin_create_raffle` | RPC Admin | `public, pg_temp` | `pg_catalog, public, auth, pg_temp` | `authenticated, service_role` (REVOCADO de anon) |
+| `admin_invite_user` | RPC Admin | `public, pg_temp` | `pg_catalog, public, auth, pg_temp` | `authenticated, service_role` (REVOCADO de anon) |
+| `admin_list_users` | RPC Admin | `public, pg_temp` | `pg_catalog, public, auth, pg_temp` | `authenticated, service_role` (REVOCADO de anon) |
+| `admin_toggle_user_status` | RPC Admin | `public, pg_temp` | `pg_catalog, public, auth, pg_temp` | `authenticated, service_role` (REVOCADO de anon) |
+| `admin_update_buyer` | RPC Admin | `public, pg_temp` | `pg_catalog, public, auth, pg_temp` | `authenticated, service_role` (REVOCADO de anon) |
+| `get_dashboard_kpis` | RPC Admin | `public, pg_catalog, pg_temp` | `pg_catalog, public, auth, pg_temp` | `authenticated, service_role` (REVOCADO de anon) |
+| `release_expired_reservations` | RPC Sistema | `public, pg_temp` | `pg_catalog, public, pg_temp` | `authenticated, service_role` (REVOCADO de anon) |
+| `reserve_tickets` | RPC Sistema | `public, pg_temp` | `pg_catalog, public, pg_temp` | `service_role` (REVOCADO de anon y authenticated) |
+| `fn_validate_order_status_transition` | Trigger | `public, pg_temp` | `pg_catalog, public, auth, pg_temp` | `authenticated, service_role` |
+| `fn_validate_raffle_status_transition` | Trigger | `public, pg_temp` | `pg_catalog, public, pg_temp` | `authenticated, service_role` |
+| `fn_validate_ticket_status_transition` | Trigger | `public, pg_temp` | `pg_catalog, public, pg_temp` | `authenticated, service_role` |
+| `fn_sync_ticket_public_state` | Trigger | `public, pg_temp` | `pg_catalog, public, pg_temp` | `authenticated, service_role` |
+| `fn_protect_admin_users` | Trigger | `public, pg_temp` | `pg_catalog, public, auth, pg_temp` | `authenticated, service_role` |
+| `fn_audit_payment_accounts` | Trigger | `public, pg_temp` | `pg_catalog, public, auth, pg_temp` | `authenticated, service_role` |
+| `fn_check_order_ticket_matrix` | Trigger | `public, pg_temp` | `pg_catalog, public, pg_temp` | `authenticated, service_role` |
+| `fn_check_ticket_order_matrix` | Trigger | `public, pg_temp` | `pg_catalog, public, pg_temp` | `authenticated, service_role` |
+| `sync_admin_user_id` | Trigger | `public, pg_temp` | `pg_catalog, public, auth, pg_temp` | `authenticated, service_role` |
+| `fn_is_order_pending_proof` | Helper Storage | `public, pg_temp` | `pg_catalog, public, pg_temp` | `anon, authenticated, service_role` |
+| `confirm_order_payment` | RPC Arcaica | Sin search_path en 001 | **PURGADA** (`DROP FUNCTION IF EXISTS`) | N/A (Eliminada) |
+| `submit_order_receipt` | RPC Arcaica | Sin search_path en 004 | **PURGADA** (`DROP FUNCTION IF EXISTS`) | N/A (Eliminada) |
+
+### 3. MECANISMO DE PREVENCIÓN DE SEARCH PATH HIJACKING
+1. **Priorización Incondicional de `pg_catalog`:**
+   - Al colocar `pg_catalog` en la primera posición de `search_path`, PostgreSQL busca funciones y operadores del sistema (`COALESCE`, `NOW`, `COUNT`, `TRIM`, `LOWER`, `UPPER`, `LPAD`, `=`, `<>`, etc.) exclusivamente en el catálogo protegido nativo.
+   - Cualquier intento de un atacante o usuario no privilegiado de inyectar funciones homónimas en esquemas temporales (`pg_temp`) o en esquemas locales es ignorado de forma incondicional.
+2. **Ubicación de `pg_temp` al Final:**
+   - La directiva `pg_temp` se fija al final de la ruta de resolución.
+   - Los objetos temporales de sesión solo se resuelven si no existen en `pg_catalog`, `public` ni `auth`.
+3. **Inclusión Selectiva y de Mínimo Privilegio de `auth` y `extensions`:**
+   - El esquema `auth` se incluye únicamente en aquellas funciones que interactúan con `auth.uid()` o `auth.users`.
+   - El esquema `extensions` se incluye únicamente en `create_order_secure` y `submit_payment_proof` para las funciones criptográficas (`digest` SHA-256).
+
+### 4. PROTOCOLO UNIFICADO DE ERRORES RPC (10 RPCS CRÍTICAS)
+
+Se implementó el contrato final de segregación de errores en el motor PostgreSQL y su contraparte en el frontend (`src/lib/errorHandling.ts`):
+
+1. **Errores de Validación y Lógica de Negocio Esperados:**
+   - Retorno JSON estructurado: `{"success": false, "code": "<CODIGO_ESTABLE>", "error": "<MENSAJE_SANITIZADO>"}`.
+   - HTTP observado por el cliente: 200 OK con payload de error controlado.
+   - Sin excepción en base de datos; no contamina los logs de errores del motor de BD.
+2. **Violaciones de Invariantes de Integridad / Estados Imposibles / Falla Atómica:**
+   - Se ejecuta `RAISE EXCEPTION` para forzar el aborto inmediato de la transacción y provocar el ROLLBACK total de PostgreSQL.
+3. **Autorización Administrativa Denegada:**
+   - Se ejecuta `RAISE EXCEPTION 'Acceso denegado: se requiere rol de administrador' USING ERRCODE = '42501';`.
+   - PostgREST traduce el código nativo `42501` (`insufficient_privilege`) a HTTP 403 Forbidden.
+
+#### Matriz de Contrato de las 10 RPCs Críticas:
+
+| # | RPC | Error / Escenario | Código Canónico | HTTP Observado | Comportamiento Transaccional | UI Resultante |
+|---|---|---|---|---|---|---|
+| **1** | `approve_order_payment` | Usuario no autenticado / no admin | `FORBIDDEN` (`42501`) | 403 Forbidden | Rollback (Excepción) | Banner de permiso denegado |
+| | | Orden no encontrada | `NOT_FOUND` | 200 (JSON) | Sin mutación | "La orden de compra no existe." |
+| | | Orden ya pagada | `INVALID_STATE` | 200 (JSON) | Sin mutación | "La orden ya se encuentra aprobada..." |
+| | | Orden en estado no aprobable | `INVALID_STATE` | 200 (JSON) | Sin mutación | "No se puede aprobar la orden..." |
+| | | Orden sin boletos / boletos incompatibles | `INTEGRITY_ERROR` | 200 (JSON) | Sin mutación | "Integridad violada: La orden no tiene boletos..." |
+| | | Discrepancia en recuento de boletos | `INTEGRITY_ERROR` | 200 (JSON) | Sin mutación | "Discrepancia en cantidad de boletos..." |
+| | | Carrera concurrente en recuento | `SERVER_ERROR` | 400 (Excepción) | Rollback (Excepción) | "Fallo de consistencia atómica..." |
+| **2** | `reject_order_payment` | No admin | `FORBIDDEN` (`42501`) | 403 Forbidden | Rollback (Excepción) | Banner de permiso denegado |
+| | | Orden no encontrada | `NOT_FOUND` | 200 (JSON) | Sin mutación | "La orden de compra no existe." |
+| | | Orden ya pagada | `INVALID_STATE` | 200 (JSON) | Sin mutación | "Una orden que ya fue pagada no puede ser rechazada..." |
+| | | Orden ya rechazada | `INVALID_STATE` | 200 (JSON) | Sin mutación | "La orden ya se encuentra rechazada..." |
+| | | Orden expirada o cancelada | `INVALID_STATE` | 200 (JSON) | Sin mutación | "Una orden en estado finalizado no puede ser rechazada." |
+| **3** | `cancel_order` | No admin | `FORBIDDEN` (`42501`) | 403 Forbidden | Rollback (Excepción) | Banner de permiso denegado |
+| | | Orden no encontrada | `NOT_FOUND` | 200 (JSON) | Sin mutación | "La orden de compra no existe." |
+| | | Orden ya cancelada | `success: true` (`already_cancelled`) | 200 (JSON) | Idempotente | "La orden ya se encontraba cancelada..." |
+| | | Orden ya pagada / completada | `INVALID_STATE` | 200 (JSON) | Sin mutación | "No se puede cancelar una orden que ya fue pagada..." |
+| | | Orden ya rechazada | `INVALID_STATE` | 200 (JSON) | Sin mutación | "No se puede cancelar una orden que ya fue rechazada." |
+| **4** | `register_winner` | No admin | `FORBIDDEN` | 200 (JSON) | Sin mutación | "Acceso denegado: solo administradores..." |
+| | | Parámetros obligatorios vacíos | `VALIDATION_ERROR` | 200 (JSON) | Sin mutación | "El ID de la rifa es obligatorio." / "El número de boleto es obligatorio." |
+| | | Rifa o boleto inexistente | `NOT_FOUND` | 200 (JSON) | Sin mutación | "La rifa especificada no existe." |
+| | | Boleto no vendido (`status <> 'sold'`) | `INVALID_STATE` | 200 (JSON) | Sin mutación | "El boleto no puede registrarse como ganador porque no está vendido." |
+| | | Ganador ya registrado / Colisión | `CONFLICT` | 200 (JSON) | Sin mutación | "El boleto ya ha sido registrado como ganador para esta rifa." |
+| **5** | `create_order_secure` | Boletos vacíos / datos inválidos | `VALIDATION_ERROR` | 200 (JSON) | Sin mutación | Mensaje de validación amigable |
+| | | Rifa pausada o inexistente | `INVALID_STATE` / `NOT_FOUND` | 200 (JSON) | Sin mutación | "La rifa no se encuentra en estado activo..." |
+| | | Boletos ya no disponibles (ocupados) | `CONFLICT` | 200 (JSON) | Sin mutación | "Uno o más números ya no se encuentran disponibles." |
+| | | Discrepancia de huella de idempotencia | `CONFLICT` | 200 (JSON) | Sin mutación | "Conflicto de idempotencia..." |
+| **6** | `submit_payment_proof` | Campos vacíos / archivo inválido | `VALIDATION_ERROR` | 200 (JSON) | Sin mutación | "El archivo del comprobante es obligatorio." |
+| | | Orden inexistente | `NOT_FOUND` | 200 (JSON) | Sin mutación | "La orden no existe." |
+| | | Orden terminal (paid, rejected, expired) | `INVALID_STATE` | 200 (JSON) | Sin mutación | "La orden se encuentra en estado X y no acepta nuevos comprobantes." |
+| | | Parámetros discrepantes en reintento | `CONFLICT` | 200 (JSON) | Sin mutación | "Conflicto de idempotencia..." |
+| **7** | `admin_update_raffle` | No admin | `FORBIDDEN` | 200 (JSON) | Sin mutación | "Acceso denegado: solo administradores..." |
+| | | Campos obligatorios vacíos o negativos | `VALIDATION_ERROR` | 200 (JSON) | Sin mutación | Mensaje de validación de campos |
+| | | Rifa no encontrada | `NOT_FOUND` | 200 (JSON) | Sin mutación | "La rifa especificada no existe." |
+| | | Intento de reabrir rifa 'finished' | `INVALID_STATE` | 200 (JSON) | Sin mutación | "Operación rechazada: Una rifa en estado finished no puede ser reabierta." |
+| **8** | `admin_update_system_settings` | No admin | `FORBIDDEN` | 200 (JSON) | Sin mutación | "Acceso denegado: solo administradores..." |
+| | | Rango de reserva o boletos fuera de límites | `VALIDATION_ERROR` | 200 (JSON) | Sin mutación | "El tiempo de reserva debe estar comprendido entre 1 y 120 minutos." |
+| **9** | `admin_block_ticket` | No admin | `FORBIDDEN` | 200 (JSON) | Sin mutación | "Acceso denegado: Se requieren privilegios..." |
+| | | Motivo vacío | `VALIDATION_ERROR` | 200 (JSON) | Sin mutación | "Debe especificar un motivo claro..." |
+| | | Boleto no existe | `NOT_FOUND` | 200 (JSON) | Sin mutación | "El boleto especificado no existe." |
+| | | Boleto ya vendido con orden pagada | `INVALID_STATE` | 200 (JSON) | Sin mutación | "Acción bloqueada: No se puede modificar o bloquear un boleto ya vendido..." |
+| | | Boleto ya bloqueado | `INVALID_STATE` | 200 (JSON) | Sin mutación | "El boleto ya se encuentra bloqueado." |
+| **10** | `admin_unblock_ticket` | No admin | `FORBIDDEN` | 200 (JSON) | Sin mutación | "Acceso denegado: Se requieren privilegios..." |
+| | | Boleto no existe | `NOT_FOUND` | 200 (JSON) | Sin mutación | "El boleto especificado no existe." |
+| | | Boleto no está bloqueado | `INVALID_STATE` | 200 (JSON) | Sin mutación | "El boleto no está bloqueado..." |
+
+### 5. AUDITORÍA FINANCIERA EXPLÍCITA (EVENT-05)
+
+#### Arquitectura de Trazabilidad sin Duplicación:
+En lugar de añadir inserciones manuales en `approve_order_payment` y `reject_order_payment` que compitieran o duplicaran eventos con los disparadores de órdenes, se centralizó la emisión formal dentro de la función trigger canónica `fn_validate_order_status_transition`:
+
+```sql
+v_audit_action := CASE NEW.status
+    WHEN 'paid' THEN 'ORDER_PAYMENT_APPROVED'
+    WHEN 'rejected' THEN 'ORDER_PAYMENT_REJECTED'
+    WHEN 'cancelled' THEN 'ORDER_CANCELLED'
+    ELSE 'ORDER_STATUS_' || UPPER(NEW.status)
+END;
+```
+
+#### Estructura del Evento de Auditoría Financiera:
+- **`action`:** `'ORDER_PAYMENT_APPROVED'`, `'ORDER_PAYMENT_REJECTED'`, `'ORDER_CANCELLED'`.
+- **`entity_type`:** `'order'`.
+- **`entity_id`:** UUID de la orden.
+- **`performed_by`:** UUID del administrador que verificó (`NEW.verified_by`).
+- **`details`:**
+  - `order_id`: UUID de la orden.
+  - `actor`: UUID del administrador (`auth.uid()`).
+  - `timestamp`: Timestamp ISO del momento de la aprobación/rechazo.
+  - `reference`: Referencia comercial de la orden (ej. `ORD-2026-0001`).
+  - `previous_status`: Estado anterior (`pending` o `pending_verification`).
+  - `new_status`: Estado resultante (`paid`, `rejected`, `cancelled`).
+  - `total_amount`: Monto financiero recaudado.
+  - `ticket_count`: Cantidad de boletos afectados.
+  - `rejection_reason`: Motivo documentado del rechazo (NULL en aprobación).
+- **Protección de Privacidad (Cero PII):** No se registran nombres, documentos, correos ni teléfonos de compradores en la tabla `audit_logs`.
+
+#### Matriz de Eventos Transaccionales (Exactamente 1 Registro por Acción):
+1. **Aprobar Pago (`approve_order_payment`):** Genera exactamente 1 registro con acción `ORDER_PAYMENT_APPROVED`.
+2. **Rechazar Pago (`reject_order_payment`):** Genera exactamente 1 registro con acción `ORDER_PAYMENT_REJECTED`.
+3. **Cancelar Orden (`cancel_order`):** Genera exactamente 1 registro con acción `ORDER_CANCELLED`.
+4. **Subir Comprobante (`submit_payment_proof`):** Genera exactamente 1 registro con acción `PAYMENT_PROOF_SUBMITTED`.
+5. **Registrar Ganador (`register_winner`):** Genera exactamente 1 registro con acción `WINNER_REGISTERED`.
+
+### 6. SUITE DE PRUEBAS AUTOMATIZADAS (src/test/securityDefinerAndFinancialAudit.test.ts)
+
+Se construyó una suite integral con 19 pruebas que validan exhaustivamente:
+- **Parte A (7 tests):** Catálogo de funciones `SECURITY DEFINER`, presencia incondicional de `pg_catalog` en primera posición, exclusividad de `auth` y `extensions`, simulación de prevención de shadowing frente a inyecciones en `pg_temp`, verificación de purga de funciones deprecadas y comprobación estricta de permisos de ejecución (least privilege).
+- **Parte B (8 tests):** Clasificación exacta de errores mediante `normalizeAppError` para `FORBIDDEN`, `NOT_FOUND`, `INVALID_STATE`, `CONFLICT` e `INTEGRITY_ERROR`, sanitización de fugas técnicas PostgreSQL, y manejo resiliente en los servicios del frontend (`approveOrderPayment`, `rejectOrderPayment`).
+- **Parte C (4 tests):** Generación de `ORDER_PAYMENT_APPROVED` con detalles financieros y cero PII, generación de `ORDER_PAYMENT_REJECTED` con motivo de rechazo, generación de `ORDER_CANCELLED`, y verificación de unicidad estricta (cero duplicados con `ORDER_STATUS_PAID`).
+
+### 7. VERIFICACIÓN Y GATES DE CALIDAD
+- **Vitest:** 381 pruebas pasando al 100% en 32 suites (`381 passed, 0 failed`).
+- **TypeScript (`tsc -b`):** 0 errores de tipado.
+- **Linter (`oxlint`):** 0 errores de sintaxis en 137 archivos.
+- **Vite Build:** Compilación limpia para producción en 5.48s (`dist/` generado exitosamente).
+
+### 8. RIESGOS RESIDUALES EVALUADOS
+1. **Funciones SECURITY INVOKER:**
+   - Las funciones de actualización de marcas de tiempo (`fn_*_updated_at`) operan en modo `SECURITY INVOKER`. No presentan riesgo de elevación de privilegios al ejecutarse bajo los permisos de la sesión invocante.
+2. **Compatibilidad con Entornos Nuevos:**
+   - La migración 055 fue diseñada de manera estrictamente idempotente (`CREATE OR REPLACE FUNCTION`, `ALTER FUNCTION`, `DROP FUNCTION IF EXISTS`), asegurando su aplicación limpia tanto en entornos existentes como en nuevas instancias de base de datos.
+
 
