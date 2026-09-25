@@ -553,7 +553,7 @@ export const TicketsView: React.FC = () => {
         </div>
 
         {isLoading ? (
-          <AdminLoadingState message="Cargando inventario de boletos desde Supabase..." />
+          <AdminLoadingState message="Cargando inventario de boletos..." />
         ) : error ? (
           <AdminErrorState
             title={isForbidden ? 'Acceso Restringido' : 'Error al cargar boletos'}

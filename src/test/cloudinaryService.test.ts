@@ -3,6 +3,7 @@ import {
   uploadToCloudinary,
   deleteFromCloudinary,
   getOptimizedCloudinaryUrl,
+  getCloudinaryResponsiveUrl,
   extractCloudinaryPublicId,
 } from '@/services/cloudinaryService';
 
@@ -326,6 +327,100 @@ describe('cloudinaryService - Integración Segura con Cloudinary', () => {
       );
       expect(extractCloudinaryPublicId('manaure-vive/aliados/photours')).toBe(
         'manaure-vive/aliados/photours'
+      );
+    });
+  });
+
+  describe('getCloudinaryResponsiveUrl', () => {
+    it('debe devolver cadena vacía para entradas vacías o nulas', () => {
+      expect(getCloudinaryResponsiveUrl(null)).toBe('');
+      expect(getCloudinaryResponsiveUrl(undefined)).toBe('');
+      expect(getCloudinaryResponsiveUrl('   ')).toBe('');
+    });
+
+    it('debe preservar intactas las URLs que no pertenezcan a Cloudinary', () => {
+      const localPath = '/images/rifa/cuatrimoto/cuatrimoto-aventura-cordillera--4x5-768w.jpg';
+      expect(getCloudinaryResponsiveUrl(localPath)).toBe(localPath);
+
+      const externalUrl = 'https://images.unsplash.com/photo-123456';
+      expect(getCloudinaryResponsiveUrl(externalUrl)).toBe(externalUrl);
+    });
+
+    it('debe respetar URLs firmadas y archivos no compatibles (PDF / raw)', () => {
+      const signedUrl =
+        'https://res.cloudinary.com/ky01b0vz/image/upload/s--AbCdEf12--/manaure-vive/privado.jpg';
+      expect(getCloudinaryResponsiveUrl(signedUrl, { width: 800 })).toBe(signedUrl);
+
+      const pdfUrl =
+        'https://res.cloudinary.com/ky01b0vz/auto/upload/manaure-vive/acta.pdf';
+      expect(getCloudinaryResponsiveUrl(pdfUrl, { width: 800 })).toBe(pdfUrl);
+    });
+
+    it('debe generar URL con c_fill,g_auto, ancho, alto, q_auto y f_webp cuando se especifica height', () => {
+      const url =
+        'https://res.cloudinary.com/ky01b0vz/image/upload/manaure-vive/galeria/serrania/og-image.jpg';
+      const result = getCloudinaryResponsiveUrl(url, {
+        width: 1600,
+        height: 900,
+        format: 'webp',
+      });
+
+      expect(result).toBe(
+        'https://res.cloudinary.com/ky01b0vz/image/upload/c_fill,g_auto,w_1600,h_900,q_auto,f_webp/manaure-vive/galeria/serrania/og-image.webp'
+      );
+    });
+
+    it('debe generar URL solo con w_, q_auto y f_jpg cuando no se especifica height', () => {
+      const url =
+        'https://res.cloudinary.com/ky01b0vz/image/upload/manaure-vive/galeria/serrania/og-image.jpg';
+      const result = getCloudinaryResponsiveUrl(url, {
+        width: 1024,
+        format: 'jpg',
+      });
+
+      expect(result).toBe(
+        'https://res.cloudinary.com/ky01b0vz/image/upload/w_1024,q_auto,f_jpg/manaure-vive/galeria/serrania/og-image.jpg'
+      );
+    });
+
+    it('debe permitir crop personalizado', () => {
+      const url =
+        'https://res.cloudinary.com/ky01b0vz/image/upload/manaure-vive/galeria/serrania/og-image.jpg';
+      const result = getCloudinaryResponsiveUrl(url, {
+        width: 800,
+        height: 600,
+        crop: 'fit',
+        format: 'webp',
+      });
+
+      expect(result).toBe(
+        'https://res.cloudinary.com/ky01b0vz/image/upload/c_fit,w_800,h_600,q_auto,f_webp/manaure-vive/galeria/serrania/og-image.webp'
+      );
+    });
+
+    it('debe generar URLs distintas para los formatos webp y jpg para la misma imagen', () => {
+      const url =
+        'https://res.cloudinary.com/ky01b0vz/image/upload/manaure-vive/galeria/serrania/og-image.jpg';
+      const webpUrl = getCloudinaryResponsiveUrl(url, { width: 800, height: 600, format: 'webp' });
+      const jpgUrl = getCloudinaryResponsiveUrl(url, { width: 800, height: 600, format: 'jpg' });
+
+      expect(webpUrl).toContain('f_webp');
+      expect(webpUrl).toContain('.webp');
+      expect(jpgUrl).toContain('f_jpg');
+      expect(jpgUrl).toContain('.jpg');
+      expect(webpUrl).not.toBe(jpgUrl);
+    });
+
+    it('debe construir la URL completa si se proporciona un publicId directo', () => {
+      const publicId = 'manaure-vive/galeria/gastronomia/gastronomia-local';
+      const result = getCloudinaryResponsiveUrl(publicId, {
+        width: 710,
+        height: 960,
+        format: 'webp',
+      });
+
+      expect(result).toBe(
+        'https://res.cloudinary.com/ky01b0vz/image/upload/c_fill,g_auto,w_710,h_960,q_auto,f_webp/manaure-vive/galeria/gastronomia/gastronomia-local.webp'
       );
     });
   });

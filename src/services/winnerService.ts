@@ -381,7 +381,7 @@ export async function uploadWinnerActDocument(
     if (!uploadRes.success || !uploadRes.secure_url) {
       return {
         success: false,
-        error: uploadRes.error || 'No fue posible subir el acta oficial a Cloudinary.',
+        error: uploadRes.error || 'No fue posible subir el acta oficial.',
       };
     }
 

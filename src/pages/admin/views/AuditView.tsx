@@ -1038,7 +1038,7 @@ export const AuditView: React.FC = () => {
       {/* Contenedor Principal */}
       {isLoading ? (
         <div className={commonStyles.cardSection}>
-          <AdminLoadingState message="Cargando bitácora de auditoría desde Supabase..." />
+          <AdminLoadingState message="Cargando bitácora de auditoría..." />
         </div>
       ) : error ? (
         <div className={commonStyles.cardSection}>

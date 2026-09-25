@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import * as paymentService from '../services/paymentService';
 import * as galleryService from '../services/galleryService';
+import * as cloudinaryService from '../services/cloudinaryService';
 import { supabase } from '@/lib/supabase';
 
 /**
@@ -320,19 +321,20 @@ describe('PROMPT 05.3: Cierre Total del Bucket Legacy receipts y Saneamiento de 
     });
 
     it('3.3 galleryService.uploadGalleryPhoto acepta formatos fotográficos válidos (WebP, JPEG, PNG, AVIF)', async () => {
-      const mockStorage = {
-        upload: vi.fn().mockResolvedValue({ error: null }),
-        getPublicUrl: vi.fn().mockReturnValue({
-          data: { publicUrl: 'https://xyz.supabase.co/storage/v1/object/public/gallery-images/foto-valida.webp' },
-        }),
-      };
-      vi.spyOn(supabase.storage, 'from').mockReturnValue(mockStorage as any);
+      const uploadSpy = vi.spyOn(cloudinaryService, 'uploadToCloudinary').mockResolvedValue({
+        success: true,
+        secure_url: 'https://res.cloudinary.com/ky01b0vz/image/upload/v1/manaure-vive/galeria/foto-valida.webp',
+        public_id: 'manaure-vive/galeria/foto-valida',
+      });
 
       const validPhoto = new File(['image_bytes'], 'paisaje.webp', { type: 'image/webp' });
       const res = await galleryService.uploadGalleryPhoto(validPhoto);
 
       expect(res.success).toBe(true);
-      expect(res.url).toContain('gallery-images/foto-valida.webp');
+      expect(uploadSpy).toHaveBeenCalledWith(validPhoto, 'manaure-vive/galeria', {
+        resourceType: 'image',
+      });
+      expect(res.url).toContain('manaure-vive/galeria/foto-valida.webp');
     });
   });
 

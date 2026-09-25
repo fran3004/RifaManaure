@@ -445,7 +445,7 @@ export const SettingsView: React.FC = () => {
 
         {isLoading ? (
           <div className={adminStyles.cardSection}>
-            <AdminLoadingState message="Cargando configuración del sistema desde Supabase..." />
+            <AdminLoadingState message="Cargando configuración del sistema..." />
           </div>
         ) : error ? (
           <div className={adminStyles.cardSection}>
@@ -891,7 +891,7 @@ export const SettingsView: React.FC = () => {
                               {item.has_auth_account ? (
                                 <span
                                   className={styles.authBadgeLinked}
-                                  title="Cuenta vinculada con credenciales activas en Supabase Auth"
+                                  title="Cuenta vinculada con credenciales activas"
                                 >
                                   <CheckCircle2 size={14} /> Vinculado
                                 </span>

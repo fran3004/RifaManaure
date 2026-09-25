@@ -355,7 +355,7 @@ export const AdminFaqManager: React.FC = () => {
           <Loader2 size={32} className={`animate-spin ${styles.faqTitleIcon}`} />
           <h4 className={styles.emptyStateTitle}>Cargando preguntas frecuentes...</h4>
           <p className={styles.emptyStateText}>
-            Conectando con la tabla faq_items en Supabase.
+            Obteniendo información de la base de datos...
           </p>
         </div>
       ) : faqs.length === 0 ? (

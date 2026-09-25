@@ -60,6 +60,7 @@
 
 .galleryItem {
   position: relative;
+  isolation: isolate;
   aspect-ratio: 3 / 2;
   border-radius: var(--radius-lg);
   overflow: clip;
@@ -95,6 +96,7 @@
 .itemOverlay {
   position: absolute;
   inset: 0;
+  z-index: 11;
   background: var(--scrim-photo);
   display: flex;
   flex-direction: column;

@@ -366,7 +366,7 @@ export const SelectorBoletos: React.FC = () => {
         {isLoading ? (
           <div className={styles.loadingBox}>
             <div className={styles.spinner} />
-            <p>Sincronizando boletos con la base de datos de Supabase...</p>
+            <p>Sincronizando boletos en tiempo real...</p>
           </div>
         ) : (
           <div className={styles.ticketGrid}>

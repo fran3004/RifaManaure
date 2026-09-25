@@ -11,8 +11,9 @@ Este script (`scripts/migrate-storage-to-cloudinary.mjs`) realiza la transferenc
 | `prize-images` | `manaure-vive/premios` | `public.prize_experiences` | `image_url` |
 | `partner-logos` | `manaure-vive/aliados` | `public.partners` | `logo_url` |
 | `winner-documents` | `manaure-vive/actas-ganadores` | `public.winners` | `official_act_url` |
+| `gallery-images` | `manaure-vive/galeria` | `public.gallery_items` | `image_url` |
 
-*Nota: Los buckets `payment-proofs` y `gallery-images` quedan completamente excluidos de este script.*
+*Nota: El bucket `payment-proofs` queda completamente excluido de este script (se mantiene en Supabase Storage).*
 
 ---
 
@@ -51,7 +52,7 @@ SUPABASE_SERVICE_ROLE_KEY="..." CLOUDINARY_API_SECRET="..." node scripts/migrate
 ```
 
 **Comportamiento en `--dry-run`:**
-- Inspecciona los 3 buckets y las 3 tablas de la base de datos.
+- Inspecciona los 4 buckets y las 4 tablas de la base de datos.
 - Identifica qué registros ya fueron migrados (idempotencia).
 - Identifica qué registros necesitan migrarse y qué archivos corresponden.
 - **No sube ningún archivo** y **no realiza modificaciones** en la base de datos.

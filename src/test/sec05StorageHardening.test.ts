@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import * as galleryService from '../services/galleryService';
 import * as paymentService from '../services/paymentService';
+import * as cloudinaryService from '../services/cloudinaryService';
 import { supabase } from '@/lib/supabase';
 
 /**
@@ -52,13 +53,11 @@ describe('SEC-05: Hardening Controlado de Supabase Storage', () => {
     });
 
     it('uploadGalleryPhoto debe aceptar formatos fotográficos válidos (WebP, JPEG, PNG, AVIF)', async () => {
-      const mockStorage = {
-        upload: vi.fn().mockResolvedValue({ error: null }),
-        getPublicUrl: vi.fn().mockReturnValue({
-          data: { publicUrl: 'https://xyz.supabase.co/storage/v1/object/public/gallery-images/foto.webp' },
-        }),
-      };
-      vi.spyOn(supabase.storage, 'from').mockReturnValue(mockStorage as any);
+      const uploadSpy = vi.spyOn(cloudinaryService, 'uploadToCloudinary').mockResolvedValue({
+        success: true,
+        secure_url: 'https://res.cloudinary.com/ky01b0vz/image/upload/v1/manaure-vive/galeria/foto.webp',
+        public_id: 'manaure-vive/galeria/foto',
+      });
 
       const validFile = new File(['dummy_image_data'], 'paisaje.webp', {
         type: 'image/webp',
@@ -67,8 +66,10 @@ describe('SEC-05: Hardening Controlado de Supabase Storage', () => {
       const res = await galleryService.uploadGalleryPhoto(validFile);
 
       expect(res.success).toBe(true);
-      expect(mockStorage.upload).toHaveBeenCalledTimes(1);
-      expect(res.url).toContain('gallery-images/foto.webp');
+      expect(uploadSpy).toHaveBeenCalledWith(validFile, 'manaure-vive/galeria', {
+        resourceType: 'image',
+      });
+      expect(res.url).toContain('manaure-vive/galeria/foto.webp');
     });
   });
 

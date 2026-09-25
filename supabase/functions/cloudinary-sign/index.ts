@@ -183,11 +183,16 @@ serve(async (req: Request) => {
     }
 
     const action = body.action;
-    if (action !== "upload" && action !== "destroy") {
+    if (
+      action !== "upload" &&
+      action !== "destroy" &&
+      action !== "create_folder" &&
+      action !== "delete_folder"
+    ) {
       return new Response(
         JSON.stringify({
           success: false,
-          error: "Acción no permitida o no especificada. Debe ser 'upload' o 'destroy'.",
+          error: "Acción no permitida o no especificada. Debe ser 'upload', 'destroy', 'create_folder' o 'delete_folder'.",
         }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
@@ -259,6 +264,46 @@ serve(async (req: Request) => {
           cloud_name: cloudName,
         }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    if (action === "create_folder") {
+      const folder = typeof body.folder === "string" ? body.folder.trim() : "";
+      if (!folder) {
+        return new Response(
+          JSON.stringify({ success: false, error: "El parámetro 'folder' es obligatorio para 'create_folder'." }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      const authHeader = `Basic ${btoa(`${apiKey}:${apiSecret}`)}`;
+      const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/folders/${encodeURIComponent(folder)}`, {
+        method: "POST",
+        headers: { Authorization: authHeader },
+      });
+      const data = await res.json().catch(() => ({}));
+      return new Response(
+        JSON.stringify({ success: res.ok, data, error: res.ok ? undefined : data?.error?.message }),
+        { status: res.status, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    if (action === "delete_folder") {
+      const folder = typeof body.folder === "string" ? body.folder.trim() : "";
+      if (!folder) {
+        return new Response(
+          JSON.stringify({ success: false, error: "El parámetro 'folder' es obligatorio para 'delete_folder'." }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      const authHeader = `Basic ${btoa(`${apiKey}:${apiSecret}`)}`;
+      const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/folders/${encodeURIComponent(folder)}`, {
+        method: "DELETE",
+        headers: { Authorization: authHeader },
+      });
+      const data = await res.json().catch(() => ({}));
+      return new Response(
+        JSON.stringify({ success: res.ok, data, error: res.ok ? undefined : data?.error?.message }),
+        { status: res.status, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 

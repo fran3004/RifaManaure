@@ -196,7 +196,7 @@ export const BuyersView: React.FC = () => {
       {/* Contenedor Principal / Tabla */}
       {isLoading ? (
         <div className={commonStyles.cardSection}>
-          <AdminLoadingState message="Cargando compradores desde Supabase..." />
+          <AdminLoadingState message="Cargando compradores..." />
         </div>
       ) : error ? (
         <div className={commonStyles.cardSection}>

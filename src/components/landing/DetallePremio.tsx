@@ -5,8 +5,12 @@ import {
   DEFAULT_OFFICIAL_TOUR_FEATURES,
 } from '@/services/prizeService';
 import type { PublicPrizeData, PrizeExperienceRow, OfficialTourFeature } from '@/types/raffle.types';
-import { getOptimizedCloudinaryUrl } from '@/services/cloudinaryService';
+import {
+  getOptimizedCloudinaryUrl,
+  getCloudinaryResponsiveUrl,
+} from '@/services/cloudinaryService';
 import { imageAliases, imageManifest } from '@/types/image-manifest';
+import { catalogoFotosManaure } from '@/assets/assets';
 import {
   Sparkles,
   Flame,
@@ -67,15 +71,24 @@ function getCardImageData(slug: string | null, title: string) {
   const focal = entry?.card?.focal || entry?.focalPoint || { x: 0.5, y: 0.5 };
   const dominantColor = entry?.dominantColor || entry?.card?.dominantColor || '#0f2e1d';
 
-  let primarySrc = entry?.variants.find((variant) => variant.role === 'tarjeta')?.jpg.url;
-  const fullSrc = entry?.variants.find((variant) => variant.role === 'lightbox')?.jpg.url || primarySrc;
+  const defaultFallback =
+    catalogoFotosManaure.find((f) => f.id === 'gastronomia-local')?.card ||
+    catalogoFotosManaure[0]?.card ||
+    '';
+
+  let primarySrc = entry?.cloudinary
+    ? getCloudinaryResponsiveUrl(entry.cloudinary.secureUrl, { width: 768, height: 960, format: 'jpg' })
+    : undefined;
+  const fullSrc = entry?.cloudinary
+    ? getCloudinaryResponsiveUrl(entry.cloudinary.secureUrl, { width: 1600, format: 'jpg' })
+    : primarySrc;
 
   if (fit === 'contain') {
-    primarySrc = fullSrc || primarySrc || '/images/rifa/gastronomia/gastronomia-local.jpg';
+    primarySrc = fullSrc || primarySrc || defaultFallback;
   }
 
   if (fit === 'asis') {
-    primarySrc = '/images/rifa/gastronomia/gastronomia-local.jpg';
+    primarySrc = defaultFallback;
   }
 
   return {
@@ -85,7 +98,7 @@ function getCardImageData(slug: string | null, title: string) {
     focalY: focal.y,
     dominantColor,
     primarySrc,
-    backdropSrc: primarySrc || '/images/rifa/gastronomia/gastronomia-local.jpg',
+    backdropSrc: primarySrc || defaultFallback,
     alt: title,
   };
 }

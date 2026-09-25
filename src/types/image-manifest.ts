@@ -1,23 +1,7 @@
 /**
  * MANIFEST DE IMÁGENES AUTOGENERADO - MANAURE VIVE
- * Generado el: 2026-09-20T22:15:45.720Z
- * Archivos optimizados WebP y JPG en /public/images/rifa/
+ * Catálogo estático alojado en Cloudinary
  */
-
-export interface ImageVariantFormat {
-  url: string;
-  bytes: number;
-  quality: number;
-}
-
-export interface ImageVariant {
-  role: 'hero-desktop' | 'hero-mobile' | 'tarjeta' | 'galeria-thumb' | 'lightbox';
-  ratio: '16x9' | '4x5' | '3x2' | 'full';
-  width: number;
-  height: number;
-  webp: ImageVariantFormat;
-  jpg: ImageVariantFormat;
-}
 
 export interface ImageEntry {
   id: string;
@@ -35,7 +19,12 @@ export interface ImageEntry {
     dominantColor?: string;
   };
   lqip: string;
-  variants: ImageVariant[];
+  cloudinary: {
+    publicId: string;
+    secureUrl: string;
+    width: number;
+    height: number;
+  };
 }
 
 export const imageAliases: Record<string, string> = {
@@ -63,60 +52,19 @@ export const imageManifest: Record<string, ImageEntry> = {
     "dominantColor": "#23302a",
     "card": {
       "fit": "asis",
-      "focal": { "x": 0.5, "y": 0.5 },
+      "focal": {
+        "x": 0.5,
+        "y": 0.5
+      },
       "dominantColor": "#23302a"
     },
     "lqip": "data:image/webp;base64,UklGRswAAABXRUJQVlA4IMAAAABQBQCdASoUABsAPzmMwVcvKSejqAqp4CcJbACuHA+DNztXE+Pv696N5lEDokogpkjBigAA9Y+cLWzYqHaTDvzwxXG1JpT9ZnbwCi8jo5QfWyBr+X0P+DH1+WXyEiYH2oTBUKdbef8iGlpW7rtjt+o7kjhPGkZ3owf9v9a1DsV+h27OwrRf1aVW7XJvG1PbC/rvs3nAabGULe3TgQ+cyLoX1bgRWyeGxfYA5u2tdYmv63WOHuQEvhrHH5fTPjqMYAA=",
-    "variants": [
-      {
-        "role": "tarjeta",
-        "ratio": "4x5",
-        "width": 710,
-        "height": 960,
-        "webp": {
-          "url": "/images/rifa/gastronomia/gastronomia-local-710w.webp",
-          "bytes": 68000,
-          "quality": 85
-        },
-        "jpg": {
-          "url": "/images/rifa/gastronomia/gastronomia-local-710w.jpg",
-          "bytes": 95000,
-          "quality": 85
-        }
-      },
-      {
-        "role": "tarjeta",
-        "ratio": "4x5",
-        "width": 480,
-        "height": 649,
-        "webp": {
-          "url": "/images/rifa/gastronomia/gastronomia-local-480w.webp",
-          "bytes": 42000,
-          "quality": 85
-        },
-        "jpg": {
-          "url": "/images/rifa/gastronomia/gastronomia-local-480w.jpg",
-          "bytes": 62000,
-          "quality": 85
-        }
-      },
-      {
-        "role": "lightbox",
-        "ratio": "full",
-        "width": 710,
-        "height": 960,
-        "webp": {
-          "url": "/images/rifa/gastronomia/gastronomia-local.webp",
-          "bytes": 68000,
-          "quality": 85
-        },
-        "jpg": {
-          "url": "/images/rifa/gastronomia/gastronomia-local.jpg",
-          "bytes": 95000,
-          "quality": 85
-        }
-      }
-    ]
+    "cloudinary": {
+      "publicId": "manaure-vive/galeria/gastronomia/gastronomia-local",
+      "secureUrl": "https://res.cloudinary.com/ky01b0vz/image/upload/manaure-vive/galeria/gastronomia/gastronomia-local.jpg",
+      "width": 710,
+      "height": 960
+    }
   },
   "og-image": {
     "id": "og-image",
@@ -132,200 +80,12 @@ export const imageManifest: Record<string, ImageEntry> = {
     },
     "dominantColor": "#6a8299",
     "lqip": "data:image/webp;base64,UklGRo4AAABXRUJQVlA4IIIAAABwBACdASoYAA4APtFUo0uoJKMhsAgBABoJQBOmUABp7hy44IbXx6yk7afuQAD+6vIODaU1prJzNT2z8lhZLH9Zkd3y81xCW42bwauxKpG6nwupXjs3CZu5020WZyezfAfI4rfnvK8uq8uUeLh4pPjrcYoL4+tUpZc6FMTwI/fNAAAA",
-    "variants": [
-      {
-        "role": "hero-desktop",
-        "ratio": "16x9",
-        "width": 1920,
-        "height": 1080,
-        "webp": {
-          "url": "/images/rifa/serrania/og-image--16x9-1920w.webp",
-          "bytes": 134212,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/serrania/og-image--16x9-1920w.jpg",
-          "bytes": 214246,
-          "quality": 80
-        }
-      },
-      {
-        "role": "hero-desktop",
-        "ratio": "16x9",
-        "width": 1600,
-        "height": 900,
-        "webp": {
-          "url": "/images/rifa/serrania/og-image--16x9-1600w.webp",
-          "bytes": 108228,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/serrania/og-image--16x9-1600w.jpg",
-          "bytes": 153795,
-          "quality": 80
-        }
-      },
-      {
-        "role": "hero-desktop",
-        "ratio": "16x9",
-        "width": 1024,
-        "height": 576,
-        "webp": {
-          "url": "/images/rifa/serrania/og-image--16x9-1024w.webp",
-          "bytes": 63170,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/serrania/og-image--16x9-1024w.jpg",
-          "bytes": 79732,
-          "quality": 80
-        }
-      },
-      {
-        "role": "hero-desktop",
-        "ratio": "16x9",
-        "width": 640,
-        "height": 360,
-        "webp": {
-          "url": "/images/rifa/serrania/og-image--16x9-640w.webp",
-          "bytes": 33690,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/serrania/og-image--16x9-640w.jpg",
-          "bytes": 37415,
-          "quality": 80
-        }
-      },
-      {
-        "role": "hero-mobile",
-        "ratio": "4x5",
-        "width": 768,
-        "height": 960,
-        "webp": {
-          "url": "/images/rifa/serrania/og-image--4x5-768w.webp",
-          "bytes": 52004,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/serrania/og-image--4x5-768w.jpg",
-          "bytes": 75643,
-          "quality": 80
-        }
-      },
-      {
-        "role": "hero-mobile",
-        "ratio": "4x5",
-        "width": 640,
-        "height": 800,
-        "webp": {
-          "url": "/images/rifa/serrania/og-image--4x5-640w.webp",
-          "bytes": 42756,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/serrania/og-image--4x5-640w.jpg",
-          "bytes": 58727,
-          "quality": 80
-        }
-      },
-      {
-        "role": "galeria-thumb",
-        "ratio": "3x2",
-        "width": 640,
-        "height": 427,
-        "webp": {
-          "url": "/images/rifa/serrania/og-image--3x2-640w.webp",
-          "bytes": 37650,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/serrania/og-image--3x2-640w.jpg",
-          "bytes": 39940,
-          "quality": 78
-        }
-      },
-      {
-        "role": "galeria-thumb",
-        "ratio": "3x2",
-        "width": 480,
-        "height": 320,
-        "webp": {
-          "url": "/images/rifa/serrania/og-image--3x2-480w.webp",
-          "bytes": 23686,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/serrania/og-image--3x2-480w.jpg",
-          "bytes": 26131,
-          "quality": 80
-        }
-      },
-      {
-        "role": "galeria-thumb",
-        "ratio": "3x2",
-        "width": 320,
-        "height": 213,
-        "webp": {
-          "url": "/images/rifa/serrania/og-image--3x2-320w.webp",
-          "bytes": 12058,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/serrania/og-image--3x2-320w.jpg",
-          "bytes": 13178,
-          "quality": 80
-        }
-      },
-      {
-        "role": "lightbox",
-        "ratio": "full",
-        "width": 1600,
-        "height": 900,
-        "webp": {
-          "url": "/images/rifa/serrania/og-image-1600w.webp",
-          "bytes": 108228,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/serrania/og-image-1600w.jpg",
-          "bytes": 153795,
-          "quality": 80
-        }
-      },
-      {
-        "role": "lightbox",
-        "ratio": "full",
-        "width": 1280,
-        "height": 720,
-        "webp": {
-          "url": "/images/rifa/serrania/og-image-1280w.webp",
-          "bytes": 83744,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/serrania/og-image-1280w.jpg",
-          "bytes": 111625,
-          "quality": 80
-        }
-      },
-      {
-        "role": "lightbox",
-        "ratio": "full",
-        "width": 960,
-        "height": 540,
-        "webp": {
-          "url": "/images/rifa/serrania/og-image-960w.webp",
-          "bytes": 59740,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/serrania/og-image-960w.jpg",
-          "bytes": 73206,
-          "quality": 80
-        }
-      }
-    ]
+    "cloudinary": {
+      "publicId": "manaure-vive/galeria/serrania/og-image",
+      "secureUrl": "https://res.cloudinary.com/ky01b0vz/image/upload/manaure-vive/galeria/serrania/og-image.jpg",
+      "width": 1600,
+      "height": 900
+    }
   },
   "cuatrimoto-aventura-cordillera": {
     "id": "cuatrimoto-aventura-cordillera",
@@ -342,236 +102,19 @@ export const imageManifest: Record<string, ImageEntry> = {
     "dominantColor": "#748a9d",
     "card": {
       "fit": "contain",
-      "focal": { "x": 0.35, "y": 0.65 },
+      "focal": {
+        "x": 0.35,
+        "y": 0.65
+      },
       "dominantColor": "#748a9d"
     },
     "lqip": "data:image/webp;base64,UklGRoQAAABXRUJQVlA4IHgAAABQBQCdASoYABIAPtFQpkuoJKOhsBgMAQAaCWIAnTLMAamL8zZjlNcD1bPFgXj6zzdqgAAA+pOezW9n9hPM/cKUqyU6OR/PdbfvBDjiMfqtk3kX0H/VQOFNSHGFkYqa6nZaSxP/Q0I0q/05rDmAnBwCRII+sXxwAAA=",
-    "variants": [
-      {
-        "role": "hero-desktop",
-        "ratio": "16x9",
-        "width": 1920,
-        "height": 1080,
-        "webp": {
-          "url": "/images/rifa/cuatrimoto/cuatrimoto-aventura-cordillera--16x9-1920w.webp",
-          "bytes": 265826,
-          "quality": 68
-        },
-        "jpg": {
-          "url": "/images/rifa/cuatrimoto/cuatrimoto-aventura-cordillera--16x9-1920w.jpg",
-          "bytes": 262878,
-          "quality": 72
-        }
-      },
-      {
-        "role": "hero-desktop",
-        "ratio": "16x9",
-        "width": 1600,
-        "height": 900,
-        "webp": {
-          "url": "/images/rifa/cuatrimoto/cuatrimoto-aventura-cordillera--16x9-1600w.webp",
-          "bytes": 228426,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/cuatrimoto/cuatrimoto-aventura-cordillera--16x9-1600w.jpg",
-          "bytes": 232578,
-          "quality": 80
-        }
-      },
-      {
-        "role": "hero-desktop",
-        "ratio": "16x9",
-        "width": 1024,
-        "height": 576,
-        "webp": {
-          "url": "/images/rifa/cuatrimoto/cuatrimoto-aventura-cordillera--16x9-1024w.webp",
-          "bytes": 100558,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/cuatrimoto/cuatrimoto-aventura-cordillera--16x9-1024w.jpg",
-          "bytes": 100115,
-          "quality": 80
-        }
-      },
-      {
-        "role": "hero-desktop",
-        "ratio": "16x9",
-        "width": 640,
-        "height": 360,
-        "webp": {
-          "url": "/images/rifa/cuatrimoto/cuatrimoto-aventura-cordillera--16x9-640w.webp",
-          "bytes": 39932,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/cuatrimoto/cuatrimoto-aventura-cordillera--16x9-640w.jpg",
-          "bytes": 39256,
-          "quality": 80
-        }
-      },
-      {
-        "role": "hero-mobile",
-        "ratio": "4x5",
-        "width": 768,
-        "height": 960,
-        "webp": {
-          "url": "/images/rifa/cuatrimoto/cuatrimoto-aventura-cordillera--4x5-768w.webp",
-          "bytes": 99856,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/cuatrimoto/cuatrimoto-aventura-cordillera--4x5-768w.jpg",
-          "bytes": 103968,
-          "quality": 80
-        }
-      },
-      {
-        "role": "hero-mobile",
-        "ratio": "4x5",
-        "width": 640,
-        "height": 800,
-        "webp": {
-          "url": "/images/rifa/cuatrimoto/cuatrimoto-aventura-cordillera--4x5-640w.webp",
-          "bytes": 70132,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/cuatrimoto/cuatrimoto-aventura-cordillera--4x5-640w.jpg",
-          "bytes": 73259,
-          "quality": 80
-        }
-      },
-      {
-        "role": "tarjeta",
-        "ratio": "4x5",
-        "width": 768,
-        "height": 960,
-        "webp": {
-          "url": "/images/rifa/cuatrimoto/cuatrimoto-aventura-cordillera--4x5-768w.webp",
-          "bytes": 83908,
-          "quality": 68
-        },
-        "jpg": {
-          "url": "/images/rifa/cuatrimoto/cuatrimoto-aventura-cordillera--4x5-768w.jpg",
-          "bytes": 82715,
-          "quality": 72
-        }
-      },
-      {
-        "role": "tarjeta",
-        "ratio": "4x5",
-        "width": 480,
-        "height": 600,
-        "webp": {
-          "url": "/images/rifa/cuatrimoto/cuatrimoto-aventura-cordillera--4x5-480w.webp",
-          "bytes": 39994,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/cuatrimoto/cuatrimoto-aventura-cordillera--4x5-480w.jpg",
-          "bytes": 41669,
-          "quality": 80
-        }
-      },
-      {
-        "role": "galeria-thumb",
-        "ratio": "3x2",
-        "width": 640,
-        "height": 427,
-        "webp": {
-          "url": "/images/rifa/cuatrimoto/cuatrimoto-aventura-cordillera--3x2-640w.webp",
-          "bytes": 40684,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/cuatrimoto/cuatrimoto-aventura-cordillera--3x2-640w.jpg",
-          "bytes": 38585,
-          "quality": 78
-        }
-      },
-      {
-        "role": "galeria-thumb",
-        "ratio": "3x2",
-        "width": 480,
-        "height": 320,
-        "webp": {
-          "url": "/images/rifa/cuatrimoto/cuatrimoto-aventura-cordillera--3x2-480w.webp",
-          "bytes": 22044,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/cuatrimoto/cuatrimoto-aventura-cordillera--3x2-480w.jpg",
-          "bytes": 22516,
-          "quality": 80
-        }
-      },
-      {
-        "role": "galeria-thumb",
-        "ratio": "3x2",
-        "width": 320,
-        "height": 213,
-        "webp": {
-          "url": "/images/rifa/cuatrimoto/cuatrimoto-aventura-cordillera--3x2-320w.webp",
-          "bytes": 10050,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/cuatrimoto/cuatrimoto-aventura-cordillera--3x2-320w.jpg",
-          "bytes": 10625,
-          "quality": 80
-        }
-      },
-      {
-        "role": "lightbox",
-        "ratio": "full",
-        "width": 1600,
-        "height": 1200,
-        "webp": {
-          "url": "/images/rifa/cuatrimoto/cuatrimoto-aventura-cordillera-1600w.webp",
-          "bytes": 211676,
-          "quality": 76
-        },
-        "jpg": {
-          "url": "/images/rifa/cuatrimoto/cuatrimoto-aventura-cordillera-1600w.jpg",
-          "bytes": 224485,
-          "quality": 78
-        }
-      },
-      {
-        "role": "lightbox",
-        "ratio": "full",
-        "width": 1280,
-        "height": 960,
-        "webp": {
-          "url": "/images/rifa/cuatrimoto/cuatrimoto-aventura-cordillera-1280w.webp",
-          "bytes": 152750,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/cuatrimoto/cuatrimoto-aventura-cordillera-1280w.jpg",
-          "bytes": 160852,
-          "quality": 80
-        }
-      },
-      {
-        "role": "lightbox",
-        "ratio": "full",
-        "width": 960,
-        "height": 720,
-        "webp": {
-          "url": "/images/rifa/cuatrimoto/cuatrimoto-aventura-cordillera-960w.webp",
-          "bytes": 89132,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/cuatrimoto/cuatrimoto-aventura-cordillera-960w.jpg",
-          "bytes": 93313,
-          "quality": 80
-        }
-      }
-    ]
+    "cloudinary": {
+      "publicId": "manaure-vive/galeria/cuatrimoto/cuatrimoto-aventura-cordillera",
+      "secureUrl": "https://res.cloudinary.com/ky01b0vz/image/upload/manaure-vive/galeria/cuatrimoto/cuatrimoto-aventura-cordillera.jpg",
+      "width": 1600,
+      "height": 1200
+    }
   },
   "serrania-perija-cordillera": {
     "id": "serrania-perija-cordillera",
@@ -587,200 +130,12 @@ export const imageManifest: Record<string, ImageEntry> = {
     },
     "dominantColor": "#587189",
     "lqip": "data:image/webp;base64,UklGRtgAAABXRUJQVlA4IMwAAAAQBgCdASoYABIAPtFcp04oJSOiKAqpABoJZgCdMuu6CasQy+LZDe8LvwDUjkaaEdJE+C7N8yESHYAA/tUIys6UAgMfq6DLSy48zwxxMyMR4Ftc2TWen0348gXTwAonBHjZwpVaf4TwO59YLTGjqGwyJ8e3e+UMM1UU/06m1cWhW6ZLwFVfpFgDTWKPeYemXmcHWxfCDnmBnFQ+a0srJsIbKVIOuD+dKjd39StXaWvXOKn+0tm5dyX6xoLKRn2JqTIq5KauaIAlnADIgAA=",
-    "variants": [
-      {
-        "role": "hero-desktop",
-        "ratio": "16x9",
-        "width": 1920,
-        "height": 1080,
-        "webp": {
-          "url": "/images/rifa/serrania/serrania-perija-cordillera--16x9-1920w.webp",
-          "bytes": 237192,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/serrania/serrania-perija-cordillera--16x9-1920w.jpg",
-          "bytes": 256766,
-          "quality": 78
-        }
-      },
-      {
-        "role": "hero-desktop",
-        "ratio": "16x9",
-        "width": 1600,
-        "height": 900,
-        "webp": {
-          "url": "/images/rifa/serrania/serrania-perija-cordillera--16x9-1600w.webp",
-          "bytes": 184598,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/serrania/serrania-perija-cordillera--16x9-1600w.jpg",
-          "bytes": 206160,
-          "quality": 80
-        }
-      },
-      {
-        "role": "hero-desktop",
-        "ratio": "16x9",
-        "width": 1024,
-        "height": 576,
-        "webp": {
-          "url": "/images/rifa/serrania/serrania-perija-cordillera--16x9-1024w.webp",
-          "bytes": 92378,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/serrania/serrania-perija-cordillera--16x9-1024w.jpg",
-          "bytes": 98962,
-          "quality": 80
-        }
-      },
-      {
-        "role": "hero-desktop",
-        "ratio": "16x9",
-        "width": 640,
-        "height": 360,
-        "webp": {
-          "url": "/images/rifa/serrania/serrania-perija-cordillera--16x9-640w.webp",
-          "bytes": 43296,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/serrania/serrania-perija-cordillera--16x9-640w.jpg",
-          "bytes": 43979,
-          "quality": 80
-        }
-      },
-      {
-        "role": "hero-mobile",
-        "ratio": "4x5",
-        "width": 768,
-        "height": 960,
-        "webp": {
-          "url": "/images/rifa/serrania/serrania-perija-cordillera--4x5-768w.webp",
-          "bytes": 99588,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/serrania/serrania-perija-cordillera--4x5-768w.jpg",
-          "bytes": 110395,
-          "quality": 80
-        }
-      },
-      {
-        "role": "hero-mobile",
-        "ratio": "4x5",
-        "width": 640,
-        "height": 800,
-        "webp": {
-          "url": "/images/rifa/serrania/serrania-perija-cordillera--4x5-640w.webp",
-          "bytes": 75766,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/serrania/serrania-perija-cordillera--4x5-640w.jpg",
-          "bytes": 81660,
-          "quality": 80
-        }
-      },
-      {
-        "role": "galeria-thumb",
-        "ratio": "3x2",
-        "width": 640,
-        "height": 427,
-        "webp": {
-          "url": "/images/rifa/serrania/serrania-perija-cordillera--3x2-640w.webp",
-          "bytes": 43212,
-          "quality": 68
-        },
-        "jpg": {
-          "url": "/images/rifa/serrania/serrania-perija-cordillera--3x2-640w.jpg",
-          "bytes": 42668,
-          "quality": 72
-        }
-      },
-      {
-        "role": "galeria-thumb",
-        "ratio": "3x2",
-        "width": 480,
-        "height": 320,
-        "webp": {
-          "url": "/images/rifa/serrania/serrania-perija-cordillera--3x2-480w.webp",
-          "bytes": 30908,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/serrania/serrania-perija-cordillera--3x2-480w.jpg",
-          "bytes": 31175,
-          "quality": 80
-        }
-      },
-      {
-        "role": "galeria-thumb",
-        "ratio": "3x2",
-        "width": 320,
-        "height": 213,
-        "webp": {
-          "url": "/images/rifa/serrania/serrania-perija-cordillera--3x2-320w.webp",
-          "bytes": 15256,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/serrania/serrania-perija-cordillera--3x2-320w.jpg",
-          "bytes": 15131,
-          "quality": 80
-        }
-      },
-      {
-        "role": "lightbox",
-        "ratio": "full",
-        "width": 1600,
-        "height": 1200,
-        "webp": {
-          "url": "/images/rifa/serrania/serrania-perija-cordillera-1600w.webp",
-          "bytes": 217896,
-          "quality": 76
-        },
-        "jpg": {
-          "url": "/images/rifa/serrania/serrania-perija-cordillera-1600w.jpg",
-          "bytes": 224663,
-          "quality": 74
-        }
-      },
-      {
-        "role": "lightbox",
-        "ratio": "full",
-        "width": 1280,
-        "height": 960,
-        "webp": {
-          "url": "/images/rifa/serrania/serrania-perija-cordillera-1280w.webp",
-          "bytes": 169454,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/serrania/serrania-perija-cordillera-1280w.jpg",
-          "bytes": 184775,
-          "quality": 80
-        }
-      },
-      {
-        "role": "lightbox",
-        "ratio": "full",
-        "width": 960,
-        "height": 720,
-        "webp": {
-          "url": "/images/rifa/serrania/serrania-perija-cordillera-960w.webp",
-          "bytes": 107196,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/serrania/serrania-perija-cordillera-960w.jpg",
-          "bytes": 114397,
-          "quality": 80
-        }
-      }
-    ]
+    "cloudinary": {
+      "publicId": "manaure-vive/galeria/serrania/serrania-perija-cordillera",
+      "secureUrl": "https://res.cloudinary.com/ky01b0vz/image/upload/manaure-vive/galeria/serrania/serrania-perija-cordillera.jpg",
+      "width": 1600,
+      "height": 1200
+    }
   },
   "fogata-casa-de-vidrio": {
     "id": "fogata-casa-de-vidrio",
@@ -797,220 +152,19 @@ export const imageManifest: Record<string, ImageEntry> = {
     "dominantColor": "#777471",
     "card": {
       "fit": "cover",
-      "focal": { "x": 0.55, "y": 0.55 },
+      "focal": {
+        "x": 0.55,
+        "y": 0.55
+      },
       "dominantColor": "#777471"
     },
     "lqip": "data:image/webp;base64,UklGRt4AAABXRUJQVlA4INIAAADQBQCdASoYABIAPtFaqE4oJKQiKAqpABoJQBOmWR3/y7BGEhf4inLDdag7aCzn4MrB3+MDSIvgAP7tqtFoVxotCS/MkwI8qFcOLJQPuoKOQTnOz+/ux1k415GNyhi7GZmYxw3USpS8Y9Ro/8GGRqX+5CI2QHiIbVM7z+5MsanbViwMET5mQH3gpne7WM5ull4J11XQjKTvxZyZlKiji3dNRGsDQe+RwkYHhKNiaogf5aLgnbvOww21mnmIqOikna0vi3c1aybnS4+BspI1AUgRgAA=",
-    "variants": [
-      {
-        "role": "hero-desktop",
-        "ratio": "16x9",
-        "width": 1600,
-        "height": 900,
-        "webp": {
-          "url": "/images/rifa/glamping/fogata-casa-de-vidrio--16x9-1600w.webp",
-          "bytes": 314354,
-          "quality": 68
-        },
-        "jpg": {
-          "url": "/images/rifa/glamping/fogata-casa-de-vidrio--16x9-1600w.jpg",
-          "bytes": 283312,
-          "quality": 72
-        }
-      },
-      {
-        "role": "hero-desktop",
-        "ratio": "16x9",
-        "width": 1024,
-        "height": 576,
-        "webp": {
-          "url": "/images/rifa/glamping/fogata-casa-de-vidrio--16x9-1024w.webp",
-          "bytes": 166086,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/glamping/fogata-casa-de-vidrio--16x9-1024w.jpg",
-          "bytes": 148237,
-          "quality": 80
-        }
-      },
-      {
-        "role": "hero-desktop",
-        "ratio": "16x9",
-        "width": 640,
-        "height": 360,
-        "webp": {
-          "url": "/images/rifa/glamping/fogata-casa-de-vidrio--16x9-640w.webp",
-          "bytes": 66866,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/glamping/fogata-casa-de-vidrio--16x9-640w.jpg",
-          "bytes": 59631,
-          "quality": 80
-        }
-      },
-      {
-        "role": "hero-mobile",
-        "ratio": "4x5",
-        "width": 768,
-        "height": 960,
-        "webp": {
-          "url": "/images/rifa/glamping/fogata-casa-de-vidrio--4x5-768w.webp",
-          "bytes": 152476,
-          "quality": 68
-        },
-        "jpg": {
-          "url": "/images/rifa/glamping/fogata-casa-de-vidrio--4x5-768w.jpg",
-          "bytes": 136731,
-          "quality": 72
-        }
-      },
-      {
-        "role": "hero-mobile",
-        "ratio": "4x5",
-        "width": 640,
-        "height": 800,
-        "webp": {
-          "url": "/images/rifa/glamping/fogata-casa-de-vidrio--4x5-640w.webp",
-          "bytes": 111478,
-          "quality": 70
-        },
-        "jpg": {
-          "url": "/images/rifa/glamping/fogata-casa-de-vidrio--4x5-640w.jpg",
-          "bytes": 112632,
-          "quality": 78
-        }
-      },
-      {
-        "role": "tarjeta",
-        "ratio": "4x5",
-        "width": 768,
-        "height": 960,
-        "webp": {
-          "url": "/images/rifa/glamping/fogata-casa-de-vidrio--4x5-768w.webp",
-          "bytes": 152476,
-          "quality": 68
-        },
-        "jpg": {
-          "url": "/images/rifa/glamping/fogata-casa-de-vidrio--4x5-768w.jpg",
-          "bytes": 136731,
-          "quality": 72
-        }
-      },
-      {
-        "role": "tarjeta",
-        "ratio": "4x5",
-        "width": 480,
-        "height": 600,
-        "webp": {
-          "url": "/images/rifa/glamping/fogata-casa-de-vidrio--4x5-480w.webp",
-          "bytes": 75340,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/glamping/fogata-casa-de-vidrio--4x5-480w.jpg",
-          "bytes": 68916,
-          "quality": 80
-        }
-      },
-      {
-        "role": "galeria-thumb",
-        "ratio": "3x2",
-        "width": 640,
-        "height": 427,
-        "webp": {
-          "url": "/images/rifa/glamping/fogata-casa-de-vidrio--3x2-640w.webp",
-          "bytes": 63916,
-          "quality": 68
-        },
-        "jpg": {
-          "url": "/images/rifa/glamping/fogata-casa-de-vidrio--3x2-640w.jpg",
-          "bytes": 55513,
-          "quality": 72
-        }
-      },
-      {
-        "role": "galeria-thumb",
-        "ratio": "3x2",
-        "width": 480,
-        "height": 320,
-        "webp": {
-          "url": "/images/rifa/glamping/fogata-casa-de-vidrio--3x2-480w.webp",
-          "bytes": 40610,
-          "quality": 76
-        },
-        "jpg": {
-          "url": "/images/rifa/glamping/fogata-casa-de-vidrio--3x2-480w.jpg",
-          "bytes": 39770,
-          "quality": 80
-        }
-      },
-      {
-        "role": "galeria-thumb",
-        "ratio": "3x2",
-        "width": 320,
-        "height": 213,
-        "webp": {
-          "url": "/images/rifa/glamping/fogata-casa-de-vidrio--3x2-320w.webp",
-          "bytes": 20020,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/glamping/fogata-casa-de-vidrio--3x2-320w.jpg",
-          "bytes": 18972,
-          "quality": 80
-        }
-      },
-      {
-        "role": "lightbox",
-        "ratio": "full",
-        "width": 1600,
-        "height": 1200,
-        "webp": {
-          "url": "/images/rifa/glamping/fogata-casa-de-vidrio-1600w.webp",
-          "bytes": 335124,
-          "quality": 68
-        },
-        "jpg": {
-          "url": "/images/rifa/glamping/fogata-casa-de-vidrio-1600w.jpg",
-          "bytes": 346104,
-          "quality": 72
-        }
-      },
-      {
-        "role": "lightbox",
-        "ratio": "full",
-        "width": 1280,
-        "height": 960,
-        "webp": {
-          "url": "/images/rifa/glamping/fogata-casa-de-vidrio-1280w.webp",
-          "bytes": 234210,
-          "quality": 68
-        },
-        "jpg": {
-          "url": "/images/rifa/glamping/fogata-casa-de-vidrio-1280w.jpg",
-          "bytes": 213987,
-          "quality": 72
-        }
-      },
-      {
-        "role": "lightbox",
-        "ratio": "full",
-        "width": 960,
-        "height": 720,
-        "webp": {
-          "url": "/images/rifa/glamping/fogata-casa-de-vidrio-960w.webp",
-          "bytes": 163726,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/glamping/fogata-casa-de-vidrio-960w.jpg",
-          "bytes": 154329,
-          "quality": 80
-        }
-      }
-    ]
+    "cloudinary": {
+      "publicId": "manaure-vive/galeria/glamping/fogata-casa-de-vidrio",
+      "secureUrl": "https://res.cloudinary.com/ky01b0vz/image/upload/manaure-vive/galeria/glamping/fogata-casa-de-vidrio.jpg",
+      "width": 1600,
+      "height": 1200
+    }
   },
   "parapente-vuelo": {
     "id": "parapente-vuelo",
@@ -1026,72 +180,12 @@ export const imageManifest: Record<string, ImageEntry> = {
     },
     "dominantColor": "#5b6977",
     "lqip": "data:image/webp;base64,UklGRjQBAABXRUJQVlA4ICgBAADwBgCdASoYACsAPtFcok2oJSKiKqoBABoJbACdMw46kGkgKIS5Eaxq53cB5ayG3aRjW4V9wq0p/5lMaMB+eMngAP5daEWyZhQR5JD8c1QorCwBFy66/deLSEI2Lw+0ZjJJLPBjZiM4M/ILgUMmEW4aki+tzcz2cjvJXjg2oHMShgLPVzY37uRqVQkeWwWglrIGfcA753Yv0EgFAmPWf92D+30nGlrtN2zpFAAcOxEA+3Kv7+7bhFulGudRtuftMF4FsX1mQGu8QtaF/ZXzXp9s2YDBwXLrgwnJvgC5XLafe+O9Nsm+3Y6NluNZuYdCSfLC3T3WG8k6BSfm7AqErsZUJNQSlsEGjUF0yCpyYltW6K5uDZkRA4u4Wkwvw0TIcoj4miyq3AAAAA==",
-    "variants": [
-      {
-        "role": "hero-mobile",
-        "ratio": "4x5",
-        "width": 598,
-        "height": 748,
-        "webp": {
-          "url": "/images/rifa/parapente/parapente-vuelo--4x5-598w.webp",
-          "bytes": 45622,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/parapente/parapente-vuelo--4x5-598w.jpg",
-          "bytes": 55199,
-          "quality": 80
-        }
-      },
-      {
-        "role": "galeria-thumb",
-        "ratio": "3x2",
-        "width": 480,
-        "height": 320,
-        "webp": {
-          "url": "/images/rifa/parapente/parapente-vuelo--3x2-480w.webp",
-          "bytes": 18632,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/parapente/parapente-vuelo--3x2-480w.jpg",
-          "bytes": 21905,
-          "quality": 80
-        }
-      },
-      {
-        "role": "galeria-thumb",
-        "ratio": "3x2",
-        "width": 320,
-        "height": 213,
-        "webp": {
-          "url": "/images/rifa/parapente/parapente-vuelo--3x2-320w.webp",
-          "bytes": 9314,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/parapente/parapente-vuelo--3x2-320w.jpg",
-          "bytes": 11030,
-          "quality": 80
-        }
-      },
-      {
-        "role": "lightbox",
-        "ratio": "full",
-        "width": 598,
-        "height": 1077,
-        "webp": {
-          "url": "/images/rifa/parapente/parapente-vuelo-598w.webp",
-          "bytes": 68018,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/parapente/parapente-vuelo-598w.jpg",
-          "bytes": 87094,
-          "quality": 80
-        }
-      }
-    ]
+    "cloudinary": {
+      "publicId": "manaure-vive/galeria/parapente/parapente-vuelo",
+      "secureUrl": "https://res.cloudinary.com/ky01b0vz/image/upload/manaure-vive/galeria/parapente/parapente-vuelo.jpg",
+      "width": 598,
+      "height": 1077
+    }
   },
   "serrania-perija-laguna": {
     "id": "serrania-perija-laguna",
@@ -1108,220 +202,19 @@ export const imageManifest: Record<string, ImageEntry> = {
     "dominantColor": "#757975",
     "card": {
       "fit": "cover",
-      "focal": { "x": 0.5, "y": 0.5 },
+      "focal": {
+        "x": 0.5,
+        "y": 0.5
+      },
       "dominantColor": "#757975"
     },
     "lqip": "data:image/webp;base64,UklGRuAAAABXRUJQVlA4INQAAADwBQCdASoYABIAPtFUpU2oJCOiMBgIAQAaCWIAuzNMjgAQKZulw174xThxbrhf2hzF/Lviye2EAAD+4cyuaSD0kMHRXmLpM7hYdHUe64qR1rtCmRKYFjHyI41LYhMOeYgQ/1p7ls+Puek+Dw0jd2HXVYKpjJwbV7Z90IAdX3RzNWAPC+Jqy7u98Fng1pMW2O6w2mf7BZ61CQLzFpU4oDqlWED7pVI0zj5uy4mCHTaMkRhEbvTQK61L1kChcqBVkUXOx9ELhhdBjh/D2g8b3jfTrOYAAA==",
-    "variants": [
-      {
-        "role": "hero-desktop",
-        "ratio": "16x9",
-        "width": 1600,
-        "height": 900,
-        "webp": {
-          "url": "/images/rifa/serrania/serrania-perija-laguna--16x9-1600w.webp",
-          "bytes": 291296,
-          "quality": 68
-        },
-        "jpg": {
-          "url": "/images/rifa/serrania/serrania-perija-laguna--16x9-1600w.jpg",
-          "bytes": 275126,
-          "quality": 72
-        }
-      },
-      {
-        "role": "hero-desktop",
-        "ratio": "16x9",
-        "width": 1024,
-        "height": 576,
-        "webp": {
-          "url": "/images/rifa/serrania/serrania-perija-laguna--16x9-1024w.webp",
-          "bytes": 159042,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/serrania/serrania-perija-laguna--16x9-1024w.jpg",
-          "bytes": 148525,
-          "quality": 80
-        }
-      },
-      {
-        "role": "hero-desktop",
-        "ratio": "16x9",
-        "width": 640,
-        "height": 360,
-        "webp": {
-          "url": "/images/rifa/serrania/serrania-perija-laguna--16x9-640w.webp",
-          "bytes": 66360,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/serrania/serrania-perija-laguna--16x9-640w.jpg",
-          "bytes": 60298,
-          "quality": 80
-        }
-      },
-      {
-        "role": "hero-mobile",
-        "ratio": "4x5",
-        "width": 768,
-        "height": 960,
-        "webp": {
-          "url": "/images/rifa/serrania/serrania-perija-laguna--4x5-768w.webp",
-          "bytes": 133944,
-          "quality": 68
-        },
-        "jpg": {
-          "url": "/images/rifa/serrania/serrania-perija-laguna--4x5-768w.jpg",
-          "bytes": 129422,
-          "quality": 72
-        }
-      },
-      {
-        "role": "hero-mobile",
-        "ratio": "4x5",
-        "width": 640,
-        "height": 800,
-        "webp": {
-          "url": "/images/rifa/serrania/serrania-perija-laguna--4x5-640w.webp",
-          "bytes": 109474,
-          "quality": 76
-        },
-        "jpg": {
-          "url": "/images/rifa/serrania/serrania-perija-laguna--4x5-640w.jpg",
-          "bytes": 108421,
-          "quality": 78
-        }
-      },
-      {
-        "role": "tarjeta",
-        "ratio": "4x5",
-        "width": 768,
-        "height": 960,
-        "webp": {
-          "url": "/images/rifa/serrania/serrania-perija-laguna--4x5-768w.webp",
-          "bytes": 133944,
-          "quality": 68
-        },
-        "jpg": {
-          "url": "/images/rifa/serrania/serrania-perija-laguna--4x5-768w.jpg",
-          "bytes": 129422,
-          "quality": 72
-        }
-      },
-      {
-        "role": "tarjeta",
-        "ratio": "4x5",
-        "width": 480,
-        "height": 600,
-        "webp": {
-          "url": "/images/rifa/serrania/serrania-perija-laguna--4x5-480w.webp",
-          "bytes": 70798,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/serrania/serrania-perija-laguna--4x5-480w.jpg",
-          "bytes": 67939,
-          "quality": 80
-        }
-      },
-      {
-        "role": "galeria-thumb",
-        "ratio": "3x2",
-        "width": 640,
-        "height": 427,
-        "webp": {
-          "url": "/images/rifa/serrania/serrania-perija-laguna--3x2-640w.webp",
-          "bytes": 63466,
-          "quality": 68
-        },
-        "jpg": {
-          "url": "/images/rifa/serrania/serrania-perija-laguna--3x2-640w.jpg",
-          "bytes": 56180,
-          "quality": 72
-        }
-      },
-      {
-        "role": "galeria-thumb",
-        "ratio": "3x2",
-        "width": 480,
-        "height": 320,
-        "webp": {
-          "url": "/images/rifa/serrania/serrania-perija-laguna--3x2-480w.webp",
-          "bytes": 39036,
-          "quality": 74
-        },
-        "jpg": {
-          "url": "/images/rifa/serrania/serrania-perija-laguna--3x2-480w.jpg",
-          "bytes": 39850,
-          "quality": 80
-        }
-      },
-      {
-        "role": "galeria-thumb",
-        "ratio": "3x2",
-        "width": 320,
-        "height": 213,
-        "webp": {
-          "url": "/images/rifa/serrania/serrania-perija-laguna--3x2-320w.webp",
-          "bytes": 20390,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/serrania/serrania-perija-laguna--3x2-320w.jpg",
-          "bytes": 18757,
-          "quality": 80
-        }
-      },
-      {
-        "role": "lightbox",
-        "ratio": "full",
-        "width": 1600,
-        "height": 1200,
-        "webp": {
-          "url": "/images/rifa/serrania/serrania-perija-laguna-1600w.webp",
-          "bytes": 344750,
-          "quality": 68
-        },
-        "jpg": {
-          "url": "/images/rifa/serrania/serrania-perija-laguna-1600w.jpg",
-          "bytes": 359592,
-          "quality": 72
-        }
-      },
-      {
-        "role": "lightbox",
-        "ratio": "full",
-        "width": 1280,
-        "height": 960,
-        "webp": {
-          "url": "/images/rifa/serrania/serrania-perija-laguna-1280w.webp",
-          "bytes": 246462,
-          "quality": 68
-        },
-        "jpg": {
-          "url": "/images/rifa/serrania/serrania-perija-laguna-1280w.jpg",
-          "bytes": 229388,
-          "quality": 72
-        }
-      },
-      {
-        "role": "lightbox",
-        "ratio": "full",
-        "width": 960,
-        "height": 720,
-        "webp": {
-          "url": "/images/rifa/serrania/serrania-perija-laguna-960w.webp",
-          "bytes": 176030,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/serrania/serrania-perija-laguna-960w.jpg",
-          "bytes": 167392,
-          "quality": 80
-        }
-      }
-    ]
+    "cloudinary": {
+      "publicId": "manaure-vive/galeria/serrania/serrania-perija-laguna",
+      "secureUrl": "https://res.cloudinary.com/ky01b0vz/image/upload/manaure-vive/galeria/serrania/serrania-perija-laguna.jpg",
+      "width": 1600,
+      "height": 1200
+    }
   },
   "parapente-bandera": {
     "id": "parapente-bandera",
@@ -1337,104 +230,12 @@ export const imageManifest: Record<string, ImageEntry> = {
     },
     "dominantColor": "#8d9796",
     "lqip": "data:image/webp;base64,UklGRvoAAABXRUJQVlA4IO4AAABQBgCdASoYACAAPtFQpUuoJKOhsBgMAQAaCWQAnTMy46HASxXvNAJoPP+gzAdGBQlDTv607Xilii3NAAD+6oW/c11UMwQTaLi6g7+moG7HdvDqWm1Do5cXQNrBBMOoOYscD453wOEsqvMtiMCWGhSknImgiMIFOiZbd9r83UhoQ+nXxLn9lkjKIifCIJAMU1lQKmmvWvEup4S+q+uAvWD2o4Goa/hR1fKumA3lbd6p3imx2JyLV3UMsHMPFFefYlJlHFnvFlgBTWD8ieQwT7MaaOnLqsRwVOnn/c3k+rwMiRtV/95HEHVYNlyuoAAA",
-    "variants": [
-      {
-        "role": "tarjeta",
-        "ratio": "4x5",
-        "width": 768,
-        "height": 960,
-        "webp": {
-          "url": "/images/rifa/parapente/parapente-bandera--4x5-768w.webp",
-          "bytes": 41102,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/parapente/parapente-bandera--4x5-768w.jpg",
-          "bytes": 62607,
-          "quality": 80
-        }
-      },
-      {
-        "role": "tarjeta",
-        "ratio": "4x5",
-        "width": 480,
-        "height": 600,
-        "webp": {
-          "url": "/images/rifa/parapente/parapente-bandera--4x5-480w.webp",
-          "bytes": 21726,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/parapente/parapente-bandera--4x5-480w.jpg",
-          "bytes": 30338,
-          "quality": 80
-        }
-      },
-      {
-        "role": "galeria-thumb",
-        "ratio": "3x2",
-        "width": 640,
-        "height": 427,
-        "webp": {
-          "url": "/images/rifa/parapente/parapente-bandera--3x2-640w.webp",
-          "bytes": 18874,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/parapente/parapente-bandera--3x2-640w.jpg",
-          "bytes": 28119,
-          "quality": 80
-        }
-      },
-      {
-        "role": "galeria-thumb",
-        "ratio": "3x2",
-        "width": 480,
-        "height": 320,
-        "webp": {
-          "url": "/images/rifa/parapente/parapente-bandera--3x2-480w.webp",
-          "bytes": 13058,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/parapente/parapente-bandera--3x2-480w.jpg",
-          "bytes": 18572,
-          "quality": 80
-        }
-      },
-      {
-        "role": "galeria-thumb",
-        "ratio": "3x2",
-        "width": 320,
-        "height": 213,
-        "webp": {
-          "url": "/images/rifa/parapente/parapente-bandera--3x2-320w.webp",
-          "bytes": 7610,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/parapente/parapente-bandera--3x2-320w.jpg",
-          "bytes": 10309,
-          "quality": 80
-        }
-      },
-      {
-        "role": "lightbox",
-        "ratio": "full",
-        "width": 960,
-        "height": 1280,
-        "webp": {
-          "url": "/images/rifa/parapente/parapente-bandera-960w.webp",
-          "bytes": 60772,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/parapente/parapente-bandera-960w.jpg",
-          "bytes": 95591,
-          "quality": 80
-        }
-      }
-    ]
+    "cloudinary": {
+      "publicId": "manaure-vive/galeria/parapente/parapente-bandera",
+      "secureUrl": "https://res.cloudinary.com/ky01b0vz/image/upload/manaure-vive/galeria/parapente/parapente-bandera.jpg",
+      "width": 960,
+      "height": 1280
+    }
   },
   "hospedaje-villa-adelaida": {
     "id": "hospedaje-villa-adelaida",
@@ -1450,136 +251,12 @@ export const imageManifest: Record<string, ImageEntry> = {
     },
     "dominantColor": "#787a58",
     "lqip": "data:image/webp;base64,UklGRroAAABXRUJQVlA4IK4AAAAQBQCdASoYABIAPtFaqU2oJSQiKAqpABoJQBdgAb31FuOY3XcsRt5EAIiZ7q63u9owAP6pRkL8s1UeqRrc55iOdjO6kS9l1RcWvrp+rSkqebylRNDo7ejbW7NO3xKkK+Sn57IfgdqXMPo/P3iZgxzEq0bZBMtgDzop2b4axUIfQJ+j03SLzjoS5bFE2/6h2zgKwBhJC3NE9N6ZcMksuLlLYf1G2hmTtJ24EZ4AAAA=",
-    "variants": [
-      {
-        "role": "tarjeta",
-        "ratio": "4x5",
-        "width": 768,
-        "height": 960,
-        "webp": {
-          "url": "/images/rifa/hospedaje/hospedaje-villa-adelaida--4x5-768w.webp",
-          "bytes": 219546,
-          "quality": 68
-        },
-        "jpg": {
-          "url": "/images/rifa/hospedaje/hospedaje-villa-adelaida--4x5-768w.jpg",
-          "bytes": 176666,
-          "quality": 72
-        }
-      },
-      {
-        "role": "tarjeta",
-        "ratio": "4x5",
-        "width": 480,
-        "height": 600,
-        "webp": {
-          "url": "/images/rifa/hospedaje/hospedaje-villa-adelaida--4x5-480w.webp",
-          "bytes": 87412,
-          "quality": 68
-        },
-        "jpg": {
-          "url": "/images/rifa/hospedaje/hospedaje-villa-adelaida--4x5-480w.jpg",
-          "bytes": 79420,
-          "quality": 78
-        }
-      },
-      {
-        "role": "galeria-thumb",
-        "ratio": "3x2",
-        "width": 640,
-        "height": 427,
-        "webp": {
-          "url": "/images/rifa/hospedaje/hospedaje-villa-adelaida--3x2-640w.webp",
-          "bytes": 80416,
-          "quality": 68
-        },
-        "jpg": {
-          "url": "/images/rifa/hospedaje/hospedaje-villa-adelaida--3x2-640w.jpg",
-          "bytes": 62311,
-          "quality": 72
-        }
-      },
-      {
-        "role": "galeria-thumb",
-        "ratio": "3x2",
-        "width": 480,
-        "height": 320,
-        "webp": {
-          "url": "/images/rifa/hospedaje/hospedaje-villa-adelaida--3x2-480w.webp",
-          "bytes": 42432,
-          "quality": 68
-        },
-        "jpg": {
-          "url": "/images/rifa/hospedaje/hospedaje-villa-adelaida--3x2-480w.jpg",
-          "bytes": 39057,
-          "quality": 78
-        }
-      },
-      {
-        "role": "galeria-thumb",
-        "ratio": "3x2",
-        "width": 320,
-        "height": 213,
-        "webp": {
-          "url": "/images/rifa/hospedaje/hospedaje-villa-adelaida--3x2-320w.webp",
-          "bytes": 21466,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/hospedaje/hospedaje-villa-adelaida--3x2-320w.jpg",
-          "bytes": 18458,
-          "quality": 80
-        }
-      },
-      {
-        "role": "lightbox",
-        "ratio": "full",
-        "width": 1600,
-        "height": 1200,
-        "webp": {
-          "url": "/images/rifa/hospedaje/hospedaje-villa-adelaida-1600w.webp",
-          "bytes": 539404,
-          "quality": 68
-        },
-        "jpg": {
-          "url": "/images/rifa/hospedaje/hospedaje-villa-adelaida-1600w.jpg",
-          "bytes": 440667,
-          "quality": 72
-        }
-      },
-      {
-        "role": "lightbox",
-        "ratio": "full",
-        "width": 1280,
-        "height": 960,
-        "webp": {
-          "url": "/images/rifa/hospedaje/hospedaje-villa-adelaida-1280w.webp",
-          "bytes": 359644,
-          "quality": 68
-        },
-        "jpg": {
-          "url": "/images/rifa/hospedaje/hospedaje-villa-adelaida-1280w.jpg",
-          "bytes": 288306,
-          "quality": 72
-        }
-      },
-      {
-        "role": "lightbox",
-        "ratio": "full",
-        "width": 960,
-        "height": 720,
-        "webp": {
-          "url": "/images/rifa/hospedaje/hospedaje-villa-adelaida-960w.webp",
-          "bytes": 223630,
-          "quality": 76
-        },
-        "jpg": {
-          "url": "/images/rifa/hospedaje/hospedaje-villa-adelaida-960w.jpg",
-          "bytes": 201804,
-          "quality": 80
-        }
-      }
-    ]
+    "cloudinary": {
+      "publicId": "manaure-vive/galeria/hospedaje/hospedaje-villa-adelaida",
+      "secureUrl": "https://res.cloudinary.com/ky01b0vz/image/upload/manaure-vive/galeria/hospedaje/hospedaje-villa-adelaida.jpg",
+      "width": 1600,
+      "height": 1200
+    }
   },
   "gastronomia-casa-arepas": {
     "id": "gastronomia-casa-arepas",
@@ -1595,136 +272,12 @@ export const imageManifest: Record<string, ImageEntry> = {
     },
     "dominantColor": "#696153",
     "lqip": "data:image/webp;base64,UklGRtwAAABXRUJQVlA4INAAAADwBACdASoYABIAPtFUoEwoJKMiMBgMAQAaCUAWoQ4AMCfToIReG3KY3HWPtlOk/QAA/vV2Q5jd6YoXPXRCpE74ZE/Gf0MkVDlzw6bNR3VmEXiFj1Inoh7gEgB0o3f6wYZhHKZlqwjH1Cr/FNvibINQ7mXqN0sUP1pmc4FXr7/P1MN8CAvDAQ5jc5FQcn0ib7vQSq3+84zDMz0YCLCjlU3aSHe4++hHfprLu5/dBMCnUqJCW33BZo3DRGWVlkAUYJv/HHQL7EY+qHB2v02kUWwA",
-    "variants": [
-      {
-        "role": "tarjeta",
-        "ratio": "4x5",
-        "width": 768,
-        "height": 960,
-        "webp": {
-          "url": "/images/rifa/gastronomia/gastronomia-casa-arepas--4x5-768w.webp",
-          "bytes": 76014,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/gastronomia/gastronomia-casa-arepas--4x5-768w.jpg",
-          "bytes": 83513,
-          "quality": 72
-        }
-      },
-      {
-        "role": "tarjeta",
-        "ratio": "4x5",
-        "width": 480,
-        "height": 600,
-        "webp": {
-          "url": "/images/rifa/gastronomia/gastronomia-casa-arepas--4x5-480w.webp",
-          "bytes": 41700,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/gastronomia/gastronomia-casa-arepas--4x5-480w.jpg",
-          "bytes": 50658,
-          "quality": 80
-        }
-      },
-      {
-        "role": "galeria-thumb",
-        "ratio": "3x2",
-        "width": 640,
-        "height": 427,
-        "webp": {
-          "url": "/images/rifa/gastronomia/gastronomia-casa-arepas--3x2-640w.webp",
-          "bytes": 40156,
-          "quality": 68
-        },
-        "jpg": {
-          "url": "/images/rifa/gastronomia/gastronomia-casa-arepas--3x2-640w.jpg",
-          "bytes": 45251,
-          "quality": 72
-        }
-      },
-      {
-        "role": "galeria-thumb",
-        "ratio": "3x2",
-        "width": 480,
-        "height": 320,
-        "webp": {
-          "url": "/images/rifa/gastronomia/gastronomia-casa-arepas--3x2-480w.webp",
-          "bytes": 30882,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/gastronomia/gastronomia-casa-arepas--3x2-480w.jpg",
-          "bytes": 34057,
-          "quality": 80
-        }
-      },
-      {
-        "role": "galeria-thumb",
-        "ratio": "3x2",
-        "width": 320,
-        "height": 213,
-        "webp": {
-          "url": "/images/rifa/gastronomia/gastronomia-casa-arepas--3x2-320w.webp",
-          "bytes": 15962,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/gastronomia/gastronomia-casa-arepas--3x2-320w.jpg",
-          "bytes": 16983,
-          "quality": 80
-        }
-      },
-      {
-        "role": "lightbox",
-        "ratio": "full",
-        "width": 1600,
-        "height": 1200,
-        "webp": {
-          "url": "/images/rifa/gastronomia/gastronomia-casa-arepas-1600w.webp",
-          "bytes": 166236,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/gastronomia/gastronomia-casa-arepas-1600w.jpg",
-          "bytes": 213539,
-          "quality": 78
-        }
-      },
-      {
-        "role": "lightbox",
-        "ratio": "full",
-        "width": 1280,
-        "height": 960,
-        "webp": {
-          "url": "/images/rifa/gastronomia/gastronomia-casa-arepas-1280w.webp",
-          "bytes": 124024,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/gastronomia/gastronomia-casa-arepas-1280w.jpg",
-          "bytes": 165270,
-          "quality": 80
-        }
-      },
-      {
-        "role": "lightbox",
-        "ratio": "full",
-        "width": 960,
-        "height": 720,
-        "webp": {
-          "url": "/images/rifa/gastronomia/gastronomia-casa-arepas-960w.webp",
-          "bytes": 86414,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/gastronomia/gastronomia-casa-arepas-960w.jpg",
-          "bytes": 107871,
-          "quality": 80
-        }
-      }
-    ]
+    "cloudinary": {
+      "publicId": "manaure-vive/galeria/gastronomia/gastronomia-casa-arepas",
+      "secureUrl": "https://res.cloudinary.com/ky01b0vz/image/upload/manaure-vive/galeria/gastronomia/gastronomia-casa-arepas.jpg",
+      "width": 1600,
+      "height": 1200
+    }
   },
   "gastronomia-arepa": {
     "id": "gastronomia-arepa",
@@ -1740,88 +293,12 @@ export const imageManifest: Record<string, ImageEntry> = {
     },
     "dominantColor": "#65553d",
     "lqip": "data:image/webp;base64,UklGRuoAAABXRUJQVlA4IN4AAADwBACdASoYABAAPtFUo0uoJKMhsAgBABoJbACdDiACPA92JOP7GxAAoe2fmVYV3iAA/Br8xpaLgJpg6qf/7jP61WNH5mItuLpSH4IezqDxTQnybsNfW4x2B+fuEtnRU4dHYpmUojcfS+pks/AA5eCZW3VKl9UFUUnXxrokhtP2hYQKfMBrMijXOK9LfzHSSbRNZM3k7lTestPOo3xE7RDPU+ExZJPMokIBAL46+6G0UWzE7zz+o4AfcqAA/Blijwb5SHdQCQqNO5VPC13UcBPEXiaNaJNgYXMD3dAAAAA=",
-    "variants": [
-      {
-        "role": "tarjeta",
-        "ratio": "4x5",
-        "width": 480,
-        "height": 600,
-        "webp": {
-          "url": "/images/rifa/gastronomia/gastronomia-arepa--4x5-480w.webp",
-          "bytes": 21920,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/gastronomia/gastronomia-arepa--4x5-480w.jpg",
-          "bytes": 27729,
-          "quality": 80
-        }
-      },
-      {
-        "role": "galeria-thumb",
-        "ratio": "3x2",
-        "width": 640,
-        "height": 427,
-        "webp": {
-          "url": "/images/rifa/gastronomia/gastronomia-arepa--3x2-640w.webp",
-          "bytes": 27386,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/gastronomia/gastronomia-arepa--3x2-640w.jpg",
-          "bytes": 37306,
-          "quality": 80
-        }
-      },
-      {
-        "role": "galeria-thumb",
-        "ratio": "3x2",
-        "width": 480,
-        "height": 320,
-        "webp": {
-          "url": "/images/rifa/gastronomia/gastronomia-arepa--3x2-480w.webp",
-          "bytes": 19114,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/gastronomia/gastronomia-arepa--3x2-480w.jpg",
-          "bytes": 24725,
-          "quality": 80
-        }
-      },
-      {
-        "role": "galeria-thumb",
-        "ratio": "3x2",
-        "width": 320,
-        "height": 213,
-        "webp": {
-          "url": "/images/rifa/gastronomia/gastronomia-arepa--3x2-320w.webp",
-          "bytes": 11606,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/gastronomia/gastronomia-arepa--3x2-320w.jpg",
-          "bytes": 13866,
-          "quality": 80
-        }
-      },
-      {
-        "role": "lightbox",
-        "ratio": "full",
-        "width": 710,
-        "height": 468,
-        "webp": {
-          "url": "/images/rifa/gastronomia/gastronomia-arepa-710w.webp",
-          "bytes": 31044,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/gastronomia/gastronomia-arepa-710w.jpg",
-          "bytes": 35819,
-          "quality": 80
-        }
-      }
-    ]
+    "cloudinary": {
+      "publicId": "manaure-vive/galeria/gastronomia/gastronomia-arepa",
+      "secureUrl": "https://res.cloudinary.com/ky01b0vz/image/upload/manaure-vive/galeria/gastronomia/gastronomia-arepa.jpg",
+      "width": 710,
+      "height": 468
+    }
   },
   "gastronomia-plato": {
     "id": "gastronomia-plato",
@@ -1837,72 +314,12 @@ export const imageManifest: Record<string, ImageEntry> = {
     },
     "dominantColor": "#816c53",
     "lqip": "data:image/webp;base64,UklGRtAAAABXRUJQVlA4IMQAAABQBQCdASoYABAAPtFUo0uoJKMhsAgBABoJaACdMoFWAEez7lkX584/xwMcfH2ls0+ZEwAA/k8mY5JW6JWJNOSm9p99vJXCISTA+Yqi9GWKCKRZlev148w9LmqhodmoLF9Q3N4nTk44zfwLTMnM5VRf9rghfeMjvlQsF0pVTVsywYMEMSU/BuOJ2I6shW37URwYYcz+QeGnR4nIq+lzg8ag7FOoictmSXZfp0+eLnk34XReWlxqo1+QkRWET2VeHzk34gAA",
-    "variants": [
-      {
-        "role": "galeria-thumb",
-        "ratio": "3x2",
-        "width": 640,
-        "height": 427,
-        "webp": {
-          "url": "/images/rifa/gastronomia/gastronomia-plato--3x2-640w.webp",
-          "bytes": 34688,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/gastronomia/gastronomia-plato--3x2-640w.jpg",
-          "bytes": 39752,
-          "quality": 78
-        }
-      },
-      {
-        "role": "galeria-thumb",
-        "ratio": "3x2",
-        "width": 480,
-        "height": 320,
-        "webp": {
-          "url": "/images/rifa/gastronomia/gastronomia-plato--3x2-480w.webp",
-          "bytes": 23904,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/gastronomia/gastronomia-plato--3x2-480w.jpg",
-          "bytes": 27634,
-          "quality": 80
-        }
-      },
-      {
-        "role": "galeria-thumb",
-        "ratio": "3x2",
-        "width": 320,
-        "height": 213,
-        "webp": {
-          "url": "/images/rifa/gastronomia/gastronomia-plato--3x2-320w.webp",
-          "bytes": 13950,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/gastronomia/gastronomia-plato--3x2-320w.jpg",
-          "bytes": 14971,
-          "quality": 80
-        }
-      },
-      {
-        "role": "lightbox",
-        "ratio": "full",
-        "width": 710,
-        "height": 480,
-        "webp": {
-          "url": "/images/rifa/gastronomia/gastronomia-plato-710w.webp",
-          "bytes": 38270,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/gastronomia/gastronomia-plato-710w.jpg",
-          "bytes": 42746,
-          "quality": 80
-        }
-      }
-    ]
+    "cloudinary": {
+      "publicId": "manaure-vive/galeria/gastronomia/gastronomia-plato",
+      "secureUrl": "https://res.cloudinary.com/ky01b0vz/image/upload/manaure-vive/galeria/gastronomia/gastronomia-plato.jpg",
+      "width": 710,
+      "height": 480
+    }
   },
   "serrania-topiarios": {
     "id": "serrania-topiarios",
@@ -1918,136 +335,12 @@ export const imageManifest: Record<string, ImageEntry> = {
     },
     "dominantColor": "#748072",
     "lqip": "data:image/webp;base64,UklGRuIAAABXRUJQVlA4INYAAABQBQCdASoYABIAPtFcpU6oJSMiKAqpABoJQBOma0iEOh6PAXX+eDYAJYbSwaT1tQEVSwAA/pGDohgor3FHTxEWK9/8dL6fhn5ZHE43rNYiDjBXwO0qyugXKsvlm5E/5ywvsO8pVcPT2x+z5z669+e0srhJImsAV0aqzwEV5LqkKhWlBxAe0GQPNEqzXg4xqbmE71S3jn6tnXel8YJJqPyenRkl0oLVPUdhvaQtteC0mQ4dKgGpw1MLPp46a1yOCJDYlLwCXdJh02XHjufwfMnheRezHAAA",
-    "variants": [
-      {
-        "role": "tarjeta",
-        "ratio": "4x5",
-        "width": 768,
-        "height": 960,
-        "webp": {
-          "url": "/images/rifa/serrania/serrania-topiarios--4x5-768w.webp",
-          "bytes": 158220,
-          "quality": 68
-        },
-        "jpg": {
-          "url": "/images/rifa/serrania/serrania-topiarios--4x5-768w.jpg",
-          "bytes": 142823,
-          "quality": 72
-        }
-      },
-      {
-        "role": "tarjeta",
-        "ratio": "4x5",
-        "width": 480,
-        "height": 600,
-        "webp": {
-          "url": "/images/rifa/serrania/serrania-topiarios--4x5-480w.webp",
-          "bytes": 72980,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/serrania/serrania-topiarios--4x5-480w.jpg",
-          "bytes": 69533,
-          "quality": 80
-        }
-      },
-      {
-        "role": "galeria-thumb",
-        "ratio": "3x2",
-        "width": 640,
-        "height": 427,
-        "webp": {
-          "url": "/images/rifa/serrania/serrania-topiarios--3x2-640w.webp",
-          "bytes": 60108,
-          "quality": 68
-        },
-        "jpg": {
-          "url": "/images/rifa/serrania/serrania-topiarios--3x2-640w.jpg",
-          "bytes": 53410,
-          "quality": 72
-        }
-      },
-      {
-        "role": "galeria-thumb",
-        "ratio": "3x2",
-        "width": 480,
-        "height": 320,
-        "webp": {
-          "url": "/images/rifa/serrania/serrania-topiarios--3x2-480w.webp",
-          "bytes": 39242,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/serrania/serrania-topiarios--3x2-480w.jpg",
-          "bytes": 37427,
-          "quality": 80
-        }
-      },
-      {
-        "role": "galeria-thumb",
-        "ratio": "3x2",
-        "width": 320,
-        "height": 213,
-        "webp": {
-          "url": "/images/rifa/serrania/serrania-topiarios--3x2-320w.webp",
-          "bytes": 18336,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/serrania/serrania-topiarios--3x2-320w.jpg",
-          "bytes": 17734,
-          "quality": 80
-        }
-      },
-      {
-        "role": "lightbox",
-        "ratio": "full",
-        "width": 1600,
-        "height": 1200,
-        "webp": {
-          "url": "/images/rifa/serrania/serrania-topiarios-1600w.webp",
-          "bytes": 367946,
-          "quality": 68
-        },
-        "jpg": {
-          "url": "/images/rifa/serrania/serrania-topiarios-1600w.jpg",
-          "bytes": 341286,
-          "quality": 72
-        }
-      },
-      {
-        "role": "lightbox",
-        "ratio": "full",
-        "width": 1280,
-        "height": 960,
-        "webp": {
-          "url": "/images/rifa/serrania/serrania-topiarios-1280w.webp",
-          "bytes": 247184,
-          "quality": 68
-        },
-        "jpg": {
-          "url": "/images/rifa/serrania/serrania-topiarios-1280w.jpg",
-          "bytes": 227210,
-          "quality": 72
-        }
-      },
-      {
-        "role": "lightbox",
-        "ratio": "full",
-        "width": 960,
-        "height": 720,
-        "webp": {
-          "url": "/images/rifa/serrania/serrania-topiarios-960w.webp",
-          "bytes": 169626,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/serrania/serrania-topiarios-960w.jpg",
-          "bytes": 162763,
-          "quality": 80
-        }
-      }
-    ]
+    "cloudinary": {
+      "publicId": "manaure-vive/galeria/serrania/serrania-topiarios",
+      "secureUrl": "https://res.cloudinary.com/ky01b0vz/image/upload/manaure-vive/galeria/serrania/serrania-topiarios.jpg",
+      "width": 1600,
+      "height": 1200
+    }
   },
   "cuatrimoto-ruta": {
     "id": "cuatrimoto-ruta",
@@ -2063,88 +356,12 @@ export const imageManifest: Record<string, ImageEntry> = {
     },
     "dominantColor": "#69816e",
     "lqip": "data:image/webp;base64,UklGRkIBAABXRUJQVlA4IDYBAABQBgCdASoYABwAPtFWo0uoJKMhsAgBABoJagCdMoR6cEArkBvfT8VMi7E3wXSViiZQXe6YghVWBHd0UAD+rqvzPxoNm0lYbe8addIMZxnH1GXA5dV10xZefEjfwDmkKao8CPQCmGMZZfECPvf4oLV2XOG7fJK8SjPN65Z9UlW8MgWz0agfOyOvKV5mfPyM1pY+5o880zsncu1fMkuB1kqLmHRh/9rEMjWd//BFBNWqISQ/P5ANA/i7Pmk6GxQpi9iz0hg6nuc02cahTE9DGQ2dbMGAH9ZgQGa8TtfgOLYjeqbu0oLBl3++um9E+R5WraTYFMIaLv3qb28kj3XHxfH/bw7T4OFmTWaSum5HcrenMkcYJmIS7HgzLxXGwK93idQP7kMnCHdT4nvwUp25lZGAXtArSBAA",
-    "variants": [
-      {
-        "role": "tarjeta",
-        "ratio": "4x5",
-        "width": 480,
-        "height": 600,
-        "webp": {
-          "url": "/images/rifa/cuatrimoto/cuatrimoto-ruta--4x5-480w.webp",
-          "bytes": 65014,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/cuatrimoto/cuatrimoto-ruta--4x5-480w.jpg",
-          "bytes": 65318,
-          "quality": 80
-        }
-      },
-      {
-        "role": "galeria-thumb",
-        "ratio": "3x2",
-        "width": 640,
-        "height": 427,
-        "webp": {
-          "url": "/images/rifa/cuatrimoto/cuatrimoto-ruta--3x2-640w.webp",
-          "bytes": 53660,
-          "quality": 68
-        },
-        "jpg": {
-          "url": "/images/rifa/cuatrimoto/cuatrimoto-ruta--3x2-640w.jpg",
-          "bytes": 52956,
-          "quality": 72
-        }
-      },
-      {
-        "role": "galeria-thumb",
-        "ratio": "3x2",
-        "width": 480,
-        "height": 320,
-        "webp": {
-          "url": "/images/rifa/cuatrimoto/cuatrimoto-ruta--3x2-480w.webp",
-          "bytes": 39488,
-          "quality": 76
-        },
-        "jpg": {
-          "url": "/images/rifa/cuatrimoto/cuatrimoto-ruta--3x2-480w.jpg",
-          "bytes": 40540,
-          "quality": 80
-        }
-      },
-      {
-        "role": "galeria-thumb",
-        "ratio": "3x2",
-        "width": 320,
-        "height": 213,
-        "webp": {
-          "url": "/images/rifa/cuatrimoto/cuatrimoto-ruta--3x2-320w.webp",
-          "bytes": 22118,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/cuatrimoto/cuatrimoto-ruta--3x2-320w.jpg",
-          "bytes": 20708,
-          "quality": 80
-        }
-      },
-      {
-        "role": "lightbox",
-        "ratio": "full",
-        "width": 750,
-        "height": 883,
-        "webp": {
-          "url": "/images/rifa/cuatrimoto/cuatrimoto-ruta-750w.webp",
-          "bytes": 119344,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/cuatrimoto/cuatrimoto-ruta-750w.jpg",
-          "bytes": 126239,
-          "quality": 80
-        }
-      }
-    ]
+    "cloudinary": {
+      "publicId": "manaure-vive/galeria/cuatrimoto/cuatrimoto-ruta",
+      "secureUrl": "https://res.cloudinary.com/ky01b0vz/image/upload/manaure-vive/galeria/cuatrimoto/cuatrimoto-ruta.jpg",
+      "width": 750,
+      "height": 883
+    }
   },
   "cuatrimoto-mirador": {
     "id": "cuatrimoto-mirador",
@@ -2161,92 +378,19 @@ export const imageManifest: Record<string, ImageEntry> = {
     "dominantColor": "#7c8786",
     "card": {
       "fit": "cover",
-      "focal": { "x": 0.5, "y": 0.45 },
+      "focal": {
+        "x": 0.5,
+        "y": 0.45
+      },
       "dominantColor": "#7c8786"
     },
     "lqip": "data:image/webp;base64,UklGRvIAAABXRUJQVlA4IOYAAADwBQCdASoYAB4APtFcpk6oJSMiKAqpABoJQBdmcBS36T9PrJrKAKs0QIbKppHcMaNH6IPe0tlIaAD+9+vYRCsLV+hRhdP+UcQAz/HF9ouahyVCf4cEKeBfM8ycFzeRTCzvR6NpZtvhRoTvuF9dRKAkcGLnFeYKcrQNWauZki5pe21Nc3Ftupo8CtSexEn+WPxL6WCp/s2Gydh3q/syv4+DMeWz3UokW+Zx73K+Oa/VYJ6hqfi3YFCgnhZ3R6J/eSTtfQA3yTQRg9B2PINQ54t4/auzz7YS2zC56e033b27fsc2uJAAAA==",
-    "variants": [
-      {
-        "role": "tarjeta",
-        "ratio": "4x5",
-        "width": 480,
-        "height": 600,
-        "webp": {
-          "url": "/images/rifa/cuatrimoto/cuatrimoto-mirador--4x5-480w.webp",
-          "bytes": 35892,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/cuatrimoto/cuatrimoto-mirador--4x5-480w.jpg",
-          "bytes": 38873,
-          "quality": 80
-        }
-      },
-      {
-        "role": "galeria-thumb",
-        "ratio": "3x2",
-        "width": 640,
-        "height": 427,
-        "webp": {
-          "url": "/images/rifa/cuatrimoto/cuatrimoto-mirador--3x2-640w.webp",
-          "bytes": 30046,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/cuatrimoto/cuatrimoto-mirador--3x2-640w.jpg",
-          "bytes": 34433,
-          "quality": 80
-        }
-      },
-      {
-        "role": "galeria-thumb",
-        "ratio": "3x2",
-        "width": 480,
-        "height": 320,
-        "webp": {
-          "url": "/images/rifa/cuatrimoto/cuatrimoto-mirador--3x2-480w.webp",
-          "bytes": 18528,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/cuatrimoto/cuatrimoto-mirador--3x2-480w.jpg",
-          "bytes": 21011,
-          "quality": 80
-        }
-      },
-      {
-        "role": "galeria-thumb",
-        "ratio": "3x2",
-        "width": 320,
-        "height": 213,
-        "webp": {
-          "url": "/images/rifa/cuatrimoto/cuatrimoto-mirador--3x2-320w.webp",
-          "bytes": 9652,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/cuatrimoto/cuatrimoto-mirador--3x2-320w.jpg",
-          "bytes": 10844,
-          "quality": 80
-        }
-      },
-      {
-        "role": "lightbox",
-        "ratio": "full",
-        "width": 750,
-        "height": 931,
-        "webp": {
-          "url": "/images/rifa/cuatrimoto/cuatrimoto-mirador-750w.webp",
-          "bytes": 80534,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/cuatrimoto/cuatrimoto-mirador-750w.jpg",
-          "bytes": 79020,
-          "quality": 80
-        }
-      }
-    ]
+    "cloudinary": {
+      "publicId": "manaure-vive/galeria/cuatrimoto/cuatrimoto-mirador",
+      "secureUrl": "https://res.cloudinary.com/ky01b0vz/image/upload/manaure-vive/galeria/cuatrimoto/cuatrimoto-mirador.jpg",
+      "width": 750,
+      "height": 931
+    }
   },
   "cuatrimoto-cumbre": {
     "id": "cuatrimoto-cumbre",
@@ -2262,104 +406,12 @@ export const imageManifest: Record<string, ImageEntry> = {
     },
     "dominantColor": "#768993",
     "lqip": "data:image/webp;base64,UklGRsIAAABXRUJQVlA4ILYAAACQBQCdASoYACAAPtFYpE0oJSMiKA1RABoJaACdMyS3WJx+y8s9knza0KFGKbtDOGXPQ5E+AAD+unQ6q2yUdmJmAnR6QdhTVOU/5m9T8CcrrVzzbXz6cSMgsNzUXWXFDOWgN5wp6lLdUsiTypJtwvbwQ29l+Go2X06G9etvtTX9EP54E8bnDZAtHCqgN+WgeFmFaTxYNpWpYzpm8LDy4LNvZ1o/06Uy4sEeuV5IIEgCbSL8O4AAAA==",
-    "variants": [
-      {
-        "role": "galeria-thumb",
-        "ratio": "3x2",
-        "width": 640,
-        "height": 427,
-        "webp": {
-          "url": "/images/rifa/cuatrimoto/cuatrimoto-cumbre--3x2-640w.webp",
-          "bytes": 22654,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/cuatrimoto/cuatrimoto-cumbre--3x2-640w.jpg",
-          "bytes": 31393,
-          "quality": 80
-        }
-      },
-      {
-        "role": "galeria-thumb",
-        "ratio": "3x2",
-        "width": 480,
-        "height": 320,
-        "webp": {
-          "url": "/images/rifa/cuatrimoto/cuatrimoto-cumbre--3x2-480w.webp",
-          "bytes": 15492,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/cuatrimoto/cuatrimoto-cumbre--3x2-480w.jpg",
-          "bytes": 19877,
-          "quality": 80
-        }
-      },
-      {
-        "role": "galeria-thumb",
-        "ratio": "3x2",
-        "width": 320,
-        "height": 213,
-        "webp": {
-          "url": "/images/rifa/cuatrimoto/cuatrimoto-cumbre--3x2-320w.webp",
-          "bytes": 8802,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/cuatrimoto/cuatrimoto-cumbre--3x2-320w.jpg",
-          "bytes": 10356,
-          "quality": 80
-        }
-      },
-      {
-        "role": "lightbox",
-        "ratio": "full",
-        "width": 1600,
-        "height": 2133,
-        "webp": {
-          "url": "/images/rifa/cuatrimoto/cuatrimoto-cumbre-1600w.webp",
-          "bytes": 123692,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/cuatrimoto/cuatrimoto-cumbre-1600w.jpg",
-          "bytes": 207615,
-          "quality": 80
-        }
-      },
-      {
-        "role": "lightbox",
-        "ratio": "full",
-        "width": 1280,
-        "height": 1707,
-        "webp": {
-          "url": "/images/rifa/cuatrimoto/cuatrimoto-cumbre-1280w.webp",
-          "bytes": 91746,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/cuatrimoto/cuatrimoto-cumbre-1280w.jpg",
-          "bytes": 149624,
-          "quality": 80
-        }
-      },
-      {
-        "role": "lightbox",
-        "ratio": "full",
-        "width": 960,
-        "height": 1280,
-        "webp": {
-          "url": "/images/rifa/cuatrimoto/cuatrimoto-cumbre-960w.webp",
-          "bytes": 63136,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/cuatrimoto/cuatrimoto-cumbre-960w.jpg",
-          "bytes": 96538,
-          "quality": 80
-        }
-      }
-    ]
+    "cloudinary": {
+      "publicId": "manaure-vive/galeria/cuatrimoto/cuatrimoto-cumbre",
+      "secureUrl": "https://res.cloudinary.com/ky01b0vz/image/upload/manaure-vive/galeria/cuatrimoto/cuatrimoto-cumbre.jpg",
+      "width": 1600,
+      "height": 2133
+    }
   },
   "cuatrimoto-flota": {
     "id": "cuatrimoto-flota",
@@ -2375,104 +427,12 @@ export const imageManifest: Record<string, ImageEntry> = {
     },
     "dominantColor": "#6c7276",
     "lqip": "data:image/webp;base64,UklGRuwAAABXRUJQVlA4IOAAAABwBQCdASoYABIAPtFgqU+oJSOiKAgBABoJYwCo9y6opjPZFRo5p7cNqkHHv0kTMPJPe8cAAP5pp1g+v/TmBQ3GtqVhvk9i4dwSJTE6V2I2d4iWMuIV2H7Gfgs4yooiPBNJbWoXxCwozW/jf43gvrr4E2139xrqVOiDoSjfnGqOTV7O070udr6UB6a1cFSNa92EIKifewqy6iIAuoAcP+K/KIwE94N8VIXJ9TmP3bxQ1bxWed/e7XywI/fjUVWkko5Xs6f3PZO87ru2Gv5HwKLJEyp+mx637+/H3FsLTXgAAA==",
-    "variants": [
-      {
-        "role": "galeria-thumb",
-        "ratio": "3x2",
-        "width": 640,
-        "height": 427,
-        "webp": {
-          "url": "/images/rifa/cuatrimoto/cuatrimoto-flota--3x2-640w.webp",
-          "bytes": 40158,
-          "quality": 72
-        },
-        "jpg": {
-          "url": "/images/rifa/cuatrimoto/cuatrimoto-flota--3x2-640w.jpg",
-          "bytes": 42328,
-          "quality": 72
-        }
-      },
-      {
-        "role": "galeria-thumb",
-        "ratio": "3x2",
-        "width": 480,
-        "height": 320,
-        "webp": {
-          "url": "/images/rifa/cuatrimoto/cuatrimoto-flota--3x2-480w.webp",
-          "bytes": 30406,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/cuatrimoto/cuatrimoto-flota--3x2-480w.jpg",
-          "bytes": 32616,
-          "quality": 80
-        }
-      },
-      {
-        "role": "galeria-thumb",
-        "ratio": "3x2",
-        "width": 320,
-        "height": 213,
-        "webp": {
-          "url": "/images/rifa/cuatrimoto/cuatrimoto-flota--3x2-320w.webp",
-          "bytes": 16252,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/cuatrimoto/cuatrimoto-flota--3x2-320w.jpg",
-          "bytes": 16893,
-          "quality": 80
-        }
-      },
-      {
-        "role": "lightbox",
-        "ratio": "full",
-        "width": 1600,
-        "height": 1200,
-        "webp": {
-          "url": "/images/rifa/cuatrimoto/cuatrimoto-flota-1600w.webp",
-          "bytes": 186350,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/cuatrimoto/cuatrimoto-flota-1600w.jpg",
-          "bytes": 225045,
-          "quality": 78
-        }
-      },
-      {
-        "role": "lightbox",
-        "ratio": "full",
-        "width": 1280,
-        "height": 960,
-        "webp": {
-          "url": "/images/rifa/cuatrimoto/cuatrimoto-flota-1280w.webp",
-          "bytes": 134854,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/cuatrimoto/cuatrimoto-flota-1280w.jpg",
-          "bytes": 171985,
-          "quality": 80
-        }
-      },
-      {
-        "role": "lightbox",
-        "ratio": "full",
-        "width": 960,
-        "height": 720,
-        "webp": {
-          "url": "/images/rifa/cuatrimoto/cuatrimoto-flota-960w.webp",
-          "bytes": 90534,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/cuatrimoto/cuatrimoto-flota-960w.jpg",
-          "bytes": 111025,
-          "quality": 80
-        }
-      }
-    ]
+    "cloudinary": {
+      "publicId": "manaure-vive/galeria/cuatrimoto/cuatrimoto-flota",
+      "secureUrl": "https://res.cloudinary.com/ky01b0vz/image/upload/manaure-vive/galeria/cuatrimoto/cuatrimoto-flota.jpg",
+      "width": 1600,
+      "height": 1200
+    }
   },
   "parapente-despegue-atardecer": {
     "id": "parapente-despegue-atardecer",
@@ -2488,104 +448,12 @@ export const imageManifest: Record<string, ImageEntry> = {
     },
     "dominantColor": "#857160",
     "lqip": "data:image/webp;base64,UklGRowAAABXRUJQVlA4IIAAAAAQBQCdASoYABIAPtFWpE0oJCMiMBgIAQAaCUAXYAHsEUQmLtw/ITCtllEoYbbinFAAAN2RNfIeYkytZJ9qvoh5Y4lNyV2pOnHChrN/hkgfqt6oZF8bw1wBRRTkKxLrM6iN7ZrcMLUJBGhyQMJbjDxjda12Kfh7nvaX3/QQN0bsAA==",
-    "variants": [
-      {
-        "role": "galeria-thumb",
-        "ratio": "3x2",
-        "width": 640,
-        "height": 427,
-        "webp": {
-          "url": "/images/rifa/parapente/parapente-despegue-atardecer--3x2-640w.webp",
-          "bytes": 14158,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/parapente/parapente-despegue-atardecer--3x2-640w.jpg",
-          "bytes": 21469,
-          "quality": 80
-        }
-      },
-      {
-        "role": "galeria-thumb",
-        "ratio": "3x2",
-        "width": 480,
-        "height": 320,
-        "webp": {
-          "url": "/images/rifa/parapente/parapente-despegue-atardecer--3x2-480w.webp",
-          "bytes": 8728,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/parapente/parapente-despegue-atardecer--3x2-480w.jpg",
-          "bytes": 13244,
-          "quality": 80
-        }
-      },
-      {
-        "role": "galeria-thumb",
-        "ratio": "3x2",
-        "width": 320,
-        "height": 213,
-        "webp": {
-          "url": "/images/rifa/parapente/parapente-despegue-atardecer--3x2-320w.webp",
-          "bytes": 4782,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/parapente/parapente-despegue-atardecer--3x2-320w.jpg",
-          "bytes": 7131,
-          "quality": 80
-        }
-      },
-      {
-        "role": "lightbox",
-        "ratio": "full",
-        "width": 1600,
-        "height": 1200,
-        "webp": {
-          "url": "/images/rifa/parapente/parapente-despegue-atardecer-1600w.webp",
-          "bytes": 63562,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/parapente/parapente-despegue-atardecer-1600w.jpg",
-          "bytes": 102594,
-          "quality": 80
-        }
-      },
-      {
-        "role": "lightbox",
-        "ratio": "full",
-        "width": 1280,
-        "height": 960,
-        "webp": {
-          "url": "/images/rifa/parapente/parapente-despegue-atardecer-1280w.webp",
-          "bytes": 44494,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/parapente/parapente-despegue-atardecer-1280w.jpg",
-          "bytes": 69909,
-          "quality": 80
-        }
-      },
-      {
-        "role": "lightbox",
-        "ratio": "full",
-        "width": 960,
-        "height": 720,
-        "webp": {
-          "url": "/images/rifa/parapente/parapente-despegue-atardecer-960w.webp",
-          "bytes": 28156,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/parapente/parapente-despegue-atardecer-960w.jpg",
-          "bytes": 43498,
-          "quality": 80
-        }
-      }
-    ]
+    "cloudinary": {
+      "publicId": "manaure-vive/galeria/parapente/parapente-despegue-atardecer",
+      "secureUrl": "https://res.cloudinary.com/ky01b0vz/image/upload/manaure-vive/galeria/parapente/parapente-despegue-atardecer.jpg",
+      "width": 1600,
+      "height": 1200
+    }
   },
   "parapente-tandem-canon": {
     "id": "parapente-tandem-canon",
@@ -2601,56 +469,12 @@ export const imageManifest: Record<string, ImageEntry> = {
     },
     "dominantColor": "#524c22",
     "lqip": "data:image/webp;base64,UklGRlwBAABXRUJQVlA4IFABAADwCACdASoYACsAPtFcok2oJSKiKqoBABoJQBajfO+FhFxgV1aBJ32fyIgq5ojKtnsW0Wm8FAwxdBm0x73WbHqbWVD1mzDYGOEbHZ2P0zqcAAD+5jvZrdxwz580xemL4I7rF3obuwZlPBD3IiaXX9KeuRJf0ONbVMVdjpBd1dBZSG70SSyH1Oy6Eg3bU3APcL6b0CrQOcriKJ812X9iqrIvx08+PStr0zRZbZg1fGcQFZr4AlIeOqSqQkZk+t+nIXuMYic56GV4WlQlXvEmKY84w9QytkZZuBw9b5OuO53zia6z6FgswwU/8bSoCQZ8ZJIz/QY/GiWBi7esYaSwxkyxzbu1ZkpujeyLJynLHjM9f983QyixaxtW3MTNWCGil5WTVZXV59lVDoPz7k/1Qh4PlvwKsg/siN7srq1Yzo/7cNnIXh2L2go6pG0X2gAAAAA=",
-    "variants": [
-      {
-        "role": "galeria-thumb",
-        "ratio": "3x2",
-        "width": 480,
-        "height": 320,
-        "webp": {
-          "url": "/images/rifa/parapente/parapente-tandem-canon--3x2-480w.webp",
-          "bytes": 40912,
-          "quality": 76
-        },
-        "jpg": {
-          "url": "/images/rifa/parapente/parapente-tandem-canon--3x2-480w.jpg",
-          "bytes": 40703,
-          "quality": 80
-        }
-      },
-      {
-        "role": "galeria-thumb",
-        "ratio": "3x2",
-        "width": 320,
-        "height": 213,
-        "webp": {
-          "url": "/images/rifa/parapente/parapente-tandem-canon--3x2-320w.webp",
-          "bytes": 20880,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/parapente/parapente-tandem-canon--3x2-320w.jpg",
-          "bytes": 19173,
-          "quality": 80
-        }
-      },
-      {
-        "role": "lightbox",
-        "ratio": "full",
-        "width": 591,
-        "height": 1055,
-        "webp": {
-          "url": "/images/rifa/parapente/parapente-tandem-canon-591w.webp",
-          "bytes": 130582,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/parapente/parapente-tandem-canon-591w.jpg",
-          "bytes": 139435,
-          "quality": 80
-        }
-      }
-    ]
+    "cloudinary": {
+      "publicId": "manaure-vive/galeria/parapente/parapente-tandem-canon",
+      "secureUrl": "https://res.cloudinary.com/ky01b0vz/image/upload/manaure-vive/galeria/parapente/parapente-tandem-canon.jpg",
+      "width": 591,
+      "height": 1055
+    }
   },
   "serrania-los-pinos": {
     "id": "serrania-los-pinos",
@@ -2666,104 +490,12 @@ export const imageManifest: Record<string, ImageEntry> = {
     },
     "dominantColor": "#60788e",
     "lqip": "data:image/webp;base64,UklGRtoAAABXRUJQVlA4IM4AAADQBQCdASoYABIAPtFcqE4oJSQiKAqpABoJZgC1F0qmwZgAbH+0N4Po4LBa+uq2Pk3CEUJsxzoAAP7VEED0J4drdaS8AjiYAPw3z4sStiyz4yk3AyizJFrPcC5+e8oiLNpdGhV8G1qLb0MbO0e4gfsrFcOeB00oj5ReT01OFguOkdNu0DUn0KgBEr2mtcIprJPKCuS+pi9C0LEHBiF4L1BysRVyX+lM8RmCxR7uSqEdv/8UKSDrlFizS3dGgqPv2I8a81kzkK/Dq1gOwAAAAA==",
-    "variants": [
-      {
-        "role": "galeria-thumb",
-        "ratio": "3x2",
-        "width": 640,
-        "height": 427,
-        "webp": {
-          "url": "/images/rifa/serrania/serrania-los-pinos--3x2-640w.webp",
-          "bytes": 42278,
-          "quality": 68
-        },
-        "jpg": {
-          "url": "/images/rifa/serrania/serrania-los-pinos--3x2-640w.jpg",
-          "bytes": 42876,
-          "quality": 72
-        }
-      },
-      {
-        "role": "galeria-thumb",
-        "ratio": "3x2",
-        "width": 480,
-        "height": 320,
-        "webp": {
-          "url": "/images/rifa/serrania/serrania-los-pinos--3x2-480w.webp",
-          "bytes": 31270,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/serrania/serrania-los-pinos--3x2-480w.jpg",
-          "bytes": 31803,
-          "quality": 80
-        }
-      },
-      {
-        "role": "galeria-thumb",
-        "ratio": "3x2",
-        "width": 320,
-        "height": 213,
-        "webp": {
-          "url": "/images/rifa/serrania/serrania-los-pinos--3x2-320w.webp",
-          "bytes": 15784,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/serrania/serrania-los-pinos--3x2-320w.jpg",
-          "bytes": 15734,
-          "quality": 80
-        }
-      },
-      {
-        "role": "lightbox",
-        "ratio": "full",
-        "width": 1600,
-        "height": 1200,
-        "webp": {
-          "url": "/images/rifa/serrania/serrania-los-pinos-1600w.webp",
-          "bytes": 209830,
-          "quality": 76
-        },
-        "jpg": {
-          "url": "/images/rifa/serrania/serrania-los-pinos-1600w.jpg",
-          "bytes": 223436,
-          "quality": 74
-        }
-      },
-      {
-        "role": "lightbox",
-        "ratio": "full",
-        "width": 1280,
-        "height": 960,
-        "webp": {
-          "url": "/images/rifa/serrania/serrania-los-pinos-1280w.webp",
-          "bytes": 164874,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/serrania/serrania-los-pinos-1280w.jpg",
-          "bytes": 185018,
-          "quality": 80
-        }
-      },
-      {
-        "role": "lightbox",
-        "ratio": "full",
-        "width": 960,
-        "height": 720,
-        "webp": {
-          "url": "/images/rifa/serrania/serrania-los-pinos-960w.webp",
-          "bytes": 108362,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/serrania/serrania-los-pinos-960w.jpg",
-          "bytes": 117329,
-          "quality": 80
-        }
-      }
-    ]
+    "cloudinary": {
+      "publicId": "manaure-vive/galeria/serrania/serrania-los-pinos",
+      "secureUrl": "https://res.cloudinary.com/ky01b0vz/image/upload/manaure-vive/galeria/serrania/serrania-los-pinos.jpg",
+      "width": 1600,
+      "height": 1200
+    }
   },
   "serrania-perija-frailejones": {
     "id": "serrania-perija-frailejones",
@@ -2779,72 +511,12 @@ export const imageManifest: Record<string, ImageEntry> = {
     },
     "dominantColor": "#838c87",
     "lqip": "data:image/webp;base64,UklGRqQAAABXRUJQVlA4IJgAAABwBACdASoYAA4APtFUo0uoJKMhsAgBABoJYwC7AYyK5a8fWG8czcP7+6ivQAD6l1Ankg7E6qveu6iGWeDQF+xIHZT+9hyo2d1WpqAi1h2QSz9UbQQ+O2gMjp01goR6CeJiACIHUBMp8bYCBruZ9de8GdLOHs1xEBrjUv2x8d1K8tqlpicYijB7wQ2UrZ+mB2F4+LbinAAAAA==",
-    "variants": [
-      {
-        "role": "galeria-thumb",
-        "ratio": "3x2",
-        "width": 640,
-        "height": 427,
-        "webp": {
-          "url": "/images/rifa/serrania/serrania-perija-frailejones--3x2-640w.webp",
-          "bytes": 69132,
-          "quality": 68
-        },
-        "jpg": {
-          "url": "/images/rifa/serrania/serrania-perija-frailejones--3x2-640w.jpg",
-          "bytes": 58543,
-          "quality": 72
-        }
-      },
-      {
-        "role": "galeria-thumb",
-        "ratio": "3x2",
-        "width": 480,
-        "height": 320,
-        "webp": {
-          "url": "/images/rifa/serrania/serrania-perija-frailejones--3x2-480w.webp",
-          "bytes": 40578,
-          "quality": 72
-        },
-        "jpg": {
-          "url": "/images/rifa/serrania/serrania-perija-frailejones--3x2-480w.jpg",
-          "bytes": 38451,
-          "quality": 78
-        }
-      },
-      {
-        "role": "galeria-thumb",
-        "ratio": "3x2",
-        "width": 320,
-        "height": 213,
-        "webp": {
-          "url": "/images/rifa/serrania/serrania-perija-frailejones--3x2-320w.webp",
-          "bytes": 21238,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/serrania/serrania-perija-frailejones--3x2-320w.jpg",
-          "bytes": 19124,
-          "quality": 80
-        }
-      },
-      {
-        "role": "lightbox",
-        "ratio": "full",
-        "width": 960,
-        "height": 557,
-        "webp": {
-          "url": "/images/rifa/serrania/serrania-perija-frailejones-960w.webp",
-          "bytes": 153388,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/serrania/serrania-perija-frailejones-960w.jpg",
-          "bytes": 139974,
-          "quality": 80
-        }
-      }
-    ]
+    "cloudinary": {
+      "publicId": "manaure-vive/galeria/serrania/serrania-perija-frailejones",
+      "secureUrl": "https://res.cloudinary.com/ky01b0vz/image/upload/manaure-vive/galeria/serrania/serrania-perija-frailejones.jpg",
+      "width": 960,
+      "height": 557
+    }
   },
   "serrania-pozo-cristalino": {
     "id": "serrania-pozo-cristalino",
@@ -2860,72 +532,12 @@ export const imageManifest: Record<string, ImageEntry> = {
     },
     "dominantColor": "#6d6844",
     "lqip": "data:image/webp;base64,UklGRoQBAABXRUJQVlA4IHgBAAAwCACdASoYACsAPtFepU8oJSMiJWzJABoJZgCdL+fLCCMPGzAO0xMgVNd6oUDkq6mYBrIoWaMlvHC+UwoBt0WYe2ibn7MSzu2EwAD9UvHqQ5N8sfX0sQ1m8XlJmITlE25TiCzj1jXxTSdnsPqBo3TDbUIhWT+9mnmNV+oyFzkq6qCCA2U/MVg9pxa7vBNoFa43kdnn4qSNPU1IyekP2gmbOeguEBU0WWG3kWJ7M/e9Wmito5Dlum5IsW+eIDQQ2qigyG1j4ZkBM6IhOwrp+9lLygouJtKlQ0vzklUoTDz02k5RY/4V8qVcD0ZDMcYjwKLs2TYzUCDhtFc8SGWznIpZCgqhBAgcFCcH4C9X5qQQjFaxukmzdBOJY2byMqZYVzBQ8E+bG7I1pA2VtFyEqorL9Xwh/vHW32hXytISk8I+EFSihgLLC9kGEewCoyzbrGes2haY8WpUoBuefH2aKSCU3wdsXL2YqNXqniGELOgksszaWkWnFAAA",
-    "variants": [
-      {
-        "role": "galeria-thumb",
-        "ratio": "3x2",
-        "width": 640,
-        "height": 427,
-        "webp": {
-          "url": "/images/rifa/serrania/serrania-pozo-cristalino--3x2-640w.webp",
-          "bytes": 39260,
-          "quality": 76
-        },
-        "jpg": {
-          "url": "/images/rifa/serrania/serrania-pozo-cristalino--3x2-640w.jpg",
-          "bytes": 39164,
-          "quality": 72
-        }
-      },
-      {
-        "role": "galeria-thumb",
-        "ratio": "3x2",
-        "width": 480,
-        "height": 320,
-        "webp": {
-          "url": "/images/rifa/serrania/serrania-pozo-cristalino--3x2-480w.webp",
-          "bytes": 29382,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/serrania/serrania-pozo-cristalino--3x2-480w.jpg",
-          "bytes": 30943,
-          "quality": 80
-        }
-      },
-      {
-        "role": "galeria-thumb",
-        "ratio": "3x2",
-        "width": 320,
-        "height": 213,
-        "webp": {
-          "url": "/images/rifa/serrania/serrania-pozo-cristalino--3x2-320w.webp",
-          "bytes": 16414,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/serrania/serrania-pozo-cristalino--3x2-320w.jpg",
-          "bytes": 16051,
-          "quality": 80
-        }
-      },
-      {
-        "role": "lightbox",
-        "ratio": "full",
-        "width": 750,
-        "height": 1334,
-        "webp": {
-          "url": "/images/rifa/serrania/serrania-pozo-cristalino-750w.webp",
-          "bytes": 133912,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/serrania/serrania-pozo-cristalino-750w.jpg",
-          "bytes": 158672,
-          "quality": 80
-        }
-      }
-    ]
+    "cloudinary": {
+      "publicId": "manaure-vive/galeria/serrania/serrania-pozo-cristalino",
+      "secureUrl": "https://res.cloudinary.com/ky01b0vz/image/upload/manaure-vive/galeria/serrania/serrania-pozo-cristalino.jpg",
+      "width": 750,
+      "height": 1334
+    }
   },
   "serrania-sabana-rubia": {
     "id": "serrania-sabana-rubia",
@@ -2941,72 +553,12 @@ export const imageManifest: Record<string, ImageEntry> = {
     },
     "dominantColor": "#837c63",
     "lqip": "data:image/webp;base64,UklGRvQAAABXRUJQVlA4IOgAAADQBQCdASoYAB0APsFQo0unpKOhsAwA8BgJQBOkJsuAIo4X33ZgLC6fuxsThYI1NngT6LJBVuEAAP7tWLCzyYUPgUT4v/EG/64UrlFA9b6Ho/gUvl9Ni9kOrLB1VnqgV8fh1Fd9mVuyEAKpOilwcocGiiFRuwT0t8dRi1jj01DXCHkEldQkWaKPBzh60mmifAuaHEVwLiiCcEv0TV6m0Ve/pewwuR4KYDuLqtTxHlR8AIoHz0fu/cZ9nDyV3w0cIDRcSdZSYKxeOklW5M2Vd2Pe0jOR1wXixHFMYZ4c3+14FOeMsCa5B1wA",
-    "variants": [
-      {
-        "role": "galeria-thumb",
-        "ratio": "3x2",
-        "width": 640,
-        "height": 427,
-        "webp": {
-          "url": "/images/rifa/serrania/serrania-sabana-rubia--3x2-640w.webp",
-          "bytes": 76864,
-          "quality": 68
-        },
-        "jpg": {
-          "url": "/images/rifa/serrania/serrania-sabana-rubia--3x2-640w.jpg",
-          "bytes": 62670,
-          "quality": 72
-        }
-      },
-      {
-        "role": "galeria-thumb",
-        "ratio": "3x2",
-        "width": 480,
-        "height": 320,
-        "webp": {
-          "url": "/images/rifa/serrania/serrania-sabana-rubia--3x2-480w.webp",
-          "bytes": 45592,
-          "quality": 68
-        },
-        "jpg": {
-          "url": "/images/rifa/serrania/serrania-sabana-rubia--3x2-480w.jpg",
-          "bytes": 39219,
-          "quality": 76
-        }
-      },
-      {
-        "role": "galeria-thumb",
-        "ratio": "3x2",
-        "width": 320,
-        "height": 213,
-        "webp": {
-          "url": "/images/rifa/serrania/serrania-sabana-rubia--3x2-320w.webp",
-          "bytes": 23668,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/serrania/serrania-sabana-rubia--3x2-320w.jpg",
-          "bytes": 20142,
-          "quality": 80
-        }
-      },
-      {
-        "role": "lightbox",
-        "ratio": "full",
-        "width": 750,
-        "height": 899,
-        "webp": {
-          "url": "/images/rifa/serrania/serrania-sabana-rubia-750w.webp",
-          "bytes": 161004,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/serrania/serrania-sabana-rubia-750w.jpg",
-          "bytes": 155329,
-          "quality": 80
-        }
-      }
-    ]
+    "cloudinary": {
+      "publicId": "manaure-vive/galeria/serrania/serrania-sabana-rubia",
+      "secureUrl": "https://res.cloudinary.com/ky01b0vz/image/upload/manaure-vive/galeria/serrania/serrania-sabana-rubia.jpg",
+      "width": 750,
+      "height": 899
+    }
   },
   "serrania-valle-nubes": {
     "id": "serrania-valle-nubes",
@@ -3022,56 +574,12 @@ export const imageManifest: Record<string, ImageEntry> = {
     },
     "dominantColor": "#5c6629",
     "lqip": "data:image/webp;base64,UklGRnYBAABXRUJQVlA4IGoBAACwCACdASoYACUAPtFgo06oJaKiKrgKAQAaCWYArDN2xnh54XTdU7wT745YJBrc0De+tVjfkPqgtIacRwRRlDcjxlZQ1LoXAAN+Sf00CAAA/sV20Iz4Np4GgMbd69f0oMwazCANY8mHgRNTTFmCCTx9k1XAbxDbPZmngUShomrZ+KUd1U3ufBtpRnrtPCTFftjMCyyj5XxcxAXAdBiHa6TSnKRFuCxs8v3sfKkxFZHaARe6oMMJZj3onERxy1DdKly4EeoDPFPV0LN7wZ+YfRFka58CiI+6OOpuIZp3F/zn3jhdJa8QohZ0iD3RnJ8R8wOAkAjOqdKvtQNo2JMaDSTbmXKAttfEDtq2sZ+R6ZeWWP2uS0HKi8/8bogrWv+B/HelN1y256RxBNR+mRrfzkvbp1PG8u/SX2sZ90LzezATrTOfgj8CMCwo9IAaxTK6azoeQMK+JfgFMEMcM/lqlCuK2bfNtJCGzYAAAA==",
-    "variants": [
-      {
-        "role": "galeria-thumb",
-        "ratio": "3x2",
-        "width": 480,
-        "height": 320,
-        "webp": {
-          "url": "/images/rifa/serrania/serrania-valle-nubes--3x2-480w.webp",
-          "bytes": 27792,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/serrania/serrania-valle-nubes--3x2-480w.jpg",
-          "bytes": 28583,
-          "quality": 80
-        }
-      },
-      {
-        "role": "galeria-thumb",
-        "ratio": "3x2",
-        "width": 320,
-        "height": 213,
-        "webp": {
-          "url": "/images/rifa/serrania/serrania-valle-nubes--3x2-320w.webp",
-          "bytes": 14304,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/serrania/serrania-valle-nubes--3x2-320w.jpg",
-          "bytes": 14488,
-          "quality": 80
-        }
-      },
-      {
-        "role": "lightbox",
-        "ratio": "full",
-        "width": 636,
-        "height": 974,
-        "webp": {
-          "url": "/images/rifa/serrania/serrania-valle-nubes-636w.webp",
-          "bytes": 100800,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/serrania/serrania-valle-nubes-636w.jpg",
-          "bytes": 101735,
-          "quality": 80
-        }
-      }
-    ]
+    "cloudinary": {
+      "publicId": "manaure-vive/galeria/serrania/serrania-valle-nubes",
+      "secureUrl": "https://res.cloudinary.com/ky01b0vz/image/upload/manaure-vive/galeria/serrania/serrania-valle-nubes.jpg",
+      "width": 636,
+      "height": 974
+    }
   },
   "fogata-mirador-nocturno": {
     "id": "fogata-mirador-nocturno",
@@ -3087,104 +595,12 @@ export const imageManifest: Record<string, ImageEntry> = {
     },
     "dominantColor": "#323b35",
     "lqip": "data:image/webp;base64,UklGRo4AAABXRUJQVlA4IIIAAACQBACdASoYABIAPtFcpU6oJSMiKAqpABoJYwC3uA9zvPCgJWdXwbkW+/59XEwA/vXchPrWncuYXFDxxrFeCCvFToT9dHVFw6sCqhtNOgLMNR6scRO319/5FU95rd6tkjSz//I91HJVNM/vLPQ3MkwE0ZP0RwA2siWi76D+dy8SAAAA",
-    "variants": [
-      {
-        "role": "galeria-thumb",
-        "ratio": "3x2",
-        "width": 640,
-        "height": 427,
-        "webp": {
-          "url": "/images/rifa/glamping/fogata-mirador-nocturno--3x2-640w.webp",
-          "bytes": 16792,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/glamping/fogata-mirador-nocturno--3x2-640w.jpg",
-          "bytes": 23748,
-          "quality": 80
-        }
-      },
-      {
-        "role": "galeria-thumb",
-        "ratio": "3x2",
-        "width": 480,
-        "height": 320,
-        "webp": {
-          "url": "/images/rifa/glamping/fogata-mirador-nocturno--3x2-480w.webp",
-          "bytes": 11078,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/glamping/fogata-mirador-nocturno--3x2-480w.jpg",
-          "bytes": 15049,
-          "quality": 80
-        }
-      },
-      {
-        "role": "galeria-thumb",
-        "ratio": "3x2",
-        "width": 320,
-        "height": 213,
-        "webp": {
-          "url": "/images/rifa/glamping/fogata-mirador-nocturno--3x2-320w.webp",
-          "bytes": 6150,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/glamping/fogata-mirador-nocturno--3x2-320w.jpg",
-          "bytes": 8229,
-          "quality": 80
-        }
-      },
-      {
-        "role": "lightbox",
-        "ratio": "full",
-        "width": 1600,
-        "height": 1200,
-        "webp": {
-          "url": "/images/rifa/glamping/fogata-mirador-nocturno-1600w.webp",
-          "bytes": 58214,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/glamping/fogata-mirador-nocturno-1600w.jpg",
-          "bytes": 90354,
-          "quality": 80
-        }
-      },
-      {
-        "role": "lightbox",
-        "ratio": "full",
-        "width": 1280,
-        "height": 960,
-        "webp": {
-          "url": "/images/rifa/glamping/fogata-mirador-nocturno-1280w.webp",
-          "bytes": 42944,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/glamping/fogata-mirador-nocturno-1280w.jpg",
-          "bytes": 68085,
-          "quality": 80
-        }
-      },
-      {
-        "role": "lightbox",
-        "ratio": "full",
-        "width": 960,
-        "height": 720,
-        "webp": {
-          "url": "/images/rifa/glamping/fogata-mirador-nocturno-960w.webp",
-          "bytes": 29022,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/glamping/fogata-mirador-nocturno-960w.jpg",
-          "bytes": 44760,
-          "quality": 80
-        }
-      }
-    ]
+    "cloudinary": {
+      "publicId": "manaure-vive/galeria/glamping/fogata-mirador-nocturno",
+      "secureUrl": "https://res.cloudinary.com/ky01b0vz/image/upload/manaure-vive/galeria/glamping/fogata-mirador-nocturno.jpg",
+      "width": 1600,
+      "height": 1200
+    }
   },
   "glamping-mashiramo-domo": {
     "id": "glamping-mashiramo-domo",
@@ -3200,73 +616,11 @@ export const imageManifest: Record<string, ImageEntry> = {
     },
     "dominantColor": "#494548",
     "lqip": "data:image/webp;base64,UklGRnwAAABXRUJQVlA4IHAAAAAwBACdASoYAAkAPtFUo0uoJKMhsAgBABoJZQC+SCPmVvJ6NX7DPqQrCAAA/uwbxMUPN2tYtPXwRJIV+xdOTvVoEMmlONkVZUG+6qkh8oH17nPaocqr3LvJzrNaHT7Xv98mPdMkitkZqODJm9agOAAA",
-    "variants": [
-      {
-        "role": "galeria-thumb",
-        "ratio": "3x2",
-        "width": 640,
-        "height": 427,
-        "webp": {
-          "url": "/images/rifa/glamping/glamping-mashiramo-domo--3x2-640w.webp",
-          "bytes": 18324,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/glamping/glamping-mashiramo-domo--3x2-640w.jpg",
-          "bytes": 20706,
-          "quality": 80
-        }
-      },
-      {
-        "role": "galeria-thumb",
-        "ratio": "3x2",
-        "width": 480,
-        "height": 320,
-        "webp": {
-          "url": "/images/rifa/glamping/glamping-mashiramo-domo--3x2-480w.webp",
-          "bytes": 18324,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/glamping/glamping-mashiramo-domo--3x2-480w.jpg",
-          "bytes": 20706,
-          "quality": 80
-        }
-      },
-      {
-        "role": "galeria-thumb",
-        "ratio": "3x2",
-        "width": 320,
-        "height": 213,
-        "webp": {
-          "url": "/images/rifa/glamping/glamping-mashiramo-domo--3x2-320w.webp",
-          "bytes": 11266,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/glamping/glamping-mashiramo-domo--3x2-320w.jpg",
-          "bytes": 12664,
-          "quality": 80
-        }
-      },
-      {
-        "role": "lightbox",
-        "ratio": "full",
-        "width": 750,
-        "height": 292,
-        "webp": {
-          "url": "/images/rifa/glamping/glamping-mashiramo-domo-750w.webp",
-          "bytes": 30024,
-          "quality": 78
-        },
-        "jpg": {
-          "url": "/images/rifa/glamping/glamping-mashiramo-domo-750w.jpg",
-          "bytes": 34790,
-          "quality": 80
-        }
-      }
-    ]
+    "cloudinary": {
+      "publicId": "manaure-vive/galeria/glamping/glamping-mashiramo-domo",
+      "secureUrl": "https://res.cloudinary.com/ky01b0vz/image/upload/manaure-vive/galeria/glamping/glamping-mashiramo-domo.jpg",
+      "width": 750,
+      "height": 292
+    }
   }
 };
-
-export default imageManifest;

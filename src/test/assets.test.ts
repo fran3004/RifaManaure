@@ -25,12 +25,18 @@ describe('Inventario de Assets y Aliados (src/assets/assets.ts)', () => {
     });
   });
 
-  it('debe tener registradas 9 fotos con sus respectivas experiencias', () => {
+  it('debe tener registradas 9 fotos con sus respectivas experiencias y alojadas en Cloudinary', () => {
     expect(fotos).toHaveLength(9);
     fotos.forEach((foto) => {
       expect(foto.slug).toBeTruthy();
       expect(foto.alt).toBeTruthy();
       expect(['cuatrimoto', 'parapente', 'serrania', 'fogata']).toContain(foto.experiencia);
+      expect(foto.hero).toContain('res.cloudinary.com');
+      expect(foto.heroJpg).toContain('res.cloudinary.com');
+      expect(foto.card).toContain('res.cloudinary.com');
+      expect(foto.cardJpg).toContain('res.cloudinary.com');
+      expect(foto.thumb).toContain('res.cloudinary.com');
+      expect(foto.full).toContain('res.cloudinary.com');
     });
   });
 
@@ -58,9 +64,15 @@ describe('Inventario de Assets y Aliados (src/assets/assets.ts)', () => {
     });
   });
 
-  it('catalogoFotosManaure debe contener las 26 fotografías optimizadas de Manaure categorizadas', async () => {
+  it('catalogoFotosManaure debe contener las 26 fotografías optimizadas de Manaure categorizadas y alojadas en Cloudinary', async () => {
     const { catalogoFotosManaure, resolveExperienceImage } = await import('@/assets/assets');
     expect(catalogoFotosManaure.length).toBe(26);
+
+    catalogoFotosManaure.forEach((foto) => {
+      expect(foto.card).toContain('res.cloudinary.com');
+      expect(foto.thumb).toContain('res.cloudinary.com');
+      expect(foto.full).toContain('res.cloudinary.com');
+    });
 
     const gastroFoto = catalogoFotosManaure.find((f) => f.slug === 'gastronomia-casa-arepas');
     expect(gastroFoto).toBeDefined();
@@ -72,5 +84,6 @@ describe('Inventario de Assets y Aliados (src/assets/assets.ts)', () => {
     const resolvedUrl = resolveExperienceImage('gastronomia-casa-arepas');
     expect(resolvedUrl).toBeTruthy();
     expect(resolvedUrl).toContain('gastronomia-casa-arepas');
+    expect(resolvedUrl).toContain('res.cloudinary.com');
   });
 });

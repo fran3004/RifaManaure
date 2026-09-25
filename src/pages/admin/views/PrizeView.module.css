@@ -1412,4 +1412,235 @@
   text-overflow: ellipsis;
 }
 
+/* --------------------------------------------------------------------------
+   Gestión de Categoría y Archivo Pendiente en Subida de Foto del Premio
+   -------------------------------------------------------------------------- */
+.uploadCategorySection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  background: var(--bg-surface, #fbf8f1);
+  border: 1px solid var(--border-subtle, #dcd5c4);
+  border-radius: var(--radius-md, 12px);
+  padding: 0.85rem 1rem;
+  margin-bottom: 0.85rem;
+}
+
+.uploadCategoryHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.uploadCategoryLabel {
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: var(--text-primary, #16261c);
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.btnNewCatInline {
+  background: rgba(16, 185, 129, 0.1);
+  color: #059669;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: 8px;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: all 0.15s ease;
+}
+
+.btnNewCatInline:hover {
+  background: #10b981;
+  color: #ffffff;
+  border-color: #10b981;
+}
+
+.uploadCategorySelect {
+  width: 100%;
+  background: var(--bg-card, #ffffff);
+  border: 1px solid var(--border-subtle, #dcd5c4);
+  border-radius: 8px;
+  padding: 0.55rem 0.8rem;
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--text-primary, #16261c);
+  outline: none;
+  cursor: pointer;
+}
+
+.uploadCategorySelect:focus {
+  border-color: var(--color-brand-accent, #f59e0b);
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2);
+}
+
+.newCatInlineBox {
+  background: #f4efe4;
+  border: 1px dashed #10b981;
+  border-radius: 10px;
+  padding: 0.75rem;
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 0.4rem;
+  animation: modalEnter 0.15s ease-out;
+}
+
+.newCatInput {
+  flex: 1;
+  min-width: 180px;
+  background: #ffffff;
+  border: 1px solid #dcd5c4;
+  border-radius: 6px;
+  padding: 0.45rem 0.7rem;
+  font-size: 0.84rem;
+  color: #16261c;
+  outline: none;
+}
+
+.newCatInput:focus {
+  border-color: #10b981;
+}
+
+.btnNewCatSubmit {
+  background: #10b981;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.45rem 0.85rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: background 0.15s ease;
+}
+
+.btnNewCatSubmit:hover:not(:disabled) {
+  background: #059669;
+}
+
+.btnNewCatCancel {
+  background: transparent;
+  color: #5a6b5f;
+  border: 1px solid #dcd5c4;
+  border-radius: 6px;
+  padding: 0.45rem 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btnNewCatCancel:hover {
+  background: #e7dfce;
+}
+
+/* Tarjeta de Archivo Local Pendiente (Subida Diferida) */
+.pendingFileCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #ffffff;
+  border: 1.5px solid #10b981;
+  border-radius: 12px;
+  padding: 0.85rem 1rem;
+  gap: 1rem;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.08);
+}
+
+.pendingFileLeft {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  min-width: 0;
+}
+
+.pendingFileThumb {
+  width: 58px;
+  height: 58px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #dcd5c4;
+  flex-shrink: 0;
+}
+
+.pendingFileInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.pendingFileName {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #16261c;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 260px;
+}
+
+.pendingFileStatus {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #065f46;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  padding: 0.15rem 0.5rem;
+  border-radius: 9999px;
+  align-self: flex-start;
+}
+
+.pendingFileActions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.btnPendingAction {
+  background: #f4efe4;
+  border: 1px solid #dcd5c4;
+  color: #16261c;
+  border-radius: 8px;
+  padding: 0.4rem 0.7rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  transition: all 0.15s ease;
+}
+
+.btnPendingAction:hover {
+  background: #e7dfce;
+}
+
+.btnPendingClear {
+  background: #fff1f2;
+  border-color: #fecdd3;
+  color: #e11d48;
+}
+
+.btnPendingClear:hover {
+  background: #e11d48;
+  color: #ffffff;
+  border-color: #e11d48;
+}
+
 

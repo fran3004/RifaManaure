@@ -1,4 +1,13 @@
 import { supabase } from '@/lib/supabase';
+import {
+  uploadToCloudinary,
+  deleteFromCloudinary,
+  extractCloudinaryPublicId,
+  resolveGalleryFolderForCategory,
+  resolvePrizeFolderForCategory,
+  createCloudinaryFolder,
+  deleteCloudinaryFolder,
+} from '@/services/cloudinaryService';
 import type {
   GalleryItemRow,
   GalleryItemInsert,
@@ -354,6 +363,19 @@ export function setCachedGalleryItems(data: GalleryItemRow[]): void {
 }
 
 /**
+ * Invalida la caché local de fotos para sincronización reactiva inmediata con la landing.
+ */
+export function invalidateGalleryCache(): void {
+  try {
+    if (typeof localStorage !== 'undefined') {
+      localStorage.removeItem(GALLERY_CACHE_KEY);
+    }
+  } catch {
+    // Ignorar
+  }
+}
+
+/**
  * Consulta las fotos activas de la galería para la landing pública con estrategia cache-first.
  */
 export async function getPublicGalleryItems(raffleId?: string | null): Promise<GalleryItemRow[]> {
@@ -473,6 +495,7 @@ export async function createGalleryItem(
       return { success: false, error: formatGalleryError(error.message) };
     }
 
+    invalidateGalleryCache();
     return { success: true, data: data as GalleryItemRow };
   } catch (err) {
     return {
@@ -514,6 +537,7 @@ export async function updateGalleryItem(
       return { success: false, error: formatGalleryError(error.message) };
     }
 
+    invalidateGalleryCache();
     return { success: true, data: data as GalleryItemRow };
   } catch (err) {
     return {
@@ -524,33 +548,42 @@ export async function updateGalleryItem(
 }
 
 /**
- * Elimina una fotografía de la galería. Si la foto provenía del bucket 'gallery-images',
- * elimina también el archivo físico de Storage.
+ * Elimina una fotografía de la galería. Si la foto está alojada en Cloudinary,
+ * destruye el archivo físico en Cloudinary.
  */
 export async function deleteGalleryItem(
   id: string,
   imageUrl?: string | null
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    // Si la foto está alojada en nuestro bucket de Supabase Storage, eliminarla físicamente
-    if (imageUrl && imageUrl.includes('gallery-images')) {
-      try {
-        const parts = imageUrl.split('/gallery-images/');
-        if (parts[1]) {
-          const fileName = parts[1].split('?')[0];
-          await supabase.storage.from('gallery-images').remove([fileName]);
-        }
-      } catch (storageErr) {
-        console.warn('[galleryService] Advertencia al eliminar archivo físico de Storage:', storageErr);
-      }
-    }
-
     const { error } = await supabase.from('gallery_items').delete().eq('id', id);
 
     if (error) {
       return { success: false, error: formatGalleryError(error.message) };
     }
 
+    // Si la foto está alojada en Cloudinary, eliminarla físicamente
+    if (imageUrl && imageUrl.trim()) {
+      const publicId = extractCloudinaryPublicId(imageUrl);
+      if (publicId) {
+        try {
+          const deleteRes = await deleteFromCloudinary(publicId);
+          if (!deleteRes.success) {
+            console.warn(
+              `[galleryService] Advertencia: No se pudo eliminar la fotografía de Cloudinary (${publicId}):`,
+              deleteRes.error
+            );
+          }
+        } catch (cloudErr) {
+          console.warn(
+            `[galleryService] Error inesperado al eliminar fotografía de Cloudinary (${publicId}):`,
+            cloudErr
+          );
+        }
+      }
+    }
+
+    invalidateGalleryCache();
     return { success: true };
   } catch (err) {
     return {
@@ -580,6 +613,7 @@ export async function toggleGalleryItemActive(
       return { success: false, error: formatGalleryError(error.message) };
     }
 
+    invalidateGalleryCache();
     return { success: true };
   } catch (err) {
     return {
@@ -610,6 +644,7 @@ export async function reorderGalleryItems(
       }
     }
 
+    invalidateGalleryCache();
     return { success: true };
   } catch (err) {
     return {
@@ -620,14 +655,13 @@ export async function reorderGalleryItems(
 }
 
 /**
- * Sube una fotografía al bucket 'gallery-images' de Supabase Storage.
+ * Sube una fotografía a Cloudinary (carpeta 'manaure-vive/galeria').
  * Acepta formatos WebP, JPG, PNG, AVIF hasta 10 MB.
- * No impone restricciones rígidas de aspecto ni resolución, basta que tenga buena calidad.
  */
 export async function uploadGalleryPhoto(
   file: File,
-  prefix = 'galeria'
-): Promise<{ success: boolean; url?: string; error?: string }> {
+  category = 'otro'
+): Promise<{ success: boolean; url?: string; public_id?: string; error?: string }> {
   try {
     const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/avif'];
     if (!validTypes.includes(file.type)) {
@@ -645,35 +679,22 @@ export async function uploadGalleryPhoto(
       };
     }
 
-    const fileExt = file.name.split('.').pop() || 'webp';
-    const cleanPrefix = prefix
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/[^a-z0-9]+/g, '-')
-      .slice(0, 30);
-    const fileName = `${cleanPrefix}-${Date.now()}.${fileExt}`;
+    const targetFolder = resolveGalleryFolderForCategory(category);
+    const uploadRes = await uploadToCloudinary(file, targetFolder, {
+      resourceType: 'image',
+    });
 
-    const { error: uploadError } = await supabase.storage
-      .from('gallery-images')
-      .upload(fileName, file, {
-        cacheControl: '3600',
-        upsert: true,
-      });
-
-    if (uploadError) {
-      console.error('[galleryService] Error en Storage:', uploadError);
+    if (!uploadRes.success || !uploadRes.secure_url) {
       return {
         success: false,
-        error: formatGalleryError(uploadError.message),
+        error: uploadRes.error || 'No fue posible subir la fotografía.',
       };
     }
 
-    const { data: publicData } = supabase.storage.from('gallery-images').getPublicUrl(fileName);
-
     return {
       success: true,
-      url: publicData.publicUrl,
+      url: uploadRes.secure_url,
+      public_id: uploadRes.public_id,
     };
   } catch (err) {
     console.error('[galleryService] Error inesperado en uploadGalleryPhoto:', err);
@@ -848,6 +869,16 @@ export async function createGalleryCategory(
     const updatedList = [...currentCategories.filter((c) => c.slug !== slug), newCategory];
     setCachedGalleryCategories(updatedList);
 
+    // Crear las carpetas correspondientes en Cloudinary (galería y premios)
+    const galleryFolder = resolveGalleryFolderForCategory(slug);
+    const prizeFolder = resolvePrizeFolderForCategory(slug);
+    void createCloudinaryFolder(galleryFolder).catch((err) => {
+      console.warn('[galleryService] Advertencia al crear carpeta de galería en Cloudinary:', err);
+    });
+    void createCloudinaryFolder(prizeFolder).catch((err) => {
+      console.warn('[galleryService] Advertencia al crear carpeta de premios en Cloudinary:', err);
+    });
+
     return { success: true, category: newCategory };
   } catch (err) {
     console.error('[galleryService] Error inesperado en createGalleryCategory:', err);
@@ -927,6 +958,31 @@ export async function deleteGalleryCategory(
     const currentCategories = getCachedGalleryCategories();
     const updatedCategories = currentCategories.filter((c) => c.slug !== slug);
     setCachedGalleryCategories(updatedCategories);
+
+    // 5. Si la categoría eliminada no es una de las oficiales protegidas, eliminar su carpeta en Cloudinary
+    const protectedSlugs = [
+      'cuatrimoto',
+      'parapente',
+      'serrania',
+      'hospedaje',
+      'gastronomia',
+      'fogata',
+      'glamping',
+      'otro',
+    ];
+    if (!protectedSlugs.includes(slug)) {
+      const galleryFolder = resolveGalleryFolderForCategory(slug);
+      const prizeFolder = resolvePrizeFolderForCategory(slug);
+      void deleteCloudinaryFolder(galleryFolder).catch((err) => {
+        console.warn('[galleryService] Advertencia al eliminar carpeta de galería en Cloudinary:', err);
+      });
+      void deleteCloudinaryFolder(prizeFolder).catch((err) => {
+        console.warn('[galleryService] Advertencia al eliminar carpeta de premios en Cloudinary:', err);
+      });
+    }
+
+    // 6. Invalidar caché para reflejar reasignaciones en la vista pública
+    invalidateGalleryCache();
 
     return {
       success: true,

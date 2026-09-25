@@ -3,7 +3,10 @@
  * Carga directa mediante Vite import.meta.glob para resolución de URLs en dev y build.
  */
 
-import { getOptimizedCloudinaryUrl } from '@/services/cloudinaryService';
+import {
+  getOptimizedCloudinaryUrl,
+  getCloudinaryResponsiveUrl,
+} from '@/services/cloudinaryService';
 
 export type Aliado = {
   slug: string;
@@ -113,7 +116,7 @@ export const aliados: Aliado[] = rawAliados.map(([slug, nombre, categoria]) => {
 
 import { imageManifest, imageAliases, type ImageEntry } from '@/types/image-manifest';
 
-// --- Constructor de Foto conectado a los derivados optimizados de /images/rifa/ ---
+// --- Constructor de Foto conectado a los activos optimizados de Cloudinary ---
 const crearFoto = (
   slug: string,
   alt: string,
@@ -123,7 +126,7 @@ const crearFoto = (
   const canonicalId = imageAliases[slug] || slug;
   const entry: ImageEntry | undefined = imageManifest[canonicalId];
 
-  if (!entry) {
+  if (!entry || !entry.cloudinary) {
     return {
       slug,
       alt,
@@ -143,42 +146,45 @@ const crearFoto = (
     };
   }
 
-  const vHero = entry.variants.find((v) => v.role === 'hero-desktop') || entry.variants[0];
-  const vHeroResp = entry.variants.filter((v) => v.role === 'hero-desktop' || v.ratio === '16x9');
-  const h640 = vHeroResp.find((v) => v.width === 640)?.webp.url;
-  const h1024 = vHeroResp.find((v) => v.width === 1024)?.webp.url;
-  const h1600 = vHeroResp.find((v) => v.width === 1600)?.webp.url;
-  const h2000 = vHeroResp.find((v) => v.width >= 1920)?.webp.url;
+  const secureUrl = entry.cloudinary.secureUrl;
 
-  const heroSrcSet = vHeroResp.length > 0
-    ? vHeroResp.map((v) => `${v.webp.url} ${v.width}w`).join(', ')
-    : `${vHero?.webp.url || ''} 1920w`;
+  const hero = getCloudinaryResponsiveUrl(secureUrl, { width: 1920, height: 1080, format: 'webp' });
+  const heroJpg = getCloudinaryResponsiveUrl(secureUrl, { width: 1920, height: 1080, format: 'jpg' });
+  const h640 = getCloudinaryResponsiveUrl(secureUrl, { width: 640, height: 360, format: 'webp' });
+  const h1024 = getCloudinaryResponsiveUrl(secureUrl, { width: 1024, height: 576, format: 'webp' });
+  const h1600 = getCloudinaryResponsiveUrl(secureUrl, { width: 1600, height: 900, format: 'webp' });
+  const h2000 = getCloudinaryResponsiveUrl(secureUrl, { width: 1920, height: 1080, format: 'webp' });
+  const heroSrcSet = `${h640} 640w, ${h1024} 1024w, ${h1600} 1600w, ${h2000} 1920w`;
 
-  const vCard = entry.variants.find((v) => v.role === 'tarjeta') || entry.variants[0];
-  const vThumb = entry.variants.find((v) => v.role === 'galeria-thumb') || entry.variants[0];
-  const vMovil = entry.variants.find((v) => v.role === 'hero-mobile') || entry.variants[0];
-  const vFull = entry.variants.find((v) => v.role === 'lightbox') || entry.variants[0];
+  const card = getCloudinaryResponsiveUrl(secureUrl, { width: 768, height: 960, format: 'webp' });
+  const cardJpg = getCloudinaryResponsiveUrl(secureUrl, { width: 768, height: 960, format: 'jpg' });
+  const thumb = getCloudinaryResponsiveUrl(secureUrl, { width: 640, height: 427, format: 'webp' });
+  const thumbJpg = getCloudinaryResponsiveUrl(secureUrl, { width: 640, height: 427, format: 'jpg' });
+  const movil = getCloudinaryResponsiveUrl(secureUrl, { width: 768, height: 960, format: 'webp' });
+  const movilJpg = getCloudinaryResponsiveUrl(secureUrl, { width: 768, height: 960, format: 'jpg' });
+  const full = getCloudinaryResponsiveUrl(secureUrl, { width: 1600, format: 'webp' });
+  const fullJpg = getCloudinaryResponsiveUrl(secureUrl, { width: 1600, format: 'jpg' });
 
   return {
     slug,
     alt: alt || entry.alt,
     experiencia,
     heroExtendido,
-    hero: vHero?.webp.url || '',
-    heroJpg: vHero?.jpg.url || '',
+    hero,
+    heroJpg,
     hero640: h640,
     hero1024: h1024,
     hero1600: h1600,
     hero2000: h2000,
     heroSrcSet,
-    card: vCard?.webp.url || '',
-    cardJpg: vCard?.jpg.url || '',
-    thumb: vThumb?.webp.url || '',
-    thumbJpg: vThumb?.jpg.url || '',
-    movil: vMovil?.webp.url || '',
-    movilJpg: vMovil?.jpg.url || '',
-    full: vFull?.webp.url || '',
-    fullJpg: vFull?.jpg.url || '',
+    card,
+    cardJpg,
+    thumb,
+    thumbJpg,
+    movil,
+    movilJpg,
+    full,
+    fullJpg,
   };
 };
 
@@ -291,13 +297,15 @@ export interface CatalogoFotoItem {
   slug: string;
   alt: string;
   caption: string;
-  categoria: 'gastronomia' | 'cuatrimoto' | 'glamping' | 'hospedaje' | 'parapente' | 'serrania';
+  categoria: 'gastronomia' | 'cuatrimoto' | 'glamping' | 'hospedaje' | 'parapente' | 'serrania' | (string & {});
   categoriaLabel: string;
   thumb: string;
   card: string;
   cardJpg: string;
   full: string;
   dominantColor: string;
+  isCustom?: boolean;
+  imageUrl?: string;
 }
 
 const CATEGORIA_LABELS: Record<string, string> = {
@@ -311,9 +319,12 @@ const CATEGORIA_LABELS: Record<string, string> = {
 
 /** Catálogo exhaustivo y categorizado de las 26 fotografías optimizadas de Manaure */
 export const catalogoFotosManaure: CatalogoFotoItem[] = Object.values(imageManifest).map((entry) => {
-  const vCard = entry.variants.find((v) => v.role === 'tarjeta') || entry.variants[0];
-  const vThumb = entry.variants.find((v) => v.role === 'galeria-thumb') || entry.variants[0];
-  const vFull = entry.variants.find((v) => v.role === 'lightbox') || entry.variants[0];
+  const secureUrl = entry.cloudinary?.secureUrl || '';
+  const thumb = getCloudinaryResponsiveUrl(secureUrl, { width: 640, height: 427, format: 'webp' });
+  const card = getCloudinaryResponsiveUrl(secureUrl, { width: 768, height: 960, format: 'webp' });
+  const cardJpg = getCloudinaryResponsiveUrl(secureUrl, { width: 768, height: 960, format: 'jpg' });
+  const full = getCloudinaryResponsiveUrl(secureUrl, { width: 1600, format: 'webp' });
+
   return {
     id: entry.id,
     slug: entry.id,
@@ -321,10 +332,10 @@ export const catalogoFotosManaure: CatalogoFotoItem[] = Object.values(imageManif
     caption: entry.caption,
     categoria: entry.category,
     categoriaLabel: CATEGORIA_LABELS[entry.category] || 'Ecoturismo',
-    thumb: vThumb?.webp.url || vThumb?.jpg.url || '',
-    card: vCard?.webp.url || vCard?.jpg.url || '',
-    cardJpg: vCard?.jpg.url || '',
-    full: vFull?.webp.url || vFull?.jpg.url || '',
+    thumb,
+    card,
+    cardJpg,
+    full,
     dominantColor: entry.dominantColor || '#0f2e1d',
   };
 });
@@ -340,7 +351,7 @@ export function resolveExperienceImage(
     return getOptimizedCloudinaryUrl(imageUrl.trim(), { width: 800 });
   }
   if (!imageSlug || !imageSlug.trim()) {
-    return catalogoFotosManaure[0]?.cardJpg || '/images/rifa/cuatrimoto/cuatrimoto-aventura-cordillera--4x5-768w.jpg';
+    return catalogoFotosManaure[0]?.card || '';
   }
   const cleanSlug = imageSlug.trim();
   const canonicalId = imageAliases[cleanSlug] || cleanSlug;
@@ -354,7 +365,7 @@ export function resolveExperienceImage(
   if (matchFoto) {
     return matchFoto.card;
   }
-  return catalogoFotosManaure[0]?.cardJpg || '';
+  return catalogoFotosManaure[0]?.card || '';
 }
 
 /**

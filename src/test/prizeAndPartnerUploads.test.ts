@@ -11,6 +11,12 @@ vi.mock('@/lib/supabase', () => ({
 vi.mock('@/services/cloudinaryService', () => ({
   uploadToCloudinary: vi.fn(),
   deleteFromCloudinary: vi.fn(),
+  resolvePrizeFolderForCategory: vi.fn((cat?: string) => {
+    const clean = cat ? cat.trim().toLowerCase() : '';
+    if (!clean || clean === 'otro') return 'manaure-vive/premios';
+    if (clean === 'glamping' || clean === 'fogata') return 'manaure-vive/premios/glamping';
+    return `manaure-vive/premios/${clean}`;
+  }),
   extractCloudinaryPublicId: vi.fn((url: string) => {
     if (url && url.includes('manaure-vive/aliados/')) {
       const match = url.match(/(manaure-vive\/aliados\/[^.?#]+)/);
@@ -52,16 +58,37 @@ describe('Migración de Subidas a Cloudinary - prizeService & partnerService', (
       expect(uploadToCloudinary).not.toHaveBeenCalled();
     });
 
-    it('debe subir a la carpeta "manaure-vive/premios" y retornar url y public_id', async () => {
+    it('debe subir a la subcarpeta de categoría en "manaure-vive/premios/<cat>" y retornar url y public_id', async () => {
       const validFile = new File(['img-bytes'], 'experiencia.webp', { type: 'image/webp' });
 
       vi.mocked(uploadToCloudinary).mockResolvedValue({
         success: true,
-        secure_url: 'https://res.cloudinary.com/ky01b0vz/image/upload/v1/manaure-vive/premios/exp_1.webp',
-        public_id: 'manaure-vive/premios/exp_1',
+        secure_url: 'https://res.cloudinary.com/ky01b0vz/image/upload/v1/manaure-vive/premios/cuatrimoto/exp_1.webp',
+        public_id: 'manaure-vive/premios/cuatrimoto/exp_1',
       });
 
       const res = await uploadPrizeImage(validFile, 'cuatrimoto');
+
+      expect(uploadToCloudinary).toHaveBeenCalledWith(
+        validFile,
+        'manaure-vive/premios/cuatrimoto',
+        { resourceType: 'image' }
+      );
+      expect(res.success).toBe(true);
+      expect(res.url).toBe('https://res.cloudinary.com/ky01b0vz/image/upload/v1/manaure-vive/premios/cuatrimoto/exp_1.webp');
+      expect(res.public_id).toBe('manaure-vive/premios/cuatrimoto/exp_1');
+    });
+
+    it('debe subir a la carpeta raíz "manaure-vive/premios" si la categoría es "otro" o no se especifica', async () => {
+      const validFile = new File(['img-bytes'], 'experiencia.webp', { type: 'image/webp' });
+
+      vi.mocked(uploadToCloudinary).mockResolvedValue({
+        success: true,
+        secure_url: 'https://res.cloudinary.com/ky01b0vz/image/upload/v1/manaure-vive/premios/exp_root.webp',
+        public_id: 'manaure-vive/premios/exp_root',
+      });
+
+      const res = await uploadPrizeImage(validFile, 'otro');
 
       expect(uploadToCloudinary).toHaveBeenCalledWith(
         validFile,
@@ -69,8 +96,6 @@ describe('Migración de Subidas a Cloudinary - prizeService & partnerService', (
         { resourceType: 'image' }
       );
       expect(res.success).toBe(true);
-      expect(res.url).toBe('https://res.cloudinary.com/ky01b0vz/image/upload/v1/manaure-vive/premios/exp_1.webp');
-      expect(res.public_id).toBe('manaure-vive/premios/exp_1');
     });
 
     it('debe propagar errores devueltos por uploadToCloudinary', async () => {

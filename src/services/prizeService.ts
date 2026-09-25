@@ -1,5 +1,10 @@
 import { supabase } from '@/lib/supabase';
-import { uploadToCloudinary } from '@/services/cloudinaryService';
+import {
+  uploadToCloudinary,
+  deleteFromCloudinary,
+  extractCloudinaryPublicId,
+  resolvePrizeFolderForCategory,
+} from '@/services/cloudinaryService';
 import type {
   PrizeSettingsRow,
   PrizeSettingsUpdate,
@@ -211,6 +216,19 @@ function setCachedPrizeDetails(data: PublicPrizeData): void {
 }
 
 /**
+ * Invalida la caché local de información de premios para sincronización reactiva inmediata con la landing.
+ */
+export function invalidatePrizeCache(): void {
+  try {
+    if (typeof localStorage !== 'undefined') {
+      localStorage.removeItem(PRIZE_CACHE_KEY);
+    }
+  } catch {
+    // Ignorar
+  }
+}
+
+/**
  * Consulta la información del premio para la landing pública con estrategia cache-first.
  */
 export async function getPublicPrizeDetails(): Promise<PublicPrizeData> {
@@ -406,6 +424,7 @@ export async function createPrizeExperience(
       return { success: false, error: error.message };
     }
 
+    invalidatePrizeCache();
     return { success: true, data: data as PrizeExperienceRow };
   } catch (err) {
     return {
@@ -444,6 +463,7 @@ export async function updatePrizeExperience(
       return { success: false, error: error.message };
     }
 
+    invalidatePrizeCache();
     return { success: true, data: data as PrizeExperienceRow };
   } catch (err) {
     return {
@@ -473,6 +493,7 @@ export async function togglePrizeExperienceActive(
       return { success: false, error: error.message };
     }
 
+    invalidatePrizeCache();
     return { success: true };
   } catch (err) {
     return {
@@ -483,10 +504,12 @@ export async function togglePrizeExperienceActive(
 }
 
 /**
- * Elimina una experiencia de premio.
+ * Elimina una experiencia de premio. Si la experiencia tenía una imagen personalizada
+ * en Cloudinary, la elimina físicamente.
  */
 export async function deletePrizeExperience(
-  id: string
+  id: string,
+  imageUrl?: string | null
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const { error } = await supabase.from('prize_experiences').delete().eq('id', id);
@@ -495,6 +518,27 @@ export async function deletePrizeExperience(
       return { success: false, error: error.message };
     }
 
+    if (imageUrl && imageUrl.trim()) {
+      const publicId = extractCloudinaryPublicId(imageUrl);
+      if (publicId) {
+        try {
+          const deleteRes = await deleteFromCloudinary(publicId);
+          if (!deleteRes.success) {
+            console.warn(
+              `[prizeService] Advertencia: No se pudo eliminar la imagen de Cloudinary (${publicId}):`,
+              deleteRes.error
+            );
+          }
+        } catch (cloudErr) {
+          console.warn(
+            `[prizeService] Error inesperado al eliminar imagen de Cloudinary (${publicId}):`,
+            cloudErr
+          );
+        }
+      }
+    }
+
+    invalidatePrizeCache();
     return { success: true };
   } catch (err) {
     return {
@@ -505,11 +549,13 @@ export async function deletePrizeExperience(
 }
 
 /**
- * Sube una imagen personalizada de experiencia de premio a Cloudinary (carpeta 'manaure-vive/premios').
+ * Sube una imagen personalizada de experiencia de premio a Cloudinary,
+ * enrutándola a la subcarpeta de su categoría correspondiente (ej: 'manaure-vive/premios/parapente').
+ * Si no se especifica categoría o es 'otro', se almacena en la raíz 'manaure-vive/premios'.
  */
 export async function uploadPrizeImage(
   file: File,
-  _prefix = 'premio'
+  categorySlug?: string | null
 ): Promise<{ success: boolean; url?: string; public_id?: string; error?: string }> {
   try {
     const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
@@ -527,14 +573,16 @@ export async function uploadPrizeImage(
       };
     }
 
-    const uploadRes = await uploadToCloudinary(file, 'manaure-vive/premios', {
+    const targetFolder = resolvePrizeFolderForCategory(categorySlug);
+
+    const uploadRes = await uploadToCloudinary(file, targetFolder, {
       resourceType: 'image',
     });
 
     if (!uploadRes.success || !uploadRes.secure_url) {
       return {
         success: false,
-        error: uploadRes.error || 'No fue posible subir la imagen del premio a Cloudinary.',
+        error: uploadRes.error || 'No fue posible subir la imagen del premio.',
       };
     }
 

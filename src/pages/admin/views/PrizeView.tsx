@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useId } from 'react';
+import React, { useState, useEffect, useCallback, useId, useMemo } from 'react';
 import { AdminPageHeader } from '@/components/admin/common/AdminPageHeader';
 import { AdminErrorState } from '@/components/admin/common/AdminErrorState';
 import { normalizeAppError, logAppError } from '@/lib/errorHandling';
@@ -13,8 +13,24 @@ import {
   DEFAULT_PRIZE_SETTINGS,
   DEFAULT_OFFICIAL_TOUR_FEATURES,
 } from '@/services/prizeService';
-import { getOptimizedCloudinaryUrl } from '@/services/cloudinaryService';
-import type { PrizeSettingsRow, PrizeExperienceRow, OfficialTourFeature } from '@/types/raffle.types';
+import {
+  getOptimizedCloudinaryUrl,
+  getCloudinaryResponsiveUrl,
+  deleteFromCloudinary,
+  extractCloudinaryPublicId,
+} from '@/services/cloudinaryService';
+import {
+  getGalleryCategories,
+  createGalleryCategory,
+  DEFAULT_GALLERY_CATEGORIES,
+  getCachedGalleryItems,
+} from '@/services/galleryService';
+import type {
+  PrizeSettingsRow,
+  PrizeExperienceRow,
+  OfficialTourFeature,
+  GalleryCategoryItem,
+} from '@/types/raffle.types';
 import {
   catalogoFotosManaure,
   resolveExperienceImage,
@@ -49,6 +65,8 @@ import {
   ArrowUp,
   ArrowDown,
   Info,
+  Tag,
+  FolderPlus,
 } from 'lucide-react';
 import styles from './PrizeView.module.css';
 
@@ -64,25 +82,6 @@ const AVAILABLE_ICONS: { [key: string]: { label: string; icon: React.ReactNode }
   Compass: { label: 'Aventura', icon: <Compass size={18} /> },
   Heart: { label: 'Romance', icon: <Heart size={18} /> },
 };
-
-type PhotoCategory =
-  | 'todas'
-  | 'gastronomia'
-  | 'cuatrimoto'
-  | 'glamping'
-  | 'hospedaje'
-  | 'parapente'
-  | 'serrania';
-
-const PHOTO_CATEGORY_TABS: { key: PhotoCategory; label: string }[] = [
-  { key: 'todas', label: 'Todas las fotos' },
-  { key: 'gastronomia', label: 'Gastronomía' },
-  { key: 'cuatrimoto', label: 'Cuatrimotos' },
-  { key: 'glamping', label: 'Glamping & Fogata' },
-  { key: 'hospedaje', label: 'Hospedaje' },
-  { key: 'parapente', label: 'Parapente' },
-  { key: 'serrania', label: 'Serranía del Perijá' },
-];
 
 function renderExperienceIcon(iconName: string, size = 18): React.ReactNode {
   switch (iconName) {
@@ -123,6 +122,7 @@ export const PrizeView: React.FC = () => {
 
   const [settings, setSettings] = useState<PrizeSettingsRow>(DEFAULT_PRIZE_SETTINGS);
   const [experiences, setExperiences] = useState<PrizeExperienceRow[]>([]);
+  const [categories, setCategories] = useState<GalleryCategoryItem[]>(DEFAULT_GALLERY_CATEGORIES);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isForbidden, setIsForbidden] = useState(false);
@@ -170,11 +170,20 @@ export const PrizeView: React.FC = () => {
 
   // Modo de imagen y catálogo
   const [imageMode, setImageMode] = useState<'local' | 'upload'>('local');
-  const [photoCategoryFilter, setPhotoCategoryFilter] = useState<PhotoCategory>('todas');
+  const [photoCategoryFilter, setPhotoCategoryFilter] = useState<string>('todas');
+  const [uploadCategory, setUploadCategory] = useState<string>('cuatrimoto');
   const [expImageSlug, setExpImageSlug] = useState('cuatrimoto-flota');
   const [expImageUrl, setExpImageUrl] = useState<string | null>(null);
-  const [uploadingImage, setUploadingImage] = useState(false);
   const [savingExperience, setSavingExperience] = useState(false);
+
+  // Subida diferida: archivo local pendiente de confirmación
+  const [selectedLocalFile, setSelectedLocalFile] = useState<File | null>(null);
+  const [localPreviewUrl, setLocalPreviewUrl] = useState<string | null>(null);
+
+  // Creación rápida de nueva categoría en línea
+  const [isCreatingCategoryInline, setIsCreatingCategoryInline] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
+  const [creatingCategoryInProgress, setCreatingCategoryInProgress] = useState(false);
 
   // Diagnóstico de imagen subida (client-side pre-flight)
   const [uploadMeta, setUploadMeta] = useState<{
@@ -199,7 +208,10 @@ export const PrizeView: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await getAdminPrizeDetails();
+      const [data, catData] = await Promise.all([
+        getAdminPrizeDetails(),
+        getGalleryCategories(),
+      ]);
       setSettings(data.settings);
       setBadgeText(data.settings.badge_text);
       setTitle(data.settings.title);
@@ -224,6 +236,9 @@ export const PrizeView: React.FC = () => {
 
       setOfficialTourFeatures(tourFeats);
       setExperiences(data.experiences);
+      if (catData && catData.length > 0) {
+        setCategories(catData);
+      }
       setIsForbidden(false);
     } catch (err) {
       const normalized = normalizeAppError(
@@ -330,8 +345,33 @@ export const PrizeView: React.FC = () => {
     setOfficialTourFeatures(updated);
   };
 
+  // Limpiar archivo seleccionado pendiente liberando memoria
+  const handleClearSelectedFile = useCallback(() => {
+    if (localPreviewUrl) {
+      URL.revokeObjectURL(localPreviewUrl);
+    }
+    setSelectedLocalFile(null);
+    setLocalPreviewUrl(null);
+    setUploadMeta(null);
+  }, [localPreviewUrl]);
+
+  // Cerrar modal de creación / edición liberando memoria de previsualización
+  const handleCloseModal = useCallback(() => {
+    if (localPreviewUrl) {
+      URL.revokeObjectURL(localPreviewUrl);
+    }
+    setSelectedLocalFile(null);
+    setLocalPreviewUrl(null);
+    setUploadMeta(null);
+    setIsCreatingCategoryInline(false);
+    setNewCategoryName('');
+    setIsModalOpen(false);
+    setEditingExperience(null);
+  }, [localPreviewUrl]);
+
   // Abrir modal de creación
   const handleOpenCreateModal = () => {
+    handleClearSelectedFile();
     setEditingExperience(null);
     setExpTitle('');
     setExpPartner('');
@@ -343,14 +383,18 @@ export const PrizeView: React.FC = () => {
     setNewFeatureInput('');
     setImageMode('local');
     setPhotoCategoryFilter('todas');
+    setUploadCategory(categories[0]?.slug || 'cuatrimoto');
     setExpImageSlug('cuatrimoto-aventura-cordillera');
     setExpImageUrl(null);
     setUploadMeta(null);
+    setIsCreatingCategoryInline(false);
+    setNewCategoryName('');
     setIsModalOpen(true);
   };
 
   // Abrir modal de edición
   const handleOpenEditModal = (exp: PrizeExperienceRow) => {
+    handleClearSelectedFile();
     setEditingExperience(exp);
     setExpTitle(exp.title);
     setExpPartner(exp.partner_name);
@@ -363,11 +407,14 @@ export const PrizeView: React.FC = () => {
     setExpFeatures(parsedFeatures);
     setNewFeatureInput('');
     setUploadMeta(null);
+    setIsCreatingCategoryInline(false);
+    setNewCategoryName('');
 
     if (exp.image_url) {
       setImageMode('upload');
       setExpImageUrl(exp.image_url);
       setExpImageSlug(exp.image_slug || 'cuatrimoto-flota');
+      setUploadCategory('otro');
     } else {
       setImageMode('local');
       // Si es gastronomía y tenía slug antiguo, preseleccionar La Casa de las Arepas
@@ -383,8 +430,10 @@ export const PrizeView: React.FC = () => {
       const match = catalogoFotosManaure.find((f) => f.slug === defaultSlug);
       if (match) {
         setPhotoCategoryFilter(match.categoria);
+        setUploadCategory(match.categoria);
       } else {
         setPhotoCategoryFilter('todas');
+        setUploadCategory(categories[0]?.slug || 'cuatrimoto');
       }
     }
 
@@ -422,7 +471,7 @@ export const PrizeView: React.FC = () => {
   const handleConfirmDelete = async () => {
     if (!deletingExperience) return;
     try {
-      const res = await deletePrizeExperience(deletingExperience.id);
+      const res = await deletePrizeExperience(deletingExperience.id, deletingExperience.image_url);
       if (res.success) {
         setExperiences((prev) => prev.filter((item) => item.id !== deletingExperience.id));
         showFeedback('success', 'Experiencia eliminada del premio mayor.');
@@ -453,16 +502,112 @@ export const PrizeView: React.FC = () => {
     setExpFeatures(expFeatures.filter((_, idx) => idx !== index));
   };
 
-  // Subir imagen personalizada a Cloudinary con análisis previo de calidad
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Catálogo dinámico unificado (Fotos canónicas oficiales + fotos subidas con URL válida)
+  const dynamicCatalog = useMemo(() => {
+    const base = catalogoFotosManaure;
+    const seenUrls = new Set(base.map((f) => f.card).filter(Boolean));
+
+    const customList: (CatalogoFotoItem & { isCustom?: boolean; imageUrl?: string })[] = [];
+
+    // 1. Fotos personalizadas de experiencias del premio
+    for (const exp of experiences) {
+      if (exp.image_url && exp.image_url.trim()) {
+        const url = exp.image_url.trim();
+        if (!seenUrls.has(url)) {
+          seenUrls.add(url);
+          customList.push({
+            id: exp.id,
+            slug: exp.image_slug || `exp-${exp.id}`,
+            alt: exp.title,
+            caption: exp.title,
+            categoria: 'otro',
+            categoriaLabel: 'Premio Mayor',
+            thumb: getCloudinaryResponsiveUrl(url, { width: 300, height: 200, crop: 'fill' }),
+            card: getCloudinaryResponsiveUrl(url, { width: 768, height: 960, crop: 'fill' }),
+            cardJpg: getCloudinaryResponsiveUrl(url, { width: 768, height: 960, crop: 'fill', format: 'jpg' }),
+            full: getOptimizedCloudinaryUrl(url, { width: 1600 }),
+            dominantColor: '#2d3748',
+            isCustom: true,
+            imageUrl: url,
+          });
+        }
+      }
+    }
+
+    // 2. Fotos de la galería si están en caché
+    try {
+      const galleryItems = getCachedGalleryItems();
+      for (const item of galleryItems) {
+        if (item.image_url && item.image_url.trim()) {
+          const url = item.image_url.trim();
+          if (!seenUrls.has(url)) {
+            seenUrls.add(url);
+            const catMeta = categories.find(
+              (c) => c.slug.toLowerCase() === item.category.toLowerCase()
+            );
+            customList.push({
+              id: item.id,
+              slug: item.image_slug || `gal-${item.id}`,
+              alt: item.alt_text || item.title,
+              caption: item.title,
+              categoria: item.category as any,
+              categoriaLabel: catMeta?.name || item.category,
+              thumb: getCloudinaryResponsiveUrl(url, { width: 300, height: 200, crop: 'fill' }),
+              card: getCloudinaryResponsiveUrl(url, { width: 768, height: 960, crop: 'fill' }),
+              cardJpg: getCloudinaryResponsiveUrl(url, { width: 768, height: 960, crop: 'fill', format: 'jpg' }),
+              full: getOptimizedCloudinaryUrl(url, { width: 1600 }),
+              dominantColor: '#2d3748',
+              isCustom: true,
+              imageUrl: url,
+            });
+          }
+        }
+      }
+    } catch {
+      // Ignorar errores al leer caché de galería
+    }
+
+    return [...base, ...customList];
+  }, [experiences, categories]);
+
+  // Filtrado de fotos del catálogo por categoría
+  const filteredCatalogPhotos = useMemo(() => {
+    if (photoCategoryFilter === 'todas') return dynamicCatalog;
+    return dynamicCatalog.filter((f) => {
+      const cat = f.categoria ? f.categoria.toLowerCase() : '';
+      return cat === photoCategoryFilter.toLowerCase();
+    });
+  }, [dynamicCatalog, photoCategoryFilter]);
+
+  // Selección de archivo con análisis previo de calidad (Subida Diferida)
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const fileSizeKB = Math.round(file.size / 1024);
-    const objectUrl = URL.createObjectURL(file);
-    const img = new Image();
+    const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
+      showFeedback('error', 'Formato no soportado. Por favor sube una imagen JPG, PNG o WebP.');
+      return;
+    }
 
-    img.onload = async () => {
+    if (file.size > 5 * 1024 * 1024) {
+      showFeedback('error', 'El archivo supera el tamaño máximo permitido de 5 MB.');
+      return;
+    }
+
+    // Revocar URL previa de previsualización para liberar memoria
+    if (localPreviewUrl) {
+      URL.revokeObjectURL(localPreviewUrl);
+    }
+
+    const objectUrl = URL.createObjectURL(file);
+    setSelectedLocalFile(file);
+    setLocalPreviewUrl(objectUrl);
+    setImageMode('upload');
+
+    const fileSizeKB = Math.round(file.size / 1024);
+    const img = new Image();
+    img.onload = () => {
       const w = img.naturalWidth;
       const h = img.naturalHeight;
       let ratioLabel = `${w} × ${h}`;
@@ -489,28 +634,42 @@ export const PrizeView: React.FC = () => {
         isOptimal,
         warning,
       });
-
-      try {
-        setUploadingImage(true);
-        const res = await uploadPrizeImage(file, expPartner || 'premio');
-        if (res.success && res.url) {
-          setExpImageUrl(res.url);
-          setImageMode('upload');
-          showFeedback('success', 'Imagen subida exitosamente a Cloudinary.');
-        } else {
-          showFeedback('error', res.error || 'Error al subir la imagen.');
-        }
-      } catch {
-        showFeedback('error', 'Error al procesar el archivo.');
-      } finally {
-        setUploadingImage(false);
-      }
     };
-
     img.src = objectUrl;
   };
 
-  // Guardar experiencia (Crear o Editar)
+  // Creación rápida de nueva categoría desde la sección del premio
+  const handleCreateCategoryInline = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const cleanName = newCategoryName.trim();
+    if (!cleanName) {
+      showFeedback('error', 'Por favor ingresa un nombre para la categoría.');
+      return;
+    }
+
+    try {
+      setCreatingCategoryInProgress(true);
+      const res = await createGalleryCategory(cleanName);
+      if (res.success && res.category) {
+        setCategories((prev) => {
+          if (prev.some((c) => c.slug === res.category!.slug)) return prev;
+          return [...prev, res.category!];
+        });
+        setUploadCategory(res.category.slug);
+        setNewCategoryName('');
+        setIsCreatingCategoryInline(false);
+        showFeedback('success', `¡Categoría "${res.category.name}" creada y carpeta lista en Cloudinary!`);
+      } else {
+        showFeedback('error', res.error || 'No fue posible crear la categoría.');
+      }
+    } catch {
+      showFeedback('error', 'Error inesperado al crear la categoría.');
+    } finally {
+      setCreatingCategoryInProgress(false);
+    }
+  };
+
+  // Guardar experiencia (Crear o Editar con subida diferida a Cloudinary)
   const handleSaveExperience = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!expTitle.trim() || !expPartner.trim() || !expDescription.trim()) {
@@ -520,6 +679,46 @@ export const PrizeView: React.FC = () => {
 
     try {
       setSavingExperience(true);
+      let finalImageUrl: string | null = null;
+      let finalImageSlug: string | null = expImageSlug;
+
+      if (imageMode === 'upload') {
+        if (selectedLocalFile) {
+          // Subida diferida a Cloudinary hacia la subcarpeta de la categoría seleccionada
+          const uploadRes = await uploadPrizeImage(selectedLocalFile, uploadCategory);
+          if (!uploadRes.success || !uploadRes.url) {
+            showFeedback('error', uploadRes.error || 'No fue posible subir la imagen a la nube.');
+            setSavingExperience(false);
+            return;
+          }
+          finalImageUrl = uploadRes.url;
+          finalImageSlug = null;
+
+          // Si editábamos y se reemplazó una imagen previa de Cloudinary, eliminarla para evitar huérfanos
+          if (editingExperience?.image_url && editingExperience.image_url !== uploadRes.url) {
+            const oldPid = extractCloudinaryPublicId(editingExperience.image_url);
+            if (oldPid) {
+              void deleteFromCloudinary(oldPid).catch((err) => {
+                console.warn('[PrizeView] Advertencia al eliminar imagen anterior:', err);
+              });
+            }
+          }
+        } else if (expImageUrl) {
+          finalImageUrl = expImageUrl;
+          finalImageSlug = null;
+        }
+      } else {
+        // Modo catálogo
+        const selectedCatalogItem = dynamicCatalog.find((f) => f.slug === expImageSlug);
+        if (selectedCatalogItem?.isCustom && selectedCatalogItem.imageUrl) {
+          finalImageUrl = selectedCatalogItem.imageUrl;
+          finalImageSlug = selectedCatalogItem.slug;
+        } else {
+          finalImageUrl = null;
+          finalImageSlug = expImageSlug || 'cuatrimoto-aventura-cordillera';
+        }
+      }
+
       const payload = {
         title: expTitle,
         partner_name: expPartner,
@@ -528,8 +727,8 @@ export const PrizeView: React.FC = () => {
         icon: expIcon,
         display_order: Number(expDisplayOrder) || 0,
         is_active: expIsActive,
-        image_url: imageMode === 'upload' ? expImageUrl : null,
-        image_slug: expImageSlug,
+        image_url: finalImageUrl,
+        image_slug: finalImageSlug,
       };
 
       if (editingExperience) {
@@ -538,39 +737,41 @@ export const PrizeView: React.FC = () => {
           setExperiences((prev) =>
             prev.map((item) => (item.id === editingExperience.id ? res.data! : item))
           );
-          showFeedback('success', '¡Experiencia actualizada con éxito!');
-          setIsModalOpen(false);
+          showFeedback('success', '¡Actividad del premio actualizada con éxito!');
+          handleCloseModal();
         } else {
-          showFeedback('error', res.error || 'Error al actualizar experiencia.');
+          showFeedback('error', res.error || 'Error al actualizar actividad.');
         }
       } else {
         const res = await createPrizeExperience(payload);
         if (res.success && res.data) {
           setExperiences((prev) => [...prev, res.data!]);
-          showFeedback('success', '¡Nueva experiencia agregada al premio!');
-          setIsModalOpen(false);
+          showFeedback('success', '¡Nueva actividad agregada al premio!');
+          handleCloseModal();
         } else {
-          showFeedback('error', res.error || 'Error al crear experiencia.');
+          showFeedback('error', res.error || 'Error al crear actividad.');
         }
       }
     } catch {
-      showFeedback('error', 'Error inesperado al guardar la experiencia.');
+      showFeedback('error', 'Error inesperado al guardar la actividad.');
     } finally {
       setSavingExperience(false);
     }
   };
 
-  // Filtrado de fotos locales por categoría
-  const filteredLocalPhotos =
-    photoCategoryFilter === 'todas'
-      ? catalogoFotosManaure
-      : catalogoFotosManaure.filter((f) => f.categoria === photoCategoryFilter);
-
-  // URL de la imagen que se está previsualizando en el modal
-  const currentModalImagePreview =
-    imageMode === 'upload' && expImageUrl
-      ? getOptimizedCloudinaryUrl(expImageUrl, { width: 600 })
-      : resolveExperienceImage(expImageSlug, expImageUrl);
+  // URL de la imagen que se está previsualizando en vivo en la tarjeta del modal
+  const currentModalImagePreview = useMemo(() => {
+    if (imageMode === 'upload') {
+      if (localPreviewUrl) return localPreviewUrl;
+      if (expImageUrl) return getOptimizedCloudinaryUrl(expImageUrl, { width: 600 });
+      return '';
+    }
+    const match = dynamicCatalog.find((f) => f.slug === expImageSlug);
+    if (match?.isCustom && match.imageUrl) {
+      return getOptimizedCloudinaryUrl(match.imageUrl, { width: 600 });
+    }
+    return resolveExperienceImage(expImageSlug, expImageUrl);
+  }, [imageMode, localPreviewUrl, expImageUrl, expImageSlug, dynamicCatalog]);
 
   if (loading) {
     return (
@@ -1105,7 +1306,7 @@ export const PrizeView: React.FC = () => {
               </h2>
               <button
                 type="button"
-                onClick={() => setIsModalOpen(false)}
+                onClick={handleCloseModal}
                 className={styles.modalCloseBtn}
                 aria-label="Cerrar modal"
               >
@@ -1217,7 +1418,7 @@ export const PrizeView: React.FC = () => {
                       onClick={() => setImageMode('local')}
                     >
                       <ImageIcon size={14} className={styles.tabIcon} />
-                      Fotos Locales de Manaure ({catalogoFotosManaure.length})
+                      Catálogo Manaure ({dynamicCatalog.length})
                     </button>
                     <button
                       type="button"
@@ -1233,28 +1434,43 @@ export const PrizeView: React.FC = () => {
 
                   {imageMode === 'local' ? (
                     <div>
-                      {/* Filtros por Categoría */}
+                      {/* Filtros por Categoría Dinámicos */}
                       <div className={styles.categoryFilterTabs}>
-                        {PHOTO_CATEGORY_TABS.map((tab) => (
-                          <button
-                            key={tab.key}
-                            type="button"
-                            className={`${styles.categoryFilterTab} ${
-                              photoCategoryFilter === tab.key ? styles.categoryFilterTabActive : ''
-                            }`}
-                            onClick={() => setPhotoCategoryFilter(tab.key)}
-                          >
-                            {tab.label}
-                          </button>
-                        ))}
+                        <button
+                          type="button"
+                          className={`${styles.categoryFilterTab} ${
+                            photoCategoryFilter === 'todas' ? styles.categoryFilterTabActive : ''
+                          }`}
+                          onClick={() => setPhotoCategoryFilter('todas')}
+                        >
+                          Todas las fotos ({dynamicCatalog.length})
+                        </button>
+                        {categories.map((cat) => {
+                          const count = dynamicCatalog.filter((f) => {
+                            const c = f.categoria ? f.categoria.toLowerCase() : '';
+                            return c === cat.slug.toLowerCase();
+                          }).length;
+                          return (
+                            <button
+                              key={cat.slug}
+                              type="button"
+                              className={`${styles.categoryFilterTab} ${
+                                photoCategoryFilter === cat.slug ? styles.categoryFilterTabActive : ''
+                              }`}
+                              onClick={() => setPhotoCategoryFilter(cat.slug)}
+                            >
+                              {cat.name} ({count})
+                            </button>
+                          );
+                        })}
                       </div>
 
-                      {/* Cuadrícula de fotos */}
+                      {/* Cuadrícula de fotos del catálogo */}
                       <div
                         className={styles.localPhotosGrid}
                         style={{ maxHeight: '280px', overflowY: 'auto', padding: '0.25rem' }}
                       >
-                        {filteredLocalPhotos.map((f: CatalogoFotoItem) => {
+                        {filteredCatalogPhotos.map((f) => {
                           const isSelected = expImageSlug === f.slug;
                           return (
                             <button
@@ -1266,6 +1482,7 @@ export const PrizeView: React.FC = () => {
                               onClick={() => {
                                 setExpImageSlug(f.slug);
                                 setExpImageUrl(null);
+                                handleClearSelectedFile();
                               }}
                               title={`${f.alt} (${f.categoriaLabel})`}
                             >
@@ -1290,52 +1507,154 @@ export const PrizeView: React.FC = () => {
                     </div>
                   ) : (
                     <div>
-                      <label className={styles.uploadBox}>
-                        <input
-                          type="file"
-                          accept="image/jpeg,image/png,image/webp"
-                          onChange={handleFileChange}
-                          className={styles.hiddenFileInput}
-                          disabled={uploadingImage}
-                        />
-                        {uploadingImage ? (
-                          <>
-                            <Loader2
-                              size={24}
-                              className={`animate-spin ${styles.loaderBrand}`}
+                      {/* Selector de categoría de destino en la galería/premios */}
+                      <div className={styles.uploadCategorySection}>
+                        <div className={styles.uploadCategoryHeader}>
+                          <label htmlFor="prizeUploadCategory" className={styles.uploadCategoryLabel}>
+                            <Tag size={14} />
+                            <span>Categoría de la fotografía:</span>
+                          </label>
+                          {!isCreatingCategoryInline && (
+                            <button
+                              type="button"
+                              className={styles.btnNewCatInline}
+                              onClick={() => setIsCreatingCategoryInline(true)}
+                            >
+                              <FolderPlus size={13} />
+                              <span>+ Nueva Categoría</span>
+                            </button>
+                          )}
+                        </div>
+
+                        {isCreatingCategoryInline ? (
+                          <div className={styles.newCatInlineBox}>
+                            <input
+                              type="text"
+                              value={newCategoryName}
+                              onChange={(e) => setNewCategoryName(e.target.value)}
+                              placeholder="Nombre de la nueva categoría..."
+                              className={styles.newCatInput}
+                              disabled={creatingCategoryInProgress}
+                              autoFocus
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  e.preventDefault();
+                                  handleCreateCategoryInline();
+                                } else if (e.key === 'Escape') {
+                                  setIsCreatingCategoryInline(false);
+                                  setNewCategoryName('');
+                                }
+                              }}
                             />
-                            <span className={styles.uploadingText}>
-                              Subiendo imagen a Cloudinary...
-                            </span>
-                          </>
-                        ) : expImageUrl ? (
-                          <div className={styles.uploadPreviewRow}>
-                            <img
-                              src={expImageUrl}
-                              alt="Vista previa subida"
-                              className={styles.uploadPreviewImg}
-                            />
-                            <div className={styles.uploadPreviewInfo}>
-                              <p className={styles.uploadPreviewTitle}>
-                                Imagen cargada con éxito
-                              </p>
-                              <span className={styles.uploadPreviewHint}>
-                                Haz clic aquí para reemplazarla
-                              </span>
-                            </div>
+                            <button
+                              type="button"
+                              className={styles.btnNewCatSubmit}
+                              onClick={handleCreateCategoryInline}
+                              disabled={creatingCategoryInProgress || !newCategoryName.trim()}
+                            >
+                              {creatingCategoryInProgress ? 'Creando...' : 'Crear'}
+                            </button>
+                            <button
+                              type="button"
+                              className={styles.btnNewCatCancel}
+                              onClick={() => {
+                                setIsCreatingCategoryInline(false);
+                                setNewCategoryName('');
+                              }}
+                              disabled={creatingCategoryInProgress}
+                            >
+                              Cancelar
+                            </button>
                           </div>
                         ) : (
-                          <>
-                            <Upload size={24} className={styles.uploadBoxIcon} />
-                            <span className={styles.uploadBoxTitle}>
-                              Selecciona o arrastra una foto (JPG, PNG, WebP)
-                            </span>
-                            <span className={styles.uploadBoxSubtitle}>
-                              Resolución recomendada: 1200×800 px. Máximo 5 MB.
-                            </span>
-                          </>
+                          <select
+                            id="prizeUploadCategory"
+                            value={uploadCategory}
+                            onChange={(e) => setUploadCategory(e.target.value)}
+                            className={styles.uploadCategorySelect}
+                          >
+                            {categories.map((cat) => (
+                              <option key={cat.slug} value={cat.slug}>
+                                {cat.name}
+                              </option>
+                            ))}
+                          </select>
                         )}
-                      </label>
+                      </div>
+
+                      {/* Tarjeta de archivo pendiente de subida o dropzone */}
+                      {selectedLocalFile ? (
+                        <div className={styles.pendingFileCard}>
+                          <div className={styles.pendingFileLeft}>
+                            <img
+                              src={localPreviewUrl || ''}
+                              alt="Foto seleccionada"
+                              className={styles.pendingFileThumb}
+                            />
+                            <div className={styles.pendingFileInfo}>
+                              <div className={styles.pendingFileName}>{selectedLocalFile.name}</div>
+                              <div className={styles.pendingFileStatus}>
+                                Listo para subirse al guardar la actividad
+                              </div>
+                            </div>
+                          </div>
+                          <div className={styles.pendingFileActions}>
+                            <label className={styles.btnPendingAction}>
+                              Cambiar
+                              <input
+                                type="file"
+                                accept="image/jpeg,image/png,image/webp"
+                                onChange={handleFileChange}
+                                className={styles.hiddenFileInput}
+                              />
+                            </label>
+                            <button
+                              type="button"
+                              className={styles.btnPendingClear}
+                              onClick={handleClearSelectedFile}
+                              title="Descartar foto"
+                            >
+                              <X size={15} />
+                            </button>
+                          </div>
+                        </div>
+                      ) : expImageUrl ? (
+                        <div className={styles.uploadPreviewRow}>
+                          <img
+                            src={expImageUrl}
+                            alt="Fotografía actual de la actividad"
+                            className={styles.uploadPreviewImg}
+                          />
+                          <div className={styles.uploadPreviewInfo}>
+                            <p className={styles.uploadPreviewTitle}>Fotografía de la actividad asignada</p>
+                            <label className={styles.uploadPreviewHint} style={{ cursor: 'pointer' }}>
+                              Haz clic para seleccionar otra foto
+                              <input
+                                type="file"
+                                accept="image/jpeg,image/png,image/webp"
+                                onChange={handleFileChange}
+                                className={styles.hiddenFileInput}
+                              />
+                            </label>
+                          </div>
+                        </div>
+                      ) : (
+                        <label className={styles.uploadBox}>
+                          <input
+                            type="file"
+                            accept="image/jpeg,image/png,image/webp"
+                            onChange={handleFileChange}
+                            className={styles.hiddenFileInput}
+                          />
+                          <Upload size={24} className={styles.uploadBoxIcon} />
+                          <span className={styles.uploadBoxTitle}>
+                            Selecciona o arrastra una foto (JPG, PNG, WebP)
+                          </span>
+                          <span className={styles.uploadBoxSubtitle}>
+                            Resolución recomendada: 1200×800 px. Máximo 5 MB. Se subirá al guardar.
+                          </span>
+                        </label>
+                      )}
 
                       {/* Diagnóstico en Vivo de la imagen analizada */}
                       {uploadMeta && (
@@ -1545,7 +1864,7 @@ export const PrizeView: React.FC = () => {
               <div className={styles.modalFooter}>
                 <button
                   type="button"
-                  onClick={() => setIsModalOpen(false)}
+                  onClick={handleCloseModal}
                   className={styles.btnSecondary}
                 >
                   Cancelar
@@ -1554,12 +1873,12 @@ export const PrizeView: React.FC = () => {
                   {savingExperience ? (
                     <>
                       <Loader2 size={16} className="animate-spin" />
-                      <span>Guardando...</span>
+                      <span>{selectedLocalFile ? 'Subiendo y guardando...' : 'Guardando...'}</span>
                     </>
                   ) : (
                     <>
                       <Save size={16} />
-                      <span>Guardar Actividad</span>
+                      <span>{editingExperience ? 'Guardar Cambios' : 'Guardar Actividad'}</span>
                     </>
                   )}
                 </button>

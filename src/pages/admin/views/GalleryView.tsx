@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useId, useRef } from 'react';
+import React, { useState, useEffect, useId, useRef, useMemo } from 'react';
 import {
   Images,
   Plus,
@@ -35,6 +35,10 @@ import {
   deleteGalleryCategory,
   DEFAULT_GALLERY_CATEGORIES,
 } from '@/services/galleryService';
+import {
+  getOptimizedCloudinaryUrl,
+  getCloudinaryResponsiveUrl,
+} from '@/services/cloudinaryService';
 import type {
   GalleryItemRow,
   GalleryItemInsert,
@@ -44,6 +48,7 @@ import type {
 import {
   catalogoFotosManaure,
   resolveExperienceImage,
+  type CatalogoFotoItem,
 } from '@/assets/assets';
 import styles from './GalleryView.module.css';
 
@@ -93,8 +98,9 @@ export const GalleryView: React.FC = () => {
   const [formIsActive, setFormIsActive] = useState<boolean>(true);
   const [formImageSlug, setFormImageSlug] = useState<string>('serrania-perija-laguna');
   const [formImageUrl, setFormImageUrl] = useState<string | null>(null);
+  const [selectedLocalFile, setSelectedLocalFile] = useState<File | null>(null);
+  const [localPreviewUrl, setLocalPreviewUrl] = useState<string | null>(null);
   const [catalogCategoryFilter, setCatalogCategoryFilter] = useState<string>('todas');
-  const [uploadingImage, setUploadingImage] = useState(false);
   const [savingItem, setSavingItem] = useState(false);
 
   // Modal de Confirmación de Eliminación
@@ -205,11 +211,32 @@ export const GalleryView: React.FC = () => {
     return resolveExperienceImage(item.image_slug);
   };
 
+  // Cerrar modal de creación/edición y liberar memoria de URL local
+  const handleCloseModal = () => {
+    if (localPreviewUrl) {
+      URL.revokeObjectURL(localPreviewUrl);
+      setLocalPreviewUrl(null);
+    }
+    setSelectedLocalFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+    setIsModalOpen(false);
+  };
+
   // Abrir modal para crear
   const handleOpenCreateModal = () => {
+    if (localPreviewUrl) {
+      URL.revokeObjectURL(localPreviewUrl);
+      setLocalPreviewUrl(null);
+    }
+    setSelectedLocalFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
     setEditingItem(null);
     setFormTitle('');
-    setFormCategory('serrania');
+    setFormCategory(categories[0]?.slug || 'serrania');
     setFormAltText('');
     setFormOrder(items.length > 0 ? Math.max(...items.map((i) => i.display_order)) + 1 : 1);
     setFormIsActive(true);
@@ -221,6 +248,14 @@ export const GalleryView: React.FC = () => {
 
   // Abrir modal para editar
   const handleOpenEditModal = (item: GalleryItemRow) => {
+    if (localPreviewUrl) {
+      URL.revokeObjectURL(localPreviewUrl);
+      setLocalPreviewUrl(null);
+    }
+    setSelectedLocalFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
     setEditingItem(item);
     setFormTitle(item.title);
     setFormCategory(item.category);
@@ -241,23 +276,56 @@ export const GalleryView: React.FC = () => {
     setIsModalOpen(true);
   };
 
-  // Subir archivo al bucket de Supabase Storage
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Selección local de archivo (subida diferida: no sube a Cloudinary hasta guardar)
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
     const file = files[0];
-    setUploadingImage(true);
-
-    const res = await uploadGalleryPhoto(file, formCategory || 'galeria');
-    if (!res.success || !res.url) {
-      showNotification('error', res.error || 'Error al subir la fotografía.');
-    } else {
-      setFormImageUrl(res.url);
-      showNotification('success', 'Fotografía subida exitosamente.');
+    const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/avif'];
+    if (!validTypes.includes(file.type)) {
+      showNotification('error', 'Formato inválido. Se admiten imágenes WebP, JPG, PNG o AVIF.');
+      return;
     }
 
-    setUploadingImage(false);
+    if (file.size > 10 * 1024 * 1024) {
+      showNotification('error', 'La imagen supera el límite recomendado de 10 MB.');
+      return;
+    }
+
+    if (localPreviewUrl) {
+      URL.revokeObjectURL(localPreviewUrl);
+    }
+
+    const preview = URL.createObjectURL(file);
+    setSelectedLocalFile(file);
+    setLocalPreviewUrl(preview);
+    setFormImageUrl(null);
+
+    // Auto-sugerir título y alt si están vacíos
+    if (!formTitle.trim()) {
+      const cleanName = file.name
+        .replace(/\.[^/.]+$/, '')
+        .replace(/[-_]/g, ' ')
+        .trim();
+      if (cleanName) {
+        const capitalized = cleanName.charAt(0).toUpperCase() + cleanName.slice(1);
+        setFormTitle(capitalized);
+        if (!formAltText.trim()) setFormAltText(capitalized);
+      }
+    }
+  };
+
+  const handleRemoveLocalFile = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (localPreviewUrl) {
+      URL.revokeObjectURL(localPreviewUrl);
+      setLocalPreviewUrl(null);
+    }
+    setSelectedLocalFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   // Guardar creación o edición
@@ -269,12 +337,43 @@ export const GalleryView: React.FC = () => {
       return;
     }
 
-    if (imageMode === 'upload' && !formImageUrl) {
-      showNotification('error', 'Por favor sube una fotografía o selecciona una del catálogo.');
+    if (imageMode === 'upload' && !selectedLocalFile && !formImageUrl) {
+      showNotification('error', 'Por favor selecciona un archivo o escoge una foto del catálogo.');
+      return;
+    }
+
+    if (imageMode === 'local' && !formImageSlug) {
+      showNotification('error', 'Por favor selecciona una fotografía del catálogo.');
       return;
     }
 
     setSavingItem(true);
+    let finalImageUrl = formImageUrl;
+
+    // Si hay un archivo local seleccionado en modo upload, se sube ahora a Cloudinary
+    if (imageMode === 'upload' && selectedLocalFile) {
+      const uploadRes = await uploadGalleryPhoto(selectedLocalFile, formCategory);
+      if (!uploadRes.success || !uploadRes.url) {
+        showNotification('error', uploadRes.error || 'No fue posible subir la fotografía.');
+        setSavingItem(false);
+        return;
+      }
+      finalImageUrl = uploadRes.url;
+    }
+
+    // Verificar si en modo catálogo se seleccionó una foto personalizada previa
+    const selectedCatalogItem =
+      imageMode === 'local' ? dynamicCatalog.find((f) => f.slug === formImageSlug) : null;
+    const isCustomCatalog = Boolean(selectedCatalogItem?.isCustom && selectedCatalogItem.imageUrl);
+
+    const targetImageUrl =
+      imageMode === 'upload'
+        ? finalImageUrl
+        : isCustomCatalog
+          ? selectedCatalogItem?.imageUrl || null
+          : null;
+    const targetImageSlug =
+      imageMode === 'local' && !isCustomCatalog ? formImageSlug : null;
 
     if (editingItem) {
       // Actualización
@@ -284,8 +383,8 @@ export const GalleryView: React.FC = () => {
         alt_text: formAltText.trim() || formTitle.trim(),
         display_order: Number(formOrder) || 1,
         is_active: formIsActive,
-        image_url: imageMode === 'upload' ? formImageUrl : null,
-        image_slug: imageMode === 'local' ? formImageSlug : null,
+        image_url: targetImageUrl,
+        image_slug: targetImageSlug,
       };
 
       const res = await updateGalleryItem(editingItem.id, updates);
@@ -297,7 +396,7 @@ export const GalleryView: React.FC = () => {
             .map((item) => (item.id === editingItem.id ? res.data! : item))
             .sort((a, b) => a.display_order - b.display_order)
         );
-        setIsModalOpen(false);
+        handleCloseModal();
         showNotification('success', 'Fotografía actualizada correctamente.');
       }
     } else {
@@ -308,8 +407,8 @@ export const GalleryView: React.FC = () => {
         alt_text: formAltText.trim() || formTitle.trim(),
         display_order: Number(formOrder) || items.length + 1,
         is_active: formIsActive,
-        image_url: imageMode === 'upload' ? formImageUrl : null,
-        image_slug: imageMode === 'local' ? formImageSlug : null,
+        image_url: targetImageUrl,
+        image_slug: targetImageSlug,
       };
 
       const res = await createGalleryItem(payload);
@@ -317,7 +416,7 @@ export const GalleryView: React.FC = () => {
         showNotification('error', res.error || 'No fue posible crear la fotografía.');
       } else {
         setItems((prev) => [...prev, res.data!].sort((a, b) => a.display_order - b.display_order));
-        setIsModalOpen(false);
+        handleCloseModal();
         showNotification('success', 'Nueva fotografía agregada a la galería.');
       }
     }
@@ -416,17 +515,66 @@ export const GalleryView: React.FC = () => {
   const activeCount = items.filter((i) => i.is_active).length;
   const hiddenCount = totalCount - activeCount;
 
-  // Filtrado de fotos del catálogo de Manaure en el modal
-  const filteredCatalog =
-    catalogCategoryFilter === 'todas'
-      ? catalogoFotosManaure
-      : catalogoFotosManaure.filter((f) => f.categoria === catalogCategoryFilter);
+  // Construcción del catálogo dinámico (fotos estáticas de Manaure + fotos personalizadas subidas por el admin)
+  const dynamicCatalog = useMemo(() => {
+    const base: (CatalogoFotoItem & { isCustom?: boolean; imageUrl?: string })[] = catalogoFotosManaure.map(
+      (f) => ({ ...f, isCustom: false })
+    );
+    const seenUrls = new Set(base.map((f) => f.card).filter(Boolean));
+
+    const customList: (CatalogoFotoItem & { isCustom?: boolean; imageUrl?: string })[] = [];
+    for (const item of items) {
+      if (item.image_url && item.image_url.trim()) {
+        const url = item.image_url.trim();
+        if (!seenUrls.has(url)) {
+          seenUrls.add(url);
+          const catMeta = categories.find(
+            (c) => c.slug.toLowerCase() === item.category.toLowerCase()
+          );
+          customList.push({
+            id: item.id,
+            slug: item.image_slug || `custom-${item.id}`,
+            alt: item.alt_text || item.title,
+            caption: item.title,
+            categoria: item.category as any,
+            categoriaLabel: catMeta?.name || item.category,
+            thumb: getCloudinaryResponsiveUrl(url, { width: 300, height: 200, crop: 'fill' }),
+            card: getCloudinaryResponsiveUrl(url, { width: 768, height: 960, crop: 'fill' }),
+            cardJpg: getCloudinaryResponsiveUrl(url, { width: 768, height: 960, crop: 'fill', format: 'jpg' }),
+            full: getOptimizedCloudinaryUrl(url, { width: 1600 }),
+            dominantColor: '#2d3748',
+            isCustom: true,
+            imageUrl: url,
+          });
+        }
+      }
+    }
+
+    return [...base, ...customList];
+  }, [items, categories]);
+
+  // Filtrado de fotos del catálogo en el modal
+  const filteredCatalog = useMemo(() => {
+    if (catalogCategoryFilter === 'todas') return dynamicCatalog;
+    return dynamicCatalog.filter(
+      (f) => f.categoria.toLowerCase() === catalogCategoryFilter.toLowerCase()
+    );
+  }, [dynamicCatalog, catalogCategoryFilter]);
 
   // Vista previa de la imagen seleccionada en el modal
-  const modalPreviewUrl =
-    imageMode === 'upload' && formImageUrl
-      ? formImageUrl
-      : resolveExperienceImage(formImageSlug);
+  const modalPreviewUrl = useMemo(() => {
+    if (imageMode === 'upload') {
+      if (localPreviewUrl) return localPreviewUrl;
+      if (formImageUrl) return getOptimizedCloudinaryUrl(formImageUrl, { width: 600 });
+      return '';
+    }
+    // Modo catálogo
+    const match = dynamicCatalog.find((f) => f.slug === formImageSlug);
+    if (match) {
+      return match.imageUrl || match.card || match.thumb;
+    }
+    return resolveExperienceImage(formImageSlug);
+  }, [imageMode, localPreviewUrl, formImageUrl, dynamicCatalog, formImageSlug]);
 
   return (
     <div className={styles.container}>
@@ -706,7 +854,7 @@ export const GalleryView: React.FC = () => {
                     {item.alt_text || 'Sin descripción alternativa'}
                   </p>
                   <span className={styles.sourceBadge}>
-                    {item.image_url ? 'Subida a Supabase' : 'Catálogo Manaure'}
+                    {item.image_url ? 'Foto Personalizada' : 'Catálogo Oficial'}
                   </span>
                 </div>
 
@@ -795,7 +943,7 @@ export const GalleryView: React.FC = () => {
       {isModalOpen && (
         <div
           className={styles.modalBackdrop}
-          onClick={() => !savingItem && setIsModalOpen(false)}
+          onClick={() => !savingItem && handleCloseModal()}
           role="dialog"
           aria-modal="true"
           aria-labelledby="modal-title"
@@ -813,7 +961,7 @@ export const GalleryView: React.FC = () => {
               <button
                 type="button"
                 className={styles.actionBtn}
-                onClick={() => setIsModalOpen(false)}
+                onClick={handleCloseModal}
                 disabled={savingItem}
                 aria-label="Cerrar modal"
               >
@@ -841,7 +989,7 @@ export const GalleryView: React.FC = () => {
                       onClick={() => setImageMode('local')}
                     >
                       <ImageIcon size={16} />
-                      <span>Catálogo Manaure ({catalogoFotosManaure.length})</span>
+                      <span>Catálogo Manaure ({dynamicCatalog.length})</span>
                     </button>
                   </div>
                 </div>
@@ -876,15 +1024,29 @@ export const GalleryView: React.FC = () => {
                       tabIndex={0}
                       onKeyDown={(e) => e.key === 'Enter' && fileInputRef.current?.click()}
                     >
-                      {uploadingImage ? (
+                      {selectedLocalFile ? (
                         <>
-                          <Loader2 size={32} className="animate-spin" color="#10b981" />
-                          <p className={styles.dropzoneText}>Subiendo fotografía a Supabase...</p>
+                          <Check size={28} color="#10b981" />
+                          <p className={styles.dropzoneText}>
+                            {selectedLocalFile.name} ({Math.round(selectedLocalFile.size / 1024)} KB)
+                          </p>
+                          <p className={styles.dropzoneHint}>
+                            Archivo listo para guardar • Haz clic para cambiar de foto
+                          </p>
+                          <button
+                            type="button"
+                            className={styles.actionBtn}
+                            onClick={handleRemoveLocalFile}
+                            style={{ marginTop: '0.4rem', fontSize: '0.75rem', padding: '0.2rem 0.6rem' }}
+                            title="Quitar archivo seleccionado"
+                          >
+                            Quitar archivo
+                          </button>
                         </>
                       ) : formImageUrl ? (
                         <>
                           <Check size={28} color="#10b981" />
-                          <p className={styles.dropzoneText}>Fotografía cargada correctamente</p>
+                          <p className={styles.dropzoneText}>Fotografía actual guardada</p>
                           <p className={styles.dropzoneHint}>Haz clic si deseas reemplazarla por otra</p>
                         </>
                       ) : (
@@ -910,13 +1072,17 @@ export const GalleryView: React.FC = () => {
                         onChange={(e) => setCatalogCategoryFilter(e.target.value)}
                         aria-label="Filtrar catálogo local por categoría"
                       >
-                        <option value="todas">Todas las categorías</option>
-                        <option value="cuatrimoto">Cuatrimotos</option>
-                        <option value="parapente">Parapente</option>
-                        <option value="serrania">Serranía del Perijá</option>
-                        <option value="hospedaje">Hospedaje</option>
-                        <option value="glamping">Glamping & Fogata</option>
-                        <option value="gastronomia">Gastronomía</option>
+                        <option value="todas">Todas las categorías ({dynamicCatalog.length})</option>
+                        {categories.map((cat) => {
+                          const count = dynamicCatalog.filter(
+                            (f) => f.categoria.toLowerCase() === cat.slug.toLowerCase()
+                          ).length;
+                          return (
+                            <option key={cat.slug} value={cat.slug}>
+                              {cat.name} ({count})
+                            </option>
+                          );
+                        })}
                       </select>
                     </div>
 
@@ -925,12 +1091,20 @@ export const GalleryView: React.FC = () => {
                         const isSelected = formImageSlug === foto.slug;
                         return (
                           <div
-                            key={foto.id}
+                            key={foto.id || foto.slug}
                             className={`${styles.catalogItem} ${isSelected ? styles.catalogItemActive : ''}`}
                             onClick={() => {
                               setFormImageSlug(foto.slug);
+                              if (foto.isCustom && foto.imageUrl) {
+                                setFormImageUrl(foto.imageUrl);
+                              } else {
+                                setFormImageUrl(null);
+                              }
                               if (!formTitle) setFormTitle(foto.alt);
                               if (!formAltText) setFormAltText(foto.alt);
+                              if (foto.categoria) {
+                                setFormCategory(foto.categoria);
+                              }
                             }}
                             title={foto.alt}
                             role="button"
@@ -938,11 +1112,28 @@ export const GalleryView: React.FC = () => {
                             onKeyDown={(e) => e.key === 'Enter' && setFormImageSlug(foto.slug)}
                           >
                             <img
-                              src={foto.thumb}
+                              src={foto.thumb || foto.card}
                               alt={foto.alt}
                               className={styles.catalogThumb}
                               loading="lazy"
                             />
+                            {foto.isCustom && (
+                              <span
+                                style={{
+                                  position: 'absolute',
+                                  top: '4px',
+                                  left: '4px',
+                                  fontSize: '0.62rem',
+                                  background: 'rgba(0, 0, 0, 0.7)',
+                                  color: '#10b981',
+                                  padding: '1px 5px',
+                                  borderRadius: '4px',
+                                  fontWeight: 600,
+                                }}
+                              >
+                                Subida
+                              </span>
+                            )}
                             {isSelected && (
                               <div className={styles.catalogItemCheck}>
                                 <Check size={12} />
@@ -957,18 +1148,26 @@ export const GalleryView: React.FC = () => {
 
                 {/* Previsualizador en Vivo */}
                 <div className={styles.previewBox}>
-                  <img
-                    src={modalPreviewUrl}
-                    alt="Previsualización"
-                    className={styles.previewThumb}
-                  />
+                  {modalPreviewUrl ? (
+                    <img
+                      src={modalPreviewUrl}
+                      alt="Previsualización"
+                      className={styles.previewThumb}
+                    />
+                  ) : (
+                    <div className={styles.previewThumb} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#1f2937' }}>
+                      <ImageIcon size={28} color="#6b7280" />
+                    </div>
+                  )}
                   <div className={styles.previewInfo}>
                     <strong className={styles.previewTitle}>Previsualización en tiempo real</strong>
                     <span className={styles.previewSubtitle}>
                       {imageMode === 'upload'
-                        ? formImageUrl
-                          ? 'Fotografía alojada en Supabase Storage'
-                          : 'Esperando archivo de imagen...'
+                        ? selectedLocalFile
+                          ? `Archivo listo: ${selectedLocalFile.name} (${Math.round(selectedLocalFile.size / 1024)} KB)`
+                          : formImageUrl
+                            ? 'Fotografía optimizada y lista para publicar'
+                            : 'Esperando archivo de imagen...'
                         : `Foto seleccionada del catálogo: ${formImageSlug}`}
                     </span>
                   </div>
@@ -1065,7 +1264,7 @@ export const GalleryView: React.FC = () => {
                 <button
                   type="button"
                   className={styles.btnSecondary}
-                  onClick={() => setIsModalOpen(false)}
+                  onClick={handleCloseModal}
                   disabled={savingItem}
                 >
                   Cancelar
@@ -1073,7 +1272,8 @@ export const GalleryView: React.FC = () => {
                 <button type="submit" className={styles.btnPrimary} disabled={savingItem}>
                   {savingItem ? (
                     <>
-                      <Loader2 size={16} className="animate-spin" /> Guardando...
+                      <Loader2 size={16} className="animate-spin" />
+                      <span>{imageMode === 'upload' && selectedLocalFile ? 'Subiendo y guardando...' : 'Guardando...'}</span>
                     </>
                   ) : editingItem ? (
                     'Guardar Cambios'
@@ -1133,7 +1333,7 @@ export const GalleryView: React.FC = () => {
               </div>
               {deletingItem.image_url && (
                 <p className={styles.deleteStorageWarning}>
-                  Nota: El archivo físico almacenado en Supabase Storage también será removido para liberar espacio.
+                  Nota: El archivo de imagen asociado también será eliminado de forma segura para no dejar residuos.
                 </p>
               )}
             </div>

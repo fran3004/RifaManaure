@@ -130,7 +130,7 @@ export const RafflesView: React.FC = () => {
   const handleEditSuccess = (updated: RaffleRow) => {
     setFeedback({
       type: 'success',
-      message: `Los parámetros de "${updated.title}" fueron actualizados exitosamente en Supabase.`,
+      message: `Los parámetros de "${updated.title}" fueron actualizados exitosamente.`,
     });
     loadRaffles();
     void reloadRaffles();
@@ -251,7 +251,7 @@ export const RafflesView: React.FC = () => {
       {/* Estado de Carga */}
       {isLoading ? (
         <div className={adminStyles.cardSection}>
-          <AdminLoadingState message="Cargando catálogo de rifas desde Supabase..." />
+          <AdminLoadingState message="Cargando catálogo de rifas..." />
         </div>
       ) : error ? (
         <div className={adminStyles.cardSection}>

@@ -347,7 +347,7 @@ export const DashboardView: React.FC = () => {
         description={
           selectedRaffle
             ? `Métricas operativas y financieras para: ${selectedRaffle.title}`
-            : 'Métricas operativas y financieras en tiempo real verificadas contra Supabase.'
+            : 'Métricas operativas y financieras en tiempo real.'
         }
         badge={selectedRaffle ? `Rifa: ${selectedRaffle.status.toUpperCase()}` : 'En Vivo'}
         actions={
@@ -365,7 +365,7 @@ export const DashboardView: React.FC = () => {
 
       {/* Estado de Carga, Error o Contenido Principal */}
       {isLoading ? (
-        <AdminLoadingState message="Calculando métricas en vivo desde Supabase..." />
+        <AdminLoadingState message="Calculando métricas en vivo..." />
       ) : error ? (
         <AdminErrorState
           title={isForbidden ? 'Acceso Restringido' : 'Error al cargar métricas del Dashboard'}
@@ -614,7 +614,7 @@ export const DashboardView: React.FC = () => {
               <div>
                 <div className={styles.tabPanelHeader}>
                   <span className={styles.tabPanelSubtitle}>
-                    Visualizando las 6 órdenes más recientes registradas en Supabase.
+                    Visualizando las 6 órdenes más recientes registradas en el sistema.
                   </span>
                   <Link
                     to="/admin/ordenes"

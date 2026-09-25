@@ -1,0 +1,210 @@
+[
+  {
+    "id": "gastronomia-local",
+    "category": "gastronomia",
+    "publicId": "manaure-vive/galeria/gastronomia/gastronomia-local",
+    "secureUrl": "https://res.cloudinary.com/ky01b0vz/image/upload/manaure-vive/galeria/gastronomia/gastronomia-local.jpg",
+    "width": 710,
+    "height": 960
+  },
+  {
+    "id": "og-image",
+    "category": "serrania",
+    "publicId": "manaure-vive/galeria/serrania/og-image",
+    "secureUrl": "https://res.cloudinary.com/ky01b0vz/image/upload/manaure-vive/galeria/serrania/og-image.jpg",
+    "width": 1600,
+    "height": 900
+  },
+  {
+    "id": "cuatrimoto-aventura-cordillera",
+    "category": "cuatrimoto",
+    "publicId": "manaure-vive/galeria/cuatrimoto/cuatrimoto-aventura-cordillera",
+    "secureUrl": "https://res.cloudinary.com/ky01b0vz/image/upload/manaure-vive/galeria/cuatrimoto/cuatrimoto-aventura-cordillera.jpg",
+    "width": 1600,
+    "height": 1200
+  },
+  {
+    "id": "serrania-perija-cordillera",
+    "category": "serrania",
+    "publicId": "manaure-vive/galeria/serrania/serrania-perija-cordillera",
+    "secureUrl": "https://res.cloudinary.com/ky01b0vz/image/upload/manaure-vive/galeria/serrania/serrania-perija-cordillera.jpg",
+    "width": 1600,
+    "height": 1200
+  },
+  {
+    "id": "fogata-casa-de-vidrio",
+    "category": "glamping",
+    "publicId": "manaure-vive/galeria/glamping/fogata-casa-de-vidrio",
+    "secureUrl": "https://res.cloudinary.com/ky01b0vz/image/upload/manaure-vive/galeria/glamping/fogata-casa-de-vidrio.jpg",
+    "width": 1600,
+    "height": 1200
+  },
+  {
+    "id": "parapente-vuelo",
+    "category": "parapente",
+    "publicId": "manaure-vive/galeria/parapente/parapente-vuelo",
+    "secureUrl": "https://res.cloudinary.com/ky01b0vz/image/upload/manaure-vive/galeria/parapente/parapente-vuelo.jpg",
+    "width": 598,
+    "height": 1077
+  },
+  {
+    "id": "serrania-perija-laguna",
+    "category": "serrania",
+    "publicId": "manaure-vive/galeria/serrania/serrania-perija-laguna",
+    "secureUrl": "https://res.cloudinary.com/ky01b0vz/image/upload/manaure-vive/galeria/serrania/serrania-perija-laguna.jpg",
+    "width": 1600,
+    "height": 1200
+  },
+  {
+    "id": "parapente-bandera",
+    "category": "parapente",
+    "publicId": "manaure-vive/galeria/parapente/parapente-bandera",
+    "secureUrl": "https://res.cloudinary.com/ky01b0vz/image/upload/manaure-vive/galeria/parapente/parapente-bandera.jpg",
+    "width": 960,
+    "height": 1280
+  },
+  {
+    "id": "hospedaje-villa-adelaida",
+    "category": "hospedaje",
+    "publicId": "manaure-vive/galeria/hospedaje/hospedaje-villa-adelaida",
+    "secureUrl": "https://res.cloudinary.com/ky01b0vz/image/upload/manaure-vive/galeria/hospedaje/hospedaje-villa-adelaida.jpg",
+    "width": 1600,
+    "height": 1200
+  },
+  {
+    "id": "gastronomia-casa-arepas",
+    "category": "gastronomia",
+    "publicId": "manaure-vive/galeria/gastronomia/gastronomia-casa-arepas",
+    "secureUrl": "https://res.cloudinary.com/ky01b0vz/image/upload/manaure-vive/galeria/gastronomia/gastronomia-casa-arepas.jpg",
+    "width": 1600,
+    "height": 1200
+  },
+  {
+    "id": "gastronomia-arepa",
+    "category": "gastronomia",
+    "publicId": "manaure-vive/galeria/gastronomia/gastronomia-arepa",
+    "secureUrl": "https://res.cloudinary.com/ky01b0vz/image/upload/manaure-vive/galeria/gastronomia/gastronomia-arepa.jpg",
+    "width": 710,
+    "height": 468
+  },
+  {
+    "id": "gastronomia-plato",
+    "category": "gastronomia",
+    "publicId": "manaure-vive/galeria/gastronomia/gastronomia-plato",
+    "secureUrl": "https://res.cloudinary.com/ky01b0vz/image/upload/manaure-vive/galeria/gastronomia/gastronomia-plato.jpg",
+    "width": 710,
+    "height": 480
+  },
+  {
+    "id": "serrania-topiarios",
+    "category": "serrania",
+    "publicId": "manaure-vive/galeria/serrania/serrania-topiarios",
+    "secureUrl": "https://res.cloudinary.com/ky01b0vz/image/upload/manaure-vive/galeria/serrania/serrania-topiarios.jpg",
+    "width": 1600,
+    "height": 1200
+  },
+  {
+    "id": "cuatrimoto-ruta",
+    "category": "cuatrimoto",
+    "publicId": "manaure-vive/galeria/cuatrimoto/cuatrimoto-ruta",
+    "secureUrl": "https://res.cloudinary.com/ky01b0vz/image/upload/manaure-vive/galeria/cuatrimoto/cuatrimoto-ruta.jpg",
+    "width": 750,
+    "height": 883
+  },
+  {
+    "id": "cuatrimoto-mirador",
+    "category": "cuatrimoto",
+    "publicId": "manaure-vive/galeria/cuatrimoto/cuatrimoto-mirador",
+    "secureUrl": "https://res.cloudinary.com/ky01b0vz/image/upload/manaure-vive/galeria/cuatrimoto/cuatrimoto-mirador.jpg",
+    "width": 750,
+    "height": 931
+  },
+  {
+    "id": "cuatrimoto-cumbre",
+    "category": "cuatrimoto",
+    "publicId": "manaure-vive/galeria/cuatrimoto/cuatrimoto-cumbre",
+    "secureUrl": "https://res.cloudinary.com/ky01b0vz/image/upload/manaure-vive/galeria/cuatrimoto/cuatrimoto-cumbre.jpg",
+    "width": 1600,
+    "height": 2133
+  },
+  {
+    "id": "cuatrimoto-flota",
+    "category": "cuatrimoto",
+    "publicId": "manaure-vive/galeria/cuatrimoto/cuatrimoto-flota",
+    "secureUrl": "https://res.cloudinary.com/ky01b0vz/image/upload/manaure-vive/galeria/cuatrimoto/cuatrimoto-flota.jpg",
+    "width": 1600,
+    "height": 1200
+  },
+  {
+    "id": "parapente-despegue-atardecer",
+    "category": "parapente",
+    "publicId": "manaure-vive/galeria/parapente/parapente-despegue-atardecer",
+    "secureUrl": "https://res.cloudinary.com/ky01b0vz/image/upload/manaure-vive/galeria/parapente/parapente-despegue-atardecer.jpg",
+    "width": 1600,
+    "height": 1200
+  },
+  {
+    "id": "parapente-tandem-canon",
+    "category": "parapente",
+    "publicId": "manaure-vive/galeria/parapente/parapente-tandem-canon",
+    "secureUrl": "https://res.cloudinary.com/ky01b0vz/image/upload/manaure-vive/galeria/parapente/parapente-tandem-canon.jpg",
+    "width": 591,
+    "height": 1055
+  },
+  {
+    "id": "serrania-los-pinos",
+    "category": "serrania",
+    "publicId": "manaure-vive/galeria/serrania/serrania-los-pinos",
+    "secureUrl": "https://res.cloudinary.com/ky01b0vz/image/upload/manaure-vive/galeria/serrania/serrania-los-pinos.jpg",
+    "width": 1600,
+    "height": 1200
+  },
+  {
+    "id": "serrania-perija-frailejones",
+    "category": "serrania",
+    "publicId": "manaure-vive/galeria/serrania/serrania-perija-frailejones",
+    "secureUrl": "https://res.cloudinary.com/ky01b0vz/image/upload/manaure-vive/galeria/serrania/serrania-perija-frailejones.jpg",
+    "width": 960,
+    "height": 557
+  },
+  {
+    "id": "serrania-pozo-cristalino",
+    "category": "serrania",
+    "publicId": "manaure-vive/galeria/serrania/serrania-pozo-cristalino",
+    "secureUrl": "https://res.cloudinary.com/ky01b0vz/image/upload/manaure-vive/galeria/serrania/serrania-pozo-cristalino.jpg",
+    "width": 750,
+    "height": 1334
+  },
+  {
+    "id": "serrania-sabana-rubia",
+    "category": "serrania",
+    "publicId": "manaure-vive/galeria/serrania/serrania-sabana-rubia",
+    "secureUrl": "https://res.cloudinary.com/ky01b0vz/image/upload/manaure-vive/galeria/serrania/serrania-sabana-rubia.jpg",
+    "width": 750,
+    "height": 899
+  },
+  {
+    "id": "serrania-valle-nubes",
+    "category": "serrania",
+    "publicId": "manaure-vive/galeria/serrania/serrania-valle-nubes",
+    "secureUrl": "https://res.cloudinary.com/ky01b0vz/image/upload/manaure-vive/galeria/serrania/serrania-valle-nubes.jpg",
+    "width": 636,
+    "height": 974
+  },
+  {
+    "id": "fogata-mirador-nocturno",
+    "category": "glamping",
+    "publicId": "manaure-vive/galeria/glamping/fogata-mirador-nocturno",
+    "secureUrl": "https://res.cloudinary.com/ky01b0vz/image/upload/manaure-vive/galeria/glamping/fogata-mirador-nocturno.jpg",
+    "width": 1600,
+    "height": 1200
+  },
+  {
+    "id": "glamping-mashiramo-domo",
+    "category": "glamping",
+    "publicId": "manaure-vive/galeria/glamping/glamping-mashiramo-domo",
+    "secureUrl": "https://res.cloudinary.com/ky01b0vz/image/upload/manaure-vive/galeria/glamping/glamping-mashiramo-domo.jpg",
+    "width": 750,
+    "height": 292
+  }
+]

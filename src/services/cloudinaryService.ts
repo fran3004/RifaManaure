@@ -253,6 +253,129 @@ export async function deleteFromCloudinary(publicId: string): Promise<Cloudinary
 }
 
 /**
+ * Resuelve la carpeta destino en Cloudinary según el slug de categoría para la galería.
+ * La categoría base 'otro' (Otra Experiencia) se guarda en la carpeta raíz 'manaure-vive/galeria'.
+ * Las demás categorías se guardan en su subcarpeta respectiva 'manaure-vive/galeria/<categoria>'.
+ */
+export function resolveGalleryFolderForCategory(categorySlug?: string | null): string {
+  const clean = categorySlug ? categorySlug.toLowerCase().trim() : 'otro';
+  if (!clean || clean === 'otro' || clean === 'general') {
+    return 'manaure-vive/galeria';
+  }
+  if (clean === 'fogata' || clean === 'glamping') {
+    return 'manaure-vive/galeria/glamping';
+  }
+  if (['cuatrimoto', 'parapente', 'serrania', 'hospedaje', 'gastronomia'].includes(clean)) {
+    return `manaure-vive/galeria/${clean}`;
+  }
+  return `manaure-vive/galeria/${clean}`;
+}
+
+/**
+ * Resuelve la carpeta destino en Cloudinary según el slug de categoría para las imágenes del Premio Mayor.
+ * La categoría base 'otro' o sin especificar se guarda en la carpeta raíz 'manaure-vive/premios'.
+ * Las demás categorías se guardan en su subcarpeta respectiva 'manaure-vive/premios/<categoria>'.
+ */
+export function resolvePrizeFolderForCategory(categorySlug?: string | null): string {
+  const clean = categorySlug ? categorySlug.toLowerCase().trim() : '';
+  if (!clean || clean === 'otro' || clean === 'general') {
+    return 'manaure-vive/premios';
+  }
+  if (clean === 'fogata' || clean === 'glamping') {
+    return 'manaure-vive/premios/glamping';
+  }
+  return `manaure-vive/premios/${clean}`;
+}
+
+/**
+ * Solicita la creación de una carpeta en Cloudinary vía Edge Function.
+ */
+export async function createCloudinaryFolder(
+  folderPath: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const cleanFolder = folderPath.trim();
+    if (!cleanFolder) return { success: false, error: 'Carpeta no especificada.' };
+
+    const { data: sessionData } = await supabase.auth.getSession();
+    const token = sessionData?.session?.access_token;
+    if (!token) {
+      return { success: false, error: 'Sesión no iniciada.' };
+    }
+
+    const { data, error } = await supabase.functions.invoke('cloudinary-sign', {
+      body: { action: 'create_folder', folder: cleanFolder },
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    if (error || (data && !data.success)) {
+      return { success: false, error: data?.error || error?.message };
+    }
+
+    return { success: true };
+  } catch (err) {
+    return { success: false, error: err instanceof Error ? err.message : 'Error al crear carpeta.' };
+  }
+}
+
+/**
+ * Solicita la eliminación de una carpeta en Cloudinary vía Edge Function, protegiendo las carpetas oficiales.
+ */
+export async function deleteCloudinaryFolder(
+  folderPath: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const cleanFolder = folderPath.trim();
+    if (!cleanFolder) return { success: false, error: 'Carpeta no especificada.' };
+
+    const protectedFolders = [
+      'manaure-vive/galeria',
+      'manaure-vive/galeria/cuatrimoto',
+      'manaure-vive/galeria/parapente',
+      'manaure-vive/galeria/serrania',
+      'manaure-vive/galeria/hospedaje',
+      'manaure-vive/galeria/gastronomia',
+      'manaure-vive/galeria/glamping',
+      'manaure-vive/galeria/fogata',
+      'manaure-vive/premios',
+      'manaure-vive/premios/cuatrimoto',
+      'manaure-vive/premios/parapente',
+      'manaure-vive/premios/serrania',
+      'manaure-vive/premios/hospedaje',
+      'manaure-vive/premios/gastronomia',
+      'manaure-vive/premios/glamping',
+      'manaure-vive/premios/fogata',
+      'manaure-vive/aliados',
+      'manaure-vive/actas-ganadores',
+      'manaure-vive/marca',
+    ];
+
+    if (protectedFolders.includes(cleanFolder)) {
+      return { success: false, error: 'La carpeta especificada está protegida y no puede eliminarse.' };
+    }
+
+    const { data: sessionData } = await supabase.auth.getSession();
+    const token = sessionData?.session?.access_token;
+    if (!token) {
+      return { success: false, error: 'Sesión no iniciada.' };
+    }
+
+    const { data, error } = await supabase.functions.invoke('cloudinary-sign', {
+      body: { action: 'delete_folder', folder: cleanFolder },
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    if (error || (data && !data.success)) {
+      return { success: false, error: data?.error || error?.message };
+    }
+
+    return { success: true };
+  } catch (err) {
+    return { success: false, error: err instanceof Error ? err.message : 'Error al eliminar carpeta.' };
+  }
+}
+
+/**
  * Extrae el public_id de un recurso de Cloudinary a partir de su URL completa o identificador.
  * Soporta URLs versionadas, transformadas, con o sin extensión.
  *
@@ -313,6 +436,32 @@ export interface CloudinaryUrlOptions {
   quality?: string | number;
 }
 
+export interface CloudinaryResponsiveOptions {
+  width?: number;
+  height?: number;
+  crop?: string;
+  format?: 'webp' | 'jpg' | 'auto';
+  quality?: string | number;
+}
+
+/**
+ * Valida si una URL de Cloudinary es elegible para transformación dinámica.
+ * Protege URLs no Cloudinary, documentos PDF/raw y firmas HMAC criptográficas.
+ */
+function isTransformableCloudinaryUrl(url: string): boolean {
+  if (!url.includes('res.cloudinary.com') || !url.includes('/upload/')) {
+    return false;
+  }
+  const cleanPath = url.split('?')[0].toLowerCase();
+  if (cleanPath.endsWith('.pdf') || url.includes('/raw/upload/')) {
+    return false;
+  }
+  if (/\/s--[a-zA-Z0-9_-]{8}--\//.test(url)) {
+    return false;
+  }
+  return true;
+}
+
 /**
  * Optimiza URLs de Cloudinary aplicando transformaciones automáticas (f_auto, q_auto y ancho opcional).
  *
@@ -339,28 +488,16 @@ export function getOptimizedCloudinaryUrl(
     return '';
   }
 
-  // 1. Verificar si es una URL de Cloudinary
-  if (!trimmed.includes('res.cloudinary.com') || !trimmed.includes('/upload/')) {
+  if (!isTransformableCloudinaryUrl(trimmed)) {
     return trimmed;
   }
 
-  // 2. Proteger archivos no compatibles (ej. PDFs o recursos raw)
-  const cleanPath = trimmed.split('?')[0].toLowerCase();
-  if (cleanPath.endsWith('.pdf') || trimmed.includes('/raw/upload/')) {
-    return trimmed;
-  }
-
-  // 3. Proteger URLs firmadas para no romper la firma HMAC de Cloudinary (ej: /s--abcdef12--/)
-  if (/\/s--[a-zA-Z0-9_-]{8}--\//.test(trimmed)) {
-    return trimmed;
-  }
-
-  // 4. Si la URL ya posee transformaciones que incluyan f_auto o q_auto, no duplicar
+  // Si la URL ya posee transformaciones que incluyan f_auto o q_auto, no duplicar
   if (/\/upload\/[^/]*f_auto[^/]*\//.test(trimmed)) {
     return trimmed;
   }
 
-  // 5. Construir los parámetros de transformación solicitados
+  // Construir los parámetros de transformación solicitados
   const transforms: string[] = ['f_auto', 'q_auto'];
 
   if (options.width && options.width > 0) {
@@ -373,8 +510,106 @@ export function getOptimizedCloudinaryUrl(
 
   const transformString = transforms.join(',');
 
-  // 6. Insertar las transformaciones inmediatamente después de '/upload/'
+  // Insertar las transformaciones inmediatamente después de '/upload/'
   return trimmed.replace('/upload/', `/upload/${transformString}/`);
 }
+
+/**
+ * Construye URLs de Cloudinary con transformaciones responsivas explícitas (ancho, alto/recorte, formato y calidad).
+ *
+ * Características:
+ * 1. Si se define `height`, aplica `c_fill,g_auto` (o el recorte en `options.crop`) para encuadrar la relación de aspecto.
+ * 2. Si no hay `height`, solo escala proporcionalmente por ancho (`w_`).
+ * 3. Aplica siempre optimización perceptual `q_auto` (o la calidad especificada).
+ * 4. Permite forzar el formato explícito ('webp' | 'jpg') en vez de 'f_auto', necesario para generar conjuntos `<source type="...">`.
+ * 5. Reutiliza las protecciones de seguridad: preserva URLs no Cloudinary, URLs firmadas criptográficamente y archivos no transformables (PDFs/raw).
+ * 6. Admite tanto URLs completas de Cloudinary como public IDs directos.
+ *
+ * @param url URL completa o public_id de Cloudinary
+ * @param options Opciones de transformación responsiva
+ */
+export function getCloudinaryResponsiveUrl(
+  url: string | null | undefined,
+  options: CloudinaryResponsiveOptions = {}
+): string {
+  if (!url || typeof url !== 'string') {
+    return '';
+  }
+
+  let trimmed = url.trim();
+  if (!trimmed) {
+    return '';
+  }
+
+  // Si se pasa un public_id directo en vez de una URL completa
+  if (!trimmed.startsWith('http://') && !trimmed.startsWith('https://') && !trimmed.startsWith('/')) {
+    const cloudName =
+      (typeof import.meta !== 'undefined' && import.meta.env?.VITE_CLOUDINARY_CLOUD_NAME) ||
+      'ky01b0vz';
+    trimmed = `https://res.cloudinary.com/${cloudName}/image/upload/${trimmed}`;
+  }
+
+  if (!isTransformableCloudinaryUrl(trimmed)) {
+    return trimmed;
+  }
+
+  // Construir los parámetros de transformación solicitados
+  const transforms: string[] = [];
+
+  // Dimensiones y recorte
+  if (options.height && options.height > 0) {
+    if (options.crop) {
+      transforms.push(options.crop.startsWith('c_') ? options.crop : `c_${options.crop}`);
+    } else {
+      transforms.push('c_fill', 'g_auto');
+    }
+    if (options.width && options.width > 0) {
+      transforms.push(`w_${Math.round(options.width)}`);
+    }
+    transforms.push(`h_${Math.round(options.height)}`);
+  } else {
+    if (options.crop) {
+      transforms.push(options.crop.startsWith('c_') ? options.crop : `c_${options.crop}`);
+    }
+    if (options.width && options.width > 0) {
+      transforms.push(`w_${Math.round(options.width)}`);
+    }
+  }
+
+  // Calidad
+  if (options.quality) {
+    transforms.push(`q_${options.quality}`);
+  } else {
+    transforms.push('q_auto');
+  }
+
+  // Formato explícito (webp | jpg | auto)
+  const format = options.format || 'webp';
+  transforms.push(`f_${format}`);
+
+  const transformString = transforms.join(',');
+
+  // Inyectar o reemplazar las transformaciones tras '/upload/'
+  let result = trimmed;
+  // Solo consideramos como transformación existente segmentos que tengan el patrón param_valor (ej: c_fill, w_800, q_auto)
+  if (/\/upload\/(?:[a-z]{1,3}_[^/]+,?)+\//.test(result)) {
+    result = result.replace(/\/upload\/(?:[a-z]{1,3}_[^/]+,?)+\//, `/upload/${transformString}/`);
+  } else {
+    result = result.replace('/upload/', `/upload/${transformString}/`);
+  }
+
+  // Actualizar o agregar la extensión en la ruta si el formato es explícito
+  if (format === 'webp' || format === 'jpg') {
+    const ext = format === 'jpg' ? '.jpg' : '.webp';
+    if (/\.[a-zA-Z0-9]+$/.test(result)) {
+      result = result.replace(/\.[a-zA-Z0-9]+$/, ext);
+    } else {
+      result = `${result}${ext}`;
+    }
+  }
+
+  return result;
+}
+
 
 

@@ -10,6 +10,7 @@ import {
   getCachedGalleryCategories,
   getGalleryCategories,
 } from '@/services/galleryService';
+import { getCloudinaryResponsiveUrl, getOptimizedCloudinaryUrl } from '@/services/cloudinaryService';
 import type { GalleryItemRow, GalleryCategoryItem } from '@/types/raffle.types';
 import styles from './GaleriaPremio.module.css';
 
@@ -147,20 +148,21 @@ export const GaleriaPremio: React.FC = () => {
       if (!item) return;
       if (item.image_url) {
         const img = new window.Image();
-        img.src = item.image_url;
+        img.src = getOptimizedCloudinaryUrl(item.image_url, { width: 1600 });
         return;
       }
       const slug = item.image_slug || item.id;
       const entry: ImageEntry | undefined = imageManifest[slug];
-      if (!entry) return;
-      const v = entry.variants.find((x) => x.role === 'lightbox') || entry.variants[0];
-      if (v?.webp?.url) {
+      if (!entry || !entry.cloudinary) return;
+      const urlWebp = getCloudinaryResponsiveUrl(entry.cloudinary.secureUrl, { width: 1600, format: 'webp' });
+      const urlJpg = getCloudinaryResponsiveUrl(entry.cloudinary.secureUrl, { width: 1600, format: 'jpg' });
+      if (urlWebp) {
         const imgWebp = new window.Image();
-        imgWebp.src = v.webp.url;
+        imgWebp.src = urlWebp;
       }
-      if (v?.jpg?.url) {
+      if (urlJpg) {
         const imgJpg = new window.Image();
-        imgJpg.src = v.jpg.url;
+        imgJpg.src = urlJpg;
       }
     };
 
@@ -267,7 +269,7 @@ export const GaleriaPremio: React.FC = () => {
               >
                 {item.image_url ? (
                   <img
-                    src={item.image_url}
+                    src={getOptimizedCloudinaryUrl(item.image_url, { width: 800 })}
                     alt={altText}
                     className={styles.galleryImage}
                     loading="lazy"
@@ -339,7 +341,7 @@ export const GaleriaPremio: React.FC = () => {
               {fotoActualItem.image_url ? (
                 <div className={styles.lightboxPicture}>
                   <img
-                    src={fotoActualItem.image_url}
+                    src={getOptimizedCloudinaryUrl(fotoActualItem.image_url, { width: 1600 })}
                     alt={fotoActualItem.alt_text || fotoActualItem.title}
                     className={styles.lightboxImg}
                     style={{ maxWidth: '100%', maxHeight: '78vh', objectFit: 'contain' }}

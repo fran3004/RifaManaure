@@ -205,7 +205,7 @@ export const AdminInviteUserModal: React.FC<AdminInviteUserModalProps> = ({
                 <p className={styles.successHint}>
                   {emailSent
                     ? 'El usuario podrá ingresar desde este enlace una vez active su contraseña desde el correo.'
-                    : 'Comparte este enlace con el usuario para que acceda con sus credenciales de Supabase Auth.'}
+                    : 'Comparte este enlace con el usuario para que configure o acceda con sus credenciales.'}
                 </p>
               </div>
             </div>

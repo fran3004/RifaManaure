@@ -9,6 +9,7 @@
  * - prize-images      -> manaure-vive/premios
  * - partner-logos     -> manaure-vive/aliados
  * - winner-documents  -> manaure-vive/actas-ganadores
+ * - gallery-images    -> manaure-vive/galeria
  *
  * Características:
  * - Requiere SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY y credenciales de Cloudinary locales.
@@ -63,13 +64,15 @@ const isDryRun = process.argv.includes('--dry-run');
 const allowOnlyMatched = process.argv.includes('--only-matched');
 
 // 1. Validación estricta de variables de entorno
-const requiredEnvVars = [
-  'SUPABASE_URL',
-  'SUPABASE_SERVICE_ROLE_KEY',
-  'CLOUDINARY_CLOUD_NAME',
-  'CLOUDINARY_API_KEY',
-  'CLOUDINARY_API_SECRET',
-];
+const requiredEnvVars = isDryRun
+  ? ['SUPABASE_URL']
+  : [
+      'SUPABASE_URL',
+      'SUPABASE_SERVICE_ROLE_KEY',
+      'CLOUDINARY_CLOUD_NAME',
+      'CLOUDINARY_API_KEY',
+      'CLOUDINARY_API_SECRET',
+    ];
 
 const missingVars = requiredEnvVars.filter((v) => !process.env[v] && !process.env[`VITE_${v}`]);
 
@@ -86,12 +89,15 @@ if (missingVars.length > 0) {
 }
 
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
-const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const CLOUDINARY_CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME || process.env.VITE_CLOUDINARY_CLOUD_NAME;
-const CLOUDINARY_API_KEY = process.env.CLOUDINARY_API_KEY;
-const CLOUDINARY_API_SECRET = process.env.CLOUDINARY_API_SECRET;
+const SUPABASE_SERVICE_ROLE_KEY =
+  process.env.SUPABASE_SERVICE_ROLE_KEY ||
+  process.env.SUPABASE_ANON_KEY ||
+  process.env.VITE_SUPABASE_ANON_KEY;
+const CLOUDINARY_CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME || process.env.VITE_CLOUDINARY_CLOUD_NAME || 'ky01b0vz';
+const CLOUDINARY_API_KEY = process.env.CLOUDINARY_API_KEY || (isDryRun ? 'dry-run-key' : '');
+const CLOUDINARY_API_SECRET = process.env.CLOUDINARY_API_SECRET || (isDryRun ? 'dry-run-secret' : '');
 
-// Cliente de Supabase con permisos de Service Role (bypassea RLS para migraciones administrativas)
+// Cliente de Supabase (Service Role en modo real para bypassear RLS; lectura disponible en simulación)
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
   auth: { persistSession: false, autoRefreshToken: false },
 });
@@ -580,7 +586,139 @@ async function runMigration() {
   }
 
   // -------------------------------------------------------------------------
-  // 4. DETECCIÓN DE DISCREPANCIAS ENTRE STORAGE Y BASE DE DATOS
+  // 4. MIGRACIÓN DE gallery-images -> manaure-vive/galeria (tabla: gallery_items)
+  // -------------------------------------------------------------------------
+  console.log('\n📦 Inspeccionando bucket "gallery-images"...');
+  let galleryFiles = [];
+  try {
+    galleryFiles = await listBucketFiles('gallery-images');
+    console.log(`   Archivos físicos encontrados en bucket: ${galleryFiles.length}`);
+  } catch (err) {
+    console.warn(`   ⚠️ Advertencia al consultar bucket 'gallery-images': ${err.message}`);
+  }
+
+  const { data: galleryItems, error: galErr } = await supabase
+    .from('gallery_items')
+    .select('id, title, image_url');
+
+  if (galErr) {
+    throw new Error(`Error al consultar tabla 'gallery_items': ${galErr.message}`);
+  }
+
+  console.log(`   Registros en tabla 'gallery_items': ${galleryItems.length}`);
+
+  const matchedGalleryFiles = new Set();
+
+  for (const item of galleryItems) {
+    const currentUrl = item.image_url || '';
+
+    // Idempotencia: Verificar si ya apunta a Cloudinary
+    if (currentUrl.includes('res.cloudinary.com')) {
+      const alreadyMigratedFile = galleryFiles.find(
+        (f) => currentUrl.includes(path.parse(f.name).name) || currentUrl.includes(f.name)
+      );
+      if (alreadyMigratedFile) {
+        matchedGalleryFiles.add(alreadyMigratedFile.path);
+      }
+
+      migrationSummary.push({
+        bucket: 'gallery-images',
+        table: 'gallery_items',
+        id: item.id,
+        identifier: item.title,
+        status: 'OMITIDO_YA_MIGRADO',
+        oldUrl: currentUrl,
+        newUrl: currentUrl,
+      });
+      continue;
+    }
+
+    // Verificar si apunta a Supabase Storage o tiene archivo asociado
+    const matchesFile = galleryFiles.find(
+      (f) => currentUrl.includes(f.name) || currentUrl.endsWith(f.path)
+    );
+
+    if (matchesFile) {
+      matchedGalleryFiles.add(matchesFile.path);
+    }
+
+    if (currentUrl.includes('supabase.co/storage') || matchesFile) {
+      const filePath = matchesFile ? matchesFile.path : currentUrl.split('/gallery-images/').pop()?.split('?')[0];
+
+      if (!filePath) {
+        migrationSummary.push({
+          bucket: 'gallery-images',
+          table: 'gallery_items',
+          id: item.id,
+          identifier: item.title,
+          status: 'ERROR_RUTA_NO_DETERMINADA',
+          oldUrl: currentUrl,
+        });
+        continue;
+      }
+
+      console.log(`   -> Procesando foto galería: "${item.title}" (${filePath})`);
+
+      if (isDryRun) {
+        migrationSummary.push({
+          bucket: 'gallery-images',
+          table: 'gallery_items',
+          id: item.id,
+          identifier: item.title,
+          status: 'SIMULADO_LISTO',
+          oldUrl: currentUrl,
+          targetFolder: 'manaure-vive/galeria',
+        });
+        continue;
+      }
+
+      // Descargar de Supabase Storage
+      const { data: fileData, error: dlErr } = await supabase.storage
+        .from('gallery-images')
+        .download(filePath);
+
+      if (dlErr || !fileData) {
+        throw new Error(`Fallo al descargar archivo '${filePath}' de gallery-images: ${dlErr?.message}`);
+      }
+
+      const buffer = Buffer.from(await fileData.arrayBuffer());
+      const uploadRes = await uploadBufferToCloudinary(buffer, path.basename(filePath), 'manaure-vive/galeria', 'image');
+
+      // Actualizar registro en base de datos
+      const { error: updErr } = await supabase
+        .from('gallery_items')
+        .update({ image_url: uploadRes.secure_url })
+        .eq('id', item.id);
+
+      if (updErr) {
+        throw new Error(`¡ERROR CRÍTICO! Fallo al actualizar gallery_items (${item.id}): ${updErr.message}`);
+      }
+
+      logicalBackups.push({
+        table: 'gallery_items',
+        record_id: item.id,
+        column: 'image_url',
+        previous_value: currentUrl,
+        new_value: uploadRes.secure_url,
+        public_id: uploadRes.public_id,
+        migrated_at: new Date().toISOString(),
+      });
+
+      migrationSummary.push({
+        bucket: 'gallery-images',
+        table: 'gallery_items',
+        id: item.id,
+        identifier: item.title,
+        status: 'MIGRADO_EXITOSO',
+        oldUrl: currentUrl,
+        newUrl: uploadRes.secure_url,
+        publicId: uploadRes.public_id,
+      });
+    }
+  }
+
+  // -------------------------------------------------------------------------
+  // 5. DETECCIÓN DE DISCREPANCIAS ENTRE STORAGE Y BASE DE DATOS
   // -------------------------------------------------------------------------
   const discrepancies = [];
 
@@ -620,8 +758,20 @@ async function runMigration() {
     }
   }
 
+  for (const f of galleryFiles) {
+    if (!matchedGalleryFiles.has(f.path)) {
+      discrepancies.push({
+        bucket: 'gallery-images',
+        file: f.path,
+        size: f.size,
+        type: 'ARCHIVO_EN_STORAGE_SIN_REGISTRO_EN_BD',
+        reason: 'El archivo existe en el bucket gallery-images pero ninguna foto en gallery_items apunta a él.',
+      });
+    }
+  }
+
   // -------------------------------------------------------------------------
-  // 5. GUARDAR RESPALDO LÓGICO Y REGISTRO EN AUDITORÍA
+  // 6. GUARDAR RESPALDO LÓGICO Y REGISTRO EN AUDITORÍA
   // -------------------------------------------------------------------------
   if (!isDryRun && logicalBackups.length > 0) {
     const backupDir = path.join(__dirname, 'migration-backups');
@@ -657,7 +807,7 @@ async function runMigration() {
   }
 
   // -------------------------------------------------------------------------
-  // 6. RESUMEN FINAL DETALLADO
+  // 7. RESUMEN FINAL DETALLADO
   // -------------------------------------------------------------------------
   console.log('\n======================================================================');
   console.log('   RESUMEN DETALLADO DE MIGRACIÓN');

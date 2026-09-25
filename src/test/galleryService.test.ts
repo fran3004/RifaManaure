@@ -33,7 +33,48 @@ vi.mock('@/lib/supabase', () => ({
   },
 }));
 
+// Mock de cloudinaryService
+vi.mock('@/services/cloudinaryService', () => ({
+  uploadToCloudinary: vi.fn(),
+  deleteFromCloudinary: vi.fn(),
+  resolveGalleryFolderForCategory: vi.fn((category?: string) => {
+    const clean = category ? category.trim().toLowerCase() : '';
+    if (!clean || clean === 'otro') {
+      return 'manaure-vive/galeria';
+    }
+    if (clean === 'fogata') {
+      return 'manaure-vive/galeria/glamping';
+    }
+    return `manaure-vive/galeria/${clean}`;
+  }),
+  resolvePrizeFolderForCategory: vi.fn((category?: string) => {
+    const clean = category ? category.trim().toLowerCase() : '';
+    if (!clean || clean === 'otro') {
+      return 'manaure-vive/premios';
+    }
+    if (clean === 'fogata' || clean === 'glamping') {
+      return 'manaure-vive/premios/glamping';
+    }
+    return `manaure-vive/premios/${clean}`;
+  }),
+  createCloudinaryFolder: vi.fn().mockResolvedValue({ success: true, folder: '' }),
+  deleteCloudinaryFolder: vi.fn().mockResolvedValue({ success: true, folder: '' }),
+  extractCloudinaryPublicId: vi.fn((url: string) => {
+    if (url && url.includes('manaure-vive/galeria/')) {
+      const match = url.match(/(manaure-vive\/galeria\/[^.?#]+)/);
+      return match ? match[1] : null;
+    }
+    return null;
+  }),
+}));
+
 import { supabase } from '@/lib/supabase';
+import {
+  uploadToCloudinary,
+  deleteFromCloudinary,
+  createCloudinaryFolder,
+  deleteCloudinaryFolder,
+} from '@/services/cloudinaryService';
 
 describe('galleryService - Gestión Integral de la Galería Fotográfica', () => {
   let store: Record<string, string> = {};
@@ -290,27 +331,37 @@ describe('galleryService - Gestión Integral de la Galería Fotográfica', () =>
     expect(res.data?.category).toBe('parapente');
   });
 
-  it('debe eliminar una fotografía y borrar su archivo físico en Storage si aplica', async () => {
-    const mockRemove = vi.fn().mockResolvedValue({ data: {}, error: null });
-    const mockStorage = {
-      remove: mockRemove,
+  it('debe eliminar una fotografía y destruir su archivo en Cloudinary si aplica', async () => {
+    const mockDeleteQuery = {
+      delete: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockResolvedValue({ error: null }),
     };
-    vi.mocked(supabase.storage.from).mockReturnValue(mockStorage as any);
+    vi.mocked(supabase.from).mockReturnValue(mockDeleteQuery as any);
+    vi.mocked(deleteFromCloudinary).mockResolvedValue({ success: true });
 
+    const res = await deleteGalleryItem(
+      'item-storage-1',
+      'https://res.cloudinary.com/ky01b0vz/image/upload/v1/manaure-vive/galeria/foto-subida-123.webp'
+    );
+
+    expect(res.success).toBe(true);
+    expect(mockDeleteQuery.delete).toHaveBeenCalled();
+    expect(mockDeleteQuery.eq).toHaveBeenCalledWith('id', 'item-storage-1');
+    expect(deleteFromCloudinary).toHaveBeenCalledWith('manaure-vive/galeria/foto-subida-123');
+  });
+
+  it('no debe fallar la eliminación si la imagen no es de Cloudinary (publicId null)', async () => {
     const mockDeleteQuery = {
       delete: vi.fn().mockReturnThis(),
       eq: vi.fn().mockResolvedValue({ error: null }),
     };
     vi.mocked(supabase.from).mockReturnValue(mockDeleteQuery as any);
 
-    const res = await deleteGalleryItem(
-      'item-storage-1',
-      'https://xyz.supabase.co/storage/v1/object/public/gallery-images/foto-subida-123.webp'
-    );
+    const res = await deleteGalleryItem('item-storage-2', 'https://externo.com/foto.jpg');
 
     expect(res.success).toBe(true);
-    expect(supabase.storage.from).toHaveBeenCalledWith('gallery-images');
-    expect(mockRemove).toHaveBeenCalledWith(['foto-subida-123.webp']);
+    expect(mockDeleteQuery.delete).toHaveBeenCalled();
+    expect(deleteFromCloudinary).not.toHaveBeenCalled();
   });
 
   it('debe alternar la visibilidad de una foto en toggleGalleryItemActive', async () => {
@@ -350,20 +401,23 @@ describe('galleryService - Gestión Integral de la Galería Fotográfica', () =>
   it('debe subir una foto válida y retornar la URL pública en uploadGalleryPhoto', async () => {
     const fakeFile = new File(['fake-image-bytes'], 'paisaje.webp', { type: 'image/webp' });
 
-    const mockUpload = vi.fn().mockResolvedValue({ data: {}, error: null });
-    const mockGetPublicUrl = vi.fn().mockReturnValue({
-      data: { publicUrl: 'https://xyz.supabase.co/storage/v1/object/public/gallery-images/galeria-123.webp' },
+    vi.mocked(uploadToCloudinary).mockResolvedValue({
+      success: true,
+      secure_url: 'https://res.cloudinary.com/ky01b0vz/image/upload/v1/manaure-vive/galeria/galeria-123.webp',
+      public_id: 'manaure-vive/galeria/galeria-123',
     });
-
-    vi.mocked(supabase.storage.from).mockReturnValue({
-      upload: mockUpload,
-      getPublicUrl: mockGetPublicUrl,
-    } as any);
 
     const res = await uploadGalleryPhoto(fakeFile, 'parapente');
 
+    expect(uploadToCloudinary).toHaveBeenCalledWith(
+      fakeFile,
+      'manaure-vive/galeria/parapente',
+      {
+        resourceType: 'image',
+      }
+    );
     expect(res.success).toBe(true);
-    expect(res.url).toBe('https://xyz.supabase.co/storage/v1/object/public/gallery-images/galeria-123.webp');
+    expect(res.url).toBe('https://res.cloudinary.com/ky01b0vz/image/upload/v1/manaure-vive/galeria/galeria-123.webp');
   });
 
   // --- Pruebas de Gestión Dinámica de Categorías ---
@@ -437,7 +491,7 @@ describe('galleryService - Gestión Integral de la Galería Fotográfica', () =>
   it('createGalleryCategory debe insertar exitosamente una nueva categoría', async () => {
     const mockInserted = {
       id: 'cat-new-uuid',
-      slug: 'avistamiento-aves',
+      slug: 'avistamiento-de-aves',
       name: 'Avistamiento de Aves',
       display_order: 8,
       is_active: true,
@@ -451,8 +505,10 @@ describe('galleryService - Gestión Integral de la Galería Fotográfica', () =>
 
     const res = await createGalleryCategory('Avistamiento de Aves');
     expect(res.success).toBe(true);
-    expect(res.category?.slug).toBe('avistamiento-aves');
+    expect(res.category?.slug).toBe('avistamiento-de-aves');
     expect(res.category?.name).toBe('Avistamiento de Aves');
+    expect(createCloudinaryFolder).toHaveBeenCalledWith('manaure-vive/galeria/avistamiento-de-aves');
+    expect(createCloudinaryFolder).toHaveBeenCalledWith('manaure-vive/premios/avistamiento-de-aves');
   });
 
   it('deleteGalleryCategory debe proteger la categoría base "otro"', async () => {
@@ -461,7 +517,7 @@ describe('galleryService - Gestión Integral de la Galería Fotográfica', () =>
     expect(res.error).toContain('no puede ser eliminada');
   });
 
-  it('deleteGalleryCategory debe reasignar fotos huérfanas a "otro" y eliminar la categoría', async () => {
+  it('deleteGalleryCategory debe reasignar fotos huérfanas a "otro", eliminar categoría y borrar carpeta Cloudinary personalizada', async () => {
     // 1. Mock de fotos afectadas en Supabase
     const mockSelectQuery = {
       select: vi.fn().mockReturnThis(),
@@ -486,9 +542,31 @@ describe('galleryService - Gestión Integral de la Galería Fotográfica', () =>
       return mockDeleteQuery as any;
     });
 
-    const res = await deleteGalleryCategory('parapente');
+    // Usar categoría personalizada (no protegida) para verificar borrado de carpeta
+    const res = await deleteGalleryCategory('experiencia-custom');
     expect(res.success).toBe(true);
     expect(res.reassignedPhotosCount).toBe(2);
+    expect(deleteCloudinaryFolder).toHaveBeenCalledWith('manaure-vive/galeria/experiencia-custom');
+    expect(deleteCloudinaryFolder).toHaveBeenCalledWith('manaure-vive/premios/experiencia-custom');
+  });
+
+  it('uploadGalleryPhoto debe subir a la carpeta raíz de galería si la categoría es "otro" o vacía', async () => {
+    const fakeFile = new File(['fake-bytes'], 'otro.webp', { type: 'image/webp' });
+
+    vi.mocked(uploadToCloudinary).mockResolvedValue({
+      success: true,
+      secure_url: 'https://res.cloudinary.com/ky01b0vz/image/upload/v1/manaure-vive/galeria/otro-1.webp',
+      public_id: 'manaure-vive/galeria/otro-1',
+    });
+
+    const res = await uploadGalleryPhoto(fakeFile, 'otro');
+
+    expect(uploadToCloudinary).toHaveBeenCalledWith(
+      fakeFile,
+      'manaure-vive/galeria',
+      { resourceType: 'image' }
+    );
+    expect(res.success).toBe(true);
   });
 });
 

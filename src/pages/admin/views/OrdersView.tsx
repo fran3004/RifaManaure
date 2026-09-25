@@ -294,7 +294,7 @@ export const OrdersView: React.FC = () => {
         description={
           selectedRaffle
             ? `Supervisión y trazabilidad de órdenes para: ${selectedRaffle.title}`
-            : 'Supervisión, filtrado y trazabilidad de todos los pedidos de compra en tiempo real desde Supabase.'
+            : 'Supervisión, filtrado y trazabilidad de todos los pedidos de compra en tiempo real.'
         }
         badge={
           selectedRaffle
@@ -405,7 +405,7 @@ export const OrdersView: React.FC = () => {
         </div>
 
         {isLoading ? (
-          <AdminLoadingState message="Consultando órdenes en Supabase..." />
+          <AdminLoadingState message="Consultando órdenes..." />
         ) : error ? (
           <AdminErrorState
             title={isForbidden ? 'Acceso Restringido' : 'Error al cargar órdenes'}

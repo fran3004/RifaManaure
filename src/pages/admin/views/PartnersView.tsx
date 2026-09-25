@@ -312,7 +312,7 @@ export const PartnersView: React.FC = () => {
         if (!uploadRes.success || !uploadRes.url) {
           setFormErrors((prev) => ({
             ...prev,
-            logo: uploadRes.error || 'Error al subir el logotipo a Cloudinary.',
+            logo: uploadRes.error || 'Error al subir el logotipo.',
           }));
           setIsSubmitting(false);
           return;
@@ -433,7 +433,7 @@ export const PartnersView: React.FC = () => {
         setPartners((prev) => prev.filter((p) => p.id !== deletingPartner.id));
         setFeedback({
           type: 'success',
-          message: `Aliado "${deletingPartner.name}" y su logotipo en Cloudinary eliminados correctamente.`,
+          message: `Aliado "${deletingPartner.name}" y su logotipo eliminados correctamente.`,
         });
         setIsDeleteModalOpen(false);
         setDeletingPartner(null);
@@ -916,7 +916,7 @@ export const PartnersView: React.FC = () => {
                     onClick={() => setLogoTab('upload')}
                   >
                     <Upload size={14} />
-                    <span>Subir archivo (Cloudinary)</span>
+                    <span>Subir archivo</span>
                   </button>
                   <button
                     type="button"
@@ -945,7 +945,7 @@ export const PartnersView: React.FC = () => {
                             : 'Haz clic para seleccionar o arrastra un logotipo'}
                       </span>
                       <span className={partnerStyles.dropzoneHint}>
-                        PNG, WebP, JPG o SVG (máx. 5 MB). Se alojará en Cloudinary CDN.
+                        PNG, WebP, JPG o SVG (máx. 5 MB). Se optimizará y publicará automáticamente.
                       </span>
                       <input
                         type="file"
@@ -986,15 +986,15 @@ export const PartnersView: React.FC = () => {
                         {logoFile ? (
                           <span className={partnerStyles.newFileBadge}>Nuevo archivo</span>
                         ) : logoUrl?.includes('res.cloudinary.com') ? (
-                          <span className={partnerStyles.cloudinaryBadge}>Cloudinary CDN</span>
+                          <span className={partnerStyles.cloudinaryBadge}>Optimizado</span>
                         ) : null}
                       </div>
                       <div>
                         {logoFile
                           ? `${logoFile.name} (${Math.round(logoFile.size / 1024)} KB)`
                           : logoUrl?.includes('res.cloudinary.com')
-                            ? 'Alojado y optimizado en Cloudinary CDN'
-                            : 'Logo local asignado'}
+                            ? 'Alojado y optimizado en la nube'
+                            : 'Logotipo asignado'}
                       </div>
                     </div>
                     {(logoFile || logoUrl || logoPreview) && (
@@ -1126,7 +1126,7 @@ export const PartnersView: React.FC = () => {
                       <Loader2 size={16} className="animate-spin" />
                       <span>
                         {logoFile
-                          ? 'Subiendo logotipo a Cloudinary...'
+                          ? 'Subiendo logotipo...'
                           : editingPartner
                             ? 'Actualizando aliado...'
                             : 'Registrando aliado...'}
@@ -1170,7 +1170,7 @@ export const PartnersView: React.FC = () => {
             <p className={partnerStyles.deleteModalDescription}>
               Estás a punto de eliminar a{' '}
               <strong className={partnerStyles.highlightText}>{deletingPartner.name}</strong>. Esta acción
-              removerá el convenio de la base de datos y eliminará permanentemente su logotipo de Cloudinary CDN para no dejar archivos residuales.
+              removerá el convenio de la base de datos y eliminará permanentemente su logotipo para no dejar archivos residuales.
             </p>
 
             <div className={partnerStyles.deleteModalActions}>
