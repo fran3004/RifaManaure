@@ -272,12 +272,30 @@ export const SelectorBoletos: React.FC = () => {
             )}
           </div>
 
-          {/* Botones de Azar */}
+          {/* Botones de Azar y Limpieza con Estructura Estable Anti-CLS (MED-01) */}
           <div className={styles.randomButtons}>
-            <div className={styles.randomLabel}>
-              <Sparkles size={16} aria-hidden="true" />
-              <span>Azar:</span>
+            <div className={styles.randomHeaderRow}>
+              <div className={styles.randomLabel}>
+                <Sparkles size={16} aria-hidden="true" />
+                <span>Azar:</span>
+              </div>
+              <div className={styles.clearSlot}>
+                {selectedTickets.length > 0 && (
+                  <Button
+                    type="button"
+                    variant="danger-soft"
+                    size="sm"
+                    className={styles.clearBtn}
+                    onClick={clearSelection}
+                    leftIcon={<RotateCcw size={14} aria-hidden="true" />}
+                    aria-label="Limpiar selección de boletos"
+                  >
+                    Limpiar
+                  </Button>
+                )}
+              </div>
             </div>
+
             <div className={styles.randomActionGroup}>
               <Button
                 type="button"
@@ -324,19 +342,6 @@ export const SelectorBoletos: React.FC = () => {
                 +10
               </Button>
             </div>
-            {selectedTickets.length > 0 && (
-              <Button
-                type="button"
-                variant="danger-soft"
-                size="sm"
-                className={styles.clearBtn}
-                onClick={clearSelection}
-                leftIcon={<RotateCcw size={14} aria-hidden="true" />}
-                aria-label="Limpiar selección de boletos"
-              >
-                Limpiar
-              </Button>
-            )}
           </div>
         </div>
 
