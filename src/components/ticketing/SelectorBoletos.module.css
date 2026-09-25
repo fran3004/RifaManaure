@@ -455,7 +455,13 @@
 }
 
 .statusChip {
-  /* Clase específica para los chips de estado */
+  flex: 1 1 auto;
+  min-width: 0;
+  text-align: center;
+  box-sizing: border-box;
+  font-variant-numeric: tabular-nums;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .filterChip {
