@@ -5,10 +5,12 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 2rem;
+  padding: clamp(1.5rem, 4vw, 3rem);
   text-align: center;
-  color: var(--text-primary, #f3f7f5);
-  background-color: var(--bg-body, #060e0a);
+  box-sizing: border-box;
+  color: var(--text-primary, #16261c);
+  background-color: var(--bg-page, #f4efe4);
+  width: 100%;
 }
 
 .iconCircle {
@@ -20,43 +22,84 @@
   align-items: center;
   justify-content: center;
   color: #ef4444;
-  margin-bottom: 1rem;
+  margin-bottom: 1.25rem;
 }
 
 .title {
-  font-size: 1.5rem;
-  line-height: 1.2;
+  font-family: var(--font-heading, 'Playfair Display Variable', Georgia, serif);
+  font-size: clamp(1.25rem, 1.1rem + 1vw, 1.75rem);
+  line-height: 1.25;
   font-weight: 700;
-  margin-bottom: 0.5rem;
+  color: var(--text-primary, #16261c);
+  margin-bottom: 0.65rem;
 }
 
 .description {
-  max-width: 500px;
-  color: var(--text-secondary, #9cb5ab);
-  font-size: 0.875rem;
-  line-height: 1.45;
-  line-height: 1.45;
-  margin-bottom: 1.5rem;
+  font-family: var(--font-sans, 'Outfit Variable', sans-serif);
+  max-width: 520px;
+  color: var(--text-secondary, #41564a);
+  font-size: 0.925rem;
+  line-height: 1.5;
+  margin-bottom: 1.75rem;
 }
 
 .retryButton {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.4rem;
-  border-radius: 8px;
-  background-color: var(--color-success);
-  color: #060e0a;
+  justify-content: center;
+  gap: 0.55rem;
+  min-height: 46px;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-md, 12px);
+  background-color: var(--brand-primary, #1b4a2e);
+  color: #ffffff;
+  font-family: var(--font-sans, 'Outfit Variable', sans-serif);
   font-weight: 700;
   font-size: 0.875rem;
   line-height: 1.2;
   border: none;
   cursor: pointer;
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  box-shadow: 0 4px 14px rgba(27, 74, 46, 0.28);
+  transition: all var(--transition-fast, 150ms ease);
 }
 
 .retryButton:hover {
-  opacity: 0.92;
+  background-color: var(--brand-primary-hover, #246a40);
   transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(27, 74, 46, 0.35);
+}
+
+.retryButton:active {
+  transform: translateY(0);
+}
+
+/* Modo Administrativo (si la ruta es /admin o ancestro data-theme="admin") */
+:where([data-theme="admin"]) .container,
+.containerAdmin {
+  background-color: var(--admin-bg, #0b1914);
+  color: var(--admin-text, #edf5f0);
+}
+
+:where([data-theme="admin"]) .title,
+.containerAdmin .title {
+  font-family: var(--font-sans, sans-serif);
+  color: var(--admin-text, #edf5f0);
+}
+
+:where([data-theme="admin"]) .description,
+.containerAdmin .description {
+  color: var(--admin-text-secondary, #9dbbb0);
+}
+
+:where([data-theme="admin"]) .retryButton,
+.containerAdmin .retryButton {
+  background-color: var(--brand-accent, #f5a623);
+  color: #0f2e1d;
+  box-shadow: 0 4px 14px rgba(245, 166, 35, 0.3);
+}
+
+:where([data-theme="admin"]) .retryButton:hover,
+.containerAdmin .retryButton:hover {
+  background-color: var(--brand-accent-hover, #e09015);
 }
 

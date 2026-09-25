@@ -26,7 +26,6 @@
   font-size: 1.875rem;
   line-height: 1.2;
   font-weight: 800;
-  line-height: 1.2;
   color: var(--text-primary, #16261C);
   margin: 0 0 1rem 0;
   letter-spacing: -0.02em;
@@ -41,7 +40,6 @@
   font-size: 1rem;
   line-height: 1.45;
   color: var(--text-secondary, #41564A);
-  line-height: 1.45;
   max-width: 60ch;
   margin: 0;
 }

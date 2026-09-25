@@ -43,10 +43,17 @@ export class ErrorBoundary extends Component<Props, State> {
         return this.props.fallback;
       }
 
+      const isAdmin =
+        typeof window !== 'undefined' && window.location.pathname.startsWith('/admin');
+
       return (
-        <div className={styles.container}>
+        <div
+          className={`${styles.container} ${isAdmin ? styles.containerAdmin : styles.containerPublic}`}
+          data-theme={isAdmin ? 'admin' : 'public'}
+          role="alert"
+        >
           <div className={styles.iconCircle}>
-            <AlertCircle size={32} />
+            <AlertCircle size={32} aria-hidden="true" />
           </div>
           <h2 className={styles.title}>
             Algo no cargó correctamente
@@ -60,7 +67,7 @@ export class ErrorBoundary extends Component<Props, State> {
             onClick={this.handleReset}
             className={styles.retryButton}
           >
-            <RotateCcw size={16} />
+            <RotateCcw size={16} aria-hidden="true" />
             <span>Recargar Página</span>
           </button>
         </div>

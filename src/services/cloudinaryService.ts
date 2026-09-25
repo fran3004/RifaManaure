@@ -624,10 +624,22 @@ export function getCloudinaryResponsiveUrl(
  */
 export function getHeroSlideResponsiveUrls(url: string | null | undefined) {
   if (!url || typeof url !== 'string') {
-    return { desktop: '', desktopJpg: '', tablet: '', mobile: '', mobileJpg: '', thumb: '', full: '' };
+    return {
+      desktop2k: '',
+      desktop2kJpg: '',
+      desktop: '',
+      desktopJpg: '',
+      tablet: '',
+      mobile: '',
+      mobileJpg: '',
+      thumb: '',
+      full: '',
+    };
   }
   const clean = url.trim();
   return {
+    desktop2k: getCloudinaryResponsiveUrl(clean, { width: 2560, height: 1440, crop: 'fill', format: 'webp' }),
+    desktop2kJpg: getCloudinaryResponsiveUrl(clean, { width: 2560, height: 1440, crop: 'fill', format: 'jpg' }),
     desktop: getCloudinaryResponsiveUrl(clean, { width: 1920, height: 1080, crop: 'fill', format: 'webp' }),
     desktopJpg: getCloudinaryResponsiveUrl(clean, { width: 1920, height: 1080, crop: 'fill', format: 'jpg' }),
     tablet: getCloudinaryResponsiveUrl(clean, { width: 1280, height: 720, crop: 'fill', format: 'webp' }),

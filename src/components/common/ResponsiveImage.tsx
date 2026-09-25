@@ -16,11 +16,11 @@ interface RoleSpec {
 }
 
 const ROLE_SPECS: Record<ImageRole, RoleSpec> = {
-  'hero-desktop': { ratio: '16x9', widths: [640, 1024, 1600, 1920] },
+  'hero-desktop': { ratio: '16x9', widths: [640, 1024, 1600, 1920, 2560] },
   'hero-mobile': { ratio: '4x5', widths: [640, 768] },
   'tarjeta': { ratio: '4x5', widths: [480, 768] },
   'galeria-thumb': { ratio: '3x2', widths: [320, 480, 640] },
-  'lightbox': { ratio: 'full', widths: [960, 1280, 1600] },
+  'lightbox': { ratio: 'full', widths: [960, 1280, 1600, 2048] },
 };
 
 const RATIO_FACTORS: Record<ImageRatio, number | null> = {
@@ -62,12 +62,12 @@ function resolveRoleDimensions(
   const widths =
     spec?.widths ||
     (effectiveRatio === '16x9'
-      ? [640, 1024, 1600, 1920]
+      ? [640, 1024, 1600, 1920, 2560]
       : effectiveRatio === '4x5'
       ? [480, 640, 768]
       : effectiveRatio === '3x2'
       ? [320, 480, 640]
-      : [640, 1024, 1600]);
+      : [640, 1024, 1600, 2048]);
 
   return widths.map((w) => calculateDimensions(w, effectiveRatio, entry));
 }

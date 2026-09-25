@@ -99,7 +99,7 @@
   flex-direction: column;
 }
 
-/* --- Contenedor Fluido Público (Consistente hasta 4K / 2560px) --- */
+/* --- Contenedor Fluido Público (Consistente desde 320px hasta Ultrawide / 4K) --- */
 [data-theme="public"] .container {
   width: min(1280px, 100% - 3rem);
   margin-inline: auto;
@@ -108,7 +108,19 @@
 
 @media (min-width: 1536px) {
   [data-theme="public"] .container {
-    width: min(1360px, 100% - 3rem);
+    width: min(1380px, 100% - 4rem);
+  }
+}
+
+@media (min-width: 1920px) {
+  [data-theme="public"] .container {
+    width: min(1480px, 100% - 5rem);
+  }
+}
+
+@media (min-width: 2560px) {
+  [data-theme="public"] .container {
+    width: min(1560px, 100% - 6rem);
   }
 }
 
@@ -119,6 +131,12 @@
 
   [data-theme="public"] .container {
     width: min(1280px, 100% - 2rem);
+  }
+}
+
+@media (max-width: 359px) {
+  [data-theme="public"] .container {
+    width: min(1280px, 100% - 1.25rem);
   }
 }
 

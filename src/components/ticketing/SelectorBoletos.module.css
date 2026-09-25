@@ -637,7 +637,6 @@
   color: var(--text-on-dark-muted, #B9CDBF);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  line-height: 1.2;
 }
 
 .cartTotalValue {
@@ -646,9 +645,7 @@
   font-variant-numeric: tabular-nums;
   font-weight: 800;
   color: var(--brand-accent);
-  line-height: 1.2;
   font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
 }
 
 .cartNumbersList {
@@ -695,7 +692,6 @@
   line-height: 1.2;
   font-variant-numeric: tabular-nums;
   font-weight: 700;
-  line-height: 1.2;
   flex-shrink: 0;
 }
 
@@ -829,7 +825,7 @@
 }
 
 /* --- Adaptabilidad Responsive --- */
-@media (max-width: 900px) {
+@media (max-width: 899px) {
   .filterBar {
     flex-direction: column;
     align-items: stretch;

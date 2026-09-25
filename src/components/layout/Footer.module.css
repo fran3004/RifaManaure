@@ -42,7 +42,6 @@
 .brandDesc {
   font-size: 0.875rem;
   line-height: 1.45;
-  line-height: 1.45;
   color: var(--text-on-dark-muted);
   max-width: 440px;
   overflow-wrap: anywhere;
@@ -94,7 +93,6 @@
   border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: var(--radius-full);
   font-size: 0.875rem;
-  line-height: 1.2;
   font-weight: 500;
   color: var(--text-on-dark);
   line-height: 1.45;
@@ -102,7 +100,6 @@
 
 .noCardsNotice {
   font-size: 0.875rem;
-  line-height: 1.2;
   color: var(--brand-accent);
   font-weight: 500;
   margin: 0.2rem 0 0;
@@ -288,7 +285,7 @@
   }
 }
 
-@media (max-width: 900px) {
+@media (max-width: 899px) {
   .footerContainer {
     grid-template-columns: 1fr;
     gap: 2.5rem;

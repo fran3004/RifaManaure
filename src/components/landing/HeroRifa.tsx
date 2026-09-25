@@ -236,14 +236,14 @@ export const HeroRifa: React.FC<HeroRifaProps> = ({
                 ) : (
                   <picture>
                     <source
-                      media="(max-width: 768px)"
+                      media="(min-width: 1921px)"
                       type="image/webp"
-                      srcSet={getHeroSlideResponsiveUrls(rawUrl).mobile}
+                      srcSet={getHeroSlideResponsiveUrls(rawUrl).desktop2k}
                     />
                     <source
-                      media="(max-width: 768px)"
+                      media="(min-width: 1921px)"
                       type="image/jpeg"
-                      srcSet={getHeroSlideResponsiveUrls(rawUrl).mobileJpg}
+                      srcSet={getHeroSlideResponsiveUrls(rawUrl).desktop2kJpg}
                     />
                     <source
                       media="(min-width: 769px)"
@@ -254,6 +254,16 @@ export const HeroRifa: React.FC<HeroRifaProps> = ({
                       media="(min-width: 769px)"
                       type="image/jpeg"
                       srcSet={getHeroSlideResponsiveUrls(rawUrl).desktopJpg}
+                    />
+                    <source
+                      media="(max-width: 768px)"
+                      type="image/webp"
+                      srcSet={getHeroSlideResponsiveUrls(rawUrl).mobile}
+                    />
+                    <source
+                      media="(max-width: 768px)"
+                      type="image/jpeg"
+                      srcSet={getHeroSlideResponsiveUrls(rawUrl).mobileJpg}
                     />
                     <img
                       src={getHeroSlideResponsiveUrls(rawUrl).desktopJpg || rawUrl}

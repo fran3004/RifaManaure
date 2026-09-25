@@ -57,7 +57,6 @@
 .questionText {
   font-family: var(--font-sans);
   font-size: 1rem;
-  line-height: 1.2;
   font-weight: 600;
   line-height: 1.45;
   color: var(--text-primary);
@@ -142,7 +141,6 @@
 
   .answerText {
     font-size: 0.875rem;
-  line-height: 1.45;
     line-height: 1.65;
   }
 }
