@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.8";
+import { generateTransactionalEmail } from "./emailTemplates.ts";
 
 /**
  * ==============================================================================
@@ -20,6 +21,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.8";
  * 7. Trazabilidad completa en la tabla 'notification_logs'.
  * 8. Fallo controlado: Si Brevo presenta incidencias, se registra el fallo sin revertir
  *    ni comprometer la aprobación financiera del pago en PostgreSQL.
+ * 9. Plantillas de correo oficiales con la identidad visual completa de Manaure Vive.
  * ==============================================================================
  */
 
@@ -98,322 +100,15 @@ function getServerConfig(): ServerConfig {
 }
 
 /**
- * Contrato mínimo recibido en el cuerpo de la petición.
+ * Contrato recibido en el cuerpo de la petición.
  */
 interface SendEmailRequestBody {
   orderId: string;
   eventType: "payment_received" | "payment_approved" | "payment_rejected";
   receiptPngBase64?: string;
   receiptFileName?: string;
+  siteUrl?: string;
   isRetry?: boolean;
-}
-
-/**
- * Formatea valores numéricos como moneda en pesos colombianos (COP).
- */
-function formatCurrency(amount: number): string {
-  try {
-    return new Intl.NumberFormat("es-CO", {
-      style: "currency",
-      currency: "COP",
-      maximumFractionDigits: 0,
-    }).format(amount);
-  } catch {
-    return `$ ${amount} COP`;
-  }
-}
-
-/**
- * Formatea fechas ISO en formato legible en español.
- */
-function formatDate(dateIso: string | null | undefined): string {
-  if (!dateIso) return "Por definir";
-  try {
-    const d = new Date(dateIso);
-    return new Intl.DateTimeFormat("es-CO", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    }).format(d);
-  } catch {
-    return String(dateIso);
-  }
-}
-
-/**
- * Genera el contenido HTML y texto plano del correo según el evento transaccional.
- */
-function buildEmailTemplates(
-  eventType: string,
-  order: {
-    id: string;
-    reference: string;
-    total_amount: number;
-    rejection_reason?: string | null;
-  },
-  buyer: {
-    full_name: string;
-    document_id: string;
-    phone: string;
-    email: string;
-    city: string;
-  },
-  raffle: {
-    title: string;
-    draw_date: string;
-    lottery_reference: string;
-  },
-  tickets: string[],
-  hasAttachment: boolean
-): { subject: string; htmlContent: string; textContent: string } {
-  const formattedAmount = formatCurrency(order.total_amount);
-  const formattedDrawDate = formatDate(raffle.draw_date);
-  const ticketsList = tickets.length > 0 ? tickets.join(", ") : "Sin asignar";
-
-  if (eventType === EVENT_PAYMENT_APPROVED) {
-    const subject = `¡Pago Confirmado! Boletos Oficiales - Rifa Manaure (${order.reference})`;
-
-    const ticketBadgesHtml = tickets
-      .map(
-        (t) =>
-          `<span style="display:inline-block;background:#059669;color:#ffffff;font-weight:bold;font-size:16px;padding:6px 12px;margin:4px;border-radius:6px;font-family:monospace;">${t}</span>`
-      )
-      .join(" ");
-
-    const htmlContent = `
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="utf-8">
-  <title>${subject}</title>
-</head>
-<body style="font-family:Arial,Helvetica,sans-serif;line-height:1.6;color:#1e293b;background-color:#f8fafc;margin:0;padding:20px;">
-  <div style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);border:1px solid #e2e8f0;">
-    
-    <!-- Encabezado -->
-    <div style="background:linear-gradient(135deg,#064e3b 0%,#059669 100%);color:#ffffff;padding:32px 24px;text-align:center;">
-      <h1 style="margin:0;font-size:24px;letter-spacing:-0.5px;">¡Tu Pago ha sido Aprobado!</h1>
-      <p style="margin:8px 0 0 0;font-size:15px;opacity:0.9;">Tus boletos oficiales han sido confirmados exitosamente</p>
-    </div>
-
-    <!-- Contenido Principal -->
-    <div style="padding:28px 24px;">
-      <p style="font-size:16px;margin:0 0 16px 0;">Hola <strong>${buyer.full_name}</strong>,</p>
-      <p style="margin:0 0 20px 0;color:#475569;">
-        Hemos verificado satisfactoriamente tu pago por valor de <strong>${formattedAmount}</strong> correspondiente a la orden <strong>#${order.reference}</strong>.
-      </p>
-
-      <!-- Caja de Boletos -->
-      <div style="background:#f1f5f9;border-left:4px solid #059669;border-radius:8px;padding:18px;margin-bottom:24px;">
-        <h3 style="margin:0 0 10px 0;font-size:15px;color:#0f172a;text-transform:uppercase;letter-spacing:0.5px;">Tus Números de la Suerte:</h3>
-        <div style="margin-top:8px;">
-          ${ticketBadgesHtml}
-        </div>
-      </div>
-
-      <!-- Detalles del Sorteo -->
-      <table style="width:100%;border-collapse:collapse;margin-bottom:24px;font-size:14px;">
-        <tr style="border-bottom:1px solid #e2e8f0;">
-          <td style="padding:10px 0;color:#64748b;">Rifa:</td>
-          <td style="padding:10px 0;font-weight:600;text-align:right;color:#0f172a;">${raffle.title}</td>
-        </tr>
-        <tr style="border-bottom:1px solid #e2e8f0;">
-          <td style="padding:10px 0;color:#64748b;">Fecha del Sorteo:</td>
-          <td style="padding:10px 0;font-weight:600;text-align:right;color:#0f172a;">${formattedDrawDate}</td>
-        </tr>
-        <tr style="border-bottom:1px solid #e2e8f0;">
-          <td style="padding:10px 0;color:#64748b;">Lotería de Referencia:</td>
-          <td style="padding:10px 0;font-weight:600;text-align:right;color:#0f172a;">${raffle.lottery_reference}</td>
-        </tr>
-        <tr>
-          <td style="padding:10px 0;color:#64748b;">Referencia de Orden:</td>
-          <td style="padding:10px 0;font-weight:600;text-align:right;color:#059669;">${order.reference}</td>
-        </tr>
-      </table>
-
-      ${
-        hasAttachment
-          ? `<div style="background:#ecfdf5;border:1px solid #a7f3d0;border-radius:8px;padding:14px;margin-bottom:24px;font-size:14px;color:#065f46;">
-               📎 <strong>Comprobante Oficial Adjunto:</strong> Hemos adjuntado a este correo tu comprobante digital oficial de compra con código QR de verificación rápida. Guárdalo para el día del sorteo.
-             </div>`
-          : ""
-      }
-
-      <div style="text-align:center;margin:28px 0 10px 0;">
-        <a href="https://manaurevive.com/verificar?q=${encodeURIComponent(order.reference)}" 
-           style="background:#059669;color:#ffffff;text-decoration:none;padding:12px 24px;border-radius:8px;font-weight:bold;font-size:14px;display:inline-block;">
-          Verificar Boletos en Línea
-        </a>
-      </div>
-    </div>
-
-    <!-- Pie de Página -->
-    <div style="background:#f8fafc;padding:20px 24px;border-top:1px solid #e2e8f0;text-align:center;font-size:12px;color:#94a3b8;">
-      <p style="margin:0 0 6px 0;">Rifa Manaure Balcón del Cesar &bull; Gestión Transaccional Oficial</p>
-      <p style="margin:0;">Si tienes alguna duda o inquietud sobre tus boletos, contáctanos a través de nuestros canales oficiales de soporte.</p>
-    </div>
-  </div>
-</body>
-</html>
-`;
-
-    const textContent = `
-¡TU PAGO HA SIDO APROBADO! - RIFA MANAURE
-
-Hola ${buyer.full_name},
-
-Hemos verificado satisfactoriamente tu pago por valor de ${formattedAmount} correspondiente a la orden #${order.reference}.
-
-TUS NÚMEROS DE LA SUERTE:
-${ticketsList}
-
-DETALLES DEL SORTEO:
-- Rifa: ${raffle.title}
-- Fecha del sorteo: ${formattedDrawDate}
-- Lotería de referencia: ${raffle.lottery_reference}
-- Referencia de orden: ${order.reference}
-
-${
-  hasAttachment
-    ? "Nota: Tu comprobante digital oficial con código de verificación QR va adjunto a este correo."
-    : ""
-}
-
-Puedes verificar el estado oficial de tus boletos en cualquier momento visitando:
-https://manaurevive.com/verificar?q=${encodeURIComponent(order.reference)}
-
-Gracias por apoyar esta iniciativa.
-Equipo de Rifa Manaure Balcón del Cesar
-`;
-
-    return { subject, htmlContent, textContent };
-  }
-
-  if (eventType === EVENT_PAYMENT_REJECTED) {
-    const subject = `Actualización sobre tu orden - Rifa Manaure (${order.reference})`;
-    const reasonText =
-      order.rejection_reason && order.rejection_reason.trim().length > 0
-        ? order.rejection_reason.trim()
-        : "El comprobante adjunto no pudo ser validado o no coincide con los montos/referencias esperadas.";
-
-    const htmlContent = `
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="utf-8">
-  <title>${subject}</title>
-</head>
-<body style="font-family:Arial,Helvetica,sans-serif;line-height:1.6;color:#1e293b;background-color:#f8fafc;margin:0;padding:20px;">
-  <div style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);border:1px solid #e2e8f0;">
-    
-    <!-- Encabezado -->
-    <div style="background:linear-gradient(135deg,#991b1b 0%,#dc2626 100%);color:#ffffff;padding:32px 24px;text-align:center;">
-      <h1 style="margin:0;font-size:24px;letter-spacing:-0.5px;">Actualización de tu Orden</h1>
-      <p style="margin:8px 0 0 0;font-size:15px;opacity:0.9;">Información sobre la verificación de tu pago</p>
-    </div>
-
-    <!-- Contenido -->
-    <div style="padding:28px 24px;">
-      <p style="font-size:16px;margin:0 0 16px 0;">Hola <strong>${buyer.full_name}</strong>,</p>
-      <p style="margin:0 0 20px 0;color:#475569;">
-        Te informamos que tras la revisión manual de la orden <strong>#${order.reference}</strong>, el pago no pudo ser confirmado por el siguiente motivo:
-      </p>
-
-      <div style="background:#fef2f2;border-left:4px solid #dc2626;border-radius:8px;padding:16px;margin-bottom:24px;font-size:14px;color:#991b1b;">
-        <strong>Motivo reportado:</strong><br>
-        ${reasonText}
-      </div>
-
-      <p style="color:#475569;font-size:14px;margin-bottom:20px;">
-        Los números que habías seleccionado han sido liberados temporalmente para mantener la disponibilidad del sorteo. Si consideras que se trata de un error o deseas enviar un nuevo soporte de transferencia, por favor comunícate de inmediato con nuestro equipo de atención.
-      </p>
-
-      <table style="width:100%;border-collapse:collapse;margin-bottom:24px;font-size:14px;">
-        <tr style="border-bottom:1px solid #e2e8f0;">
-          <td style="padding:10px 0;color:#64748b;">Rifa:</td>
-          <td style="padding:10px 0;font-weight:600;text-align:right;color:#0f172a;">${raffle.title}</td>
-        </tr>
-        <tr>
-          <td style="padding:10px 0;color:#64748b;">Referencia:</td>
-          <td style="padding:10px 0;font-weight:600;text-align:right;color:#dc2626;">${order.reference}</td>
-        </tr>
-      </table>
-
-      <div style="text-align:center;margin:28px 0 10px 0;">
-        <a href="https://manaurevive.com" 
-           style="background:#0f172a;color:#ffffff;text-decoration:none;padding:12px 24px;border-radius:8px;font-weight:bold;font-size:14px;display:inline-block;">
-          Visitar Rifa Manaure
-        </a>
-      </div>
-    </div>
-
-    <!-- Pie de Página -->
-    <div style="background:#f8fafc;padding:20px 24px;border-top:1px solid #e2e8f0;text-align:center;font-size:12px;color:#94a3b8;">
-      <p style="margin:0 0 6px 0;">Rifa Manaure Balcón del Cesar &bull; Soporte Administrativo</p>
-      <p style="margin:0;">Para asistencia directa, contáctanos a través de nuestro WhatsApp oficial de atención.</p>
-    </div>
-  </div>
-</body>
-</html>
-`;
-
-    const textContent = `
-ACTUALIZACIÓN SOBRE TU ORDEN - RIFA MANAURE
-
-Hola ${buyer.full_name},
-
-Te informamos que la verificación del pago de tu orden #${order.reference} no pudo ser completada.
-
-MOTIVO DE RECHAZO:
-${reasonText}
-
-Los números previamente asociados han sido liberados. Si consideras que hubo una confusión o deseas adjuntar un nuevo soporte, por favor contáctanos con la referencia #${order.reference}.
-
-Atentamente,
-Equipo de Atención - Rifa Manaure Balcón del Cesar
-`;
-
-    return { subject, htmlContent, textContent };
-  }
-
-  // EVENT_PAYMENT_RECEIVED (Soporte arquitectónico)
-  const subject = `Comprobante recibido en verificación - Rifa Manaure (${order.reference})`;
-
-  const htmlContent = `
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="utf-8">
-  <title>${subject}</title>
-</head>
-<body style="font-family:Arial,Helvetica,sans-serif;line-height:1.6;color:#1e293b;background-color:#f8fafc;margin:0;padding:20px;">
-  <div style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);border:1px solid #e2e8f0;">
-    <div style="background:#0284c7;color:#ffffff;padding:28px 24px;text-align:center;">
-      <h1 style="margin:0;font-size:22px;">Comprobante Recibido</h1>
-      <p style="margin:6px 0 0 0;font-size:14px;opacity:0.9;">Tu orden se encuentra en proceso de validación</p>
-    </div>
-    <div style="padding:24px;">
-      <p>Hola <strong>${buyer.full_name}</strong>,</p>
-      <p>Hemos recibido tu soporte de pago para la orden <strong>#${order.reference}</strong> (${formattedAmount}).</p>
-      <p>Nuestro equipo administrativo validará la transacción a la mayor brevedad. Una vez aprobada, recibirás la confirmación oficial con tus boletos asignados.</p>
-    </div>
-  </div>
-</body>
-</html>
-`;
-
-  const textContent = `
-COMPROBANTE RECIBIDO EN VERIFICACIÓN - RIFA MANAURE
-
-Hola ${buyer.full_name},
-
-Hemos recibido tu soporte de pago para la orden #${order.reference} por ${formattedAmount}.
-Tu orden está en fila de revisión. Tan pronto sea confirmada, recibirás tus boletos oficiales.
-
-Equipo de Rifa Manaure Balcón del Cesar
-`;
-
-  return { subject, htmlContent, textContent };
 }
 
 /**
@@ -464,7 +159,7 @@ serve(async (req: Request) => {
     );
   }
 
-  const { orderId, eventType, receiptPngBase64, receiptFileName, isRetry } = body;
+  const { orderId, eventType, receiptPngBase64, receiptFileName, isRetry } = body || {};
 
   // 4. Validación de campos obligatorios
   if (!orderId || typeof orderId !== "string" || !orderId.trim()) {
@@ -575,6 +270,7 @@ serve(async (req: Request) => {
       payment_method,
       contact_preference,
       created_at,
+      verified_at,
       rejection_reason,
       buyer:buyers!orders_buyer_id_fkey(
         id,
@@ -736,7 +432,7 @@ serve(async (req: Request) => {
     );
   }
 
-  // 10. Construcción de plantilla y adjuntos
+  // 10. Construcción de plantilla y adjuntos con identidad visual oficial
   const hasAttachment = Boolean(
     cleanEventType === EVENT_PAYMENT_APPROVED &&
       receiptPngBase64 &&
@@ -744,14 +440,40 @@ serve(async (req: Request) => {
       receiptPngBase64.trim().length > 0
   );
 
-  const { subject, htmlContent, textContent } = buildEmailTemplates(
-    cleanEventType,
-    order,
-    buyer,
-    raffle,
-    ticketNumbers,
-    hasAttachment
-  );
+  // Resolución no hardcodeada de la URL del portal
+  const origin = req.headers.get("origin") || "";
+  const envSiteUrl = Deno.env.get("SITE_URL") || Deno.env.get("VITE_SITE_URL") || "";
+  const siteUrl = (body.siteUrl || origin || envSiteUrl || "https://manaurevive.com").replace(/\/$/, "");
+
+  const { subject, htmlContent, textContent } = generateTransactionalEmail({
+    eventType: cleanEventType as "payment_approved" | "payment_rejected" | "payment_received",
+    order: {
+      id: order.id,
+      reference: order.reference,
+      totalAmount: order.total_amount,
+      ticketCount: order.ticket_count,
+      status: order.status,
+      rejectionReason: order.rejection_reason,
+      confirmedAt: order.verified_at,
+      paymentMethod: order.payment_method,
+    },
+    buyer: {
+      fullName: buyer?.full_name || "Comprador",
+      documentId: buyer?.document_id,
+      phone: buyer?.phone,
+      email: buyerEmail,
+      city: buyer?.city,
+    },
+    raffle: {
+      title: raffle?.title || "Gran Rifa Manaure",
+      drawDate: raffle?.draw_date,
+      lotteryReference: raffle?.lottery_reference,
+    },
+    tickets: ticketNumbers,
+    siteUrl,
+    hasAttachment,
+    supportEmail: config.brevoReplyToEmail || "soporte@rifamanaure.com",
+  });
 
   const emailPayload: Record<string, unknown> = {
     sender: {
@@ -761,7 +483,7 @@ serve(async (req: Request) => {
     to: [
       {
         email: buyerEmail,
-        name: buyer.full_name || "Comprador",
+        name: buyer?.full_name || "Comprador",
       },
     ],
     subject,
