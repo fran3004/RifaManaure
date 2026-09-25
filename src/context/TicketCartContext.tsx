@@ -12,6 +12,8 @@ import { getRandomTicketNumbers } from '@/lib/utils';
 import { calculateTicketStats } from '@/config/ticketSocialProof';
 import { TicketCartContext } from './TicketCartContextDefinition';
 import { ToastNotification, type ToastItem } from '@/components/common/ToastNotification';
+import { RAFFLE_UPDATED_EVENT } from '@/hooks/useActiveRaffle';
+
 
 const RAFFLE_CACHE_KEY = 'manaure_active_raffle_cache';
 const WINNER_CACHE_KEY = 'manaure_active_winner_cache';
@@ -288,7 +290,38 @@ export const TicketCartProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     };
   }, [raffle?.id]);
 
+  // ─── Sincronización inmediata al cambio de rifa activa ────────────────────
+  // Escucha RAFFLE_UPDATED_EVENT (misma pestaña, emitido por saveCachedRaffle)
+  // y el evento 'storage' (otras pestañas) para reaccionar sin esperar Realtime.
+  useEffect(() => {
+    const handleRaffleUpdated = (evt: Event) => {
+      const customEvt = evt as CustomEvent<RaffleRow>;
+      const updatedRaffle = customEvt.detail;
+      if (!updatedRaffle?.id) return;
+
+      // Solo recargar si la rifa activa cambió (ID diferente o status diferente)
+      if (updatedRaffle.id !== raffle?.id || updatedRaffle.status !== raffle?.status) {
+        void loadData();
+      }
+    };
+
+    const handleStorage = (evt: StorageEvent) => {
+      if (evt.key === RAFFLE_CACHE_KEY) {
+        void loadData();
+      }
+    };
+
+    window.addEventListener(RAFFLE_UPDATED_EVENT, handleRaffleUpdated);
+    window.addEventListener('storage', handleStorage);
+
+    return () => {
+      window.removeEventListener(RAFFLE_UPDATED_EVENT, handleRaffleUpdated);
+      window.removeEventListener('storage', handleStorage);
+    };
+  }, [loadData, raffle?.id, raffle?.status]);
+
   const toggleTicketSelection = (ticketNumber: string) => {
+
     if (raffle && raffle.status !== 'active') {
       showToast(
         'info',

@@ -271,3 +271,53 @@ export async function createRaffleAdmin(
     };
   }
 }
+
+// =============================================================================
+// Activacion y Pausa Publica de Rifas (basadas en admin_update_raffle)
+// =============================================================================
+
+export interface ActivateRaffleResult {
+  success: boolean;
+  raffle?: RaffleRow;
+  error?: string;
+  code?: string;
+  isTimeout?: boolean;
+}
+
+export async function activateRafflePublic(
+  raffle: RaffleRow,
+  timeoutMs: number = DEFAULT_REQUEST_TIMEOUT_MS
+): Promise<ActivateRaffleResult> {
+  return updateRaffleAdmin(
+    {
+      raffleId: raffle.id,
+      title: raffle.title,
+      description: raffle.description || '',
+      ticketPrice: Number(raffle.ticket_price),
+      drawDate: raffle.draw_date || new Date().toISOString(),
+      lotteryReference: raffle.lottery_reference || '',
+      status: 'active',
+      maxTicketsPerBuyer: raffle.max_tickets_per_buyer || 50,
+    },
+    timeoutMs
+  );
+}
+
+export async function pauseRafflePublic(
+  raffle: RaffleRow,
+  timeoutMs: number = DEFAULT_REQUEST_TIMEOUT_MS
+): Promise<ActivateRaffleResult> {
+  return updateRaffleAdmin(
+    {
+      raffleId: raffle.id,
+      title: raffle.title,
+      description: raffle.description || '',
+      ticketPrice: Number(raffle.ticket_price),
+      drawDate: raffle.draw_date || new Date().toISOString(),
+      lotteryReference: raffle.lottery_reference || '',
+      status: 'paused',
+      maxTicketsPerBuyer: raffle.max_tickets_per_buyer || 50,
+    },
+    timeoutMs
+  );
+}
