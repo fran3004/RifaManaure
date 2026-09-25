@@ -315,6 +315,48 @@ describe('Servicio de Notificaciones por WhatsApp (src/services/notificationServ
         expect.any(Object)
       );
     });
+
+    it('debe despachar WhatsApp y configurar contactPreference en "both" cuando se elige ambos', async () => {
+      const mockMaybeSingle = vi.fn().mockResolvedValueOnce({ data: null, error: null });
+      const mockSelectInitial = vi.fn().mockReturnValue({
+        eq: vi.fn().mockReturnValue({ maybeSingle: mockMaybeSingle }),
+      });
+      const mockSingle = vi.fn().mockResolvedValueOnce({
+        data: { id: 'log_both', status: 'sent' },
+        error: null,
+      });
+      const mockSelectAfterUpsert = vi.fn().mockReturnValue({ single: mockSingle });
+      const mockUpsert = vi.fn().mockReturnValue({ select: mockSelectAfterUpsert });
+
+      vi.mocked(supabase.from).mockReturnValue({
+        select: mockSelectInitial,
+        upsert: mockUpsert,
+      } as any);
+
+      const result = await dispatchOrderNotifications({
+        orderId: 'ord_dispatch_both',
+        contactPreference: 'both',
+        eventType: 'payment_approved',
+        notificationData: mockNotificationData,
+      });
+
+      expect(result.contactPreference).toBe('both');
+      expect(result.whatsappDispatched).toBe(true);
+      expect(result.whatsappNotification).toBeDefined();
+    });
+
+    it('no debe despachar WhatsApp si la preferencia de contacto es exclusivamente "email"', async () => {
+      const result = await dispatchOrderNotifications({
+        orderId: 'ord_dispatch_email_only',
+        contactPreference: 'email',
+        eventType: 'payment_approved',
+        notificationData: mockNotificationData,
+      });
+
+      expect(result.contactPreference).toBe('email');
+      expect(result.whatsappDispatched).toBe(false);
+      expect(result.whatsappNotification).toBeUndefined();
+    });
   });
 
   describe('7. Reintentos (retryNotification)', () => {
@@ -345,7 +387,18 @@ describe('Servicio de Notificaciones por WhatsApp (src/services/notificationServ
       expect(result.whatsAppLink).toContain('https://wa.me/573001234567');
     });
 
-    it('debe fallar y registrar error si no hay teléfono al reintentar', async () => {
+    it('debe responder adecuadamente al solicitar reintento por canal "email"', async () => {
+      const result = await retryNotification('ord_retry_email', 'email', 'payment_approved', {
+        buyerEmail: 'carlos@example.com',
+        buyerName: 'Carlos Pérez',
+        orderReference: 'MAN-2026-001',
+      });
+
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('correo transaccional');
+    });
+
+    it('debe fallar y registrar error si no hay teléfono al reintentar WhatsApp', async () => {
       const mockMaybeSingle = vi.fn().mockResolvedValueOnce({ data: null, error: null });
       const mockSelectInitial = vi.fn().mockReturnValue({
         eq: vi.fn().mockReturnValue({ maybeSingle: mockMaybeSingle }),

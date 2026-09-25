@@ -3,6 +3,7 @@ import type {
   TicketPublicStateRow,
   RaffleRow,
   PaymentMethod,
+  ContactPreference,
 } from '@/types/raffle.types';
 import {
   withTimeout,
@@ -143,7 +144,7 @@ export async function createOrder(
   ticketNumbers: string[],
   _clientTotalAmountIgnored?: number,
   paymentMethod: PaymentMethod = 'transfer_manual',
-  contactPreference: 'whatsapp' | 'email' | 'both' = 'both',
+  contactPreference: ContactPreference = 'both',
   buyerDataParam?: BuyerRegistrationData,
   idempotencyKey?: string,
   timeoutMs: number = DEFAULT_REQUEST_TIMEOUT_MS

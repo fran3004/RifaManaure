@@ -27,8 +27,16 @@ import type { ContactPreference } from '@/types/raffle.types';
 import type { Database, Json } from '@/database.types';
 
 export type NotificationLogRow = Database['public']['Tables']['notification_logs']['Row'];
-export type NotificationChannel = 'whatsapp';
 
+/**
+ * Canales de notificación soportados por la plataforma.
+ * Mapea directamente a los canales válidos en la tabla notification_logs.
+ */
+export type NotificationChannel = 'whatsapp' | 'email';
+
+/**
+ * Contrato canónico de tipos de eventos de notificación (estricto en minúsculas).
+ */
 export const NOTIFICATION_EVENT_TYPES = {
   PAYMENT_RECEIVED: 'payment_received',
   PAYMENT_APPROVED: 'payment_approved',
@@ -38,11 +46,15 @@ export const NOTIFICATION_EVENT_TYPES = {
 export type NotificationEventType =
   (typeof NOTIFICATION_EVENT_TYPES)[keyof typeof NOTIFICATION_EVENT_TYPES];
 
+/**
+ * Tipo de entrada flexible para permitir compatibilidad histórica durante la transición.
+ */
 export type NotificationEventInputType =
   | NotificationEventType
   | 'PAYMENT_RECEIVED'
   | 'PAYMENT_APPROVED'
-  | 'PAYMENT_REJECTED';
+  | 'PAYMENT_REJECTED'
+  | string;
 
 export type NotificationStatus = 'pending' | 'sent' | 'failed' | 'delivered' | 'bounced';
 
@@ -83,6 +95,7 @@ export interface DispatchNotificationResult {
   contactPreference: ContactPreference | string;
   whatsappDispatched: boolean;
   whatsappNotification?: GeneratedNotification;
+  emailDispatched: boolean;
 }
 
 export interface RecordNotificationLogInput {
@@ -101,13 +114,14 @@ const DEFAULT_SUPPORT_CONTACT = 'Equipo de Atención y Soporte Rifa Manaure';
 const DEFAULT_RAFFLE_TITLE = 'Gran Rifa Manaure Balcón del Cesar';
 
 /**
- * Normaliza los nombres de eventos al formato estándar en minúsculas.
+ * Normaliza cualquier variante de nombre de evento al contrato canónico en minúsculas.
+ * Punto único y centralizado de normalización del sistema para garantizar consistencia.
  */
 export function normalizeEventType(eventType: string): NotificationEventType {
-  const clean = eventType.toLowerCase();
-  if (clean.includes('approved')) return 'payment_approved';
-  if (clean.includes('rejected')) return 'payment_rejected';
-  return 'payment_received';
+  const clean = (eventType || '').trim().toLowerCase();
+  if (clean.includes('approved')) return NOTIFICATION_EVENT_TYPES.PAYMENT_APPROVED;
+  if (clean.includes('rejected')) return NOTIFICATION_EVENT_TYPES.PAYMENT_REJECTED;
+  return NOTIFICATION_EVENT_TYPES.PAYMENT_RECEIVED;
 }
 
 /**
@@ -316,9 +330,17 @@ export function generateOrderNotification(
 export async function dispatchOrderNotifications(
   options: DispatchNotificationOptions
 ): Promise<DispatchNotificationResult> {
-  const preference = options.contactPreference || 'whatsapp';
+  const preference: ContactPreference =
+    options.contactPreference === 'email' || options.contactPreference === 'both'
+      ? options.contactPreference
+      : 'whatsapp';
   const normalizedType = normalizeEventType(options.eventType);
   let whatsappNotification: GeneratedNotification | undefined;
+  let whatsappDispatched = false;
+  let emailDispatched = false;
+
+  const shouldSendWhatsApp = preference === 'whatsapp' || preference === 'both';
+  const shouldSendEmail = preference === 'email' || preference === 'both';
 
   const typeMapping: Record<NotificationEventType, NotificationType> = {
     payment_received: 'receipt_received',
@@ -326,42 +348,53 @@ export async function dispatchOrderNotifications(
     payment_rejected: 'payment_rejected',
   };
 
-  whatsappNotification = generateOrderNotification(
-    typeMapping[normalizedType],
-    options.notificationData
-  );
+  if (shouldSendWhatsApp) {
+    whatsappNotification = generateOrderNotification(
+      typeMapping[normalizedType],
+      options.notificationData
+    );
 
-  const hasPhone = Boolean(
-    options.notificationData.buyerPhone && options.notificationData.buyerPhone.trim().length >= 7
-  );
+    const hasPhone = Boolean(
+      options.notificationData.buyerPhone && options.notificationData.buyerPhone.trim().length >= 7
+    );
 
-  // Registrar en trazabilidad el despacho de WhatsApp
-  void recordNotificationLog({
-    orderId: options.orderId,
-    channel: 'whatsapp',
-    eventType: normalizedType,
-    recipient: options.notificationData.buyerPhone || 'Sin teléfono',
-    status: hasPhone ? 'sent' : 'failed',
-    errorMessage: hasPhone
-      ? null
-      : 'El comprador no tiene un número de celular válido registrado para WhatsApp.',
-    attempts: 1,
-    metadata: {
-      buyer_name: options.notificationData.buyerName,
-      reference: options.notificationData.reference,
-      tickets_count: options.notificationData.ticketNumbers.length,
-    },
-  });
+    // Registrar en trazabilidad el despacho de WhatsApp
+    void recordNotificationLog({
+      orderId: options.orderId,
+      channel: 'whatsapp',
+      eventType: normalizedType,
+      recipient: options.notificationData.buyerPhone || 'Sin teléfono',
+      status: hasPhone ? 'sent' : 'failed',
+      errorMessage: hasPhone
+        ? null
+        : 'El comprador no tiene un número de celular válido registrado para WhatsApp.',
+      attempts: 1,
+      metadata: {
+        buyer_name: options.notificationData.buyerName,
+        reference: options.notificationData.reference,
+        tickets_count: options.notificationData.ticketNumbers.length,
+      },
+    });
+
+    whatsappDispatched = true;
+  }
+
+  if (shouldSendEmail) {
+    // Canal email preparado para el despachador de Brevo en el siguiente prompt.
+    // La invocación y plantilla de correo se gestionarán mediante Edge Function.
+    emailDispatched = false;
+  }
 
   return {
     contactPreference: preference,
-    whatsappDispatched: true,
+    whatsappDispatched,
     whatsappNotification,
+    emailDispatched,
   };
 }
 
 /**
- * Reintenta una notificación específica de WhatsApp y actualiza la trazabilidad.
+ * Reintenta una notificación específica (WhatsApp o Correo) y actualiza la trazabilidad.
  */
 export async function retryNotification(
   orderId: string,
@@ -419,6 +452,13 @@ export async function retryNotification(
     return {
       success: true,
       whatsAppLink: notif.whatsAppLink,
+    };
+  }
+
+  if (channel === 'email') {
+    return {
+      success: false,
+      error: 'El reintento de correo transaccional se gestionará a través de la Edge Function de Brevo.',
     };
   }
 

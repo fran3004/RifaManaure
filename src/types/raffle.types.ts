@@ -57,7 +57,7 @@ export interface TicketItem {
   price: number;
 }
 
-export type ContactPreference = 'whatsapp';
+export type ContactPreference = 'whatsapp' | 'email' | 'both';
 
 export interface BuyerFormData {
   fullName: string;
