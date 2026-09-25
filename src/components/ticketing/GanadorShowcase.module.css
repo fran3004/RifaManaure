@@ -5,7 +5,7 @@
 
 .celebrationSection {
   position: relative;
-  padding: clamp(4rem, 8vw, 7rem) 1rem;
+  padding: clamp(3rem, 6vw, 6rem) clamp(1rem, 3vw, 2rem);
   background-color: var(--bg-surface, #FBF8F1);
   overflow: hidden;
   border-top: 1px solid var(--border-subtle, #DCD5C4);
@@ -30,42 +30,50 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2.25rem;
+  gap: clamp(1.5rem, 3.5vw, 2.25rem);
   text-align: center;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .headerBadge {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.6rem;
-  padding: 0.45rem 1.25rem;
+  padding: 0.4rem clamp(0.75rem, 2.5vw, 1.25rem);
   border-radius: 9999px;
   background-color: var(--brand-accent-soft, #FDF1D8);
   border: 1px solid rgba(245, 166, 35, 0.45);
   box-shadow: 0 2px 8px rgba(245, 166, 35, 0.15);
   color: var(--brand-accent-strong, #8A5200);
-  font-size: 0.875rem;
+  font-size: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
   line-height: 1.2;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
+  max-width: 100%;
+  box-sizing: border-box;
+  text-align: center;
 }
 
 .titleGroup {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  width: 100%;
 }
 
 .mainTitle {
   font-family: var(--font-heading, Georgia, serif);
-  font-size: 2.5rem;
+  font-size: clamp(1.625rem, 1.25rem + 1.875vw, 2.5rem);
   line-height: 1.2;
   font-weight: 800;
   color: var(--brand-primary, var(--brand-primary));
-  line-height: 1.2;
   margin: 0;
   letter-spacing: -0.02em;
+  text-wrap: balance;
+  overflow-wrap: break-word;
 }
 
 .goldenHighlight {
@@ -75,12 +83,12 @@
 }
 
 .subtitle {
-  font-size: 1.125rem;
-  line-height: 1.45;
+  font-size: clamp(0.95rem, 0.9rem + 0.25vw, 1.125rem);
+  line-height: 1.5;
   color: var(--text-secondary, #41564A);
   max-width: 680px;
   margin: 0 auto;
-  line-height: 1.45;
+  text-wrap: pretty;
 }
 
 /* Tarjeta Principal del Ganador */
@@ -88,12 +96,12 @@
   width: 100%;
   background-color: var(--bg-card, #FFFFFF);
   border: 1.5px solid var(--brand-accent, var(--brand-accent));
-  border-radius: var(--radius-xl, 28px);
-  padding: 2.5rem 2rem;
+  border-radius: clamp(18px, 3vw, 28px);
+  padding: clamp(1.5rem, 4vw, 2.5rem) clamp(1rem, 3vw, 2rem);
   box-shadow: var(--shadow-lg, 0 12px 32px rgba(15, 46, 29, 0.16));
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: clamp(1.5rem, 3.5vw, 2rem);
   position: relative;
   overflow: clip;
   box-sizing: border-box;
@@ -147,51 +155,61 @@
 
 .hugeTicketNumber {
   font-family: var(--font-mono, monospace);
-  font-size: 2.5rem;
+  font-size: clamp(1.875rem, 1.5rem + 2.5vw, 3rem);
   line-height: 1.2;
   font-variant-numeric: tabular-nums;
   font-weight: 900;
   color: var(--brand-primary, var(--brand-primary));
-  line-height: 1.2;
-  padding: 0.4rem 2rem;
+  padding: 0.4rem clamp(1rem, 3vw, 2rem);
   background-color: var(--bg-surface, #FBF8F1);
   border: 2px solid var(--brand-accent, var(--brand-accent));
   border-radius: var(--radius-lg, 20px);
   display: inline-block;
   letter-spacing: 0.05em;
   box-shadow: var(--shadow-sm, 0 2px 6px rgba(15, 46, 29, 0.08));
+  max-width: 100%;
+  box-sizing: border-box;
+  text-align: center;
 }
 
 .lotteryMetaPill {
   display: inline-flex;
   align-items: center;
-  gap: 0.6rem;
-  font-size: 0.875rem;
-  line-height: 1.2;
+  justify-content: center;
+  gap: 0.5rem;
+  font-size: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+  line-height: 1.35;
   color: var(--brand-accent-strong, #8A5200);
   background-color: var(--brand-accent-soft, #FDF1D8);
-  padding: 0.4rem 1.15rem;
-  border-radius: 9999px;
+  padding: 0.45rem clamp(0.75rem, 2vw, 1.15rem);
+  border-radius: var(--radius-md, 14px);
   border: 1px solid rgba(245, 166, 35, 0.4);
   margin-top: 0.5rem;
+  max-width: 100%;
+  box-sizing: border-box;
+  text-align: center;
+  overflow-wrap: break-word;
 }
 
 /* Datos Protegidos del Ganador */
 .winnerInfoGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
   gap: 1.25rem;
   background-color: var(--bg-surface, #FBF8F1);
   border: 1px solid var(--border-subtle, #DCD5C4);
   border-radius: var(--radius-md, 14px);
-  padding: 1.5rem;
+  padding: clamp(1rem, 3vw, 1.5rem);
   text-align: left;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .infoItem {
   display: flex;
   flex-direction: column;
   gap: 0.3rem;
+  min-width: 0;
 }
 
 .infoLabel {
@@ -206,10 +224,11 @@
 }
 
 .infoValue {
-  font-size: 1.125rem;
-  line-height: 1.2;
+  font-size: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+  line-height: 1.25;
   font-weight: 700;
   color: var(--text-primary, #16261C);
+  overflow-wrap: break-word;
 }
 
 .infoSub {
@@ -229,13 +248,16 @@
   flex-direction: column;
   align-items: center;
   gap: 1.25rem;
+  width: 100%;
 }
 
 .actButton {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.75rem;
   padding: 0.85rem 1.6rem;
+  min-height: 44px;
   border-radius: var(--radius-md, 14px);
   background-color: var(--brand-accent-soft, #FDF1D8);
   border: 1px solid var(--brand-accent, var(--brand-accent));
@@ -246,6 +268,9 @@
   text-decoration: none;
   transition: all var(--transition-fast, 150ms ease);
   box-shadow: var(--shadow-sm, 0 2px 6px rgba(15, 46, 29, 0.08));
+  max-width: 100%;
+  box-sizing: border-box;
+  text-align: center;
 }
 
 .actButton:hover {
@@ -266,7 +291,7 @@
   background-color: var(--bg-card, #FFFFFF);
   border: 1px solid var(--border-subtle, #DCD5C4);
   border-radius: var(--radius-lg, 20px);
-  padding: 1.25rem 1.5rem;
+  padding: clamp(1rem, 3vw, 1.25rem) clamp(1rem, 3vw, 1.5rem);
   display: flex;
   align-items: center;
   gap: 1.15rem;
@@ -290,16 +315,16 @@
 
 .noticeDesc {
   font-size: 0.875rem;
-  line-height: 1.2;
+  line-height: 1.45;
   color: var(--text-secondary, #41564A);
   margin: 0;
-  line-height: 1.45;
 }
 
 /* Botón para Re-lanzar Confeti */
 .btnConfetti {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
   padding: 0.65rem 1.4rem;
   min-height: 44px;
@@ -311,6 +336,7 @@
   font-weight: 700;
   cursor: pointer;
   transition: all var(--transition-fast, 150ms ease);
+  max-width: 100%;
 }
 
 .btnConfetti:hover {
@@ -327,16 +353,30 @@
 
 @media (max-width: 640px) {
   .winnerHeroCard {
-    padding: 1.75rem 1.25rem;
+    padding: 1.5rem 1rem;
+    gap: 1.5rem;
   }
+
   .hugeTicketNumber {
-    font-size: 2.5rem;
-  line-height: 1.2;
-  font-variant-numeric: tabular-nums;
-    padding: 0.3rem 1.25rem;
+    padding: 0.35rem 1rem;
   }
+
+  .winnerInfoGrid {
+    grid-template-columns: 1fr;
+    padding: 1.15rem 1rem;
+    gap: 1rem;
+  }
+
+  .actButton {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    font-size: 0.9rem;
+    text-align: center;
+  }
+
   .nextEditionNotice {
     flex-direction: column;
     text-align: center;
+    gap: 0.75rem;
   }
 }
