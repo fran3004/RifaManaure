@@ -10,6 +10,7 @@ import {
   dispatchOrderNotifications,
   getOrderNotificationLogs,
   generateOrderNotification,
+  retryNotification,
   NOTIFICATION_EVENT_TYPES,
   type GeneratedNotification,
   type NotificationLogRow,
@@ -39,6 +40,15 @@ import {
 } from 'lucide-react';
 import { DigitalReceiptModal } from '@/components/receipt/DigitalReceiptModal';
 import { AdminConfirmPaymentModal } from './AdminConfirmPaymentModal';
+import {
+  sendPaymentApprovedEmail,
+  sendPaymentRejectedEmail,
+  shouldSendEmail,
+  buildDigitalReceiptDataFromOrder,
+  convertCanvasToBase64,
+  formatReceiptAttachmentFileName,
+} from '@/services/emailService';
+import { generateDigitalReceiptCanvas } from '@/services/receiptGeneratorService';
 import styles from './AdminOrderReviewModal.module.css';
 
 interface AdminOrderReviewModalProps {
@@ -189,11 +199,27 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
           `¡Pago aprobado! Se confirmaron definitivamente ${order.ticket_count} boletos como vendidos.`
         );
 
-        // Despachar notificaciones centralizadas por WhatsApp
+        // 1. Despacho de Correo Transaccional con Comprobante PNG adjunto si aplica
+        if (shouldSendEmail(order.contact_preference)) {
+          try {
+            const emailRes = await sendPaymentApprovedEmail(order);
+            if (!emailRes.success) {
+              console.warn(
+                'Aviso: El correo de confirmación no pudo ser entregado:',
+                emailRes.error
+              );
+            }
+          } catch (emailErr) {
+            console.warn('Error al procesar correo de confirmación de pago:', emailErr);
+          }
+        }
+
+        // 2. Despachar notificaciones centralizadas según contactPreference de la orden
         const dispatchResult = await dispatchOrderNotifications({
           orderId: order.id,
-          contactPreference: 'whatsapp',
+          contactPreference: order.contact_preference || 'both',
           eventType: NOTIFICATION_EVENT_TYPES.PAYMENT_APPROVED,
+          skipEmail: true, // Ya despachado de forma segura con comprobante PNG
           notificationData: {
             reference: order.reference,
             buyerName: order.buyers?.full_name || 'Comprador',
@@ -250,11 +276,24 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
           `Orden rechazada exitosamente. Los ${order.ticket_count} boletos fueron liberados inmediatamente a disponibles.`
         );
 
-        // Despachar notificaciones centralizadas por WhatsApp
+        // 1. Despachar correo transaccional de rechazo si aplica
+        if (shouldSendEmail(order.contact_preference)) {
+          try {
+            const emailRes = await sendPaymentRejectedEmail(order.id, order.contact_preference);
+            if (!emailRes.success) {
+              console.warn('Aviso: Falló el despacho de correo de rechazo:', emailRes.error);
+            }
+          } catch (emailErr) {
+            console.warn('Error al procesar correo de rechazo:', emailErr);
+          }
+        }
+
+        // 2. Despachar notificaciones centralizadas por WhatsApp
         const dispatchResult = await dispatchOrderNotifications({
           orderId: order.id,
-          contactPreference: 'whatsapp',
+          contactPreference: order.contact_preference || 'both',
           eventType: NOTIFICATION_EVENT_TYPES.PAYMENT_REJECTED,
+          skipEmail: true, // Ya despachado arriba
           notificationData: {
             reference: order.reference,
             buyerName: order.buyers?.full_name || 'Comprador',
@@ -333,6 +372,61 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
     } catch (err) {
       setNotifActionResult(
         err instanceof Error ? err.message : 'Error al reintentar notificación por WhatsApp'
+      );
+    } finally {
+      setIsRetryingNotif(false);
+    }
+  };
+
+  // REINTENTAR NOTIFICACIÓN (CORREO ELECTRÓNICO CON BREVO)
+  const handleRetryEmailNotification = async (log?: NotificationLogRow) => {
+    if (!order) return;
+    setIsRetryingNotif(true);
+    setNotifActionResult(null);
+    try {
+      const eventType =
+        log?.event_type ||
+        (order.status === 'paid'
+          ? 'payment_approved'
+          : order.status === 'rejected'
+            ? 'payment_rejected'
+            : 'payment_received');
+
+      let receiptPngBase64: string | undefined;
+      let receiptFileName: string | undefined;
+
+      // Si es una orden pagada, generar el comprobante oficial para adjuntarlo al correo
+      if (order.status === 'paid') {
+        try {
+          const receiptData = buildDigitalReceiptDataFromOrder(order);
+          const canvas = await generateDigitalReceiptCanvas(receiptData);
+          receiptPngBase64 = await convertCanvasToBase64(canvas);
+          receiptFileName = formatReceiptAttachmentFileName(order.reference);
+        } catch (cErr) {
+          console.warn('Aviso: no se pudo regenerar canvas en reintento de correo:', cErr);
+        }
+      }
+
+      const res = await retryNotification(order.id, 'email', eventType, {
+        receiptPngBase64,
+        receiptFileName,
+        buyerEmail: order.buyers?.email,
+        buyerName: order.buyers?.full_name,
+        orderReference: order.reference,
+        reason: order.rejection_reason || undefined,
+      });
+
+      if (res.success) {
+        setNotifActionResult('¡Correo transaccional reenviado exitosamente a través de Brevo!');
+      } else {
+        setNotifActionResult(`Fallo al reenviar correo: ${res.error || 'Error desconocido'}`);
+      }
+
+      const updatedLogs = await getOrderNotificationLogs(order.id);
+      setNotificationLogs(updatedLogs);
+    } catch (err) {
+      setNotifActionResult(
+        err instanceof Error ? err.message : 'Error inesperado al reintentar correo transaccional'
       );
     } finally {
       setIsRetryingNotif(false);
@@ -827,12 +921,12 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
             </div>
           )}
 
-          {/* 5. Trazabilidad de Notificaciones (WhatsApp) */}
+          {/* 5. Trazabilidad de Notificaciones (WhatsApp y Correo) */}
           <div className={`${styles.reviewCard} ${styles.notificationTraceCard}`}>
             <div className={styles.reviewCardHeader}>
               <Send size={16} className={styles.notificationTraceIcon} />
               <span className={styles.reviewCardHeaderTitle}>
-                5. Trazabilidad de Notificaciones (WhatsApp)
+                5. Trazabilidad de Notificaciones (WhatsApp y Correo)
               </span>
             </div>
 
@@ -843,6 +937,13 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
                   <span className={styles.infoLabel}>📱 Destino WhatsApp:</span>
                   <span className={`${styles.infoValue} ${styles.notificationPhone}`}>
                     {order.buyers?.phone || 'Sin celular registrado'}
+                  </span>
+                </div>
+
+                <div className={styles.infoRow}>
+                  <span className={styles.infoLabel}>✉️ Destino Correo:</span>
+                  <span className={styles.infoValue}>
+                    {order.buyers?.email || 'Sin correo registrado'}
                   </span>
                 </div>
               </div>
@@ -972,6 +1073,19 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
                   <Phone size={13} color="#25d366" />
                   <span>Reenviar por WhatsApp</span>
                 </button>
+
+                {order.buyers?.email && (
+                  <button
+                    type="button"
+                    className={`${styles.btnSecondary} ${styles.notificationRetryButton}`}
+                    onClick={() => void handleRetryEmailNotification()}
+                    disabled={isRetryingNotif}
+                    title="Reenviar correo transaccional oficial a través de Brevo"
+                  >
+                    <Mail size={13} color="#0084ff" />
+                    <span>{isRetryingNotif ? 'Enviando...' : 'Reenviar Correo (Brevo)'}</span>
+                  </button>
+                )}
               </div>
             </div>
           </div>
@@ -1043,20 +1157,7 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
         <DigitalReceiptModal
           isOpen={isReceiptModalOpen}
           onClose={() => setIsReceiptModalOpen(false)}
-          receiptData={{
-            orderReference: order.reference,
-            orderStatus: 'paid',
-            createdAt: order.created_at,
-            totalAmount: order.total_amount,
-            ticketCount: order.tickets?.length || 0,
-            buyerName: order.buyers?.full_name || 'Comprador',
-            buyerDocumentMasked: order.buyers?.document_id
-              ? maskDocumentId(order.buyers.document_id)
-              : '***',
-            raffleTitle: 'Sorteo Oficial Manaure Vive',
-            lotteryReference: 'Lotería Oficial según cronograma',
-            ticketNumbers: (order.tickets || []).map((t) => t.number),
-          }}
+          receiptData={buildDigitalReceiptDataFromOrder(order)}
         />
       )}
 

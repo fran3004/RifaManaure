@@ -17,6 +17,9 @@ import { supabase } from '@/lib/supabase';
 vi.mock('@/lib/supabase', () => ({
   supabase: {
     from: vi.fn(),
+    functions: {
+      invoke: vi.fn(),
+    },
   },
 }));
 
@@ -388,14 +391,25 @@ describe('Servicio de Notificaciones por WhatsApp (src/services/notificationServ
     });
 
     it('debe responder adecuadamente al solicitar reintento por canal "email"', async () => {
+      (supabase.functions.invoke as any).mockResolvedValueOnce({
+        data: { success: true, messageId: 'brevo_retry_001' },
+        error: null,
+      });
+
       const result = await retryNotification('ord_retry_email', 'email', 'payment_approved', {
         buyerEmail: 'carlos@example.com',
         buyerName: 'Carlos Pérez',
         orderReference: 'MAN-2026-001',
       });
 
-      expect(result.success).toBe(false);
-      expect(result.error).toContain('correo transaccional');
+      expect(result.success).toBe(true);
+      expect(supabase.functions.invoke).toHaveBeenCalledWith('send-brevo-email', {
+        body: expect.objectContaining({
+          orderId: 'ord_retry_email',
+          eventType: 'payment_approved',
+          isRetry: true,
+        }),
+      });
     });
 
     it('debe fallar y registrar error si no hay teléfono al reintentar WhatsApp', async () => {

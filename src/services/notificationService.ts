@@ -18,11 +18,8 @@
 
 import { supabase } from '@/lib/supabase';
 import { formatCOP, formatTicketNumber } from '@/lib/utils';
-import {
-  createWhatsAppLink,
-  getWhatsAppProvider,
-  type WhatsAppSendResult,
-} from './whatsappService';
+import { createWhatsAppLink, getWhatsAppProvider, type WhatsAppSendResult } from './whatsappService';
+import { sendTransactionalEmail } from './emailService';
 import type { ContactPreference } from '@/types/raffle.types';
 import type { Database, Json } from '@/database.types';
 
@@ -89,6 +86,9 @@ export interface DispatchNotificationOptions {
   contactPreference?: ContactPreference | string;
   eventType: NotificationEventInputType;
   notificationData: OrderNotificationData;
+  receiptPngBase64?: string;
+  receiptFileName?: string;
+  skipEmail?: boolean;
 }
 
 export interface DispatchNotificationResult {
@@ -379,10 +379,19 @@ export async function dispatchOrderNotifications(
     whatsappDispatched = true;
   }
 
-  if (shouldSendEmail) {
-    // Canal email preparado para el despachador de Brevo en el siguiente prompt.
-    // La invocación y plantilla de correo se gestionarán mediante Edge Function.
-    emailDispatched = false;
+  if (shouldSendEmail && !options.skipEmail) {
+    try {
+      const emailResult = await sendTransactionalEmail({
+        orderId: options.orderId,
+        eventType: normalizedType,
+        receiptPngBase64: options.receiptPngBase64,
+        receiptFileName: options.receiptFileName,
+      });
+      emailDispatched = emailResult.success;
+    } catch (emailErr) {
+      console.warn('Error al despachar correo transaccional en notificationService:', emailErr);
+      emailDispatched = false;
+    }
   }
 
   return {
@@ -406,6 +415,8 @@ export async function retryNotification(
     buyerName?: string;
     orderReference?: string;
     reason?: string;
+    receiptPngBase64?: string;
+    receiptFileName?: string;
   }
 ): Promise<{ success: boolean; error?: string; whatsAppLink?: string }> {
   const normalizedType = normalizeEventType(eventType);
@@ -456,10 +467,28 @@ export async function retryNotification(
   }
 
   if (channel === 'email') {
-    return {
-      success: false,
-      error: 'El reintento de correo transaccional se gestionará a través de la Edge Function de Brevo.',
-    };
+    try {
+      const emailResult = await sendTransactionalEmail({
+        orderId,
+        eventType: normalizedType,
+        receiptPngBase64: data?.receiptPngBase64,
+        receiptFileName: data?.receiptFileName,
+        isRetry: true,
+      });
+
+      return {
+        success: emailResult.success,
+        error: emailResult.error,
+      };
+    } catch (err: unknown) {
+      return {
+        success: false,
+        error:
+          err instanceof Error
+            ? err.message
+            : 'Error inesperado al reintentar correo transaccional',
+      };
+    }
   }
 
   return { success: false, error: 'Canal no soportado' };
