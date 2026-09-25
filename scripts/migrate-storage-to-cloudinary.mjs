@@ -8,8 +8,8 @@
  * Buckets y destinos:
  * - prize-images      -> manaure-vive/premios
  * - partner-logos     -> manaure-vive/aliados
- * - winner-documents  -> manaure-vive/actas-ganadores
  * - gallery-images    -> manaure-vive/galeria
+ * (winner-documents se preserva en Supabase Storage para visualización nativa de PDF)
  *
  * Características:
  * - Requiere SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY y credenciales de Cloudinary locales.
@@ -458,132 +458,11 @@ async function runMigration() {
   }
 
   // -------------------------------------------------------------------------
-  // 3. MIGRACIÓN DE winner-documents -> manaure-vive/actas-ganadores (tabla: winners)
+  // 3. winner-documents: PRESERVADO EN SUPABASE STORAGE
   // -------------------------------------------------------------------------
-  console.log('\n📦 Inspeccionando bucket "winner-documents"...');
-  let winnerFiles = [];
-  try {
-    winnerFiles = await listBucketFiles('winner-documents');
-    console.log(`   Archivos físicos encontrados en bucket: ${winnerFiles.length}`);
-  } catch (err) {
-    console.warn(`   ⚠️ Advertencia al consultar bucket 'winner-documents': ${err.message}`);
-  }
-
-  const { data: winners, error: winErr } = await supabase
-    .from('winners')
-    .select('id, ticket_number, official_act_url');
-
-  if (winErr) {
-    throw new Error(`Error al consultar tabla 'winners': ${winErr.message}`);
-  }
-
-  console.log(`   Registros en tabla 'winners': ${winners.length}`);
-
-  const matchedWinnerFiles = new Set();
-
-  for (const winner of winners) {
-    const currentUrl = winner.official_act_url || '';
-
-    if (currentUrl.includes('res.cloudinary.com')) {
-      const alreadyMigratedFile = winnerFiles.find(
-        (f) => currentUrl.includes(path.parse(f.name).name) || currentUrl.includes(f.name)
-      );
-      if (alreadyMigratedFile) {
-        matchedWinnerFiles.add(alreadyMigratedFile.path);
-      }
-
-      migrationSummary.push({
-        bucket: 'winner-documents',
-        table: 'winners',
-        id: winner.id,
-        identifier: `Boleto #${winner.ticket_number}`,
-        status: 'OMITIDO_YA_MIGRADO',
-        oldUrl: currentUrl,
-        newUrl: currentUrl,
-      });
-      continue;
-    }
-
-    const matchesFile = winnerFiles.find(
-      (f) => currentUrl.includes(f.name) || currentUrl.endsWith(f.path)
-    );
-
-    if (matchesFile) {
-      matchedWinnerFiles.add(matchesFile.path);
-    }
-
-    if (currentUrl.includes('supabase.co/storage') || matchesFile) {
-      const filePath = matchesFile ? matchesFile.path : currentUrl.split('/winner-documents/').pop()?.split('?')[0];
-
-      if (!filePath) {
-        migrationSummary.push({
-          bucket: 'winner-documents',
-          table: 'winners',
-          id: winner.id,
-          identifier: `Boleto #${winner.ticket_number}`,
-          status: 'ERROR_RUTA_NO_DETERMINADA',
-          oldUrl: currentUrl,
-        });
-        continue;
-      }
-
-      console.log(`   -> Procesando acta ganador: Boleto #${winner.ticket_number} (${filePath})`);
-
-      if (isDryRun) {
-        migrationSummary.push({
-          bucket: 'winner-documents',
-          table: 'winners',
-          id: winner.id,
-          identifier: `Boleto #${winner.ticket_number}`,
-          status: 'SIMULADO_LISTO',
-          oldUrl: currentUrl,
-          targetFolder: 'manaure-vive/actas-ganadores',
-        });
-        continue;
-      }
-
-      const { data: fileData, error: dlErr } = await supabase.storage
-        .from('winner-documents')
-        .download(filePath);
-
-      if (dlErr || !fileData) {
-        throw new Error(`Fallo al descargar '${filePath}' de winner-documents: ${dlErr?.message}`);
-      }
-
-      const buffer = Buffer.from(await fileData.arrayBuffer());
-      const uploadRes = await uploadBufferToCloudinary(buffer, path.basename(filePath), 'manaure-vive/actas-ganadores', 'auto');
-
-      const { error: updErr } = await supabase
-        .from('winners')
-        .update({ official_act_url: uploadRes.secure_url })
-        .eq('id', winner.id);
-
-      if (updErr) {
-        throw new Error(`¡ERROR CRÍTICO! Fallo al actualizar winners (${winner.id}): ${updErr.message}`);
-      }
-
-      logicalBackups.push({
-        table: 'winners',
-        record_id: winner.id,
-        column: 'official_act_url',
-        previous_value: currentUrl,
-        new_value: uploadRes.secure_url,
-        public_id: uploadRes.public_id,
-        migrated_at: new Date().toISOString(),
-      });
-
-      migrationSummary.push({
-        bucket: 'winner-documents',
-        table: 'winners',
-        id: winner.id,
-        identifier: `Boleto #${winner.ticket_number}`,
-        status: 'MIGRADO_EXITOSO',
-        oldUrl: currentUrl,
-        newUrl: uploadRes.secure_url,
-        publicId: uploadRes.public_id,
-      });
-    }
-  }
+  // Las actas oficiales de ganadores (PDF) se almacenan exclusivamente en Supabase
+  // Storage (bucket 'winner-documents') para visualización directa en el navegador.
+  console.log('\n📦 Bucket "winner-documents": Preservado en Supabase Storage (no se migra a Cloudinary)');
 
   // -------------------------------------------------------------------------
   // 4. MIGRACIÓN DE gallery-images -> manaure-vive/galeria (tabla: gallery_items)

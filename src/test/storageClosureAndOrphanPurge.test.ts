@@ -74,6 +74,12 @@ describe('PROMPT 05.3: Cierre Total del Bucket Legacy receipts y Saneamiento de 
       file_size_limit: 10485760, // 10 MB
       allowed_mime_types: ['image/jpeg', 'image/png', 'image/webp', 'image/avif'], // SVG eliminado taxativamente
     },
+    {
+      id: 'winner-documents',
+      public: true, // Público para exhibición y verificación de actas en PDF (Migración 061)
+      file_size_limit: 10485760, // 10 MB
+      allowed_mime_types: ['application/pdf'],
+    },
   ];
 
   // Catálogo de políticas RLS activas en storage.objects post-Migración 054
@@ -113,6 +119,34 @@ describe('PROMPT 05.3: Cierre Total del Bucket Legacy receipts y Saneamiento de 
       name: 'Solo administradores suben fotos de galería',
       bucket_id: 'gallery-images',
       command: 'INSERT',
+      roles: ['authenticated'],
+      check: ({ role, isAdmin }) => role === 'authenticated' && isAdmin,
+    },
+    {
+      name: 'Lectura pública de actas de ganadores',
+      bucket_id: 'winner-documents',
+      command: 'SELECT',
+      roles: ['public', 'anon', 'authenticated'],
+      check: () => true,
+    },
+    {
+      name: 'Solo administradores pueden subir actas de ganadores',
+      bucket_id: 'winner-documents',
+      command: 'INSERT',
+      roles: ['authenticated'],
+      check: ({ role, isAdmin }) => role === 'authenticated' && isAdmin,
+    },
+    {
+      name: 'Solo administradores pueden actualizar actas de ganadores',
+      bucket_id: 'winner-documents',
+      command: 'UPDATE',
+      roles: ['authenticated'],
+      check: ({ role, isAdmin }) => role === 'authenticated' && isAdmin,
+    },
+    {
+      name: 'Solo administradores pueden eliminar actas de ganadores',
+      bucket_id: 'winner-documents',
+      command: 'DELETE',
       roles: ['authenticated'],
       check: ({ role, isAdmin }) => role === 'authenticated' && isAdmin,
     },
@@ -373,15 +407,15 @@ describe('PROMPT 05.3: Cierre Total del Bucket Legacy receipts y Saneamiento de 
       }
     });
 
-    it('4.2 Los buckets partner-logos, prize-images y winner-documents NO deben figurar en storage.buckets', () => {
+    it('4.2 Los buckets partner-logos y prize-images NO deben figurar en storage.buckets de Supabase como migrados a Cloudinary', () => {
       const bucketIds = bucketsCatalog.map((b) => b.id);
       expect(bucketIds).not.toContain('partner-logos');
       expect(bucketIds).not.toContain('prize-images');
-      expect(bucketIds).not.toContain('winner-documents');
+      expect(bucketIds).toContain('winner-documents');
     });
 
     it('4.3 La lista de políticas activas debe estar restringida exclusivamente a buckets legítimos', () => {
-      const allowedBuckets = new Set(['receipts', 'payment-proofs', 'gallery-images']);
+      const allowedBuckets = new Set(['receipts', 'payment-proofs', 'gallery-images', 'winner-documents']);
       for (const policy of storagePolicies) {
         expect(allowedBuckets.has(policy.bucket_id)).toBe(true);
       }

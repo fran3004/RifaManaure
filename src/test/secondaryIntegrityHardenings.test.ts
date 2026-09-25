@@ -53,10 +53,10 @@ describe('DB-12: Clasificación de Buckets y Arquitectura Híbrida de Almacenami
     },
     {
       id: 'winner-documents',
-      status: 'migrado_a_cloudinary',
-      storageProvider: 'cloudinary',
-      isPublic: false,
-      hasActiveOrphanedPolicies: true, // purgado en migración 041
+      status: 'activo',
+      storageProvider: 'supabase_storage',
+      isPublic: true,
+      hasActiveOrphanedPolicies: false,
     },
   ];
 
@@ -67,16 +67,17 @@ describe('DB-12: Clasificación de Buckets y Arquitectura Híbrida de Almacenami
     expect(activeIds).toContain('payment-proofs');
     expect(activeIds).toContain('gallery-images');
     expect(activeIds).toContain('receipts');
-    expect(activeIds.length).toBe(3);
+    expect(activeIds).toContain('winner-documents');
+    expect(activeIds.length).toBe(4);
   });
 
-  it('debe identificar que logos de aliados, premios y actas de ganadores se procesan en Cloudinary', () => {
+  it('debe identificar que logos de aliados y premios se procesan en Cloudinary', () => {
     const cloudinaryBuckets = bucketsCatalog.filter((b) => b.storageProvider === 'cloudinary');
     const cloudinaryIds = cloudinaryBuckets.map((b) => b.id);
 
     expect(cloudinaryIds).toContain('partner-logos');
     expect(cloudinaryIds).toContain('prize-images');
-    expect(cloudinaryIds).toContain('winner-documents');
+    expect(cloudinaryIds).not.toContain('winner-documents');
   });
 
   it('debe validar la lista exhaustiva de políticas huérfanas purgadas en migración 041', () => {

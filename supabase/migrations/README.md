@@ -78,6 +78,9 @@ Este directorio (`supabase/migrations/`) constituye la **única fuente de verdad
 | **056** | `056_consolidate_pg_cron_and_retention.sql` | **(Auditoría 05 — Remediación 5: CRIT-04 / EVENT-08 / EVENT-10)** Consolidación de `pg_cron` como scheduler primario (`release-expired-reservations-job` cada 5 min `*/5 * * * *`), advisory locks (`pg_try_advisory_xact_lock`) y `FOR UPDATE SKIP LOCKED` anti-solapamiento en `release_expired_reservations()`, política de retención oficial de 30 días para `cron.job_run_details` vía `cleanup_cron_job_run_details` (rechazo de purga a 7 días) y programación de job diario de mantenimiento (`0 3 * * *`). |
 | **057** | `057_restrict_admin_role_privileges_to_superadmin.sql` | **(Gobernanza de Roles)** Restricción de invitaciones y gestión de aliados a usuarios con rol `superadmin`. |
 | **058** | `058_extend_notification_logs_brevo_traceability.sql` | **(Trazabilidad Brevo y Deduplicación)** Adición de columnas estructuradas (`provider`, `provider_message_id`, `last_attempt_at`, `delivered_at`, `failed_at`), unicidad estricta de `idempotency_key` y optimización de índices para Brevo y WhatsApp manual. |
+| **059** | `059_fix_approve_order_payment_aggregate_for_update.sql` | **(Concurrencia)** Corrección del bloqueo FOR UPDATE sobre agregaciones en aprobación de pagos. |
+| **060** | `060_hero_slides_management.sql` | **(Hero)** Gestión resiliente de diapositivas del carrusel del hero principal con respaldo estático. |
+| **061** | `061_restore_winner_documents_bucket.sql` | **(Almacenamiento de Actas)** Restauración del bucket `winner-documents` en Supabase Storage (`public = true`, cuota 10 MB, solo `application/pdf`) con políticas RLS de lectura pública y mutación administrativa, garantizando visualización nativa de actas en el navegador. |
 
 ---
 

@@ -66,8 +66,8 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
 });
 
 // LISTA BLANCA ESTRICTA DE BUCKETS A RETIRAR (EXCLUSIÓN ABSOLUTA DE OTROS)
-const TARGET_BUCKETS = ['prize-images', 'partner-logos', 'winner-documents'];
-const PROTECTED_BUCKETS = ['payment-proofs', 'receipts', 'gallery-images'];
+const TARGET_BUCKETS = ['prize-images', 'partner-logos'];
+const PROTECTED_BUCKETS = ['payment-proofs', 'receipts', 'gallery-images', 'winner-documents'];
 
 async function listAllFiles(bucket, prefix = '') {
   const { data, error } = await supabase.storage.from(bucket).list(prefix, { limit: 1000 });

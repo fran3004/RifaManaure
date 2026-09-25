@@ -1,5 +1,4 @@
 import { supabase } from '@/lib/supabase';
-import { uploadToCloudinary } from '@/services/cloudinaryService';
 import type {
   WinnerWithDetails,
   RegisterWinnerPayload,
@@ -358,13 +357,13 @@ export async function registerWinner(
 }
 
 /**
- * Sube el acta oficial en PDF a Cloudinary (carpeta 'manaure-vive/actas-ganadores').
- * Retorna la URL segura permanente y el public_id.
+ * Sube el acta oficial en PDF a Supabase Storage (bucket público 'winner-documents').
+ * Retorna la URL pública directa para visualización nativa en el navegador y la ruta del archivo.
  */
 export async function uploadWinnerActDocument(
   file: File,
-  _raffleId?: string
-): Promise<{ success: boolean; url?: string; public_id?: string; error?: string }> {
+  raffleId?: string
+): Promise<{ success: boolean; url?: string; path?: string; public_id?: string; error?: string }> {
   try {
     if (file.type !== 'application/pdf') {
       return { success: false, error: 'El acta oficial debe ser un archivo en formato PDF.' };
@@ -374,26 +373,50 @@ export async function uploadWinnerActDocument(
       return { success: false, error: 'El archivo PDF no debe exceder 10 MB.' };
     }
 
-    const uploadRes = await uploadToCloudinary(file, 'manaure-vive/actas-ganadores', {
-      resourceType: 'auto',
-    });
+    const sanitizedBase = file.name
+      .toLowerCase()
+      .replace(/[^a-z0-9._-]/g, '_')
+      .replace(/\.pdf$/i, '');
+    const cleanFileName = `acta_${sanitizedBase || 'sorteo'}_${Date.now()}.pdf`;
+    const folderPath = raffleId ? `actas/${raffleId}` : 'actas';
+    const filePath = `${folderPath}/${cleanFileName}`;
 
-    if (!uploadRes.success || !uploadRes.secure_url) {
+    const { error: uploadError } = await supabase.storage
+      .from('winner-documents')
+      .upload(filePath, file, {
+        contentType: 'application/pdf',
+        cacheControl: '3600',
+        upsert: false,
+      });
+
+    if (uploadError) {
       return {
         success: false,
-        error: uploadRes.error || 'No fue posible subir el acta oficial.',
+        error: `No fue posible guardar el acta oficial: ${uploadError.message}`,
+      };
+    }
+
+    const { data: publicData } = supabase.storage
+      .from('winner-documents')
+      .getPublicUrl(filePath);
+
+    if (!publicData?.publicUrl) {
+      return {
+        success: false,
+        error: 'No fue posible generar el enlace público del acta oficial.',
       };
     }
 
     return {
       success: true,
-      url: uploadRes.secure_url,
-      public_id: uploadRes.public_id,
+      url: publicData.publicUrl,
+      path: filePath,
+      public_id: filePath,
     };
   } catch (err) {
     return {
       success: false,
-      error: err instanceof Error ? err.message : 'Error al subir acta PDF.',
+      error: err instanceof Error ? err.message : 'Error al subir acta PDF a Supabase Storage.',
     };
   }
 }
