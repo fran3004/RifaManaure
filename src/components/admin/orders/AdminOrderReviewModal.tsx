@@ -90,6 +90,7 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
   const [signedProofUrl, setSignedProofUrl] = useState<string | null>(null);
   const [isLoadingProof, setIsLoadingProof] = useState<boolean>(false);
   const [proofError, setProofError] = useState<string | null>(null);
+  const [isPurgedProof, setIsPurgedProof] = useState<boolean>(false);
 
   // Estados de acciones
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
@@ -136,17 +137,32 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
           setSignedProofUrl(null);
           setIsLoadingProof(false);
           setProofError(null);
+          setIsPurgedProof(false);
+        }
+        return;
+      }
+
+      if (order.receipt_purged) {
+        if (active) {
+          setSignedProofUrl(null);
+          setIsLoadingProof(false);
+          setIsPurgedProof(true);
+          setProofError(null);
         }
         return;
       }
 
       setIsLoadingProof(true);
       setProofError(null);
+      setIsPurgedProof(false);
       try {
         const res = await getSignedProofUrl(order.receipt_url, 900); // 15 min
         if (active) {
           if (res.url) {
             setSignedProofUrl(res.url);
+          } else if (res.isPurged) {
+            setIsPurgedProof(true);
+            setProofError(null);
           } else {
             setProofError(res.error || 'No se pudo generar el enlace seguro al comprobante.');
           }
@@ -167,7 +183,7 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
     return () => {
       active = false;
     };
-  }, [isOpen, order?.id, order?.receipt_url]);
+  }, [isOpen, order?.id, order?.receipt_url, order?.receipt_purged]);
 
   if (!isOpen || !order) return null;
 
@@ -178,6 +194,7 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
   };
 
   const hasReceipt = Boolean(order.receipt_url && order.receipt_url.trim().length > 0);
+  const isPurged = Boolean(order.receipt_purged || isPurgedProof);
   const canReviewPayment = order.status === 'pending_verification' && hasReceipt;
   const isPendingAction = canReviewPayment;
 
@@ -804,11 +821,58 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
                   Soporte Adjunto (Acceso Seguro Temporal 15 min):
                 </span>
 
+                {/* Avisos de Retención de 5 días */}
+                {!isPurged && (order.status === 'paid' || order.status === 'rejected') && (
+                  <div className={styles.retentionNoticePill}>
+                    <Clock size={15} className={styles.retentionNoticeIcon} />
+                    <span>
+                      <strong>Política de Retención (5 días):</strong> Este comprobante se conserva temporalmente para auditoría hasta el{' '}
+                      <strong>
+                        {order.verified_at
+                          ? new Date(new Date(order.verified_at).getTime() + 5 * 24 * 60 * 60 * 1000).toLocaleDateString('es-CO', {
+                              day: 'numeric',
+                              month: 'long',
+                              year: 'numeric',
+                            })
+                          : 'cumplimiento de los 5 días posteriores a su validación'}
+                      </strong>. Tras esa fecha, el adjunto se depura automáticamente para mantener optimizado el almacenamiento.
+                    </span>
+                  </div>
+                )}
+
+                {!isPurged && order.status === 'pending_verification' && (
+                  <div className={styles.retentionPendingPill}>
+                    <ShieldCheck size={15} className={styles.retentionNoticeIcon} />
+                    <span>
+                      <strong>Soporte protegido:</strong> Los comprobantes en revisión se preservan permanentemente en el sistema hasta que sean aprobados o rechazados. Nunca se eliminan pagos pendientes.
+                    </span>
+                  </div>
+                )}
+
                 <div className={styles.proofViewerContainer}>
                   {isLoadingProof ? (
                     <div className={styles.proofLoading}>
                       <Clock size={24} className={styles.proofStatusIcon} />
                       <span className={styles.proofLoadingText}>Generando acceso seguro privado...</span>
+                    </div>
+                  ) : isPurged ? (
+                    <div className={styles.proofPurgedCard}>
+                      <ShieldCheck size={36} className={styles.proofPurgedIcon} />
+                      <h4 className={styles.proofPurgedTitle}>
+                        Soporte archivado y depurado automáticamente
+                      </h4>
+                      <p className={styles.proofPurgedDesc}>
+                        El archivo adjunto original fue depurado tras cumplir los <strong>5 días de retención</strong> para optimizar el almacenamiento del sistema.
+                      </p>
+                      <div className={styles.proofPurgedMeta}>
+                        <span>Estado orden: <strong>{order.status === 'paid' ? 'Pago Aprobado' : 'Rechazada'}</strong></span>
+                        {order.receipt_purged_at && (
+                          <span>Depurado: <strong>{new Date(order.receipt_purged_at).toLocaleDateString('es-CO', { dateStyle: 'medium' })}</strong></span>
+                        )}
+                      </div>
+                      <div className={styles.proofPurgedGuarantee}>
+                        ✓ La orden #{order.reference}, el comprador y los boletos asignados permanecen 100% confirmados e inalterables en el sistema.
+                      </div>
                     </div>
                   ) : proofError || !signedProofUrl ? (
                     <div className={styles.proofEmptyState}>
@@ -836,7 +900,7 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
                     />
                   )}
 
-                  {signedProofUrl && (
+                  {signedProofUrl && !isPurged && (
                     <div className={styles.proofToolbar}>
                       <span>* El enlace estará disponible durante 15 minutos</span>
                       <a

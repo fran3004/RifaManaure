@@ -286,7 +286,7 @@ describe('cloudinaryService - Integración Segura con Cloudinary', () => {
 
     it('no debe transformar documentos PDF ni URLs raw', () => {
       const pdfUrl =
-        'https://res.cloudinary.com/ky01b0vz/auto/upload/v1790092061/manaure-vive/documentos/reglamento.pdf';
+        'https://res.cloudinary.com/ky01b0vz/auto/upload/v1790092061/manaure-vive/actas-ganadores/acta_sorteo.pdf';
       expect(getOptimizedCloudinaryUrl(pdfUrl)).toBe(pdfUrl);
 
       const rawUrl =

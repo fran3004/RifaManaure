@@ -907,6 +907,93 @@
   font-weight: 600;
 }
 
+.retentionNoticePill,
+.retentionPendingPill {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.65rem 0.85rem;
+  border-radius: var(--radius-sm, 6px);
+  font-size: 0.8rem;
+  line-height: 1.45;
+  margin-bottom: 0.6rem;
+}
+
+.retentionNoticePill {
+  background-color: var(--admin-warning-bg, rgba(245, 158, 11, 0.12));
+  border: 1px solid var(--admin-warning, rgba(245, 158, 11, 0.35));
+  color: var(--admin-warning, #d97706);
+}
+
+.retentionPendingPill {
+  background-color: rgba(59, 130, 246, 0.08);
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  color: #2563eb;
+}
+
+.retentionNoticeIcon {
+  flex-shrink: 0;
+  margin-top: 0.12rem;
+}
+
+.proofPurgedCard {
+  width: 100%;
+  padding: 2.2rem 1.5rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  background-color: var(--bg-surface, #ffffff);
+}
+
+.proofPurgedIcon {
+  color: var(--admin-success, #059669);
+  margin-bottom: 0.25rem;
+}
+
+.proofPurgedTitle {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-primary, #111827);
+}
+
+.proofPurgedDesc {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--text-secondary, #4b5563);
+  max-width: 480px;
+}
+
+.proofPurgedMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
+  font-size: 0.8rem;
+  color: var(--text-muted, #6b7280);
+  background-color: var(--bg-surface-soft, #f8fafc);
+  padding: 0.4rem 0.85rem;
+  border-radius: var(--radius-sm, 6px);
+  border: 1px solid var(--border-subtle, #e2e8f0);
+}
+
+.proofPurgedGuarantee {
+  margin-top: 0.25rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--admin-success, #059669);
+  background-color: var(--admin-success-bg, rgba(16, 185, 129, 0.1));
+  padding: 0.5rem 0.9rem;
+  border-radius: var(--radius-sm, 6px);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  max-width: 520px;
+  line-height: 1.4;
+}
+
 .rejectionHeader,
 .notificationHeader {
   display: flex;

@@ -4,9 +4,6 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 vi.mock('@/lib/supabase', () => ({
   supabase: {
     from: vi.fn(),
-    storage: {
-      from: vi.fn(),
-    },
   },
 }));
 
@@ -187,6 +184,7 @@ describe('Migración de Subidas a Cloudinary - prizeService & partnerService', (
 
       expect(res.success).toBe(false);
       expect(res.error).toContain('formato PDF');
+      expect(uploadToCloudinary).not.toHaveBeenCalled();
     });
 
     it('debe rechazar actas PDF que excedan los 10 MB', async () => {
@@ -197,49 +195,44 @@ describe('Migración de Subidas a Cloudinary - prizeService & partnerService', (
 
       expect(res.success).toBe(false);
       expect(res.error).toContain('no debe exceder 10 MB');
+      expect(uploadToCloudinary).not.toHaveBeenCalled();
     });
 
-    it('debe subir el acta PDF al bucket "winner-documents" en Supabase Storage con ruta estructurada', async () => {
+    it('debe subir el acta PDF a "manaure-vive/actas-ganadores" con resourceType auto', async () => {
       const validPdf = new File(['%PDF-1.4'], 'acta_notarial.pdf', { type: 'application/pdf' });
-      const uploadMock = vi.fn().mockResolvedValue({ data: { path: 'actas/raffle-123/acta_notarial_123.pdf' }, error: null });
-      const getPublicUrlMock = vi.fn().mockReturnValue({
-        data: {
-          publicUrl:
-            'https://bxhzvmbbsisxqpwrgvgn.supabase.co/storage/v1/object/public/winner-documents/actas/raffle-123/acta_notarial_123.pdf',
-        },
-      });
 
-      vi.mocked(supabase.storage.from).mockReturnValue({
-        upload: uploadMock,
-        getPublicUrl: getPublicUrlMock,
-      } as any);
+      vi.mocked(uploadToCloudinary).mockResolvedValue({
+        success: true,
+        secure_url: 'https://res.cloudinary.com/ky01b0vz/auto/upload/v1/manaure-vive/actas-ganadores/acta_notarial.pdf',
+        public_id: 'manaure-vive/actas-ganadores/acta_notarial',
+      });
 
       const res = await uploadWinnerActDocument(validPdf, 'raffle-123');
 
-      expect(supabase.storage.from).toHaveBeenCalledWith('winner-documents');
-      expect(uploadMock).toHaveBeenCalledWith(
-        expect.stringMatching(/^actas\/raffle-123\/acta_acta_notarial_\d+\.pdf$/),
+      expect(uploadToCloudinary).toHaveBeenCalledWith(
         validPdf,
-        expect.objectContaining({ contentType: 'application/pdf' })
+        'manaure-vive/actas-ganadores',
+        { resourceType: 'auto' }
       );
       expect(res.success).toBe(true);
       expect(res.url).toBe(
-        'https://bxhzvmbbsisxqpwrgvgn.supabase.co/storage/v1/object/public/winner-documents/actas/raffle-123/acta_notarial_123.pdf'
+        'https://res.cloudinary.com/ky01b0vz/auto/upload/v1/manaure-vive/actas-ganadores/acta_notarial.pdf'
       );
+      expect(res.public_id).toBe('manaure-vive/actas-ganadores/acta_notarial');
     });
 
-    it('debe propagar errores de fallo en la subida a Supabase Storage', async () => {
+    it('debe propagar errores de fallo en la subida a Cloudinary', async () => {
       const validPdf = new File(['%PDF-1.4'], 'acta.pdf', { type: 'application/pdf' });
-      const uploadMock = vi.fn().mockResolvedValue({ data: null, error: { message: 'Storage quota exceeded' } });
 
-      vi.mocked(supabase.storage.from).mockReturnValue({
-        upload: uploadMock,
-      } as any);
+      vi.mocked(uploadToCloudinary).mockResolvedValue({
+        success: false,
+        error: 'Error de permisos en Cloudinary',
+      });
 
       const res = await uploadWinnerActDocument(validPdf);
 
       expect(res.success).toBe(false);
-      expect(res.error).toContain('Storage quota exceeded');
+      expect(res.error).toContain('Error de permisos en Cloudinary');
     });
   });
 

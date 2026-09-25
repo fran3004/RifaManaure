@@ -30,6 +30,7 @@ import {
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
+  ShieldCheck,
 } from 'lucide-react';
 import { AdminOrderReviewModal } from '@/components/admin/orders/AdminOrderReviewModal';
 import { AdminConfirmPaymentModal } from '@/components/admin/orders/AdminConfirmPaymentModal';
@@ -38,27 +39,37 @@ import styles from './AdminViews.module.css';
 interface ReceiptThumbnailProps {
   receiptPath: string;
   reference: string;
+  isPurged?: boolean | null;
   onSelect: (url: string) => void;
 }
 
 const ReceiptThumbnail: React.FC<ReceiptThumbnailProps> = ({
   receiptPath,
   reference,
+  isPurged,
   onSelect,
 }) => {
   const [signedUrl, setSignedUrl] = useState<string | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(!isPurged);
+  const [isPurgedState, setIsPurgedState] = useState<boolean>(Boolean(isPurged));
   const isPdf =
     receiptPath.toLowerCase().endsWith('.pdf') || receiptPath.toLowerCase().includes('.pdf?');
 
   useEffect(() => {
     let active = true;
+    if (isPurged) {
+      setIsPurgedState(true);
+      setLoading(false);
+      return;
+    }
     const fetchUrl = async () => {
       setLoading(true);
       const res = await getSignedProofUrl(receiptPath, 900); // 15 min
       if (active) {
         if (res.url) {
           setSignedUrl(res.url);
+        } else if (res.isPurged) {
+          setIsPurgedState(true);
         }
         setLoading(false);
       }
@@ -67,7 +78,20 @@ const ReceiptThumbnail: React.FC<ReceiptThumbnailProps> = ({
     return () => {
       active = false;
     };
-  }, [receiptPath]);
+  }, [receiptPath, isPurged]);
+
+  if (isPurged || isPurgedState) {
+    return (
+      <div
+        className={`${styles.receiptThumbNotice} ${styles.receiptThumbNoticePurged}`}
+        title="Soporte depurado automáticamente por política de retención de 5 días."
+      >
+        <ShieldCheck size={22} className={styles.receiptThumbNoticeIcon} />
+        <span className={styles.receiptPurgedMainText}>Soporte depurado</span>
+        <span className={styles.receiptPurgedSubText}>5 días cumplidos</span>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
@@ -335,6 +359,19 @@ export const ReceiptsView: React.FC = () => {
         </div>
       )}
 
+      {/* Política Informativa de Retención del Sistema (5 días) */}
+      <div className={styles.retentionNoticeBanner}>
+        <ShieldCheck size={22} className={styles.retentionNoticeBannerIcon} />
+        <div className={styles.retentionNoticeBannerContent}>
+          <strong className={styles.retentionNoticeBannerTitle}>
+            Política de Retención y Depuración de Soportes (5 días)
+          </strong>
+          <p className={styles.retentionNoticeBannerDesc}>
+            Para optimizar el almacenamiento del sistema, los comprobantes de órdenes <strong>aprobadas o rechazadas</strong> se conservan durante <strong>5 días</strong> para auditoría y luego son depurados automáticamente. Los comprobantes pendientes de validación <strong>nunca se eliminan</strong>. Toda la información contable, referencia, datos del comprador y boletos asignados permanecen 100% protegidos y registrados de forma permanente.
+          </p>
+        </div>
+      </div>
+
       {/* Barra de Filtros */}
       <div className={styles.filterBar}>
         <div className={styles.searchGroup}>
@@ -452,6 +489,7 @@ export const ReceiptsView: React.FC = () => {
                   <ReceiptThumbnail
                     receiptPath={ord.receipt_url}
                     reference={ord.reference}
+                    isPurged={ord.receipt_purged}
                     onSelect={(url) => setSelectedReceiptUrl(url)}
                   />
                 ) : (

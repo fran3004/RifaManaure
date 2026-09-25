@@ -315,6 +315,8 @@ export type Database = {
           contact_preference: 'whatsapp' | 'email' | 'both';
           verified_at: string | null;
           verified_by: string | null;
+          receipt_purged?: boolean | null;
+          receipt_purged_at?: string | null;
           client_idempotency_key: string;
           idempotency_fingerprint: string | null;
           created_at: string;
@@ -336,6 +338,8 @@ export type Database = {
           contact_preference?: 'whatsapp' | 'email' | 'both';
           verified_at?: string | null;
           verified_by?: string | null;
+          receipt_purged?: boolean | null;
+          receipt_purged_at?: string | null;
           client_idempotency_key?: string;
           idempotency_fingerprint?: string | null;
           created_at?: string;
@@ -357,6 +361,8 @@ export type Database = {
           contact_preference?: 'whatsapp' | 'email' | 'both';
           verified_at?: string | null;
           verified_by?: string | null;
+          receipt_purged?: boolean | null;
+          receipt_purged_at?: string | null;
           client_idempotency_key?: string;
           idempotency_fingerprint?: string | null;
           updated_at?: string;
@@ -437,6 +443,8 @@ export type Database = {
           rejection_reason: string | null;
           verified_by: string | null;
           verified_at: string | null;
+          file_purged?: boolean | null;
+          file_purged_at?: string | null;
           client_idempotency_key: string;
           idempotency_fingerprint: string | null;
           created_at: string;
@@ -456,6 +464,8 @@ export type Database = {
           rejection_reason?: string | null;
           verified_by?: string | null;
           verified_at?: string | null;
+          file_purged?: boolean | null;
+          file_purged_at?: string | null;
           client_idempotency_key?: string;
           idempotency_fingerprint?: string | null;
           created_at?: string;
@@ -475,6 +485,8 @@ export type Database = {
           rejection_reason?: string | null;
           verified_by?: string | null;
           verified_at?: string | null;
+          file_purged?: boolean | null;
+          file_purged_at?: string | null;
           client_idempotency_key?: string;
           idempotency_fingerprint?: string | null;
           created_at?: string;
@@ -878,6 +890,12 @@ export type Database = {
       release_expired_reservations: {
         Args: Record<string, never>;
         Returns: number;
+      };
+      cleanup_resolved_payment_proofs: {
+        Args: {
+          p_retention_days?: number;
+        };
+        Returns: Json;
       };
       approve_order_payment: {
         Args: {

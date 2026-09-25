@@ -38,6 +38,8 @@ export interface AdminActionPaymentResult {
 export interface OrderWithDetails extends OrderRow {
   buyers?: Pick<BuyerRow, 'id' | 'full_name' | 'document_id' | 'phone' | 'email' | 'city'> | null;
   tickets?: Array<Pick<TicketRow, 'id' | 'number' | 'status'>>;
+  receipt_purged?: boolean | null;
+  receipt_purged_at?: string | null;
 }
 
 export type PaymentAccountInsert = Database['public']['Tables']['payment_accounts']['Insert'];
@@ -270,11 +272,13 @@ export function validateProofFile(file: File): { valid: boolean; error?: string 
 /**
  * Genera una URL firmada TEMPORAL y segura para que el administrador autorizado
  * pueda previsualizar el comprobante privado. NUNCA genera una URL pública permanente.
+ * Si el archivo ya cumplió la ventana de retención (5 días) y fue depurado, retorna
+ * un mensaje claro y comprensible sin tecnicismos.
  */
 export async function getSignedProofUrl(
   filePathOrData: string,
   expiresInSeconds = 900 // 15 minutos de vigencia
-): Promise<{ url?: string; error?: string }> {
+): Promise<{ url?: string; error?: string; isPurged?: boolean }> {
   try {
     if (!filePathOrData) return { error: 'Ruta de comprobante no especificada' };
 
@@ -314,10 +318,74 @@ export async function getSignedProofUrl(
       return { url: legacyData.signedUrl };
     }
 
-    return { error: error?.message || 'No se pudo generar acceso seguro al comprobante' };
+    const rawError = error?.message || legacyError?.message || '';
+    const isNotFound =
+      rawError.toLowerCase().includes('not found') ||
+      rawError.toLowerCase().includes('no encontrado') ||
+      rawError.toLowerCase().includes('404');
+
+    if (isNotFound) {
+      return {
+        error:
+          'El archivo adjunto fue depurado automáticamente tras cumplir el período de retención de 5 días para optimizar el almacenamiento del sistema.',
+        isPurged: true,
+      };
+    }
+
+    return { error: rawError || 'No se pudo generar acceso seguro al comprobante' };
   } catch (err) {
     return {
       error: err instanceof Error ? err.message : 'Error al obtener URL segura',
+    };
+  }
+}
+
+/**
+ * Ejecuta el procedimiento administrativo de depuración de comprobantes resueltos
+ * (aprobados o rechazados) que han cumplido los 5 días de retención.
+ * Garantiza la exclusión estricta de cualquier comprobante o pago en estado pendiente.
+ */
+export async function cleanupExpiredPaymentProofs(
+  retentionDays = 5
+): Promise<{
+  success: boolean;
+  message: string;
+  purgedProofsCount?: number;
+  purgedFilesCount?: number;
+  error?: string;
+}> {
+  try {
+    const { data, error } = await supabase.rpc('cleanup_resolved_payment_proofs', {
+      p_retention_days: retentionDays,
+    });
+
+    if (error) {
+      return {
+        success: false,
+        message: 'No fue posible ejecutar la depuración de comprobantes.',
+        error: error.message,
+      };
+    }
+
+    const res = data as {
+      success: boolean;
+      message: string;
+      purged_proofs_count: number;
+      purged_files_count: number;
+      retention_days: number;
+    };
+
+    return {
+      success: res?.success ?? true,
+      message: res?.message || 'Depuración completada exitosamente.',
+      purgedProofsCount: res?.purged_proofs_count ?? 0,
+      purgedFilesCount: res?.purged_files_count ?? 0,
+    };
+  } catch (err) {
+    return {
+      success: false,
+      message: 'Error inesperado al depurar comprobantes antiguos.',
+      error: err instanceof Error ? err.message : 'Error desconocido',
     };
   }
 }

@@ -10,9 +10,10 @@ Este script (`scripts/migrate-storage-to-cloudinary.mjs`) realiza la transferenc
 |---|---|---|---|
 | `prize-images` | `manaure-vive/premios` | `public.prize_experiences` | `image_url` |
 | `partner-logos` | `manaure-vive/aliados` | `public.partners` | `logo_url` |
+| `winner-documents` | `manaure-vive/actas-ganadores` | `public.winners` | `official_act_url` |
 | `gallery-images` | `manaure-vive/galeria` | `public.gallery_items` | `image_url` |
 
-*Nota: Los buckets `payment-proofs` y `winner-documents` quedan completamente excluidos de Cloudinary (se mantienen en Supabase Storage para visualización nativa de PDF y seguridad).*
+*Nota: El bucket `payment-proofs` queda completamente excluido de este script (se mantiene en Supabase Storage).*
 
 ---
 

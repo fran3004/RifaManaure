@@ -39,8 +39,7 @@ describe('Gobernanza de Ganadores y Máquina de Estados de Rifas', () => {
         ticketNumber: ' 777 ',
         lotteryDrawNumber: ' 4567 ',
         drawDate: '2026-10-01T20:00:00Z',
-        officialActUrl:
-          'https://bxhzvmbbsisxqpwrgvgn.supabase.co/storage/v1/object/public/winner-documents/actas/raffle-uuid-1/acta_sorteo.pdf',
+        officialActUrl: 'https://res.cloudinary.com/test/acta.pdf',
         notes: 'Sorteo verificado por notario',
       });
 
@@ -50,8 +49,7 @@ describe('Gobernanza de Ganadores y Máquina de Estados de Rifas', () => {
         p_ticket_number: '777',
         p_lottery_draw_number: '4567',
         p_draw_date: '2026-10-01T20:00:00Z',
-        p_official_act_url:
-          'https://bxhzvmbbsisxqpwrgvgn.supabase.co/storage/v1/object/public/winner-documents/actas/raffle-uuid-1/acta_sorteo.pdf',
+        p_official_act_url: 'https://res.cloudinary.com/test/acta.pdf',
         p_notes: 'Sorteo verificado por notario',
       });
 

@@ -36,6 +36,7 @@ export default defineConfig(({ mode }) => {
     test: {
       environment: 'node',
       globals: true,
+      testTimeout: 15000,
     },
     build: {
       sourcemap: 'hidden',

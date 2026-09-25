@@ -350,6 +350,7 @@ export async function deleteCloudinaryFolder(
       'manaure-vive/premios/glamping',
       'manaure-vive/premios/fogata',
       'manaure-vive/aliados',
+      'manaure-vive/actas-ganadores',
       'manaure-vive/marca',
     ];
 
