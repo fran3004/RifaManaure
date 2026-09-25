@@ -239,7 +239,7 @@
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   background-color: rgba(10, 30, 19, 0.98);
   /* --cart-h se define a nivel global (variables.css) y se actualiza dinámicamente en runtime por SelectorBoletos.tsx */
-  padding: 1.5rem 0 calc(2rem + var(--cart-h, 0px) + env(safe-area-inset-bottom, 0px));
+  padding: 1.5rem 0 calc(1.5rem + var(--cart-h, 0px) + env(safe-area-inset-bottom, 0px));
   font-size: 0.75rem;
   line-height: 1.45;
   color: var(--text-on-dark-muted);
@@ -292,11 +292,12 @@
   .footerContainer {
     grid-template-columns: 1fr;
     gap: 2.5rem;
-    padding-bottom: 3rem;
+    padding-bottom: 2.5rem;
   }
 
   .bottomBar {
-    padding-bottom: calc(5.25rem + var(--cart-h, 0px) + env(safe-area-inset-bottom, 0px));
+    /* LOW-05: Espaciado proporcional. Si no hay carrito, deja espacio suficiente para el botón flotante de WhatsApp sin excesos */
+    padding-bottom: calc(max(2rem, var(--cart-h, 0px) + 1.25rem) + env(safe-area-inset-bottom, 0px));
   }
 
   .bottomContainer {

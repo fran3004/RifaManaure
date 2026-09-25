@@ -977,6 +977,30 @@
 }
 
 /* --- Reducción de Movimiento --- */
+/* HIGH-02: Carrito flotante en móviles en orientación landscape y pantallas de altura reducida */
+@media (max-height: 520px) {
+  .floatingCart {
+    bottom: max(6px, env(safe-area-inset-bottom, 6px));
+    left: max(0.5rem, env(safe-area-inset-left, 0.5rem));
+    right: max(3.75rem, calc(3.5rem + env(safe-area-inset-right, 0px)));
+    width: auto;
+    max-width: 620px;
+    margin: 0;
+    padding: 0.45rem 0.75rem;
+    border-radius: var(--radius-lg, 16px);
+  }
+
+  .cartContainer {
+    gap: 0.5rem;
+  }
+
+  .checkoutBtn {
+    padding: 0.45rem 0.9rem;
+    min-height: 40px;
+    font-size: 0.875rem;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .statDotSelectedMax {
     animation: none;

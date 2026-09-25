@@ -57,7 +57,7 @@ export const SelectorBoletos: React.FC = () => {
 
   const cartRef = useRef<HTMLElement>(null);
 
-  // Coordinación dinámica de la variable CSS --cart-h
+  // Coordinación dinámica de la variable CSS --cart-h con soporte inmediato para rotación de pantalla
   useEffect(() => {
     if (selectedTickets.length === 0) {
       document.documentElement.style.setProperty('--cart-h', '0px');
@@ -67,7 +67,8 @@ export const SelectorBoletos: React.FC = () => {
 
     const updateCartHeight = () => {
       if (cartRef.current) {
-        const height = cartRef.current.offsetHeight;
+        const rect = cartRef.current.getBoundingClientRect();
+        const height = Math.round(rect.height || cartRef.current.offsetHeight);
         // Se agregan 16px para el margen flotante sobre la parte inferior
         document.documentElement.style.setProperty('--cart-h', `${height + 16}px`);
       }
@@ -83,11 +84,34 @@ export const SelectorBoletos: React.FC = () => {
       observer.observe(cartRef.current);
     }
 
-    window.addEventListener('resize', updateCartHeight);
+    const handleRotationOrResize = () => {
+      updateCartHeight();
+      // Doble requestAnimationFrame para sincronizar cuando el navegador calcule las dimensiones tras rotación
+      requestAnimationFrame(() => {
+        updateCartHeight();
+        requestAnimationFrame(updateCartHeight);
+      });
+    };
+
+    window.addEventListener('resize', handleRotationOrResize, { passive: true });
+    window.addEventListener('orientationchange', handleRotationOrResize, { passive: true });
+
+    let orientationMedia: MediaQueryList | null = null;
+    const handleMediaChange = () => handleRotationOrResize();
+    if (typeof window !== 'undefined' && window.matchMedia) {
+      orientationMedia = window.matchMedia('(orientation: portrait)');
+      if (orientationMedia.addEventListener) {
+        orientationMedia.addEventListener('change', handleMediaChange);
+      }
+    }
 
     return () => {
       if (observer) observer.disconnect();
-      window.removeEventListener('resize', updateCartHeight);
+      window.removeEventListener('resize', handleRotationOrResize);
+      window.removeEventListener('orientationchange', handleRotationOrResize);
+      if (orientationMedia && orientationMedia.removeEventListener) {
+        orientationMedia.removeEventListener('change', handleMediaChange);
+      }
       document.documentElement.style.setProperty('--cart-h', '0px');
     };
   }, [selectedTickets.length, isMobileListOpen]);

@@ -1,13 +1,13 @@
 .toastContainer {
   position: fixed;
-  top: 24px;
-  right: 24px;
-  z-index: var(--z-toast);
+  top: max(1.25rem, calc(0.5rem + env(safe-area-inset-top, 0px)));
+  right: max(1.25rem, calc(0.5rem + env(safe-area-inset-right, 0px)));
+  z-index: var(--z-toast, 2000);
   display: flex;
   flex-direction: column;
   gap: 12px;
   max-width: 440px;
-  width: calc(100vw - 32px);
+  width: calc(100vw - max(2.5rem, calc(1rem + env(safe-area-inset-left, 0px) + env(safe-area-inset-right, 0px))));
   pointer-events: none;
 }
 
@@ -27,6 +27,8 @@
     0 0 0 1px rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.1);
   overflow: clip;
+  max-height: calc(100dvh - max(2.5rem, env(safe-area-inset-top, 0px) + env(safe-area-inset-bottom, 0px)));
+  box-sizing: border-box;
   animation: slideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   transition: all 0.3s ease;
 }
@@ -116,7 +118,7 @@
 
 .toastTitle {
   font-size: 1rem;
-  line-height: 1.2;
+  line-height: 1.25;
   font-weight: 700;
   color: #ffffff;
   margin: 0 0 4px 0;
@@ -124,6 +126,8 @@
   display: flex;
   align-items: center;
   gap: 6px;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .toastWarning .toastTitle {
@@ -145,9 +149,10 @@
 .toastMessage {
   font-size: 0.875rem;
   line-height: 1.45;
-  line-height: 1.45;
   color: #cbd5e1;
   margin: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .closeButton {
@@ -209,10 +214,38 @@
 
 @media (max-width: 640px) {
   .toastContainer {
-    top: 16px;
-    right: 16px;
-    left: 16px;
+    top: max(1rem, calc(0.5rem + env(safe-area-inset-top, 0px)));
+    right: max(1rem, env(safe-area-inset-right, 1rem));
+    left: max(1rem, env(safe-area-inset-left, 1rem));
     width: auto;
     max-width: none;
+  }
+}
+
+/* Pantallas de altura reducida o móviles en orientación horizontal (Landscape) */
+@media (max-height: 520px) {
+  .toastContainer {
+    top: max(0.5rem, env(safe-area-inset-top, 0.5rem));
+    gap: 8px;
+  }
+
+  .toastCard {
+    padding: 10px 14px;
+    gap: 10px;
+  }
+
+  .toastTitle {
+    font-size: 0.9rem;
+    margin-bottom: 2px;
+  }
+
+  .toastMessage {
+    font-size: 0.8rem;
+    line-height: 1.35;
+  }
+
+  .iconWrapper {
+    width: 32px;
+    height: 32px;
   }
 }

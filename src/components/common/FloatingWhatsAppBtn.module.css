@@ -152,7 +152,7 @@
     width: 52px;
     height: 52px;
     bottom: calc(16px + env(safe-area-inset-bottom, 0px) + var(--cart-h, 0px));
-    right: calc(16px + env(safe-area-inset-right, 0px));
+    right: max(16px, env(safe-area-inset-right, 16px));
   }
 
   .floatingBtn {
@@ -163,6 +163,33 @@
   .whatsappIcon {
     width: 30px;
     height: 30px;
+  }
+
+  .tooltip {
+    display: none;
+  }
+}
+
+/* HIGH-02: Estrategia para landscape y altura reducida (375x320, 568x320, 640x360) */
+@media (max-height: 520px) {
+  .floatingBtnWrapper {
+    width: 44px;
+    height: 44px;
+    /* En landscape/altura reducida, el botón se mantiene anclado al rincón inferior seguro sin elevarse a mitad de pantalla */
+    bottom: max(8px, env(safe-area-inset-bottom, 8px));
+    right: max(8px, env(safe-area-inset-right, 8px));
+  }
+
+  .floatingBtn {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .whatsappIcon {
+    width: 24px;
+    height: 24px;
   }
 
   .tooltip {
