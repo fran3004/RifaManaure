@@ -11,6 +11,9 @@ import {
   getOrderNotificationLogs,
   generateOrderNotification,
   retryNotification,
+  recordWhatsAppOpened,
+  recordWhatsAppSentManually,
+  getNotificationStatusBadge,
   NOTIFICATION_EVENT_TYPES,
   type GeneratedNotification,
   type NotificationLogRow,
@@ -102,6 +105,7 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
     null
   );
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
+  const [isWhatsAppOpened, setIsWhatsAppOpened] = useState<boolean>(false);
 
   // Trazabilidad de notificaciones (WhatsApp y Email)
   const [notificationLogs, setNotificationLogs] = useState<NotificationLogRow[]>([]);
@@ -114,6 +118,9 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
   // Cargar trazabilidad de notificaciones y URL segura firmada cuando cambia la orden
   useEffect(() => {
     let active = true;
+
+    setIsWhatsAppOpened(false);
+    setPreparedNotification(null);
 
     if (isOpen && order?.id) {
       void getOrderNotificationLogs(order.id).then((logs) => {
@@ -237,6 +244,7 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
 
         // Asignar plantilla de WhatsApp si aplica o como soporte para el administrador
         if (dispatchResult.whatsappNotification) {
+          setIsWhatsAppOpened(false);
           setPreparedNotification(dispatchResult.whatsappNotification);
         }
 
@@ -312,6 +320,7 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
 
         // Asignar plantilla de WhatsApp si aplica o como soporte para el administrador
         if (dispatchResult.whatsappNotification) {
+          setIsWhatsAppOpened(false);
           setPreparedNotification(dispatchResult.whatsappNotification);
         }
 
@@ -326,7 +335,43 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
     }
   };
 
-  // REINTENTAR NOTIFICACIÓN (WHATSAPP)
+  // Control de apertura y confirmación manual de WhatsApp
+  const handleOpenWhatsAppManual = async (whatsAppLink?: string) => {
+    if (!order || !whatsAppLink) return;
+    setIsWhatsAppOpened(true);
+    window.open(whatsAppLink, '_blank', 'noopener,noreferrer');
+
+    const eventType =
+      order.status === 'paid'
+        ? NOTIFICATION_EVENT_TYPES.PAYMENT_APPROVED
+        : order.status === 'rejected'
+          ? NOTIFICATION_EVENT_TYPES.PAYMENT_REJECTED
+          : NOTIFICATION_EVENT_TYPES.PAYMENT_RECEIVED;
+
+    if (order.buyers?.phone) {
+      await recordWhatsAppOpened(order.id, eventType, order.buyers.phone);
+      const updatedLogs = await getOrderNotificationLogs(order.id);
+      setNotificationLogs(updatedLogs);
+    }
+    setNotifActionResult('Enlace a WhatsApp abierto para envío manual con la plantilla oficial.');
+  };
+
+  const handleMarkWhatsAppAsSent = async () => {
+    if (!order || !order.buyers?.phone) return;
+    const eventType =
+      order.status === 'paid'
+        ? NOTIFICATION_EVENT_TYPES.PAYMENT_APPROVED
+        : order.status === 'rejected'
+          ? NOTIFICATION_EVENT_TYPES.PAYMENT_REJECTED
+          : NOTIFICATION_EVENT_TYPES.PAYMENT_RECEIVED;
+
+    await recordWhatsAppSentManually(order.id, eventType, order.buyers.phone);
+    const updatedLogs = await getOrderNotificationLogs(order.id);
+    setNotificationLogs(updatedLogs);
+    setNotifActionResult('Se registró la confirmación como enviada manualmente por el administrador.');
+  };
+
+  // REINTENTAR / ABRIR NOTIFICACIÓN (WHATSAPP MANUAL)
   const handleRetryWhatsAppNotification = async (log?: NotificationLogRow) => {
     if (!order) return;
     setIsRetryingNotif(true);
@@ -361,8 +406,18 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
 
       setPreparedNotification(notif);
       if (notif.whatsAppLink) {
+        setIsWhatsAppOpened(true);
         window.open(notif.whatsAppLink, '_blank', 'noopener,noreferrer');
-        setNotifActionResult('Enlace directo a WhatsApp abierto con la plantilla oficial.');
+        await recordWhatsAppOpened(
+          order.id,
+          eventType.toLowerCase().includes('approved')
+            ? NOTIFICATION_EVENT_TYPES.PAYMENT_APPROVED
+            : eventType.toLowerCase().includes('rejected')
+              ? NOTIFICATION_EVENT_TYPES.PAYMENT_REJECTED
+              : NOTIFICATION_EVENT_TYPES.PAYMENT_RECEIVED,
+          order.buyers?.phone || ''
+        );
+        setNotifActionResult('Enlace a WhatsApp abierto para envío manual con la plantilla oficial.');
       } else {
         setNotifActionResult('El comprador no tiene teléfono válido para WhatsApp.');
       }
@@ -371,7 +426,7 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
       setNotificationLogs(updatedLogs);
     } catch (err) {
       setNotifActionResult(
-        err instanceof Error ? err.message : 'Error al reintentar notificación por WhatsApp'
+        err instanceof Error ? err.message : 'Error al abrir WhatsApp para envío manual'
       );
     } finally {
       setIsRetryingNotif(false);
@@ -881,12 +936,15 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
               }`}
             >
               <div className={styles.notificationHeader}>
-                <strong
-                  className={`${styles.notificationTitle} ${preparedNotification.type === 'payment_approved' ? styles.notificationTitleSuccess : styles.notificationTitleDanger}`}
-                >
-                  <MessageSquare size={16} />
-                  {preparedNotification.title}
-                </strong>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                  <strong
+                    className={`${styles.notificationTitle} ${preparedNotification.type === 'payment_approved' ? styles.notificationTitleSuccess : styles.notificationTitleDanger}`}
+                  >
+                    <MessageSquare size={16} />
+                    {preparedNotification.title}
+                  </strong>
+                  <span className={styles.manualChannelTag}>WhatsApp manual</span>
+                </div>
                 <button
                   type="button"
                   className={`${styles.btnSecondary} ${styles.compactCopyButton}`}
@@ -897,21 +955,46 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
                 </button>
               </div>
 
+              {/* Aviso normativo: WhatsApp manual */}
+              <div className={styles.manualNoticeBox}>
+                <AlertCircle size={16} className={styles.manualNoticeIcon} />
+                <span className={styles.manualNoticeText}>
+                  <strong>WhatsApp manual:</strong> El sistema prepara el mensaje, pero el envío debe realizarse manualmente por el administrador.
+                </span>
+              </div>
+
               <div className={styles.notificationMessagePreview}>
                 {preparedNotification.messageText}
               </div>
 
               {preparedNotification.whatsAppLink ? (
                 <div className={styles.notificationSendRow}>
-                  <a
-                    href={preparedNotification.whatsAppLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={styles.btnWhatsApp}
+                  <button
+                    type="button"
+                    onClick={() => void handleOpenWhatsAppManual(preparedNotification.whatsAppLink)}
+                    className={`${styles.btnWhatsApp} ${styles.btnWhatsAppManual}`}
                   >
-                    <MessageSquare size={16} />
-                    <span>Enviar Notificación por WhatsApp</span>
-                  </a>
+                    <ExternalLink size={16} />
+                    <span>Abrir WhatsApp</span>
+                  </button>
+
+                  {isWhatsAppOpened && (
+                    <button
+                      type="button"
+                      onClick={() => void handleMarkWhatsAppAsSent()}
+                      className={`${styles.btnSecondary} ${styles.compactCopyButton}`}
+                      style={{
+                        padding: '0.6rem 0.95rem',
+                        fontSize: '0.8rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.45rem',
+                      }}
+                    >
+                      <CheckCircle2 size={14} color="var(--admin-success, #10b981)" />
+                      <span>Marcar como enviado manualmente</span>
+                    </button>
+                  )}
                 </div>
               ) : (
                 <span className={styles.notificationNoPhone}>
@@ -971,8 +1054,7 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
                     const isWhatsApp = log.channel === 'whatsapp';
                     const eventLabel = formatNotificationEventLabel(log.event_type);
                     const isFailed = log.status === 'failed';
-                    const isSent = log.status === 'sent' || log.status === 'delivered';
-                    const isPending = log.status === 'pending';
+                    const badge = getNotificationStatusBadge(log);
 
                     return (
                       <div
@@ -985,7 +1067,7 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
                               className={`${styles.notificationChannelBadge} ${isWhatsApp ? styles.notificationChannelWhatsApp : styles.notificationChannelEmail}`}
                             >
                               {isWhatsApp ? <Phone size={11} /> : <Mail size={11} />}
-                              {isWhatsApp ? 'WhatsApp' : 'Correo'}
+                              {isWhatsApp ? 'WhatsApp (Manual)' : 'Correo (Brevo)'}
                             </span>
 
                             <strong className={styles.notificationEventTitle}>
@@ -994,21 +1076,23 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
                           </div>
 
                           <div className={styles.notificationLogStatus}>
-                            {isSent && (
-                              <span className={`${styles.badgeSuccess} ${styles.smallBadge}`}>
-                                <CheckCircle2 size={12} /> Enviada
-                              </span>
-                            )}
-                            {isFailed && (
-                              <span className={`${styles.badgeDanger} ${styles.smallBadge}`}>
-                                <XCircle size={12} /> Falló
-                              </span>
-                            )}
-                            {isPending && (
-                              <span className={`${styles.badgeWarning} ${styles.smallBadge}`}>
-                                <Clock size={12} /> Pendiente
-                              </span>
-                            )}
+                            <span
+                              className={`${
+                                badge.variant === 'success'
+                                  ? styles.badgeSuccess
+                                  : badge.variant === 'info'
+                                    ? styles.badgeInfo
+                                    : badge.variant === 'danger'
+                                      ? styles.badgeDanger
+                                      : styles.badgeWarning
+                              } ${styles.smallBadge}`}
+                            >
+                              {badge.variant === 'success' && <CheckCircle2 size={12} />}
+                              {badge.variant === 'info' && <ExternalLink size={12} />}
+                              {badge.variant === 'warning' && <Clock size={12} />}
+                              {badge.variant === 'danger' && <XCircle size={12} />}
+                              {badge.label}
+                            </span>
 
                             <span className={styles.notificationAttempts}>
                               {log.attempts} {log.attempts === 1 ? 'intento' : 'intentos'}
@@ -1046,8 +1130,9 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
                 </div>
               ) : (
                 <p className={styles.notificationEmpty}>
-                  Las notificaciones transaccionales se disparan automáticamente y quedan
-                  registradas al enviar comprobantes, aprobar o rechazar pagos.
+                  Las notificaciones transaccionales quedan registradas al enviar comprobantes,
+                  aprobar o rechazar pagos. El correo se envía automáticamente vía Brevo, y WhatsApp
+                  se prepara para su envío manual por el administrador.
                 </p>
               )}
 
@@ -1061,17 +1146,17 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
                 </div>
               )}
 
-              {/* Acciones de Reintento Administrativo */}
+              {/* Acciones de Notificación Administrativa */}
               <div className={styles.notificationActions}>
                 <button
                   type="button"
                   className={`${styles.btnSecondary} ${styles.notificationRetryButton}`}
                   onClick={() => void handleRetryWhatsAppNotification()}
                   disabled={isRetryingNotif || !order.buyers?.phone}
-                  title="Abrir WhatsApp oficial para enviar o reenviar confirmación"
+                  title="Abrir WhatsApp oficial para enviar o reenviar plantilla manual"
                 >
                   <Phone size={13} color="#25d366" />
-                  <span>Reenviar por WhatsApp</span>
+                  <span>Abrir WhatsApp (Manual)</span>
                 </button>
 
                 {order.buyers?.email && (

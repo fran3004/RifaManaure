@@ -153,7 +153,7 @@ const AdminEditBuyerForm: React.FC<AdminEditBuyerFormProps> = ({ buyer, onClose,
                 disabled={isSaving}
               />
               <span className={styles.helpText}>
-                Utilizado para el despacho automático de comprobantes y notificaciones por WhatsApp.
+                Utilizado para el contacto y envío manual de comprobantes y notificaciones por WhatsApp.
               </span>
             </div>
 

@@ -9,6 +9,9 @@ import {
   getOrderNotificationLogs,
   dispatchOrderNotifications,
   retryNotification,
+  recordWhatsAppOpened,
+  recordWhatsAppSentManually,
+  getNotificationStatusBadge,
   NOTIFICATION_EVENT_TYPES,
   type OrderNotificationData,
 } from '@/services/notificationService';
@@ -308,7 +311,7 @@ describe('Servicio de Notificaciones por WhatsApp (src/services/notificationServ
         },
       });
 
-      expect(result.whatsappDispatched).toBe(true);
+      expect(result.whatsappDispatched).toBe(false);
       expect(mockUpsert).toHaveBeenCalledWith(
         expect.objectContaining({
           status: 'failed',
@@ -435,6 +438,134 @@ describe('Servicio de Notificaciones por WhatsApp (src/services/notificationServ
 
       expect(result.success).toBe(false);
       expect(result.error).toContain('No se encontró el número de WhatsApp');
+    });
+  });
+
+  describe('8. Operaciones del Canal Manual WhatsApp y Trazabilidad Verídica', () => {
+    it('recordWhatsAppOpened debe registrar etapa "opened" con status pending en DB', async () => {
+      const mockMaybeSingle = vi.fn().mockResolvedValueOnce({ data: null, error: null });
+      const mockSelectInitial = vi.fn().mockReturnValue({
+        eq: vi.fn().mockReturnValue({ maybeSingle: mockMaybeSingle }),
+      });
+      const mockSingle = vi.fn().mockResolvedValueOnce({
+        data: { id: 'log_opened', status: 'pending' },
+        error: null,
+      });
+      const mockSelectAfterUpsert = vi.fn().mockReturnValue({ single: mockSingle });
+      const mockUpsert = vi.fn().mockReturnValue({ select: mockSelectAfterUpsert });
+
+      vi.mocked(supabase.from).mockReturnValue({
+        select: mockSelectInitial,
+        upsert: mockUpsert,
+      } as any);
+
+      await recordWhatsAppOpened('ord_manual_01', 'payment_approved', '3001234567');
+
+      expect(mockUpsert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          order_id: 'ord_manual_01',
+          channel: 'whatsapp',
+          event_type: 'payment_approved',
+          recipient: '3001234567',
+          status: 'pending',
+          metadata: expect.objectContaining({
+            manual: true,
+            stage: 'opened',
+            delivery_type: 'manual_whatsapp',
+          }),
+        }),
+        expect.any(Object)
+      );
+    });
+
+    it('recordWhatsAppSentManually debe registrar etapa "sent_manually" con status pending en DB', async () => {
+      const mockMaybeSingle = vi.fn().mockResolvedValueOnce({ data: null, error: null });
+      const mockSelectInitial = vi.fn().mockReturnValue({
+        eq: vi.fn().mockReturnValue({ maybeSingle: mockMaybeSingle }),
+      });
+      const mockSingle = vi.fn().mockResolvedValueOnce({
+        data: { id: 'log_sent_manually', status: 'pending' },
+        error: null,
+      });
+      const mockSelectAfterUpsert = vi.fn().mockReturnValue({ single: mockSingle });
+      const mockUpsert = vi.fn().mockReturnValue({ select: mockSelectAfterUpsert });
+
+      vi.mocked(supabase.from).mockReturnValue({
+        select: mockSelectInitial,
+        upsert: mockUpsert,
+      } as any);
+
+      await recordWhatsAppSentManually('ord_manual_02', 'payment_approved', '3001234567');
+
+      expect(mockUpsert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          order_id: 'ord_manual_02',
+          channel: 'whatsapp',
+          event_type: 'payment_approved',
+          recipient: '3001234567',
+          status: 'pending',
+          metadata: expect.objectContaining({
+            manual: true,
+            stage: 'sent_manually',
+            delivery_type: 'manual_whatsapp',
+          }),
+        }),
+        expect.any(Object)
+      );
+    });
+
+    it('getNotificationStatusBadge debe clasificar con total exactitud los estados sin mentir', () => {
+      // WhatsApp: preparado
+      const badgePrepared = getNotificationStatusBadge({
+        channel: 'whatsapp',
+        status: 'pending',
+        metadata: { manual: true, stage: 'prepared' },
+      });
+      expect(badgePrepared.label).toBe('Plantilla preparada');
+      expect(badgePrepared.variant).toBe('warning');
+
+      // WhatsApp: enlace abierto
+      const badgeOpened = getNotificationStatusBadge({
+        channel: 'whatsapp',
+        status: 'pending',
+        metadata: { manual: true, stage: 'opened' },
+      });
+      expect(badgeOpened.label).toBe('WhatsApp abierto');
+      expect(badgeOpened.variant).toBe('info');
+
+      // WhatsApp: enviado manualmente
+      const badgeSentManually = getNotificationStatusBadge({
+        channel: 'whatsapp',
+        status: 'pending',
+        metadata: { manual: true, stage: 'sent_manually' },
+      });
+      expect(badgeSentManually.label).toBe('Enviado manualmente');
+      expect(badgeSentManually.variant).toBe('success');
+
+      // WhatsApp: falló por falta de teléfono
+      const badgeInvalidPhone = getNotificationStatusBadge({
+        channel: 'whatsapp',
+        status: 'failed',
+        metadata: { manual: true, stage: 'failed' },
+      });
+      expect(badgeInvalidPhone.label).toBe('Teléfono no válido');
+      expect(badgeInvalidPhone.variant).toBe('danger');
+
+      // Email: entregado por Brevo
+      const badgeEmailSent = getNotificationStatusBadge({
+        channel: 'email',
+        status: 'sent',
+      });
+      expect(badgeEmailSent.label).toBe('Enviada (Brevo)');
+      expect(badgeEmailSent.variant).toBe('success');
+
+      // Email: fallido
+      const badgeEmailFailed = getNotificationStatusBadge({
+        channel: 'email',
+        status: 'failed',
+      });
+      expect(badgeEmailFailed.label).toBe('Falló el envío');
+      expect(badgeEmailFailed.variant).toBe('danger');
     });
   });
 });

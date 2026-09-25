@@ -358,25 +358,28 @@ export async function dispatchOrderNotifications(
       options.notificationData.buyerPhone && options.notificationData.buyerPhone.trim().length >= 7
     );
 
-    // Registrar en trazabilidad el despacho de WhatsApp
+    // Registrar en trazabilidad la preparación de la plantilla de WhatsApp (CANAL MANUAL)
     void recordNotificationLog({
       orderId: options.orderId,
       channel: 'whatsapp',
       eventType: normalizedType,
       recipient: options.notificationData.buyerPhone || 'Sin teléfono',
-      status: hasPhone ? 'sent' : 'failed',
+      status: hasPhone ? 'pending' : 'failed',
       errorMessage: hasPhone
         ? null
         : 'El comprador no tiene un número de celular válido registrado para WhatsApp.',
       attempts: 1,
       metadata: {
+        manual: true,
+        stage: hasPhone ? 'prepared' : 'failed',
+        delivery_type: 'manual_whatsapp',
         buyer_name: options.notificationData.buyerName,
         reference: options.notificationData.reference,
         tickets_count: options.notificationData.ticketNumbers.length,
       },
     });
 
-    whatsappDispatched = true;
+    whatsappDispatched = hasPhone;
   }
 
   if (shouldSendEmail && !options.skipEmail) {
@@ -400,6 +403,98 @@ export async function dispatchOrderNotifications(
     whatsappNotification,
     emailDispatched,
   };
+}
+
+/**
+ * Registra en trazabilidad que el enlace de WhatsApp fue abierto para envío manual.
+ */
+export async function recordWhatsAppOpened(
+  orderId: string,
+  eventType: NotificationEventType | string,
+  recipient: string
+): Promise<NotificationLogRow | null> {
+  const normalizedType = normalizeEventType(eventType);
+  return recordNotificationLog({
+    orderId,
+    channel: 'whatsapp',
+    eventType: normalizedType,
+    recipient: recipient || 'N/A',
+    status: 'pending',
+    errorMessage: null,
+    metadata: {
+      manual: true,
+      stage: 'opened',
+      delivery_type: 'manual_whatsapp',
+      opened_at: new Date().toISOString(),
+    },
+  });
+}
+
+/**
+ * Registra en trazabilidad que el administrador confirmó haber enviado el mensaje manualmente.
+ */
+export async function recordWhatsAppSentManually(
+  orderId: string,
+  eventType: NotificationEventType | string,
+  recipient: string
+): Promise<NotificationLogRow | null> {
+  const normalizedType = normalizeEventType(eventType);
+  return recordNotificationLog({
+    orderId,
+    channel: 'whatsapp',
+    eventType: normalizedType,
+    recipient: recipient || 'N/A',
+    status: 'pending',
+    errorMessage: null,
+    metadata: {
+      manual: true,
+      stage: 'sent_manually',
+      delivery_type: 'manual_whatsapp',
+      confirmed_at: new Date().toISOString(),
+    },
+  });
+}
+
+/**
+ * Retorna la etiqueta y estilo verídico para un registro de notificación.
+ * Evita rotundamente afirmar "Enviada" en WhatsApp salvo confirmación manual.
+ */
+export function getNotificationStatusBadge(log: {
+  channel: string;
+  status: string;
+  metadata?: unknown;
+}): {
+  label: string;
+  variant: 'success' | 'warning' | 'info' | 'danger';
+  stage?: 'prepared' | 'opened' | 'sent_manually';
+  isManualWhatsApp?: boolean;
+} {
+  const isWhatsApp = log.channel === 'whatsapp';
+  const meta = (typeof log.metadata === 'object' && log.metadata !== null ? log.metadata : {}) as Record<string, any>;
+  const stage = meta?.stage;
+
+  if (isWhatsApp) {
+    if (log.status === 'failed') {
+      return { label: 'Teléfono no válido', variant: 'danger', isManualWhatsApp: true };
+    }
+    if (stage === 'sent_manually') {
+      return { label: 'Enviado manualmente', variant: 'success', stage: 'sent_manually', isManualWhatsApp: true };
+    }
+    if (stage === 'opened') {
+      return { label: 'WhatsApp abierto', variant: 'info', stage: 'opened', isManualWhatsApp: true };
+    }
+    // Por defecto para canal manual WhatsApp
+    return { label: 'Plantilla preparada', variant: 'warning', stage: 'prepared', isManualWhatsApp: true };
+  }
+
+  // Canal Correo (Brevo)
+  if (log.status === 'sent' || log.status === 'delivered') {
+    return { label: 'Enviada (Brevo)', variant: 'success' };
+  }
+  if (log.status === 'failed') {
+    return { label: 'Falló el envío', variant: 'danger' };
+  }
+  return { label: 'Pendiente', variant: 'warning' };
 }
 
 /**
@@ -455,9 +550,15 @@ export async function retryNotification(
       channel: 'whatsapp',
       eventType: normalizedType,
       recipient: phone,
-      status: 'sent',
+      status: 'pending',
       errorMessage: null,
-      metadata: { retry: true, timestamp: new Date().toISOString() },
+      metadata: {
+        manual: true,
+        stage: 'opened',
+        delivery_type: 'manual_whatsapp',
+        opened_at: new Date().toISOString(),
+        retry: true,
+      },
     });
 
     return {
