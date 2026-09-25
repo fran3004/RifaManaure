@@ -26,6 +26,7 @@ export const GaleriaPremio: React.FC = () => {
   const closeBtnRef = useRef<HTMLButtonElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
   const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
 
   // Sincronización en segundo plano con Supabase sin FOUC
   useEffect(() => {
@@ -78,9 +79,12 @@ export const GaleriaPremio: React.FC = () => {
   useEffect(() => {
     if (fotoSeleccionadaIndex !== null) {
       const originalOverflow = document.body.style.overflow;
+      const originalOverscrollBehavior = document.body.style.overscrollBehavior;
       document.body.style.overflow = 'hidden';
+      document.body.style.overscrollBehavior = 'none';
       return () => {
         document.body.style.overflow = originalOverflow;
+        document.body.style.overscrollBehavior = originalOverscrollBehavior;
       };
     }
   }, [fotoSeleccionadaIndex]);
@@ -170,15 +174,23 @@ export const GaleriaPremio: React.FC = () => {
     preload(fotosFiltradas[nextIndex]);
   }, [fotoSeleccionadaIndex, fotosFiltradas]);
 
-  // Soporte táctil para deslizar (umbral 50 px)
+  // Soporte táctil para deslizar con detección direccional estricta (umbral 45px)
   const handleTouchStart = (e: React.TouchEvent) => {
-    touchStartX.current = e.touches[0].clientX;
+    if (e.touches.length === 1) {
+      touchStartX.current = e.touches[0].clientX;
+      touchStartY.current = e.touches[0].clientY;
+    }
   };
 
   const handleTouchEnd = (e: React.TouchEvent) => {
-    if (touchStartX.current === null) return;
+    if (touchStartX.current === null || touchStartY.current === null) return;
     const diffX = e.changedTouches[0].clientX - touchStartX.current;
-    if (Math.abs(diffX) > 50) {
+    const diffY = e.changedTouches[0].clientY - touchStartY.current;
+
+    // Solo se interpreta como swipe horizontal si supera el umbral y domina al desplazamiento vertical
+    const isHorizontalSwipe = Math.abs(diffX) > 45 && Math.abs(diffX) > Math.abs(diffY) * 1.4;
+
+    if (isHorizontalSwipe) {
       if (diffX > 0) {
         handlePrev();
       } else {
@@ -186,6 +198,7 @@ export const GaleriaPremio: React.FC = () => {
       }
     }
     touchStartX.current = null;
+    touchStartY.current = null;
   };
 
   const fotoActualItem =
@@ -317,26 +330,34 @@ export const GaleriaPremio: React.FC = () => {
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
         >
+          {/* Botón de Cierre Fijo en Viewport con Safe Areas */}
+          <button
+            ref={closeBtnRef}
+            type="button"
+            className={styles.closeBtn}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleCloseLightbox();
+            }}
+            aria-label="Cerrar galería de imágenes"
+          >
+            <X size={24} aria-hidden="true" />
+          </button>
+
+          {/* Flecha Anterior Accesible */}
+          <button
+            type="button"
+            className={`${styles.navArrow} ${styles.prevArrow}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              handlePrev();
+            }}
+            aria-label="Ver fotografía anterior"
+          >
+            <ChevronLeft size={28} aria-hidden="true" />
+          </button>
+
           <div className={styles.lightboxContent} onClick={(e) => e.stopPropagation()}>
-            <button
-              ref={closeBtnRef}
-              type="button"
-              className={styles.closeBtn}
-              onClick={handleCloseLightbox}
-              aria-label="Cerrar galería de imágenes"
-            >
-              <X size={24} aria-hidden="true" />
-            </button>
-
-            <button
-              type="button"
-              className={`${styles.navArrow} ${styles.prevArrow}`}
-              onClick={handlePrev}
-              aria-label="Ver fotografía anterior"
-            >
-              <ChevronLeft size={28} aria-hidden="true" />
-            </button>
-
             <div className={styles.lightboxImageWrapper}>
               {fotoActualItem.image_url ? (
                 <div className={styles.lightboxPicture}>
@@ -344,7 +365,6 @@ export const GaleriaPremio: React.FC = () => {
                     src={getOptimizedCloudinaryUrl(fotoActualItem.image_url, { width: 1600 })}
                     alt={fotoActualItem.alt_text || fotoActualItem.title}
                     className={styles.lightboxImg}
-                    style={{ maxWidth: '100%', maxHeight: '78vh', objectFit: 'contain' }}
                   />
                 </div>
               ) : fotoActualEntry ? (
@@ -362,10 +382,11 @@ export const GaleriaPremio: React.FC = () => {
                     src={resolveExperienceImage(fotoActualSlug)}
                     alt={fotoActualItem.alt_text || fotoActualItem.title}
                     className={styles.lightboxImg}
-                    style={{ maxWidth: '100%', maxHeight: '78vh', objectFit: 'contain' }}
                   />
                 </div>
               )}
+
+              {/* Leyenda y Contador */}
               <div className={styles.lightboxCaption}>
                 <p className={styles.lightboxAlt}>
                   {fotoActualItem.alt_text || fotoActualEntry?.caption || fotoActualItem.title}
@@ -374,17 +395,47 @@ export const GaleriaPremio: React.FC = () => {
                   {fotoSeleccionadaIndex! + 1} / {fotosFiltradas.length}
                 </span>
               </div>
-            </div>
 
-            <button
-              type="button"
-              className={`${styles.navArrow} ${styles.nextArrow}`}
-              onClick={handleNext}
-              aria-label="Ver fotografía siguiente"
-            >
-              <ChevronRight size={28} aria-hidden="true" />
-            </button>
+              {/* Indicador de Páginas / Dots interactivo */}
+              {fotosFiltradas.length > 1 && (
+                <div
+                  className={styles.paginationDots}
+                  role="tablist"
+                  aria-label="Selector de fotografías"
+                >
+                  {fotosFiltradas.map((item, idx) => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      role="tab"
+                      aria-selected={idx === fotoSeleccionadaIndex}
+                      aria-label={`Ver fotografía ${idx + 1} de ${fotosFiltradas.length}`}
+                      className={`${styles.paginationDot} ${
+                        idx === fotoSeleccionadaIndex ? styles.paginationDotActive : ''
+                      }`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setFotoSeleccionadaIndex(idx);
+                      }}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
+
+          {/* Flecha Siguiente Accesible */}
+          <button
+            type="button"
+            className={`${styles.navArrow} ${styles.nextArrow}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleNext();
+            }}
+            aria-label="Ver fotografía siguiente"
+          >
+            <ChevronRight size={28} aria-hidden="true" />
+          </button>
         </div>
       )}
     </section>
