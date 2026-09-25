@@ -308,7 +308,7 @@ export const TicketCartProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         showToast(
           'warning',
           '¡Límite de Boletos Alcanzado!',
-          `Has alcanzado el límite máximo de ${maxTicketsPerBuyer} boletos por comprador. Puedes continuar al checkout o retirar un número seleccionado.`
+          `Has alcanzado el límite máximo de ${maxTicketsPerBuyer} boletos por comprador. Puedes continuar con tu compra o retirar un número seleccionado.`
         );
         return prev;
       }

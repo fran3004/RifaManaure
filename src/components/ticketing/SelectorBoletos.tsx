@@ -12,6 +12,9 @@ import {
   X,
   ChevronDown,
   ChevronUp,
+  ChevronLeft,
+  ChevronRight,
+  Layers,
 } from 'lucide-react';
 import { formatCOP, formatTicketNumber } from '@/lib/utils';
 import { SectionHeader, Button } from '@/components/public/ui';
@@ -20,12 +23,27 @@ import styles from './SelectorBoletos.module.css';
 
 type FilterType = 'all' | 'available' | 'selected';
 
-const RANGES = [
+// Rangos de 200 boletos para pantallas de escritorio (≥ 1024px)
+const DESKTOP_RANGES = [
   { label: '000 - 199', min: 0, max: 199 },
   { label: '200 - 399', min: 200, max: 399 },
   { label: '400 - 599', min: 400, max: 599 },
   { label: '600 - 799', min: 600, max: 799 },
   { label: '800 - 999', min: 800, max: 999 },
+];
+
+// Rangos de 100 boletos para teléfonos, tablets y dispositivos pequeños (< 1024px)
+const COMPACT_RANGES = [
+  { label: '000 - 099', min: 0, max: 99 },
+  { label: '100 - 199', min: 100, max: 199 },
+  { label: '200 - 299', min: 200, max: 299 },
+  { label: '300 - 399', min: 300, max: 399 },
+  { label: '400 - 499', min: 400, max: 499 },
+  { label: '500 - 599', min: 500, max: 599 },
+  { label: '600 - 699', min: 600, max: 699 },
+  { label: '700 - 799', min: 700, max: 799 },
+  { label: '800 - 899', min: 800, max: 899 },
+  { label: '900 - 999', min: 900, max: 999 },
 ];
 
 export const SelectorBoletos: React.FC = () => {
@@ -52,8 +70,61 @@ export const SelectorBoletos: React.FC = () => {
 
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<FilterType>('all');
-  const [selectedRange, setSelectedRange] = useState<number>(0);
   const [isMobileListOpen, setIsMobileListOpen] = useState(false);
+
+  // Detección reactiva de vista compacta para móviles y tablets (< 1024px)
+  const [isCompactView, setIsCompactView] = useState<boolean>(() => {
+    if (typeof window !== 'undefined' && window.matchMedia) {
+      return window.matchMedia('(max-width: 1023px)').matches;
+    }
+    return false;
+  });
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) return;
+    const mql = window.matchMedia('(max-width: 1023px)');
+    setIsCompactView(mql.matches);
+    const onChange = (e: MediaQueryListEvent) => {
+      setIsCompactView(e.matches);
+    };
+    if (mql.addEventListener) {
+      mql.addEventListener('change', onChange);
+    } else {
+      mql.addListener(onChange);
+    }
+    return () => {
+      if (mql.removeEventListener) {
+        mql.removeEventListener('change', onChange);
+      } else {
+        mql.removeListener(onChange);
+      }
+    };
+  }, []);
+
+  const [selectedDesktopIndex, setSelectedDesktopIndex] = useState<number>(0);
+  const [selectedCompactIndex, setSelectedCompactIndex] = useState<number>(0);
+
+  const handleDesktopRangeSelect = (idx: number) => {
+    setSelectedDesktopIndex(idx);
+    setSelectedCompactIndex(Math.min(idx * 2, COMPACT_RANGES.length - 1));
+  };
+
+  const handleCompactRangeSelect = (idx: number) => {
+    setSelectedCompactIndex(idx);
+    setSelectedDesktopIndex(Math.min(Math.floor(idx / 2), DESKTOP_RANGES.length - 1));
+  };
+
+  const handlePrevRange = () => {
+    if (selectedCompactIndex > 0) {
+      handleCompactRangeSelect(selectedCompactIndex - 1);
+    }
+  };
+
+  const handleNextRange = () => {
+    if (selectedCompactIndex < COMPACT_RANGES.length - 1) {
+      handleCompactRangeSelect(selectedCompactIndex + 1);
+    }
+  };
 
   const cartRef = useRef<HTMLElement>(null);
 
@@ -116,7 +187,7 @@ export const SelectorBoletos: React.FC = () => {
     };
   }, [selectedTickets.length, isMobileListOpen]);
 
-  // Boletos filtrados
+  // Boletos filtrados: en móviles y tablets muestra estrictamente 100 boletos por grupo; en escritorio 200 boletos
   const filteredTickets = useMemo(() => {
     let list = [...tickets];
 
@@ -131,10 +202,14 @@ export const SelectorBoletos: React.FC = () => {
       list = list.filter((t) => t.status === 'available');
     } else if (filterType === 'selected') {
       list = list.filter((t) => selectedTickets.includes(t.number));
+      return list;
     }
 
-    // Filtro por rango numérico
-    const curRange = RANGES[selectedRange];
+    // Filtro por rango numérico: en móvil y tablet son 100 boletos, en escritorio son 200 boletos
+    const curRange = isCompactView
+      ? COMPACT_RANGES[selectedCompactIndex]
+      : DESKTOP_RANGES[selectedDesktopIndex];
+
     if (curRange) {
       list = list.filter((t) => {
         const num = parseInt(t.number, 10);
@@ -143,7 +218,15 @@ export const SelectorBoletos: React.FC = () => {
     }
 
     return list;
-  }, [tickets, searchTerm, filterType, selectedRange, selectedTickets]);
+  }, [
+    tickets,
+    searchTerm,
+    filterType,
+    isCompactView,
+    selectedCompactIndex,
+    selectedDesktopIndex,
+    selectedTickets,
+  ]);
 
   // Si la edición cuenta con ganador oficial registrado, mostrar la celebración en lugar del selector
   if (winner) {
@@ -345,27 +428,103 @@ export const SelectorBoletos: React.FC = () => {
           </div>
         </div>
 
-        {/* Filtros de Rango y Disponibilidad como Chips */}
+        {/* Filtros de Rango y Disponibilidad */}
         {!searchTerm && (
           <div className={styles.filterBar}>
-            <div className={styles.rangeChips} role="toolbar" aria-label="Filtrar por rango de boletos">
-              {RANGES.map((r, idx) => (
+            {/* 1. Selector de Rangos de 200 Boletos (Exclusivo Escritorio ≥ 1024px) */}
+            <div
+              className={styles.desktopRangeChips}
+              role="toolbar"
+              aria-label="Filtrar por rango de boletos"
+            >
+              {DESKTOP_RANGES.map((r, idx) => (
                 <button
                   key={idx}
                   type="button"
-                  className={`${styles.filterChip} ${selectedRange === idx ? styles.filterChipActive : ''}`}
-                  onClick={() => setSelectedRange(idx)}
-                  aria-pressed={selectedRange === idx}
+                  className={`${styles.filterChip} ${selectedDesktopIndex === idx ? styles.filterChipActive : ''}`}
+                  onClick={() => handleDesktopRangeSelect(idx)}
+                  aria-pressed={selectedDesktopIndex === idx}
                 >
                   {r.label}
                 </button>
               ))}
             </div>
 
+            {/* 2. Navegador de Rangos de 100 Boletos (Exclusivo Móviles y Tablets < 1024px) */}
+            <div
+              className={styles.compactRangeNavigator}
+              role="region"
+              aria-label="Navegador de rangos de 100 boletos"
+            >
+              <button
+                type="button"
+                className={styles.rangeNavArrow}
+                onClick={handlePrevRange}
+                disabled={selectedCompactIndex === 0}
+                aria-label="Ver 100 boletos anteriores"
+                title="Ver 100 boletos anteriores"
+              >
+                <ChevronLeft size={20} aria-hidden="true" />
+              </button>
+
+              <div className={styles.rangeSelectorCard}>
+                <div className={styles.rangeSelectorInfo}>
+                  <div className={styles.rangeMainLabelRow}>
+                    <Layers size={14} className={styles.rangeIcon} aria-hidden="true" />
+                    <span className={styles.rangeMainLabel}>
+                      Rango {COMPACT_RANGES[selectedCompactIndex]?.label}
+                    </span>
+                  </div>
+                  <span className={styles.rangeMetaBadge}>
+                    Grupo {selectedCompactIndex + 1} de {COMPACT_RANGES.length} • 100 boletos
+                  </span>
+                </div>
+
+                <div className={styles.rangeChevronBox} aria-hidden="true">
+                  <ChevronDown size={18} />
+                </div>
+
+                {/* Barra de progreso de posición */}
+                <div
+                  className={styles.rangeProgressBar}
+                  style={{
+                    width: `${((selectedCompactIndex + 1) / COMPACT_RANGES.length) * 100}%`,
+                  }}
+                  aria-hidden="true"
+                />
+
+                {/* Select nativo overlay para interacción táctil fluida sin desbordamiento */}
+                <select
+                  className={styles.rangeNativeSelect}
+                  value={selectedCompactIndex}
+                  onChange={(e) => handleCompactRangeSelect(Number(e.target.value))}
+                  aria-label="Elegir grupo de 100 boletos"
+                >
+                  {COMPACT_RANGES.map((r, idx) => (
+                    <option key={r.label} value={idx}>
+                      Rango {r.label} ({idx + 1} de {COMPACT_RANGES.length} • 100 boletos)
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <button
+                type="button"
+                className={styles.rangeNavArrow}
+                onClick={handleNextRange}
+                disabled={selectedCompactIndex === COMPACT_RANGES.length - 1}
+                aria-label="Ver 100 boletos siguientes"
+                title="Ver 100 boletos siguientes"
+              >
+                <ChevronRight size={20} aria-hidden="true" />
+              </button>
+            </div>
+
+            {/* 3. Filtros de Disponibilidad (Todos, Solo Libres, Mis Boletos) */}
             <div className={styles.statusChips} role="toolbar" aria-label="Filtrar por disponibilidad">
               <button
                 type="button"
-                className={`${styles.filterChip} ${filterType === 'all' ? styles.filterChipActive : ''}`}
+                className={`${styles.filterChip} ${styles.statusChip} ${filterType === 'all' ? styles.filterChipActive : ''}`}
                 onClick={() => setFilterType('all')}
                 aria-pressed={filterType === 'all'}
               >
@@ -373,7 +532,7 @@ export const SelectorBoletos: React.FC = () => {
               </button>
               <button
                 type="button"
-                className={`${styles.filterChip} ${filterType === 'available' ? styles.filterChipActive : ''}`}
+                className={`${styles.filterChip} ${styles.statusChip} ${filterType === 'available' ? styles.filterChipActive : ''}`}
                 onClick={() => setFilterType('available')}
                 aria-pressed={filterType === 'available'}
               >
@@ -381,7 +540,7 @@ export const SelectorBoletos: React.FC = () => {
               </button>
               <button
                 type="button"
-                className={`${styles.filterChip} ${filterType === 'selected' ? styles.filterChipActive : ''}`}
+                className={`${styles.filterChip} ${styles.statusChip} ${filterType === 'selected' ? styles.filterChipActive : ''}`}
                 onClick={() => setFilterType('selected')}
                 aria-pressed={filterType === 'selected'}
               >
@@ -452,6 +611,8 @@ export const SelectorBoletos: React.FC = () => {
               onClick={() => {
                 setSearchTerm('');
                 setFilterType('all');
+                setSelectedDesktopIndex(0);
+                setSelectedCompactIndex(0);
               }}
             >
               Restablecer filtros
