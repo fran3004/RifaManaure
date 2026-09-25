@@ -7,37 +7,62 @@ import { formatTicketNumber } from '@/lib/utils';
 export const RAFFLE_CACHE_KEY = 'manaure_active_raffle_cache';
 export const RAFFLE_UPDATED_EVENT = 'manaure_raffle_updated';
 
+/** Loterías tradicionales programadas para el calendario colombiano 2026. */
+export const COLOMBIAN_TRADITIONAL_LOTTERIES = [
+  'Lotería de Bogotá',
+  'Lotería de Boyacá',
+  'Lotería del Cauca',
+  'Lotería de la Cruz Roja Colombiana',
+  'Lotería de Cundinamarca',
+  'Lotería del Huila',
+  'Lotería de Manizales',
+  'Lotería de Medellín',
+  'Lotería del Meta',
+  'Lotería del Quindío',
+  'Lotería de Risaralda',
+  'Lotería de Santander',
+  'Lotería del Tolima',
+  'Lotería del Valle',
+] as const;
+
+/** Referencias de sorteos extraordinarios o realizados en convenio. */
+export const COLOMBIAN_SPECIAL_DRAW_REFERENCES = [
+  'Sorteo Extraordinario de Colombia',
+  'Lotería de la Villa Republicana de Chiquinquirá',
+] as const;
+
+/** Juegos de chance usados como referencias; la jornada se conserva en el valor elegido. */
+export const COLOMBIAN_CHANCE_DRAW_REFERENCES = [
+  'El Sinuano Día',
+  'El Sinuano Noche',
+  'Caribeña Día',
+  'Caribeña Noche',
+  'Chontico Día',
+  'Chontico Noche',
+  'Motilón Día',
+  'Motilón Noche',
+  'Paisita Día',
+  'Paisita Noche',
+  'Culona Día',
+  'Culona Noche',
+  'El Cafeterito',
+  'Pijao de Oro',
+  'El Dorado',
+  'La Antioqueñita',
+  'La Fantástica Día',
+  'La Fantástica Noche',
+] as const;
+
 /**
- * Listado oficial de principales loterías y sorteos en Colombia.
- * Facilita el autocompletado y selección intuitiva en el panel administrativo.
+ * Catálogo combinado para compatibilidad con valores ya guardados y autocompletado.
+ * El selector administrativo muestra cada tipo de sorteo por separado.
  */
 export const COLOMBIAN_LOTTERIES = [
+  ...COLOMBIAN_TRADITIONAL_LOTTERIES,
+  ...COLOMBIAN_SPECIAL_DRAW_REFERENCES,
+  ...COLOMBIAN_CHANCE_DRAW_REFERENCES,
   'Lotería del Sinuano',
-  'El Sinuano Noche',
-  'El Sinuano Día',
-  'Lotería de Santander',
-  'Lotería de Boyacá',
-  'Lotería de Medellín',
-  'Lotería del Valle',
-  'Lotería de Bogotá',
   'Lotería de la Cruz Roja',
-  'Lotería del Huila',
-  'Lotería del Cauca',
-  'Lotería de Cundinamarca',
-  'Lotería del Quindío',
-  'Lotería del Meta',
-  'Lotería de Manizales',
-  'Lotería de Risaralda',
-  'Caribeña Noche',
-  'Caribeña Día',
-  'Chontico Noche',
-  'Chontico Día',
-  'Motilón Noche',
-  'Motilón Día',
-  'Paisita Noche',
-  'Paisita Día',
-  'Culona Noche',
-  'Culona Día',
 ] as const;
 
 export function getStoredCachedRaffle(): RaffleRow | null {

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import type { RaffleRow } from '@/types/raffle.types';
 import { createRaffleAdmin } from '@/services/raffleService';
-import { COLOMBIAN_LOTTERIES, saveCachedRaffle } from '@/hooks/useActiveRaffle';
+import { saveCachedRaffle } from '@/hooks/useActiveRaffle';
 import {
   X,
   PlusCircle,
@@ -16,6 +16,7 @@ import {
   ShieldCheck,
   Settings,
 } from 'lucide-react';
+import { LotteryReferenceField } from './LotteryReferenceField';
 import styles from './AdminEditRaffleModal.module.css';
 
 interface AdminCreateRaffleModalProps {
@@ -47,7 +48,7 @@ const CreateRaffleForm: React.FC<{
   const [totalTickets, setTotalTickets] = useState<number>(1000);
   const [maxTicketsPerBuyer, setMaxTicketsPerBuyer] = useState<number>(50);
   const [drawDate, setDrawDate] = useState<string>('');
-  const [lotteryReference, setLotteryReference] = useState('Lotería del Sinuano');
+  const [lotteryReference, setLotteryReference] = useState('El Sinuano Día');
   const [status, setStatus] = useState<'draft' | 'active' | 'paused'>('draft');
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -307,46 +308,16 @@ const CreateRaffleForm: React.FC<{
               </div>
 
               <div className={styles.formGroup}>
-                <label className={styles.label}>
+                <label className={styles.label} htmlFor="raffle-lottery-create">
                   <Award size={14} />
-                  Lotería de Referencia *
+                  Lotería o sorteo de referencia *
                 </label>
-                <input
-                  type="text"
-                  list="colombianLotteriesListCreate"
-                  className={styles.input}
+                <LotteryReferenceField
+                  id="raffle-lottery-create"
                   value={lotteryReference}
-                  onChange={(e) => setLotteryReference(e.target.value)}
-                  placeholder="Ej. Lotería del Sinuano, Lotería de Santander..."
-                  required
+                  onChange={setLotteryReference}
                   disabled={isSubmitting}
                 />
-                <datalist id="colombianLotteriesListCreate">
-                  {COLOMBIAN_LOTTERIES.map((lot) => (
-                    <option key={lot} value={lot} />
-                  ))}
-                </datalist>
-                <div className={styles.lotteryChipsRow}>
-                  {[
-                    'Lotería del Sinuano',
-                    'Lotería de Santander',
-                    'Lotería de Boyacá',
-                    'Lotería de Medellín',
-                    'Lotería del Valle',
-                  ].map((preset) => (
-                    <button
-                      key={preset}
-                      type="button"
-                      className={`${styles.lotteryPresetChip} ${
-                        lotteryReference === preset ? styles.lotteryPresetChipActive : ''
-                      }`}
-                      onClick={() => setLotteryReference(preset)}
-                      title={`Seleccionar ${preset}`}
-                    >
-                      {preset}
-                    </button>
-                  ))}
-                </div>
               </div>
             </div>
 

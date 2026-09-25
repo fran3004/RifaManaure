@@ -380,36 +380,10 @@
   margin-top: 2px;
 }
 
-.lotteryChipsRow {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
-  margin-top: 0.45rem;
-}
-
-.lotteryPresetChip {
-  background-color: var(--bg-surface, rgba(255, 255, 255, 0.05));
-  border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.1));
-  color: var(--text-secondary, #9cb5ab);
-  padding: 0.22rem 0.55rem;
-  border-radius: 9999px;
-  font-size: 0.72rem;
-  line-height: 1.2;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 150ms ease;
-}
-
-.lotteryPresetChip:hover {
-  background-color: var(--brand-accent-soft, rgba(245, 166, 35, 0.15));
-  border-color: var(--brand-accent, #f5a623);
-  color: var(--text-primary, #ffffff);
-}
-
-.lotteryPresetChipActive {
-  background-color: var(--brand-accent-soft, rgba(245, 166, 35, 0.2));
-  border-color: var(--brand-accent, #f5a623);
-  color: var(--brand-accent, #f5a623);
-  font-weight: 700;
+.lotteryCatalogHint {
+  margin: 0;
+  color: var(--admin-text-2, var(--text-secondary, #52635a));
+  font-size: 0.78rem;
+  line-height: 1.4;
 }
 
