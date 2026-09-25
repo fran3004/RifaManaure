@@ -50,7 +50,17 @@ import {
   resolveExperienceImage,
   type CatalogoFotoItem,
 } from '@/assets/assets';
+import { imageAliases } from '@/types/image-manifest';
 import styles from './GalleryView.module.css';
+
+const getImageAvailabilityKey = (
+  imageUrl: string | null | undefined,
+  imageSlug: string | null | undefined,
+  id?: string
+): string => {
+  const canonicalSlug = imageSlug ? imageAliases[imageSlug] || imageSlug : '';
+  return imageUrl?.trim() || canonicalSlug.trim() || id || '';
+};
 
 const getCategoryBadgeClass = (categorySlug: string): string => {
   switch (categorySlug.toLowerCase()) {
@@ -101,6 +111,7 @@ export const GalleryView: React.FC = () => {
   const [selectedLocalFile, setSelectedLocalFile] = useState<File | null>(null);
   const [localPreviewUrl, setLocalPreviewUrl] = useState<string | null>(null);
   const [catalogCategoryFilter, setCatalogCategoryFilter] = useState<string>('todas');
+  const [unavailableImageKeys, setUnavailableImageKeys] = useState<Set<string>>(() => new Set());
   const [savingItem, setSavingItem] = useState(false);
 
   // Modal de Confirmación de Eliminación
@@ -554,27 +565,41 @@ export const GalleryView: React.FC = () => {
   }, [items, categories]);
 
   // Filtrado de fotos del catálogo en el modal
+  const availableCatalog = useMemo(
+    () => dynamicCatalog.filter((photo) => {
+      const imageSource = photo.thumb || photo.card;
+      const imageKey = getImageAvailabilityKey(photo.imageUrl, photo.slug, photo.id);
+      return Boolean(imageSource) && !unavailableImageKeys.has(imageKey);
+    }),
+    [dynamicCatalog, unavailableImageKeys]
+  );
+
   const filteredCatalog = useMemo(() => {
-    if (catalogCategoryFilter === 'todas') return dynamicCatalog;
-    return dynamicCatalog.filter(
+    if (catalogCategoryFilter === 'todas') return availableCatalog;
+    return availableCatalog.filter(
       (f) => f.categoria.toLowerCase() === catalogCategoryFilter.toLowerCase()
     );
-  }, [dynamicCatalog, catalogCategoryFilter]);
+  }, [availableCatalog, catalogCategoryFilter]);
 
   // Vista previa de la imagen seleccionada en el modal
   const modalPreviewUrl = useMemo(() => {
     if (imageMode === 'upload') {
       if (localPreviewUrl) return localPreviewUrl;
-      if (formImageUrl) return getOptimizedCloudinaryUrl(formImageUrl, { width: 600 });
+      if (
+        formImageUrl &&
+        !unavailableImageKeys.has(getImageAvailabilityKey(formImageUrl, formImageSlug))
+      ) {
+        return getOptimizedCloudinaryUrl(formImageUrl, { width: 600 });
+      }
       return '';
     }
     // Modo catálogo
-    const match = dynamicCatalog.find((f) => f.slug === formImageSlug);
+    const match = availableCatalog.find((f) => f.slug === formImageSlug);
     if (match) {
       return match.imageUrl || match.card || match.thumb;
     }
-    return resolveExperienceImage(formImageSlug);
-  }, [imageMode, localPreviewUrl, formImageUrl, dynamicCatalog, formImageSlug]);
+    return '';
+  }, [imageMode, localPreviewUrl, formImageUrl, availableCatalog, formImageSlug, unavailableImageKeys]);
 
   return (
     <div className={styles.container}>
@@ -804,6 +829,7 @@ export const GalleryView: React.FC = () => {
         <div className={styles.galleryGrid}>
           {filteredItems.map((item, index) => {
             const imageSrc = resolveImage(item);
+            const imageKey = getImageAvailabilityKey(item.image_url, item.image_slug, item.id);
             const categoryMeta = categories.find(
               (c) => c.slug.toLowerCase() === item.category.toLowerCase()
             );
@@ -815,37 +841,42 @@ export const GalleryView: React.FC = () => {
                 className={`${styles.photoCard} ${!item.is_active ? styles.photoCardHidden : ''}`}
               >
                 {/* Contenedor de la miniatura */}
-                <div className={styles.photoThumbBox}>
-                  <img
-                    src={imageSrc}
-                    alt={item.alt_text || item.title}
-                    className={styles.photoImage}
-                    loading="lazy"
-                  />
+                {imageSrc && !unavailableImageKeys.has(imageKey) && (
+                  <div className={styles.photoThumbBox}>
+                    <img
+                      src={imageSrc}
+                      alt={item.alt_text || item.title}
+                      className={styles.photoImage}
+                      loading="lazy"
+                      onError={() =>
+                        setUnavailableImageKeys((current) => new Set(current).add(imageKey))
+                      }
+                    />
 
-                  <div className={styles.thumbBadges}>
-                    <span className={styles.orderBadge}>#{item.display_order}</span>
-                    <span className={`${styles.categoryBadge} ${badgeClass}`}>
-                      {categoryMeta?.name || item.category}
+                    <div className={styles.thumbBadges}>
+                      <span className={styles.orderBadge}>#{item.display_order}</span>
+                      <span className={`${styles.categoryBadge} ${badgeClass}`}>
+                        {categoryMeta?.name || item.category}
+                      </span>
+                    </div>
+
+                    <span
+                      className={`${styles.statusBadge} ${
+                        item.is_active ? styles.statusActive : styles.statusHidden
+                      }`}
+                    >
+                      {item.is_active ? (
+                        <>
+                          <Eye size={12} /> Visible
+                        </>
+                      ) : (
+                        <>
+                          <EyeOff size={12} /> Oculta
+                        </>
+                      )}
                     </span>
                   </div>
-
-                  <span
-                    className={`${styles.statusBadge} ${
-                      item.is_active ? styles.statusActive : styles.statusHidden
-                    }`}
-                  >
-                    {item.is_active ? (
-                      <>
-                        <Eye size={12} /> Visible
-                      </>
-                    ) : (
-                      <>
-                        <EyeOff size={12} /> Oculta
-                      </>
-                    )}
-                  </span>
-                </div>
+                )}
 
                 {/* Información de la foto */}
                 <div className={styles.photoBody}>
@@ -989,7 +1020,7 @@ export const GalleryView: React.FC = () => {
                       onClick={() => setImageMode('local')}
                     >
                       <ImageIcon size={16} />
-                      <span>Catálogo Manaure ({dynamicCatalog.length})</span>
+                      <span>Catálogo Manaure ({availableCatalog.length})</span>
                     </button>
                   </div>
                 </div>
@@ -1072,9 +1103,9 @@ export const GalleryView: React.FC = () => {
                         onChange={(e) => setCatalogCategoryFilter(e.target.value)}
                         aria-label="Filtrar catálogo local por categoría"
                       >
-                        <option value="todas">Todas las categorías ({dynamicCatalog.length})</option>
+                        <option value="todas">Todas las categorías ({availableCatalog.length})</option>
                         {categories.map((cat) => {
-                          const count = dynamicCatalog.filter(
+                          const count = availableCatalog.filter(
                             (f) => f.categoria.toLowerCase() === cat.slug.toLowerCase()
                           ).length;
                           return (
@@ -1116,6 +1147,14 @@ export const GalleryView: React.FC = () => {
                               alt={foto.alt}
                               className={styles.catalogThumb}
                               loading="lazy"
+                              onError={() => {
+                                const imageKey = getImageAvailabilityKey(
+                                  foto.imageUrl,
+                                  foto.slug,
+                                  foto.id
+                                );
+                                setUnavailableImageKeys((current) => new Set(current).add(imageKey));
+                              }}
                             />
                             {foto.isCustom && (
                               <span
@@ -1153,6 +1192,10 @@ export const GalleryView: React.FC = () => {
                       src={modalPreviewUrl}
                       alt="Previsualización"
                       className={styles.previewThumb}
+                      onError={() => {
+                        const imageKey = getImageAvailabilityKey(formImageUrl, formImageSlug);
+                        setUnavailableImageKeys((current) => new Set(current).add(imageKey));
+                      }}
                     />
                   ) : (
                     <div className={styles.previewThumb} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#1f2937' }}>

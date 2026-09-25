@@ -351,7 +351,7 @@ export function resolveExperienceImage(
     return getOptimizedCloudinaryUrl(imageUrl.trim(), { width: 800 });
   }
   if (!imageSlug || !imageSlug.trim()) {
-    return catalogoFotosManaure[0]?.card || '';
+    return '';
   }
   const cleanSlug = imageSlug.trim();
   const canonicalId = imageAliases[cleanSlug] || cleanSlug;
@@ -365,7 +365,7 @@ export function resolveExperienceImage(
   if (matchFoto) {
     return matchFoto.card;
   }
-  return catalogoFotosManaure[0]?.card || '';
+  return '';
 }
 
 /**
@@ -379,7 +379,7 @@ export function resolveExperienceThumb(
     return imageUrl.trim();
   }
   if (!imageSlug || !imageSlug.trim()) {
-    return catalogoFotosManaure[0]?.thumb || '';
+    return '';
   }
   const cleanSlug = imageSlug.trim();
   const canonicalId = imageAliases[cleanSlug] || cleanSlug;
@@ -393,7 +393,7 @@ export function resolveExperienceThumb(
   if (matchFoto) {
     return matchFoto.thumb;
   }
-  return catalogoFotosManaure[0]?.thumb || '';
+  return '';
 }
 
 

@@ -36,6 +36,7 @@ import {
   resolveExperienceImage,
   type CatalogoFotoItem,
 } from '@/assets/assets';
+import { imageAliases } from '@/types/image-manifest';
 import {
   Gift,
   Sparkles,
@@ -69,6 +70,15 @@ import {
   FolderPlus,
 } from 'lucide-react';
 import styles from './PrizeView.module.css';
+
+const getImageAvailabilityKey = (
+  imageUrl: string | null | undefined,
+  imageSlug: string | null | undefined,
+  id?: string
+): string => {
+  const canonicalSlug = imageSlug ? imageAliases[imageSlug] || imageSlug : '';
+  return imageUrl?.trim() || canonicalSlug.trim() || id || '';
+};
 
 // Mapeo de iconos seleccionables para experiencias
 const AVAILABLE_ICONS: { [key: string]: { label: string; icon: React.ReactNode } } = {
@@ -174,6 +184,7 @@ export const PrizeView: React.FC = () => {
   const [uploadCategory, setUploadCategory] = useState<string>('cuatrimoto');
   const [expImageSlug, setExpImageSlug] = useState('cuatrimoto-flota');
   const [expImageUrl, setExpImageUrl] = useState<string | null>(null);
+  const [unavailableImageKeys, setUnavailableImageKeys] = useState<Set<string>>(() => new Set());
   const [savingExperience, setSavingExperience] = useState(false);
 
   // Subida diferida: archivo local pendiente de confirmación
@@ -571,13 +582,22 @@ export const PrizeView: React.FC = () => {
   }, [experiences, categories]);
 
   // Filtrado de fotos del catálogo por categoría
+  const availableCatalogPhotos = useMemo(
+    () => dynamicCatalog.filter((photo) => {
+      const imageSource = photo.thumb || photo.card;
+      const imageKey = getImageAvailabilityKey(photo.imageUrl, photo.slug, photo.id);
+      return Boolean(imageSource) && !unavailableImageKeys.has(imageKey);
+    }),
+    [dynamicCatalog, unavailableImageKeys]
+  );
+
   const filteredCatalogPhotos = useMemo(() => {
-    if (photoCategoryFilter === 'todas') return dynamicCatalog;
-    return dynamicCatalog.filter((f) => {
+    if (photoCategoryFilter === 'todas') return availableCatalogPhotos;
+    return availableCatalogPhotos.filter((f) => {
       const cat = f.categoria ? f.categoria.toLowerCase() : '';
       return cat === photoCategoryFilter.toLowerCase();
     });
-  }, [dynamicCatalog, photoCategoryFilter]);
+  }, [availableCatalogPhotos, photoCategoryFilter]);
 
   // Selección de archivo con análisis previo de calidad (Subida Diferida)
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -763,15 +783,20 @@ export const PrizeView: React.FC = () => {
   const currentModalImagePreview = useMemo(() => {
     if (imageMode === 'upload') {
       if (localPreviewUrl) return localPreviewUrl;
-      if (expImageUrl) return getOptimizedCloudinaryUrl(expImageUrl, { width: 600 });
+      if (
+        expImageUrl &&
+        !unavailableImageKeys.has(getImageAvailabilityKey(expImageUrl, expImageSlug))
+      ) {
+        return getOptimizedCloudinaryUrl(expImageUrl, { width: 600 });
+      }
       return '';
     }
-    const match = dynamicCatalog.find((f) => f.slug === expImageSlug);
+    const match = availableCatalogPhotos.find((f) => f.slug === expImageSlug);
     if (match?.isCustom && match.imageUrl) {
       return getOptimizedCloudinaryUrl(match.imageUrl, { width: 600 });
     }
-    return resolveExperienceImage(expImageSlug, expImageUrl);
-  }, [imageMode, localPreviewUrl, expImageUrl, expImageSlug, dynamicCatalog]);
+    return match ? resolveExperienceImage(expImageSlug, expImageUrl) : '';
+  }, [imageMode, localPreviewUrl, expImageUrl, expImageSlug, availableCatalogPhotos, unavailableImageKeys]);
 
   if (loading) {
     return (
@@ -1188,6 +1213,7 @@ export const PrizeView: React.FC = () => {
           <div className={styles.cardsGrid}>
             {experiences.map((exp) => {
               const imageSrc = resolveExperienceImage(exp.image_slug, exp.image_url);
+              const imageKey = getImageAvailabilityKey(exp.image_url, exp.image_slug, exp.id);
               const featuresList = Array.isArray(exp.features) ? (exp.features as string[]) : [];
 
               return (
@@ -1195,15 +1221,20 @@ export const PrizeView: React.FC = () => {
                   key={exp.id}
                   className={`${styles.experienceCard} ${!exp.is_active ? styles.cardInactive : ''}`}
                 >
-                  <div className={styles.cardMedia}>
-                    <img
-                      src={imageSrc}
-                      alt={exp.title}
-                      className={styles.cardImg}
-                      loading="lazy"
-                    />
-                    <div className={styles.cardScrim} />
-                  </div>
+                  {imageSrc && !unavailableImageKeys.has(imageKey) && (
+                    <div className={styles.cardMedia}>
+                      <img
+                        src={imageSrc}
+                        alt={exp.title}
+                        className={styles.cardImg}
+                        loading="lazy"
+                        onError={() =>
+                          setUnavailableImageKeys((current) => new Set(current).add(imageKey))
+                        }
+                      />
+                      <div className={styles.cardScrim} />
+                    </div>
+                  )}
 
                   <div className={styles.cardInner}>
                     <div className={styles.cardTopBar}>
@@ -1418,7 +1449,7 @@ export const PrizeView: React.FC = () => {
                       onClick={() => setImageMode('local')}
                     >
                       <ImageIcon size={14} className={styles.tabIcon} />
-                      Catálogo Manaure ({dynamicCatalog.length})
+                      Catálogo Manaure ({availableCatalogPhotos.length})
                     </button>
                     <button
                       type="button"
@@ -1443,10 +1474,10 @@ export const PrizeView: React.FC = () => {
                           }`}
                           onClick={() => setPhotoCategoryFilter('todas')}
                         >
-                          Todas las fotos ({dynamicCatalog.length})
+                          Todas las fotos ({availableCatalogPhotos.length})
                         </button>
                         {categories.map((cat) => {
-                          const count = dynamicCatalog.filter((f) => {
+                          const count = availableCatalogPhotos.filter((f) => {
                             const c = f.categoria ? f.categoria.toLowerCase() : '';
                             return c === cat.slug.toLowerCase();
                           }).length;
@@ -1487,10 +1518,14 @@ export const PrizeView: React.FC = () => {
                               title={`${f.alt} (${f.categoriaLabel})`}
                             >
                               <img
-                                src={f.thumb}
+                                src={f.thumb || f.card}
                                 alt={f.alt}
                                 className={styles.thumbImg}
                                 loading="lazy"
+                                onError={() => {
+                                  const imageKey = getImageAvailabilityKey(f.imageUrl, f.slug, f.id);
+                                  setUnavailableImageKeys((current) => new Set(current).add(imageKey));
+                                }}
                               />
                               <div className={styles.photoThumbMeta}>
                                 <span>{f.caption || f.alt}</span>
@@ -1692,14 +1727,20 @@ export const PrizeView: React.FC = () => {
                   <div className={styles.previewStage}>
                     <div className={styles.previewCardWrapper}>
                       <div className={`${styles.experienceCard} ${styles.previewCard}`}>
-                        <div className={styles.cardMedia}>
-                          <img
-                            src={currentModalImagePreview}
-                            alt={expTitle || 'Previsualización'}
-                            className={styles.cardImg}
-                          />
-                          <div className={styles.cardScrim} />
-                        </div>
+                        {currentModalImagePreview && (
+                          <div className={styles.cardMedia}>
+                            <img
+                              src={currentModalImagePreview}
+                              alt={expTitle || 'Previsualización'}
+                              className={styles.cardImg}
+                              onError={() => {
+                                const imageKey = getImageAvailabilityKey(expImageUrl, expImageSlug);
+                                setUnavailableImageKeys((current) => new Set(current).add(imageKey));
+                              }}
+                            />
+                            <div className={styles.cardScrim} />
+                          </div>
+                        )}
 
                         <div className={styles.cardInner}>
                           <div className={styles.cardTopBar}>
