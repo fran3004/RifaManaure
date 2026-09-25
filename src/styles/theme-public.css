@@ -112,7 +112,7 @@
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 899px) {
   [data-theme="public"] {
     --navbar-h: 64px;
   }

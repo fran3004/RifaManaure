@@ -192,7 +192,7 @@ export const Navbar: React.FC = () => {
   return (
     <header
       ref={navHeaderRef}
-      className={`${styles.navbar} ${isScrolled ? styles.scrolled : ''}`}
+      className={`${styles.navbar} ${isScrolled ? styles.scrolled : ''} ${mobileMenuOpen ? styles.navbarMenuOpen : ''}`}
     >
       <div className={`container ${styles.navContainer}`}>
         <Link
@@ -241,7 +241,8 @@ export const Navbar: React.FC = () => {
               leftIcon={<Leaf size={16} aria-hidden="true" />}
               onClick={handleConsultarClick}
             >
-              Consultar Boletos
+              <span className={styles.btnFullText}>Consultar Boletos</span>
+              <span className={styles.btnShortText}>Consultar</span>
             </Button>
             <Button
               as="a"
@@ -252,7 +253,8 @@ export const Navbar: React.FC = () => {
               leftIcon={<Ticket size={17} aria-hidden="true" />}
               onClick={(e) => handleSectionClick(e, 'boletos')}
             >
-              Comprar Boletos
+              <span className={styles.btnFullText}>Comprar Boletos</span>
+              <span className={styles.btnShortText}>Comprar</span>
             </Button>
           </div>
         </nav>
@@ -261,7 +263,7 @@ export const Navbar: React.FC = () => {
         <button
           ref={menuToggleRef}
           type="button"
-          className={styles.menuToggle}
+          className={`${styles.menuToggle} ${mobileMenuOpen ? styles.menuToggleActive : ''}`}
           onClick={() => setMobileMenuOpen((prev) => !prev)}
           aria-expanded={mobileMenuOpen}
           aria-controls="mobile-menu-drawer"
@@ -274,6 +276,13 @@ export const Navbar: React.FC = () => {
           )}
         </button>
       </div>
+
+      {/* Backdrop oscuro translúcido para cerrar el menú y evitar toques accidentales en el fondo */}
+      <div
+        className={`${styles.mobileBackdrop} ${mobileMenuOpen ? styles.mobileBackdropOpen : ''}`}
+        onClick={closeMenu}
+        aria-hidden="true"
+      />
 
       {/* Menú Móvil Desplegable con animación y foco atrapado */}
       <nav
