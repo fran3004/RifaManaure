@@ -335,7 +335,7 @@ serve(async (req: Request) => {
   const raffle = order.raffle as any;
 
   const buyerEmail = buyer?.email ? String(buyer.email).trim() : "";
-  const idempotencyKey = `email-${cleanEventType}-${order.id}`;
+  const idempotencyKey = `email:${cleanEventType}:${order.id}`;
 
   if (!buyerEmail || !buyerEmail.includes("@")) {
     const errorMsg = "El comprador asociado a la orden no cuenta con un correo electrónico válido.";
@@ -349,6 +349,10 @@ serve(async (req: Request) => {
         attempts: 1,
         error_message: errorMsg,
         idempotency_key: idempotencyKey,
+        provider: "brevo",
+        provider_message_id: null,
+        last_attempt_at: new Date().toISOString(),
+        failed_at: new Date().toISOString(),
         metadata: {
           error: errorMsg,
           reference: order.reference,
@@ -366,14 +370,14 @@ serve(async (req: Request) => {
         error: errorMsg,
         idempotencyKey,
       }),
-      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
 
   // 8. Idempotencia: Verificar si ya fue enviado exitosamente
   const { data: existingLog } = await adminClient
     .from("notification_logs")
-    .select("id, status, attempts, metadata")
+    .select("id, status, attempts, metadata, provider, provider_message_id")
     .eq("idempotency_key", idempotencyKey)
     .maybeSingle();
 
@@ -388,7 +392,7 @@ serve(async (req: Request) => {
         eventType: cleanEventType,
         channel: "email",
         status: "skipped",
-        messageId: (existingLog.metadata as any)?.messageId,
+        messageId: existingLog.provider_message_id || (existingLog.metadata as any)?.messageId,
         idempotencyKey,
         message: "Notificación de correo ya enviada previamente (idempotente).",
       }),
@@ -411,6 +415,10 @@ serve(async (req: Request) => {
         attempts: (existingLog?.attempts || 0) + 1,
         error_message: errorMsg,
         idempotency_key: idempotencyKey,
+        provider: "brevo",
+        provider_message_id: null,
+        last_attempt_at: new Date().toISOString(),
+        failed_at: new Date().toISOString(),
         metadata: {
           error: errorMsg,
           reference: order.reference,
@@ -548,6 +556,9 @@ serve(async (req: Request) => {
           attempts: (existingLog?.attempts || 0) + 1,
           error_message: null,
           idempotency_key: idempotencyKey,
+          provider: "brevo",
+          provider_message_id: messageId,
+          last_attempt_at: new Date().toISOString(),
           metadata: {
             messageId,
             sent_at: new Date().toISOString(),
@@ -591,6 +602,10 @@ serve(async (req: Request) => {
           attempts: (existingLog?.attempts || 0) + 1,
           error_message: sanitizedError,
           idempotency_key: idempotencyKey,
+          provider: "brevo",
+          provider_message_id: null,
+          last_attempt_at: new Date().toISOString(),
+          failed_at: new Date().toISOString(),
           metadata: {
             error: sanitizedError,
             failed_at: new Date().toISOString(),
@@ -633,6 +648,10 @@ serve(async (req: Request) => {
         attempts: (existingLog?.attempts || 0) + 1,
         error_message: sanitizedError,
         idempotency_key: idempotencyKey,
+        provider: "brevo",
+        provider_message_id: null,
+        last_attempt_at: new Date().toISOString(),
+        failed_at: new Date().toISOString(),
         metadata: {
           error: sanitizedError,
           failed_at: new Date().toISOString(),

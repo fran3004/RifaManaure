@@ -33,6 +33,13 @@ export type NotificationLogRow = Database['public']['Tables']['notification_logs
 export type NotificationChannel = 'whatsapp' | 'email';
 
 /**
+ * Proveedores transaccionales de notificación soportados por la plataforma.
+ * 'brevo': Correo electrónico transaccional automatizado.
+ * 'manual': WhatsApp manual gestionado por el administrador.
+ */
+export type NotificationProvider = 'brevo' | 'manual';
+
+/**
  * Contrato canónico de tipos de eventos de notificación (estricto en minúsculas).
  */
 export const NOTIFICATION_EVENT_TYPES = {
@@ -102,13 +109,18 @@ export interface DispatchNotificationResult {
 export interface RecordNotificationLogInput {
   orderId: string;
   channel: NotificationChannel;
-  eventType: NotificationEventType | string;
+  eventType: NotificationEventInputType;
   recipient: string;
   status: NotificationStatus;
   errorMessage?: string | null;
   attempts?: number;
   metadata?: Record<string, unknown>;
   idempotencyKey?: string;
+  provider?: NotificationProvider | null;
+  providerMessageId?: string | null;
+  lastAttemptAt?: string | null;
+  deliveredAt?: string | null;
+  failedAt?: string | null;
 }
 
 const DEFAULT_SUPPORT_CONTACT = 'Equipo de Atención y Soporte Rifa Manaure';
@@ -126,6 +138,21 @@ export function normalizeEventType(eventType: string): NotificationEventType {
 }
 
 /**
+ * Construye una clave idempotente canónica, determinista y sin marcas temporales:
+ * Formato: {channel}:{eventType}:{orderId}
+ * Ejemplo: email:payment_approved:{orderId}
+ */
+export function buildNotificationIdempotencyKey(
+  channel: NotificationChannel | string,
+  eventType: NotificationEventInputType,
+  orderId: string
+): string {
+  const normChannel = (channel || 'email').trim().toLowerCase();
+  const normEvent = normalizeEventType(eventType);
+  return `${normChannel}:${normEvent}:${orderId.trim()}`;
+}
+
+/**
  * Registra o actualiza una entrada de trazabilidad en la tabla notification_logs.
  * Protege estrictamente la privacidad omitiendo cualquier dato sensible.
  */
@@ -134,15 +161,41 @@ export async function recordNotificationLog(
 ): Promise<NotificationLogRow | null> {
   try {
     const normalizedType = normalizeEventType(input.eventType);
-    const key = input.idempotencyKey || `${input.channel}-${normalizedType}/${input.orderId}`;
+    const key =
+      input.idempotencyKey ||
+      buildNotificationIdempotencyKey(input.channel, normalizedType, input.orderId);
 
     const { data: existing } = await supabase
       .from('notification_logs')
-      .select('id, attempts')
+      .select('id, attempts, provider, provider_message_id, delivered_at, failed_at')
       .eq('idempotency_key', key)
       .maybeSingle();
 
     const attempts = input.attempts || (existing ? (existing.attempts || 1) + 1 : 1);
+    const nowIso = new Date().toISOString();
+
+    const provider: NotificationProvider =
+      input.provider ?? (input.channel === 'email' ? 'brevo' : 'manual');
+
+    // Para WhatsApp manual NUNCA se inventa messageId. Para email se toma de providerMessageId o metadata.
+    const providerMessageId =
+      input.channel === 'email'
+        ? input.providerMessageId ||
+          (input.metadata as Record<string, any>)?.messageId ||
+          (input.metadata as Record<string, any>)?.message_id ||
+          existing?.provider_message_id ||
+          null
+        : null;
+
+    const lastAttemptAt = input.lastAttemptAt || nowIso;
+    const deliveredAt =
+      input.deliveredAt ||
+      (input.status === 'delivered' ? nowIso : existing?.delivered_at || null);
+    const failedAt =
+      input.failedAt ||
+      (input.status === 'failed' || input.status === 'bounced'
+        ? nowIso
+        : existing?.failed_at || null);
 
     const { data, error } = await supabase
       .from('notification_logs')
@@ -156,8 +209,13 @@ export async function recordNotificationLog(
           error_message: input.errorMessage || null,
           attempts,
           idempotency_key: key,
+          provider,
+          provider_message_id: providerMessageId,
+          last_attempt_at: lastAttemptAt,
+          delivered_at: deliveredAt,
+          failed_at: failedAt,
           metadata: (input.metadata as Json) || null,
-          updated_at: new Date().toISOString(),
+          updated_at: nowIso,
         },
         { onConflict: 'idempotency_key' }
       )
@@ -370,6 +428,8 @@ export async function dispatchOrderNotifications(
         ? null
         : 'El comprador no tiene un número de celular válido registrado para WhatsApp.',
       attempts: 1,
+      provider: 'manual',
+      providerMessageId: null,
       metadata: {
         manual: true,
         stage: hasPhone ? 'prepared' : 'failed',
@@ -422,6 +482,8 @@ export async function recordWhatsAppOpened(
     recipient: recipient || 'N/A',
     status: 'pending',
     errorMessage: null,
+    provider: 'manual',
+    providerMessageId: null,
     metadata: {
       manual: true,
       stage: 'opened',
@@ -447,6 +509,8 @@ export async function recordWhatsAppSentManually(
     recipient: recipient || 'N/A',
     status: 'pending',
     errorMessage: null,
+    provider: 'manual',
+    providerMessageId: null,
     metadata: {
       manual: true,
       stage: 'sent_manually',
@@ -553,6 +617,8 @@ export async function retryNotification(
       recipient: phone,
       status: 'pending',
       errorMessage: null,
+      provider: 'manual',
+      providerMessageId: null,
       metadata: {
         manual: true,
         stage: 'opened',
@@ -642,9 +708,13 @@ export function computeEmailTraceability(
   const meta = (typeof latestLog?.metadata === 'object' && latestLog?.metadata !== null
     ? latestLog.metadata
     : {}) as Record<string, any>;
-  const messageId = meta?.messageId || meta?.message_id;
+  const messageId =
+    latestLog?.provider_message_id ||
+    meta?.messageId ||
+    meta?.message_id ||
+    undefined;
   const attempts = latestLog?.attempts || 0;
-  const lastAttemptAt = latestLog?.created_at;
+  const lastAttemptAt = latestLog?.last_attempt_at || latestLog?.created_at;
   const errorMessage = latestLog?.error_message || undefined;
   const recipientMasked = maskEmail(latestLog?.recipient || buyerEmail) || 'N/A';
 
@@ -836,7 +906,7 @@ export async function verifyAndRetryEmailNotification(
   // 4. Idempotencia: Verificar si ya existe un correo exitoso 'sent' o 'delivered'
   const { data: existingLogs } = await supabase
     .from('notification_logs')
-    .select('id, status, metadata')
+    .select('id, status, metadata, provider, provider_message_id, idempotency_key')
     .eq('order_id', orderId)
     .eq('channel', 'email')
     .eq('event_type', normalizedType);

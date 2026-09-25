@@ -494,6 +494,11 @@ export type Database = {
           error_message: string | null;
           idempotency_key: string;
           metadata: Json | null;
+          provider: 'brevo' | 'manual' | null;
+          provider_message_id: string | null;
+          last_attempt_at: string | null;
+          delivered_at: string | null;
+          failed_at: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -508,6 +513,11 @@ export type Database = {
           error_message?: string | null;
           idempotency_key: string;
           metadata?: Json | null;
+          provider?: 'brevo' | 'manual' | null;
+          provider_message_id?: string | null;
+          last_attempt_at?: string | null;
+          delivered_at?: string | null;
+          failed_at?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -522,6 +532,11 @@ export type Database = {
           error_message?: string | null;
           idempotency_key?: string;
           metadata?: Json | null;
+          provider?: 'brevo' | 'manual' | null;
+          provider_message_id?: string | null;
+          last_attempt_at?: string | null;
+          delivered_at?: string | null;
+          failed_at?: string | null;
           created_at?: string;
           updated_at?: string;
         };

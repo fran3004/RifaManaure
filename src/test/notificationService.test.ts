@@ -15,6 +15,7 @@ import {
   computeEmailTraceability,
   verifyAndRetryEmailNotification,
   maskEmail,
+  buildNotificationIdempotencyKey,
   NOTIFICATION_EVENT_TYPES,
   type OrderNotificationData,
 } from '@/services/notificationService';
@@ -192,7 +193,9 @@ describe('Servicio de Notificaciones por WhatsApp (src/services/notificationServ
           recipient: '3001234567',
           status: 'sent',
           attempts: 1,
-          idempotency_key: 'whatsapp-payment_received/ord_test_01',
+          idempotency_key: 'whatsapp:payment_received:ord_test_01',
+          provider: 'manual',
+          provider_message_id: null,
         }),
         { onConflict: 'idempotency_key' }
       );
@@ -647,6 +650,11 @@ describe('Servicio de Notificaciones por WhatsApp (src/services/notificationServ
               created_at: '2026-09-25T10:00:00Z',
               error_message: null,
               idempotency_key: 'key_1',
+              provider: 'brevo',
+              provider_message_id: '<20260925-brevo-123@smtp.brevo.com>',
+              last_attempt_at: '2026-09-25T10:00:00Z',
+              delivered_at: null,
+              failed_at: null,
               metadata: { messageId: '<20260925-brevo-123@smtp.brevo.com>' },
               updated_at: '2026-09-25T10:00:00Z',
             },
@@ -679,6 +687,11 @@ describe('Servicio de Notificaciones por WhatsApp (src/services/notificationServ
               created_at: '2026-09-25T10:00:00Z',
               error_message: null,
               idempotency_key: 'key_deliv',
+              provider: 'brevo',
+              provider_message_id: 'msg_deliv_456',
+              last_attempt_at: '2026-09-25T10:00:00Z',
+              delivered_at: '2026-09-25T10:01:00Z',
+              failed_at: null,
               metadata: { messageId: 'msg_deliv_456' },
               updated_at: '2026-09-25T10:00:00Z',
             },
@@ -709,6 +722,11 @@ describe('Servicio de Notificaciones por WhatsApp (src/services/notificationServ
               created_at: '2026-09-25T10:00:00Z',
               error_message: 'Fallo al autenticar con Brevo',
               idempotency_key: 'key_err',
+              provider: 'brevo',
+              provider_message_id: null,
+              last_attempt_at: '2026-09-25T10:00:00Z',
+              delivered_at: null,
+              failed_at: '2026-09-25T10:00:00Z',
               metadata: null,
               updated_at: '2026-09-25T10:00:00Z',
             },
@@ -853,6 +871,254 @@ describe('Servicio de Notificaciones por WhatsApp (src/services/notificationServ
         expect(maskEmail('ab@test.com')).toBe('a*@test.com');
         expect(maskEmail('')).toBe('');
         expect(maskEmail(null)).toBe('');
+      });
+    });
+  });
+
+  describe('10. Extensión de Trazabilidad y Pruebas de Idempotencia para Brevo (Migración 058)', () => {
+    describe('buildNotificationIdempotencyKey', () => {
+      it('debe generar una clave canónica estable con formato channel:eventType:orderId', () => {
+        const key = buildNotificationIdempotencyKey('email', 'payment_approved', 'ord_abc_123');
+        expect(key).toBe('email:payment_approved:ord_abc_123');
+      });
+
+      it('debe normalizar mayúsculas y espacios en canal y evento', () => {
+        const key1 = buildNotificationIdempotencyKey('EMAIL', 'PAYMENT_APPROVED', 'ord_123');
+        expect(key1).toBe('email:payment_approved:ord_123');
+
+        const key2 = buildNotificationIdempotencyKey('WHATSAPP', 'payment_received', 'ord_456');
+        expect(key2).toBe('whatsapp:payment_received:ord_456');
+
+        const key3 = buildNotificationIdempotencyKey('email', 'PAYMENT_REJECTED', 'ord_789');
+        expect(key3).toBe('email:payment_rejected:ord_789');
+      });
+
+      it('debe ser estrictamente determinista y nunca incorporar marcas temporales ni aleatorias', () => {
+        const keyA = buildNotificationIdempotencyKey('email', 'payment_approved', 'ord_fix');
+        const keyB = buildNotificationIdempotencyKey('email', 'payment_approved', 'ord_fix');
+        expect(keyA).toBe(keyB);
+        expect(keyA).toBe('email:payment_approved:ord_fix');
+        expect(keyA).not.toMatch(/\d{4}-\d{2}-\d{2}/);
+        expect(keyA).not.toMatch(/T\d{2}:\d{2}/);
+      });
+    });
+
+    describe('recordNotificationLog (Contrato Extendido de Trazabilidad)', () => {
+      it('debe asignar provider "brevo" y guardar provider_message_id para canal de correo', async () => {
+        let capturedUpsertPayload: any = null;
+        let capturedOnConflict: any = null;
+
+        const mockSingle = vi.fn().mockResolvedValue({
+          data: {
+            id: 'log_em_001',
+            order_id: 'ord_100',
+            channel: 'email',
+            event_type: 'payment_approved',
+            provider: 'brevo',
+            provider_message_id: 'msg_brevo_999',
+            status: 'sent',
+          },
+          error: null,
+        });
+
+        const mockSelect = vi.fn().mockReturnValue({ single: mockSingle });
+
+        const mockUpsert = vi.fn().mockImplementation((payload: any, options: any) => {
+          capturedUpsertPayload = payload;
+          capturedOnConflict = options;
+          return { select: mockSelect };
+        });
+
+        vi.mocked(supabase.from).mockReturnValue({
+          select: vi.fn().mockReturnValue({
+            eq: vi.fn().mockReturnValue({
+              maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
+            }),
+          }),
+          upsert: mockUpsert,
+        } as any);
+
+        const result = await recordNotificationLog({
+          orderId: 'ord_100',
+          channel: 'email',
+          eventType: 'payment_approved',
+          recipient: 'cliente@test.com',
+          status: 'sent',
+          providerMessageId: 'msg_brevo_999',
+          metadata: { messageId: 'msg_brevo_999' },
+        });
+
+        expect(result).not.toBeNull();
+        expect(capturedUpsertPayload).toMatchObject({
+          order_id: 'ord_100',
+          channel: 'email',
+          event_type: 'payment_approved',
+          provider: 'brevo',
+          provider_message_id: 'msg_brevo_999',
+          idempotency_key: 'email:payment_approved:ord_100',
+          status: 'sent',
+        });
+        expect(capturedUpsertPayload.last_attempt_at).toBeDefined();
+        expect(capturedOnConflict).toEqual({ onConflict: 'idempotency_key' });
+      });
+
+      it('debe asignar provider "manual" y NUNCA inventar provider_message_id para canal WhatsApp', async () => {
+        let capturedUpsertPayload: any = null;
+
+        const mockSingle = vi.fn().mockResolvedValue({
+          data: {
+            id: 'log_wa_001',
+            order_id: 'ord_200',
+            channel: 'whatsapp',
+            event_type: 'payment_approved',
+            provider: 'manual',
+            provider_message_id: null,
+            status: 'pending',
+          },
+          error: null,
+        });
+
+        const mockSelect = vi.fn().mockReturnValue({ single: mockSingle });
+
+        const mockUpsert = vi.fn().mockImplementation((payload: any) => {
+          capturedUpsertPayload = payload;
+          return { select: mockSelect };
+        });
+
+        vi.mocked(supabase.from).mockReturnValue({
+          select: vi.fn().mockReturnValue({
+            eq: vi.fn().mockReturnValue({
+              maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
+            }),
+          }),
+          upsert: mockUpsert,
+        } as any);
+
+        await recordNotificationLog({
+          orderId: 'ord_200',
+          channel: 'whatsapp',
+          eventType: 'payment_approved',
+          recipient: '3001234567',
+          status: 'pending',
+          metadata: { stage: 'prepared' },
+        });
+
+        expect(capturedUpsertPayload).toMatchObject({
+          order_id: 'ord_200',
+          channel: 'whatsapp',
+          event_type: 'payment_approved',
+          provider: 'manual',
+          provider_message_id: null,
+          idempotency_key: 'whatsapp:payment_approved:ord_200',
+          status: 'pending',
+        });
+      });
+
+      it('debe registrar failed_at cuando el estado es failed o bounced', async () => {
+        let capturedUpsertPayload: any = null;
+
+        const mockSelect = vi.fn().mockReturnValue({
+          single: vi.fn().mockResolvedValue({ data: { id: 'log_fail' }, error: null }),
+        });
+
+        vi.mocked(supabase.from).mockReturnValue({
+          select: vi.fn().mockReturnValue({
+            eq: vi.fn().mockReturnValue({
+              maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
+            }),
+          }),
+          upsert: vi.fn().mockImplementation((payload: any) => {
+            capturedUpsertPayload = payload;
+            return { select: mockSelect };
+          }),
+        } as any);
+
+        await recordNotificationLog({
+          orderId: 'ord_fail',
+          channel: 'email',
+          eventType: 'payment_approved',
+          recipient: 'bad@test.com',
+          status: 'failed',
+          errorMessage: 'Rechazo SMTP',
+        });
+
+        expect(capturedUpsertPayload.status).toBe('failed');
+        expect(capturedUpsertPayload.failed_at).toBeDefined();
+        expect(capturedUpsertPayload.delivered_at).toBeNull();
+      });
+
+      it('debe registrar delivered_at cuando el estado es delivered', async () => {
+        let capturedUpsertPayload: any = null;
+
+        const mockSelect = vi.fn().mockReturnValue({
+          single: vi.fn().mockResolvedValue({ data: { id: 'log_deliv' }, error: null }),
+        });
+
+        vi.mocked(supabase.from).mockReturnValue({
+          select: vi.fn().mockReturnValue({
+            eq: vi.fn().mockReturnValue({
+              maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
+            }),
+          }),
+          upsert: vi.fn().mockImplementation((payload: any) => {
+            capturedUpsertPayload = payload;
+            return { select: mockSelect };
+          }),
+        } as any);
+
+        await recordNotificationLog({
+          orderId: 'ord_deliv',
+          channel: 'email',
+          eventType: 'payment_approved',
+          recipient: 'good@test.com',
+          status: 'delivered',
+        });
+
+        expect(capturedUpsertPayload.status).toBe('delivered');
+        expect(capturedUpsertPayload.delivered_at).toBeDefined();
+        expect(capturedUpsertPayload.failed_at).toBeNull();
+      });
+
+      it('debe incrementar attempts y respetar idempotencia por order + event + channel', async () => {
+        let capturedUpsertPayload: any = null;
+
+        // Simular que ya existe un registro previo con attempts = 2
+        const existingRow = {
+          id: 'log_exist',
+          attempts: 2,
+          provider: 'brevo',
+          provider_message_id: 'old_msg_id',
+          delivered_at: null,
+          failed_at: null,
+        };
+
+        const mockSelect = vi.fn().mockReturnValue({
+          single: vi.fn().mockResolvedValue({ data: { ...existingRow, attempts: 3 }, error: null }),
+        });
+
+        vi.mocked(supabase.from).mockReturnValue({
+          select: vi.fn().mockReturnValue({
+            eq: vi.fn().mockReturnValue({
+              maybeSingle: vi.fn().mockResolvedValue({ data: existingRow, error: null }),
+            }),
+          }),
+          upsert: vi.fn().mockImplementation((payload: any) => {
+            capturedUpsertPayload = payload;
+            return { select: mockSelect };
+          }),
+        } as any);
+
+        await recordNotificationLog({
+          orderId: 'ord_retry_idem',
+          channel: 'email',
+          eventType: 'payment_approved',
+          recipient: 'user@test.com',
+          status: 'sent',
+          providerMessageId: 'new_msg_id',
+        });
+
+        expect(capturedUpsertPayload.attempts).toBe(3);
+        expect(capturedUpsertPayload.idempotency_key).toBe('email:payment_approved:ord_retry_idem');
       });
     });
   });
