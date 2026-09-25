@@ -1659,6 +1659,10 @@ export const PrizeView: React.FC = () => {
                             src={expImageUrl}
                             alt="Fotografía actual de la actividad"
                             className={styles.uploadPreviewImg}
+                            onError={() => {
+                              const imageKey = getImageAvailabilityKey(expImageUrl, expImageSlug);
+                              setUnavailableImageKeys((current) => new Set(current).add(imageKey));
+                            }}
                           />
                           <div className={styles.uploadPreviewInfo}>
                             <p className={styles.uploadPreviewTitle}>Fotografía de la actividad asignada</p>

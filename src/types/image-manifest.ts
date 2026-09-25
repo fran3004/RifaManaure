@@ -28,8 +28,6 @@ export interface ImageEntry {
 }
 
 export const imageAliases: Record<string, string> = {
-  "gastronomia-arepa": "gastronomia-local",
-  "gastronomia-plato": "gastronomia-local",
   "fogata-circulo-piedra": "fogata-casa-de-vidrio",
   "cuatrimoto-topiario": "cuatrimoto-mirador",
   "serrania-perija-panoramica": "og-image",
@@ -294,8 +292,8 @@ export const imageManifest: Record<string, ImageEntry> = {
     "dominantColor": "#65553d",
     "lqip": "data:image/webp;base64,UklGRuoAAABXRUJQVlA4IN4AAADwBACdASoYABAAPtFUo0uoJKMhsAgBABoJbACdDiACPA92JOP7GxAAoe2fmVYV3iAA/Br8xpaLgJpg6qf/7jP61WNH5mItuLpSH4IezqDxTQnybsNfW4x2B+fuEtnRU4dHYpmUojcfS+pks/AA5eCZW3VKl9UFUUnXxrokhtP2hYQKfMBrMijXOK9LfzHSSbRNZM3k7lTestPOo3xE7RDPU+ExZJPMokIBAL46+6G0UWzE7zz+o4AfcqAA/Blijwb5SHdQCQqNO5VPC13UcBPEXiaNaJNgYXMD3dAAAAA=",
     "cloudinary": {
-      "publicId": "manaure-vive/galeria/gastronomia/gastronomia-arepa",
-      "secureUrl": "https://res.cloudinary.com/ky01b0vz/image/upload/manaure-vive/galeria/gastronomia/gastronomia-arepa.jpg",
+      "publicId": "manaure-vive/galeria/gastronomia/gastronomia-local",
+      "secureUrl": "https://res.cloudinary.com/ky01b0vz/image/upload/c_crop,g_north,h_480,w_710/manaure-vive/galeria/gastronomia/gastronomia-local.jpg",
       "width": 710,
       "height": 468
     }
@@ -315,8 +313,8 @@ export const imageManifest: Record<string, ImageEntry> = {
     "dominantColor": "#816c53",
     "lqip": "data:image/webp;base64,UklGRtAAAABXRUJQVlA4IMQAAABQBQCdASoYABAAPtFUo0uoJKMhsAgBABoJaACdMoFWAEez7lkX584/xwMcfH2ls0+ZEwAA/k8mY5JW6JWJNOSm9p99vJXCISTA+Yqi9GWKCKRZlev148w9LmqhodmoLF9Q3N4nTk44zfwLTMnM5VRf9rghfeMjvlQsF0pVTVsywYMEMSU/BuOJ2I6shW37URwYYcz+QeGnR4nIq+lzg8ag7FOoictmSXZfp0+eLnk34XReWlxqo1+QkRWET2VeHzk34gAA",
     "cloudinary": {
-      "publicId": "manaure-vive/galeria/gastronomia/gastronomia-plato",
-      "secureUrl": "https://res.cloudinary.com/ky01b0vz/image/upload/manaure-vive/galeria/gastronomia/gastronomia-plato.jpg",
+      "publicId": "manaure-vive/galeria/gastronomia/gastronomia-local",
+      "secureUrl": "https://res.cloudinary.com/ky01b0vz/image/upload/c_crop,g_south,h_480,w_710/manaure-vive/galeria/gastronomia/gastronomia-local.jpg",
       "width": 710,
       "height": 480
     }

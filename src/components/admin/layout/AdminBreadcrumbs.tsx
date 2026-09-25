@@ -28,7 +28,7 @@ export const AdminBreadcrumbs: React.FC = () => {
   return (
     <nav className={styles.breadcrumbsNav} aria-label="Ruta de navegación">
       <Link to="/admin" className={styles.crumbLink}>
-        Administración
+        Admin
       </Link>
       <span className={styles.separator} aria-hidden="true">
         <ChevronRight size={14} />

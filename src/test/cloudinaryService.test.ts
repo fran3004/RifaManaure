@@ -423,6 +423,20 @@ describe('cloudinaryService - Integración Segura con Cloudinary', () => {
         'https://res.cloudinary.com/ky01b0vz/image/upload/c_fill,g_auto,w_710,h_960,q_auto,f_webp/manaure-vive/galeria/gastronomia/gastronomia-local.webp'
       );
     });
+
+    it('debe preservar y encadenar transformaciones cuando la URL ya contiene un recorte base (c_crop)', () => {
+      const croppedUrl =
+        'https://res.cloudinary.com/ky01b0vz/image/upload/c_crop,g_north,h_480,w_710/manaure-vive/galeria/gastronomia/gastronomia-local.jpg';
+      const result = getCloudinaryResponsiveUrl(croppedUrl, {
+        width: 640,
+        height: 427,
+        format: 'webp',
+      });
+
+      expect(result).toBe(
+        'https://res.cloudinary.com/ky01b0vz/image/upload/c_crop,g_north,h_480,w_710/c_fill,g_auto,w_640,h_427,q_auto,f_webp/manaure-vive/galeria/gastronomia/gastronomia-local.webp'
+      );
+    });
   });
 });
 

@@ -85,5 +85,22 @@ describe('Inventario de Assets y Aliados (src/assets/assets.ts)', () => {
     expect(resolvedUrl).toBeTruthy();
     expect(resolvedUrl).toContain('gastronomia-casa-arepas');
     expect(resolvedUrl).toContain('res.cloudinary.com');
+
+    // Debe resolver correctamente las fotos derivadas de gastronomia con recorte dinámico
+    const arepaFoto = catalogoFotosManaure.find((f) => f.slug === 'gastronomia-arepa');
+    expect(arepaFoto).toBeDefined();
+    expect(arepaFoto?.card).toContain('c_crop,g_north');
+    expect(arepaFoto?.card).toContain('gastronomia-local');
+
+    const platoFoto = catalogoFotosManaure.find((f) => f.slug === 'gastronomia-plato');
+    expect(platoFoto).toBeDefined();
+    expect(platoFoto?.card).toContain('c_crop,g_south');
+    expect(platoFoto?.card).toContain('gastronomia-local');
+
+    const resolvedArepa = resolveExperienceImage('gastronomia-arepa');
+    expect(resolvedArepa).toContain('c_crop,g_north');
+
+    const resolvedPlato = resolveExperienceImage('gastronomia-plato');
+    expect(resolvedPlato).toContain('c_crop,g_south');
   });
 });

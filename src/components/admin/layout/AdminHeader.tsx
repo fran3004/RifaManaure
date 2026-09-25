@@ -111,10 +111,10 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({ onToggleSidebar }) => 
           <span className={styles.userEmail}>{user?.email}</span>
           <span className={styles.roleTag}>
             {adminProfile?.role === 'superadmin'
-              ? 'Administrador principal'
+              ? 'Admin principal'
               : adminProfile?.role === 'auditor'
                 ? 'Auditor'
-                : 'Administrador'}
+                : 'Admin'}
           </span>
         </div>
 

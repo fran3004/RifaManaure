@@ -514,7 +514,13 @@ export function getOptimizedCloudinaryUrl(
 
   const transformString = transforms.join(',');
 
-  // Insertar las transformaciones inmediatamente después de '/upload/'
+  // Insertar las transformaciones inmediatamente después de '/upload/' o tras baseCrop
+  const cropMatch = trimmed.match(/\/upload\/(c_crop,[^/]+)\//);
+  if (cropMatch) {
+    const baseCrop = cropMatch[1];
+    return trimmed.replace(`/upload/${baseCrop}/`, `/upload/${baseCrop}/${transformString}/`);
+  }
+
   return trimmed.replace('/upload/', `/upload/${transformString}/`);
 }
 
@@ -593,10 +599,17 @@ export function getCloudinaryResponsiveUrl(
 
   const transformString = transforms.join(',');
 
-  // Inyectar o reemplazar las transformaciones tras '/upload/'
+  // Inyectar o reemplazar las transformaciones tras '/upload/' (preservando base crops c_crop si existen)
   let result = trimmed;
-  // Solo consideramos como transformación existente segmentos que tengan el patrón param_valor (ej: c_fill, w_800, q_auto)
-  if (/\/upload\/(?:[a-z]{1,3}_[^/]+,?)+\//.test(result)) {
+  const cropMatch = result.match(/\/upload\/(c_crop,[^/]+)\//);
+  if (cropMatch) {
+    const baseCrop = cropMatch[1];
+    if (/\/upload\/c_crop,[^/]+\/(?:[a-z]{1,3}_[^/]+,?)+\//.test(result)) {
+      result = result.replace(/\/upload\/c_crop,[^/]+\/(?:[a-z]{1,3}_[^/]+,?)+\//, `/upload/${baseCrop}/${transformString}/`);
+    } else {
+      result = result.replace(`/upload/${baseCrop}/`, `/upload/${baseCrop}/${transformString}/`);
+    }
+  } else if (/\/upload\/(?:[a-z]{1,3}_[^/]+,?)+\//.test(result)) {
     result = result.replace(/\/upload\/(?:[a-z]{1,3}_[^/]+,?)+\//, `/upload/${transformString}/`);
   } else {
     result = result.replace('/upload/', `/upload/${transformString}/`);

@@ -2371,6 +2371,14 @@ export const GalleryView: React.FC = () => {
                               alt={photo.alt}
                               className={styles.heroCatalogThumbImg}
                               loading="lazy"
+                              onError={() => {
+                                const imageKey = getImageAvailabilityKey(
+                                  photo.imageUrl,
+                                  photo.slug,
+                                  photo.id
+                                );
+                                setUnavailableImageKeys((current) => new Set(current).add(imageKey));
+                              }}
                             />
                             {isSelected && (
                               <div className={styles.heroCatalogSelectedCheck}>
@@ -2471,6 +2479,10 @@ export const GalleryView: React.FC = () => {
                       alt="Vista previa seleccionada"
                       className={styles.previewThumb}
                       style={{ width: 110, height: 62, aspectRatio: '16/9' }}
+                      onError={() => {
+                        const imageKey = getImageAvailabilityKey(heroFormImageUrl, heroFormImageSlug);
+                        setUnavailableImageKeys((current) => new Set(current).add(imageKey));
+                      }}
                     />
                     <div className={styles.previewInfo}>
                       <span className={styles.previewTitle}>
