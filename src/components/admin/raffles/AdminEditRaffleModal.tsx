@@ -133,7 +133,7 @@ const EditRaffleForm: React.FC<{
             <div>
               <h3 className={styles.headerTitle}>Editar Parámetros de la Rifa</h3>
               <span className={styles.headerSubtitle}>
-                <span className={styles.headerMetaLabel}>Identificador</span> {raffle.slug} •
+                <span className={styles.headerMetaLabel}>Enlace</span> {raffle.slug} •
                 Emisión: {raffle.total_tickets} boletos
               </span>
             </div>
@@ -355,7 +355,7 @@ const EditRaffleForm: React.FC<{
                   <Info size={16} className={styles.statusNoticeIcon} />
                   <span>
                     <strong>Sorteo Pausado:</strong> La página pública mostrará un banner
-                    informativo de pausa y bloqueará la selección de boletos y el botón de checkout.
+                    aviso de pausa y bloqueará la selección de boletos y el pago.
                   </span>
                 </div>
               )}

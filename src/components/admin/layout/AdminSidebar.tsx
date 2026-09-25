@@ -49,7 +49,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({ isOpen, onClose }) =
           </div>
           <div className={styles.brandText}>
             <span className={styles.brandName}>Manaure Vive</span>
-            <span className={styles.brandTag}>Panel Admin</span>
+            <span className={styles.brandTag}>Panel de administración</span>
           </div>
         </Link>
 
@@ -78,7 +78,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({ isOpen, onClose }) =
             onClick={handleLinkClick}
           >
             <LayoutDashboard size={18} className={styles.linkIcon} />
-            <span>Dashboard</span>
+            <span>Resumen</span>
           </NavLink>
 
           <NavLink
@@ -111,7 +111,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({ isOpen, onClose }) =
             onClick={handleLinkClick}
           >
             <Ticket size={18} className={styles.linkIcon} />
-            <span>Tickets</span>
+            <span>Boletos</span>
           </NavLink>
         </div>
 
@@ -235,9 +235,15 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({ isOpen, onClose }) =
           <div className={styles.userAvatar}>{initial}</div>
           <div className={styles.userDetails}>
             <span className={styles.userName}>
-              {adminProfile?.full_name || user?.email?.split('@')[0] || 'Admin'}
+              {adminProfile?.full_name || user?.email?.split('@')[0] || 'Administrador'}
             </span>
-            <span className={styles.userRole}>{adminProfile?.role || 'admin'}</span>
+            <span className={styles.userRole}>
+              {adminProfile?.role === 'superadmin'
+                ? 'Administrador principal'
+                : adminProfile?.role === 'auditor'
+                  ? 'Auditor'
+                  : 'Administrador'}
+            </span>
           </div>
         </div>
 

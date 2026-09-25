@@ -173,13 +173,13 @@ const AdminBuyerOrdersContent: React.FC<AdminBuyerOrdersContentProps> = ({ buyer
                     {buyer.phone}
                   </a>
                 ) : (
-                  <span>N/A</span>
+                  <span>No registrado</span>
                 )}
               </div>
 
               <div className={styles.infoItem}>
                 <Mail size={14} />
-                <span>{buyer.email || 'N/A'}</span>
+                <span>{buyer.email || 'No registrado'}</span>
               </div>
 
               <div className={styles.infoItem}>

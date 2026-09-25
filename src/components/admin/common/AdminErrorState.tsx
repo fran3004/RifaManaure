@@ -40,7 +40,7 @@ export const AdminErrorState: React.FC<AdminErrorStateProps> = ({
             className={styles.retryButton}
             style={{ backgroundColor: 'var(--color-surface-hover, #334155)', textDecoration: 'none' }}
           >
-            <span>Volver al Dashboard</span>
+            <span>Volver al resumen</span>
           </Link>
         )}
       </div>

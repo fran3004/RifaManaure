@@ -606,7 +606,7 @@ export const PrizeView: React.FC = () => {
 
     const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
     if (!validTypes.includes(file.type)) {
-      showFeedback('error', 'Formato no soportado. Por favor sube una imagen JPG, PNG o WebP.');
+      showFeedback('error', 'Este archivo no es compatible. Selecciona otra imagen.');
       return;
     }
 
@@ -678,7 +678,7 @@ export const PrizeView: React.FC = () => {
         setUploadCategory(res.category.slug);
         setNewCategoryName('');
         setIsCreatingCategoryInline(false);
-        showFeedback('success', `¡Categoría "${res.category.name}" creada y carpeta lista en Cloudinary!`);
+        showFeedback('success', `¡La categoría "${res.category.name}" está lista para usar!`);
       } else {
         showFeedback('error', res.error || 'No fue posible crear la categoría.');
       }

@@ -439,7 +439,7 @@ export const ReceiptsView: React.FC = () => {
                     {ord.buyers?.full_name || 'Comprador Desconocido'}
                   </span>
                   <span className={styles.receiptBuyerMeta}>
-                    C.C. {ord.buyers?.document_id || 'N/A'} • Cel: {ord.buyers?.phone || 'N/A'}
+                    C.C. {ord.buyers?.document_id || 'No registrado'} • Cel: {ord.buyers?.phone || 'No registrado'}
                   </span>
                   <span className={styles.receiptBuyerAmount}>
                     {formatCOP(ord.total_amount)} ({ord.ticket_count}{' '}

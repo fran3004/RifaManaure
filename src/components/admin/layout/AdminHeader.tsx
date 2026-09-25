@@ -109,7 +109,13 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({ onToggleSidebar }) => 
         <div className={styles.userBadge}>
           <Shield size={14} color="var(--admin-accent, var(--brand-accent))" />
           <span className={styles.userEmail}>{user?.email}</span>
-          <span className={styles.roleTag}>{adminProfile?.role || 'admin'}</span>
+          <span className={styles.roleTag}>
+            {adminProfile?.role === 'superadmin'
+              ? 'Administrador principal'
+              : adminProfile?.role === 'auditor'
+                ? 'Auditor'
+                : 'Administrador'}
+          </span>
         </div>
 
         <button

@@ -203,7 +203,7 @@ export const GalleryView: React.FC = () => {
     if (res.success && res.data) {
       setHeroSlides(res.data);
     } else {
-      showNotification('error', res.error || 'Error al cargar los fondos del Hero.');
+      showNotification('error', res.error || 'No se pudieron cargar las imágenes del carrusel.');
     }
   };
 
@@ -305,7 +305,7 @@ export const GalleryView: React.FC = () => {
     if (heroFormSource === 'upload' && heroSelectedFile) {
       const uploadRes = await uploadHeroPhoto(heroSelectedFile);
       if (!uploadRes.success || !uploadRes.secure_url) {
-        showNotification('error', uploadRes.error || 'Error al subir la fotografía a Cloudinary.');
+        showNotification('error', 'No se pudo guardar la fotografía. Inténtalo de nuevo.');
         setSavingHeroSlide(false);
         return;
       }
@@ -330,7 +330,7 @@ export const GalleryView: React.FC = () => {
       });
 
       if (!res.success || !res.data) {
-        showNotification('error', res.error || 'No fue posible actualizar el fondo del Hero.');
+        showNotification('error', res.error || 'No se pudo actualizar la imagen del carrusel.');
       } else {
         setHeroSlides((prev) =>
           prev
@@ -338,7 +338,7 @@ export const GalleryView: React.FC = () => {
             .sort((a, b) => a.display_order - b.display_order)
         );
         handleCloseHeroModal();
-        showNotification('success', 'Fondo del Hero actualizado correctamente.');
+        showNotification('success', 'Imagen del carrusel actualizada correctamente.');
       }
     } else {
       const res = await createHeroSlide({
@@ -351,11 +351,11 @@ export const GalleryView: React.FC = () => {
       });
 
       if (!res.success || !res.data) {
-        showNotification('error', res.error || 'No fue posible agregar el fondo al Hero.');
+        showNotification('error', res.error || 'No se pudo agregar la imagen al carrusel.');
       } else {
         setHeroSlides((prev) => [...prev, res.data!].sort((a, b) => a.display_order - b.display_order));
         handleCloseHeroModal();
-        showNotification('success', 'Nuevo fondo agregado exitosamente al carrusel del Hero.');
+        showNotification('success', 'La imagen se agregó correctamente al carrusel.');
       }
     }
 
@@ -373,7 +373,7 @@ export const GalleryView: React.FC = () => {
       );
       showNotification(
         'success',
-        nextStatus ? 'Fondo activado en el carrusel del Hero.' : 'Fondo pausado en el Hero.'
+        nextStatus ? 'Imagen activada en el carrusel.' : 'Imagen pausada en el carrusel.'
       );
     }
   };
@@ -411,12 +411,12 @@ export const GalleryView: React.FC = () => {
     setDeletingHeroInProgress(true);
     const res = await deleteHeroSlide(deletingHeroSlide.id, deletingHeroSlide.image_url);
     if (!res.success) {
-      showNotification('error', res.error || 'Error al eliminar el fondo del Hero.');
+      showNotification('error', res.error || 'No se pudo eliminar la imagen del carrusel.');
     } else {
       setHeroSlides((prev) => prev.filter((s) => s.id !== deletingHeroSlide.id));
       setHeroDeleteModalOpen(false);
       setDeletingHeroSlide(null);
-      showNotification('success', 'Fondo eliminado del Hero permanentemente.');
+      showNotification('success', 'Imagen eliminada del carrusel.');
     }
     setDeletingHeroInProgress(false);
   };
@@ -554,7 +554,7 @@ export const GalleryView: React.FC = () => {
     const file = files[0];
     const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/avif'];
     if (!validTypes.includes(file.type)) {
-      showNotification('error', 'Formato inválido. Se admiten imágenes WebP, JPG, PNG o AVIF.');
+      showNotification('error', 'Este archivo no es compatible. Selecciona otra imagen.');
       return;
     }
 
@@ -935,7 +935,7 @@ export const GalleryView: React.FC = () => {
             <div className={styles.headerTextGroup}>
               <div className={styles.headerBadgeRow}>
                 <h1 id="gallery-admin-title" className={styles.title}>
-                  {activeTab === 'gallery' ? 'Galería Fotográfica' : 'Fondos del Inicio (Hero Slides)'}
+                  {activeTab === 'gallery' ? 'Galería fotográfica' : 'Carrusel de inicio'}
                 </h1>
                 <span className={styles.headerLiveBadge}>
                   <span className={styles.liveDot} aria-hidden="true" />
@@ -979,7 +979,7 @@ export const GalleryView: React.FC = () => {
                 onClick={handleOpenCreateHeroModal}
               >
                 <Plus size={18} aria-hidden="true" />
-                <span>Agregar Fondo al Hero</span>
+                <span>Agregar imagen al carrusel</span>
               </button>
             )}
           </div>
@@ -1044,7 +1044,7 @@ export const GalleryView: React.FC = () => {
                 </div>
               </div>
               <span className={styles.metricValue}>{heroSlides.length}</span>
-              <span className={styles.metricHint}>Configurados para el Hero</span>
+              <span className={styles.metricHint}>En el carrusel de inicio</span>
             </div>
 
             <div className={styles.metricCard}>
@@ -1104,7 +1104,7 @@ export const GalleryView: React.FC = () => {
           onClick={() => setActiveTab('hero')}
         >
           <Sparkles size={18} />
-          <span>Fondos del Inicio (Hero Slides)</span>
+          <span>Carrusel de inicio</span>
           <span className={styles.mainTabBadge}>
             {heroSlides.filter((s) => s.is_active).length} activas
           </span>
@@ -1353,7 +1353,7 @@ export const GalleryView: React.FC = () => {
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           {/* Tarjeta de Especificaciones Técnicas y Recomendaciones */}
-          <section className={styles.heroSpecsCard} aria-label="Especificaciones recomendadas para fondos de Hero">
+          <section className={styles.heroSpecsCard} aria-label="Recomendaciones para las imágenes del carrusel">
             <div className={styles.heroSpecsHeader}>
               <div className={styles.heroSpecsIconBox} aria-hidden="true">
                 <Sliders size={20} />
@@ -1361,7 +1361,7 @@ export const GalleryView: React.FC = () => {
               <div>
                 <h3 className={styles.heroSpecsTitle}>Especificaciones Técnicas Recomendadas para los Fondos</h3>
                 <p className={styles.heroSpecsSubtitle}>
-                  El Hero rota dinámicamente cada 4.5s de fondo. Sigue estas pautas para máxima nitidez y rendimiento:
+                  Las imágenes del inicio cambian cada 4,5 segundos. Sigue estas recomendaciones para que se vean nítidas y carguen rápido:
                 </p>
               </div>
             </div>
@@ -1383,7 +1383,7 @@ export const GalleryView: React.FC = () => {
                   <span>Formatos y Peso</span>
                 </div>
                 <p className={styles.heroSpecItemDesc}>
-                  Formatos recomendados: <strong>WebP, JPG o PNG</strong>. Peso ideal <strong>menor a 2.5 MB</strong>. Cloudinary aplicará compresión automática con calidad adaptativa inteligente (f_auto, q_auto).
+                  Usa una imagen JPG o PNG de menos de <strong>2,5 MB</strong>. La imagen se ajustará automáticamente para que cargue rápido y se vea bien.
                 </p>
               </div>
 
@@ -1427,7 +1427,7 @@ export const GalleryView: React.FC = () => {
                 onClick={handleOpenCreateHeroModal}
               >
                 <Plus size={18} aria-hidden="true" />
-                <span>Agregar Fondo al Hero</span>
+                <span>Agregar imagen al carrusel</span>
               </button>
             </div>
 
@@ -1436,9 +1436,9 @@ export const GalleryView: React.FC = () => {
                 <div className={styles.emptyIconBox}>
                   <Sparkles size={36} color="#059669" />
                 </div>
-                <h4 className={styles.emptyTitle}>No hay fondos configurados para el Hero</h4>
+                <h4 className={styles.emptyTitle}>Aún no hay imágenes en el carrusel</h4>
                 <p className={styles.emptyText}>
-                  Agrega diapositivas seleccionando fotos de la galería existente o subiendo nuevas fotos panorámicas a Cloudinary.
+                  Agrega imágenes panorámicas desde la galería o selecciona una nueva desde tu dispositivo.
                 </p>
                 <button
                   type="button"
@@ -1565,7 +1565,7 @@ export const GalleryView: React.FC = () => {
                                 setDeletingHeroSlide(slide);
                                 setHeroDeleteModalOpen(true);
                               }}
-                              title="Eliminar del carrusel del Hero"
+                      title="Eliminar del carrusel principal"
                               aria-label={`Eliminar ${slide.title}`}
                             >
                               <Trash2 size={15} />
@@ -1646,7 +1646,7 @@ export const GalleryView: React.FC = () => {
                       <div>
                         <strong>Recomendación de Calidad:</strong>
                         <p style={{ margin: '0.2rem 0 0 0' }}>
-                          Para una visualización nítida y atractiva en la galería y el visor ampliado, sugerimos subir imágenes de buena nitidez (formatos WebP, JPG, PNG o AVIF hasta 10 MB). Puedes usar fotos horizontales, verticales o panorámicas con total libertad.
+                          Para que la foto se vea bien en la galería y al ampliarla, selecciona una imagen de hasta 10 MB. Puedes usar fotos horizontales, verticales o panorámicas.
                         </p>
                       </div>
                     </div>
@@ -1696,7 +1696,7 @@ export const GalleryView: React.FC = () => {
                         <>
                           <Upload size={32} color="#10b981" />
                           <p className={styles.dropzoneText}>Haz clic aquí para seleccionar tu foto</p>
-                          <p className={styles.dropzoneHint}>Formatos admitidos: WebP, JPG, PNG, AVIF (hasta 10 MB)</p>
+                          <p className={styles.dropzoneHint}>Selecciona una imagen (hasta 10 MB)</p>
                         </>
                       )}
                     </div>
@@ -1802,7 +1802,7 @@ export const GalleryView: React.FC = () => {
                   {modalPreviewUrl ? (
                     <img
                       src={modalPreviewUrl}
-                      alt="Previsualización"
+                      alt="Vista previa"
                       className={styles.previewThumb}
                       onError={() => {
                         const imageKey = getImageAvailabilityKey(formImageUrl, formImageSlug);
@@ -1815,7 +1815,7 @@ export const GalleryView: React.FC = () => {
                     </div>
                   )}
                   <div className={styles.previewInfo}>
-                    <strong className={styles.previewTitle}>Previsualización en tiempo real</strong>
+                    <strong className={styles.previewTitle}>Vista previa</strong>
                     <span className={styles.previewSubtitle}>
                       {imageMode === 'upload'
                         ? selectedLocalFile
@@ -1823,7 +1823,7 @@ export const GalleryView: React.FC = () => {
                           : formImageUrl
                             ? 'Fotografía optimizada y lista para publicar'
                             : 'Esperando archivo de imagen...'
-                        : `Foto seleccionada del catálogo: ${formImageSlug}`}
+                        : 'Foto seleccionada del catálogo'}
                     </span>
                   </div>
                 </div>
@@ -2113,7 +2113,7 @@ export const GalleryView: React.FC = () => {
                   </button>
                 </div>
                 <p className={styles.catCreateHint}>
-                  <Info size={13} /> El identificador técnico (slug) para enlaces y filtros se normaliza automáticamente.
+                  <Info size={13} /> Las categorías se organizan automáticamente para facilitar la búsqueda.
                 </p>
               </form>
 
@@ -2176,7 +2176,7 @@ export const GalleryView: React.FC = () => {
                     <span>Categorías registradas</span>
                     <span className={styles.catCountBadge}>{categories.length}</span>
                   </h3>
-                  <span className={styles.catListSubhint}>Filtros activos en web</span>
+                  <span className={styles.catListSubhint}>Categorías disponibles en la página</span>
                 </div>
 
                 <div className={styles.catList}>
@@ -2193,7 +2193,6 @@ export const GalleryView: React.FC = () => {
                             {cat.name}
                           </span>
                           <div className={styles.catItemMeta}>
-                            <span className={styles.catItemSlug}>slug: {cat.slug}</span>
                             <span className={styles.catItemPhotosCount}>
                               <ImageIcon size={12} aria-hidden="true" />
                               {photoCount} {photoCount === 1 ? 'foto' : 'fotos'}
@@ -2261,7 +2260,7 @@ export const GalleryView: React.FC = () => {
                 </div>
                 <div>
                   <h2 id="hero-modal-title" className={styles.modalTitle}>
-                    {editingHeroSlide ? 'Editar Fondo del Hero' : 'Añadir Fondo al Carrusel del Hero'}
+                    {editingHeroSlide ? 'Editar imagen del carrusel' : 'Añadir imagen al carrusel'}
                   </h2>
                   <p style={{ margin: 0, fontSize: '0.8rem', color: '#41564a' }}>
                     Esta imagen rotará dinámicamente como fondo en la página de inicio.
@@ -2299,7 +2298,7 @@ export const GalleryView: React.FC = () => {
                       onClick={() => setHeroFormSource('upload')}
                     >
                       <Upload size={16} />
-                      <span>Subir Nueva a Cloudinary</span>
+                      <span>Elegir una imagen nueva</span>
                     </button>
                   </div>
                 </div>
@@ -2309,7 +2308,7 @@ export const GalleryView: React.FC = () => {
                   <div className={styles.formGroup}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <span className={styles.formLabel}>
-                        Selecciona una foto para el Hero:
+                        Selecciona una imagen para el carrusel:
                       </span>
                       <span style={{ fontSize: '0.78rem', color: '#41564a' }}>
                         {heroFilteredCatalog.length} disponibles
@@ -2394,9 +2393,9 @@ export const GalleryView: React.FC = () => {
                     <div className={styles.qualityTip}>
                       <Info size={22} color="#059669" style={{ flexShrink: 0, marginTop: 2 }} />
                       <div>
-                        <strong>Recomendaciones Cloudinary para Fondos Hero:</strong>
+                        <strong>Recomendaciones para las imágenes del carrusel:</strong>
                         <p style={{ margin: '0.2rem 0 0 0' }}>
-                          Sube fotos horizontales de alta resolución (1920 × 1080 px o 16:9). Se guardarán en Cloudinary en la carpeta protegida <code>manaure-vive/galeria/hero</code> con optimizaciones de entrega automática (WebP/AVIF y CDN global).
+                          Elige fotos horizontales de buena calidad (1920 × 1080 px o proporción 16:9). Se ajustarán automáticamente para mostrarse con claridad en la página.
                         </p>
                       </div>
                     </div>
@@ -2410,7 +2409,7 @@ export const GalleryView: React.FC = () => {
                       }}
                       accept="image/jpeg,image/png,image/webp,image/avif"
                       style={{ display: 'none' }}
-                      aria-label="Subir foto para el Hero"
+                      aria-label="Seleccionar imagen para el carrusel"
                     />
 
                     <div
@@ -2427,7 +2426,7 @@ export const GalleryView: React.FC = () => {
                             {heroSelectedFile.name} ({Math.round(heroSelectedFile.size / 1024)} KB)
                           </p>
                           <p className={styles.dropzoneHint}>
-                            Fotografía cargada lista para subir a Cloudinary • Clic para reemplazar
+                            Imagen lista para guardar • Selecciona aquí para cambiarla
                           </p>
                         </>
                       ) : heroFormImageUrl ? (
@@ -2481,8 +2480,8 @@ export const GalleryView: React.FC = () => {
                         {heroFormSource === 'upload' && heroSelectedFile
                           ? `Archivo local: ${heroSelectedFile.name}`
                           : heroFormImageSlug
-                          ? `Catálogo: ${heroFormImageSlug}`
-                          : 'URL Cloudinary directa'}
+                          ? `Imagen seleccionada: ${heroFormTitle || 'del catálogo'}`
+                          : 'Imagen seleccionada'}
                       </span>
                     </div>
                   </div>
@@ -2569,11 +2568,11 @@ export const GalleryView: React.FC = () => {
                 >
                   {savingHeroSlide ? (
                     <>
-                      <Loader2 size={16} className="animate-spin" /> Guardando en Cloudinary...
+                      <Loader2 size={16} className="animate-spin" /> Guardando imagen...
                     </>
                   ) : (
                     <>
-                      <Sparkles size={16} /> {editingHeroSlide ? 'Actualizar Fondo' : 'Guardar Fondo'}
+                      <Sparkles size={16} /> {editingHeroSlide ? 'Actualizar imagen' : 'Guardar imagen'}
                     </>
                   )}
                 </button>
@@ -2600,7 +2599,7 @@ export const GalleryView: React.FC = () => {
                 >
                   <Trash2 size={20} />
                 </div>
-                <h2 className={styles.modalTitle}>¿Eliminar este fondo del Hero?</h2>
+                <h2 className={styles.modalTitle}>¿Eliminar esta imagen del carrusel?</h2>
               </div>
               <button
                 type="button"
@@ -2621,9 +2620,9 @@ export const GalleryView: React.FC = () => {
                 <div className={styles.qualityTip} style={{ background: '#fef2f2', borderColor: '#fca5a5' }}>
                   <AlertCircle size={20} color="#dc2626" style={{ flexShrink: 0, marginTop: 2 }} />
                   <div>
-                    <strong style={{ color: '#991b1b' }}>Limpieza Cloudinary Automática:</strong>
+                    <strong style={{ color: '#991b1b' }}>Eliminación automática:</strong>
                     <p style={{ margin: '0.2rem 0 0 0', color: '#7f1d1d' }}>
-                      Este archivo fue subido a la carpeta de Cloudinary y será destruido de forma segura para no consumir cuota de almacenamiento.
+                      Esta imagen se eliminará junto con el elemento seleccionado.
                     </p>
                   </div>
                 </div>

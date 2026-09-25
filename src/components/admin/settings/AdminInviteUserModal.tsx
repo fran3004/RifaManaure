@@ -295,7 +295,7 @@ export const AdminInviteUserModal: React.FC<AdminInviteUserModalProps> = ({
                       size={18}
                       className={`${styles.roleIcon} ${role === 'admin' ? styles.roleIconActive : ''}`}
                     />
-                    <span className={styles.roleName}>Admin</span>
+                    <span className={styles.roleName}>Administrador</span>
                     <span className={styles.roleDesc}>Gestión de rifas, órdenes y pagos</span>
                   </div>
 
@@ -323,9 +323,9 @@ export const AdminInviteUserModal: React.FC<AdminInviteUserModalProps> = ({
                         role === 'superadmin' ? styles.roleIconSuperadminActive : ''
                       }`}
                     />
-                    <span className={styles.roleName}>Superadmin</span>
+                    <span className={styles.roleName}>Administrador principal</span>
                     <span className={styles.roleDesc}>
-                      {isSuperadmin ? 'Control total y roles' : 'Requiere Superadmin'}
+                      {isSuperadmin ? 'Control total y administración de cuentas' : 'Requiere autorización especial'}
                     </span>
                   </div>
                 </div>

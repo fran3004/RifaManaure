@@ -479,7 +479,7 @@ export const OrdersView: React.FC = () => {
                             {ord.buyers?.full_name || 'Desconocido'}
                           </strong>
                           <span className={styles.tableMeta}>
-                            C.C. {ord.buyers?.document_id || 'N/A'}
+                            C.C. {ord.buyers?.document_id || 'No registrado'}
                           </span>
                         </td>
 

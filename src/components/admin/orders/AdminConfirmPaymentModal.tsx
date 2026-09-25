@@ -41,7 +41,7 @@ export const AdminConfirmPaymentModal: React.FC<AdminConfirmPaymentModalProps> =
   if (!isOpen || !order) return null;
 
   const buyerName = order.buyers?.full_name || 'Comprador Desconocido';
-  const buyerDoc = order.buyers?.document_id ? `C.C. ${order.buyers.document_id}` : 'Documento N/A';
+  const buyerDoc = order.buyers?.document_id ? `C.C. ${order.buyers.document_id}` : 'Documento no registrado';
   const buyerPhone = order.buyers?.phone || 'Sin teléfono';
   const tickets = order.tickets || [];
   const ticketCount = order.ticket_count || tickets.length;

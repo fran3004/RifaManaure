@@ -4,11 +4,11 @@ import { ChevronRight } from 'lucide-react';
 import styles from './AdminBreadcrumbs.module.css';
 
 const ROUTE_LABELS: Record<string, string> = {
-  '': 'Dashboard',
-  dashboard: 'Dashboard',
+  '': 'Resumen',
+  dashboard: 'Resumen',
   ordenes: 'Órdenes',
   comprobantes: 'Comprobantes',
-  tickets: 'Tickets',
+  tickets: 'Boletos',
   rifas: 'Rifas',
   cuentas: 'Cuentas de pago',
   aliados: 'Aliados',
@@ -28,7 +28,7 @@ export const AdminBreadcrumbs: React.FC = () => {
   return (
     <nav className={styles.breadcrumbsNav} aria-label="Ruta de navegación">
       <Link to="/admin" className={styles.crumbLink}>
-        Admin
+        Administración
       </Link>
       <span className={styles.separator} aria-hidden="true">
         <ChevronRight size={14} />

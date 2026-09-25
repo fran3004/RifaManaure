@@ -76,7 +76,7 @@ const CreateRaffleForm: React.FC<{
     }
 
     if (!cleanSlug) {
-      setErrorMessage('El slug o identificador URL es obligatorio.');
+      setErrorMessage('No se pudo preparar el enlace de la rifa. Revisa el título e inténtalo de nuevo.');
       return;
     }
 
@@ -195,9 +195,9 @@ const CreateRaffleForm: React.FC<{
               />
             </div>
 
-            {/* Slug URL */}
+            {/* Enlace de la rifa */}
             <div className={styles.formGroup}>
-              <label className={styles.label}>Identificador Slug (URL única) *</label>
+              <label className={styles.label}>Enlace de la rifa *</label>
               <input
                 type="text"
                 className={styles.input}
@@ -211,8 +211,7 @@ const CreateRaffleForm: React.FC<{
                 disabled={isSubmitting}
               />
               <span className={styles.helpText}>
-                Identificador URL limpio para el sistema. Se genera automáticamente a partir del
-                título.
+                Se crea automáticamente a partir del título y permite compartir esta rifa.
               </span>
             </div>
 

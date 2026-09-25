@@ -237,7 +237,7 @@ export const PartnersView: React.FC = () => {
     if (!['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml'].includes(file.type)) {
       setFormErrors((prev) => ({
         ...prev,
-        logo: 'Formato no admitido. Usa PNG, WebP, JPG o SVG.',
+        logo: 'Este archivo no es compatible. Selecciona otra imagen para el logo.',
       }));
       return;
     }
@@ -282,7 +282,7 @@ export const PartnersView: React.FC = () => {
   const validateForm = () => {
     const errs: Record<string, string> = {};
     if (!formData.name.trim()) errs.name = 'El nombre del aliado es obligatorio.';
-    if (!formData.slug.trim()) errs.slug = 'El identificador (slug) es obligatorio.';
+    if (!formData.slug.trim()) errs.slug = 'Escribe un nombre para el enlace.';
     if (!formData.category.trim()) errs.category = 'La categoría es obligatoria.';
 
     if (formData.website_url.trim() && !/^https?:\/\//i.test(formData.website_url.trim())) {
@@ -590,7 +590,7 @@ export const PartnersView: React.FC = () => {
           <input
             type="text"
             className={styles.searchInput}
-            placeholder="Buscar por nombre, categoría, slug o descripción..."
+            placeholder="Buscar por nombre, categoría o descripción..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -603,7 +603,7 @@ export const PartnersView: React.FC = () => {
             onChange={(e) => setFilterStatus(e.target.value as 'all' | 'active' | 'inactive')}
           >
             <option value="all">Todos los estados</option>
-            <option value="active">Solo Activos (En Web)</option>
+            <option value="active">Solo publicados</option>
             <option value="inactive">Solo Inactivos</option>
           </select>
         </div>
@@ -704,7 +704,7 @@ export const PartnersView: React.FC = () => {
                       </button>
                     </div>
 
-                    <span className={partnerStyles.partnerSlug}>@{partner.slug}</span>
+                    <span className={partnerStyles.partnerSlug}>Nombre del enlace: {partner.slug}</span>
                     <span className={partnerStyles.categoryBadge}>{partner.category}</span>
                   </div>
                 </div>
@@ -848,10 +848,10 @@ export const PartnersView: React.FC = () => {
                 )}
               </div>
 
-              {/* Slug */}
+              {/* Nombre del enlace */}
               <div className={styles.formModalGroup}>
                 <label className={styles.formModalLabel}>
-                  Slug Identificador <span className={partnerStyles.requiredIndicator}>*</span>
+                  Nombre para el enlace <span className={partnerStyles.requiredIndicator}>*</span>
                 </label>
                 <input
                   type="text"
@@ -926,7 +926,7 @@ export const PartnersView: React.FC = () => {
                     onClick={() => setLogoTab('url')}
                   >
                     <Link size={14} />
-                    <span>URL Externa</span>
+                    <span>Enlace externo</span>
                   </button>
                 </div>
 
@@ -972,7 +972,7 @@ export const PartnersView: React.FC = () => {
                   </div>
                 )}
 
-                {/* Previsualización del Logo */}
+                {/* Vista previa del logo */}
                 {logoPreview && (
                   <div className={partnerStyles.logoPreviewArea}>
                     <img

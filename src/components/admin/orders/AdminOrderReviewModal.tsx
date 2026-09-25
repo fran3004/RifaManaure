@@ -476,7 +476,7 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
       });
 
       if (res.success) {
-        setNotifActionResult('¡Correo transaccional reenviado exitosamente a través de Brevo!');
+        setNotifActionResult('¡El aviso por correo se envió nuevamente!');
       } else if (res.alreadyProcessed) {
         setNotifActionResult(res.error || 'Correo ya procesado: ya existe confirmación de despacho para esta orden.');
       } else {
@@ -672,7 +672,7 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
                       </button>
                     </>
                   ) : (
-                    <span className={styles.infoValue}>N/A</span>
+                    <span className={styles.infoValue}>No registrado</span>
                   )}
                 </div>
               </div>
@@ -688,7 +688,7 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
                     {order.buyers.email}
                   </a>
                 ) : (
-                  <span className={styles.infoValue}>N/A</span>
+                  <span className={styles.infoValue}>No registrado</span>
                 )}
               </div>
 
@@ -838,7 +838,7 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
 
                   {signedProofUrl && (
                     <div className={styles.proofToolbar}>
-                      <span>* URL con caducidad automática de 15 min</span>
+                      <span>* El enlace estará disponible durante 15 minutos</span>
                       <a
                         href={signedProofUrl}
                         target="_blank"
@@ -1043,7 +1043,7 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
             <div className={styles.notificationContent}>
               {/* Bloque de Canales de Confirmación Separados */}
               <div className={styles.channelsGrid}>
-                {/* Canal A: Correo Automático (Brevo) */}
+                {/* Canal A: Correo automático */}
                 <div className={`${styles.channelCard} ${styles.channelCardEmail}`}>
                   <div className={styles.channelCardHeader}>
                     <div className={styles.channelTitleGroup}>
@@ -1087,13 +1087,6 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
                       </span>
                     </div>
 
-                    {emailTraceability.messageId && (
-                      <div className={styles.channelMetaRow}>
-                        <span className={styles.channelMetaKey}>ID Brevo:</span>
-                        <span className={styles.messageIdCode}>{emailTraceability.messageId}</span>
-                      </div>
-                    )}
-
                     {emailTraceability.errorMessage && (
                       <div className={styles.channelMetaRow}>
                         <span className={styles.channelMetaKey}>Fallo:</span>
@@ -1103,6 +1096,13 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
                         >
                           {emailTraceability.errorMessage}
                         </span>
+                      </div>
+                    )}
+
+                    {emailTraceability.messageId && (
+                      <div className={styles.channelMetaRow}>
+                        <span className={styles.channelMetaKey}>Referencia del envío:</span>
+                        <span className={styles.messageIdCode}>{emailTraceability.messageId}</span>
                       </div>
                     )}
                   </div>
@@ -1217,11 +1217,10 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
                     const eventLabel = formatNotificationEventLabel(log.event_type);
                     const isFailed = log.status === 'failed';
                     const badge = getNotificationStatusBadge(log);
-                    const logMeta = (typeof log.metadata === 'object' && log.metadata !== null
+                    const logMetadata = (typeof log.metadata === 'object' && log.metadata !== null
                       ? log.metadata
-                      : {}) as Record<string, any>;
-                    const logMessageId = logMeta?.messageId || logMeta?.message_id;
-
+                      : {}) as Record<string, unknown>;
+                    const sendReference = logMetadata.messageId || logMetadata.message_id;
                     return (
                       <div
                         key={log.id}
@@ -1233,7 +1232,7 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
                               className={`${styles.notificationChannelBadge} ${isWhatsApp ? styles.notificationChannelWhatsApp : styles.notificationChannelEmail}`}
                             >
                               {isWhatsApp ? <Phone size={11} /> : <Mail size={11} />}
-                              {isWhatsApp ? 'WhatsApp (Manual)' : 'Correo (Brevo)'}
+                              {isWhatsApp ? 'WhatsApp (manual)' : 'Correo electrónico'}
                             </span>
 
                             <strong className={styles.notificationEventTitle}>
@@ -1281,11 +1280,10 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
                           </span>
                         </div>
 
-                        {/* Brevo messageId para canal email */}
-                        {logMessageId && (
+                        {typeof sendReference === 'string' && sendReference && (
                           <div className={styles.channelMetaRow} style={{ border: 'none', padding: 0 }}>
-                            <span className={styles.channelMetaKey}>Message ID:</span>
-                            <span className={styles.messageIdCode}>{logMessageId}</span>
+                            <span className={styles.channelMetaKey}>Referencia del aviso:</span>
+                            <span className={styles.messageIdCode}>{sendReference}</span>
                           </div>
                         )}
 
@@ -1301,9 +1299,9 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
                 </div>
               ) : (
                 <p className={styles.notificationEmpty} style={{ marginTop: '0.75rem' }}>
-                  Las notificaciones transaccionales quedan registradas al enviar comprobantes,
-                  aprobar o rechazar pagos. El correo se envía automáticamente vía Brevo, y WhatsApp
-                  se prepara para su envío manual por el administrador.
+                  Los avisos quedan registrados al enviar comprobantes, aprobar o rechazar pagos.
+                  El correo se envía automáticamente y los mensajes de WhatsApp se preparan para que
+                  el administrador los envíe.
                 </p>
               )}
 

@@ -232,7 +232,7 @@ export const DashboardView: React.FC = () => {
     } catch (err: unknown) {
       const normalized = normalizeAppError(
         err,
-        'Error inesperado de red al consultar métricas del Dashboard.'
+        'No fue posible cargar los indicadores. Revisa tu conexión e inténtalo de nuevo.'
       );
       logAppError('DashboardView.loadData', normalized);
       setError(normalized.userMessage);
@@ -343,7 +343,7 @@ export const DashboardView: React.FC = () => {
   return (
     <div className={styles.viewContainer}>
       <AdminPageHeader
-        title="Dashboard General"
+        title="Resumen general"
         description={
           selectedRaffle
             ? `Métricas operativas y financieras para: ${selectedRaffle.title}`
@@ -368,7 +368,7 @@ export const DashboardView: React.FC = () => {
         <AdminLoadingState message="Calculando métricas en vivo..." />
       ) : error ? (
         <AdminErrorState
-          title={isForbidden ? 'Acceso Restringido' : 'Error al cargar métricas del Dashboard'}
+          title={isForbidden ? 'Acceso restringido' : 'No se pudieron cargar los indicadores'}
           message={error}
           isForbidden={isForbidden}
           onRetry={handleRefresh}
@@ -656,7 +656,7 @@ export const DashboardView: React.FC = () => {
                             </td>
                             <td>
                               <div className={styles.buyerName}>
-                                {ord.buyers?.full_name || 'N/A'}
+                                {ord.buyers?.full_name || 'No registrado'}
                               </div>
                               <div className={styles.tableMeta}>
                                 {ord.buyers?.phone || ord.buyers?.email || ''}

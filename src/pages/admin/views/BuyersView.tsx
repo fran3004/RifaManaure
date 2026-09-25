@@ -272,14 +272,14 @@ export const BuyersView: React.FC = () => {
                           <span>{buyer.phone}</span>
                         </a>
                       ) : (
-                        <span className={styles.phoneNotAvailable}>N/A</span>
+                        <span className={styles.phoneNotAvailable}>No registrado</span>
                       )}
                     </td>
 
                     {/* 3. Correo */}
                     <td>
                       <span className={styles.emailText} title={buyer.email}>
-                        {buyer.email || 'N/A'}
+                        {buyer.email || 'No registrado'}
                       </span>
                     </td>
 

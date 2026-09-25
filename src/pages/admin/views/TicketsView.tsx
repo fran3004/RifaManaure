@@ -371,7 +371,7 @@ export const TicketsView: React.FC = () => {
   return (
     <div className={styles.viewContainer}>
       <AdminPageHeader
-        title="Control de Tickets"
+        title="Control de boletos"
         description={
           selectedRaffle
             ? `Inventario en vivo, ventas y bloqueos para: ${selectedRaffle.title}`
@@ -448,7 +448,7 @@ export const TicketsView: React.FC = () => {
           <div className={`${styles.metricValue} ${styles.metricValueReserved}`}>
             {ticketCounts.reservedCount}
           </div>
-          <span className={styles.metricHint}>En checkout o validación</span>
+          <span className={styles.metricHint}>En proceso de compra o validación</span>
         </div>
 
         <div className={styles.metricCard}>
@@ -990,7 +990,7 @@ export const TicketsView: React.FC = () => {
                 <div className={styles.actionRow}>
                   <span className={styles.actionText}>
                     El boleto está bloqueado. Puedes habilitarlo para que vuelva a estar disponible
-                    en el checkout.
+                    durante la compra.
                   </span>
                   <button
                     type="button"

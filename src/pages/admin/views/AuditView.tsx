@@ -160,7 +160,7 @@ function getActionConfig(action: string): ActionConfig {
     pillClass: styles.pillNeutral,
     nodeClass: styles.nodeNeutral,
     icon: <Activity size={15} />,
-    actor: 'Sistema Backend',
+    actor: 'Sistema',
   };
 }
 
@@ -937,7 +937,7 @@ export const AuditView: React.FC = () => {
             ? `Flujo de actividades y eventos transaccionales para: ${selectedRaffle.title}`
             : 'Flujo de actividades, transiciones transaccionales y confirmaciones de pago en tiempo real.'
         }
-        badge="Seguridad Backend"
+        badge="Seguridad y actividad"
         actions={
           <button
             type="button"

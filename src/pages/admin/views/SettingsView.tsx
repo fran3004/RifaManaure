@@ -469,7 +469,7 @@ export const SettingsView: React.FC = () => {
                 </h3>
                 <p className={styles.sectionSubtitle}>
                   Controlan la dinámica de selección de boletos en la cuadrícula y el cronómetro de
-                  checkout.
+                  proceso de compra.
                 </p>
               </div>
 
@@ -556,7 +556,7 @@ export const SettingsView: React.FC = () => {
 
                       <span className={styles.cardHint}>
                         ⚡ Equivale a <strong>{reservationDurationMinutes * 60} segundos</strong> en
-                        el cronómetro de checkout.
+                        el tiempo disponible para completar la compra.
                       </span>
                     </div>
                   </div>
@@ -878,11 +878,11 @@ export const SettingsView: React.FC = () => {
                             {/* Rol */}
                             <td>
                               {item.role === 'superadmin' ? (
-                                <span className={styles.roleBadgeSuperadmin}>Superadmin</span>
+                                <span className={styles.roleBadgeSuperadmin}>Administrador principal</span>
                               ) : item.role === 'auditor' ? (
                                 <span className={styles.roleBadgeAuditor}>Auditor</span>
                               ) : (
-                                <span className={styles.roleBadgeAdmin}>Admin</span>
+                                <span className={styles.roleBadgeAdmin}>Administrador</span>
                               )}
                             </td>
 
@@ -1071,7 +1071,11 @@ export const SettingsView: React.FC = () => {
                           : styles.roleBadgeAdmin
                     }
                   >
-                    {confirmToggleUser.userItem.role.toUpperCase()}
+                    {confirmToggleUser.userItem.role === 'superadmin'
+                      ? 'Administrador principal'
+                      : confirmToggleUser.userItem.role === 'auditor'
+                        ? 'Auditor'
+                        : 'Administrador'}
                   </span>
                 </div>
                 <span className={styles.confirmUserEmail}>{confirmToggleUser.userItem.email}</span>
@@ -1086,8 +1090,8 @@ export const SettingsView: React.FC = () => {
                 ) : (
                   <>
                     ¿Confirmas que deseas <strong>suspender el acceso</strong> de este administrador?
-                    Su sesión activa será invalidada de inmediato y no podrá ingresar al panel hasta que un
-                    Superadministrador lo reactive.
+                    Su sesión activa se cerrará de inmediato y no podrá ingresar al panel hasta que un
+                    administrador principal reactive su acceso.
                   </>
                 )}
               </p>
@@ -1097,8 +1101,8 @@ export const SettingsView: React.FC = () => {
                   <div className={styles.superadminWarningNotice}>
                     <ShieldAlert size={18} />
                     <span>
-                      Atención: Esta cuenta posee rol de Superadministrador. Asegúrate de contar con
-                      otro Superadministrador activo en el sistema.
+                      Atención: Esta cuenta tiene permisos principales. Asegúrate de contar con
+                      otra cuenta administradora activa antes de suspenderla.
                     </span>
                   </div>
                 )}

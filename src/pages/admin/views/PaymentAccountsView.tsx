@@ -203,7 +203,7 @@ export const PaymentAccountsView: React.FC = () => {
     if (res.success) {
       showFeedback(
         'success',
-        `Cuenta ${acc.bank_name} (${acc.account_number}) ${newStatus ? 'activada y visible en checkout' : 'desactivada y oculta al público'}.`
+        `Cuenta ${acc.bank_name} (${acc.account_number}) ${newStatus ? 'activada y visible durante la compra' : 'desactivada y oculta a los compradores'}.`
       );
     } else {
       // Revert on failure
@@ -390,7 +390,7 @@ export const PaymentAccountsView: React.FC = () => {
             {activeCount}
           </span>
           <span className={styles.metricHint}>
-            Visibles actualmente para compradores en Checkout
+            Visibles actualmente para los compradores
           </span>
         </div>
 
@@ -442,7 +442,7 @@ export const PaymentAccountsView: React.FC = () => {
       <div className={styles.accountInfoNotice}>
         <ShieldCheck size={20} className={styles.accountInfoNoticeIcon} />
         <span>
-          <strong>Regla de visualización:</strong> Los compradores que ingresan al checkout
+          <strong>Regla de visualización:</strong> Los compradores que inician su compra
           únicamente podrán ver y copiar las cuentas marcadas como <strong>Activas</strong>. Si
           desactivas una cuenta, dejará de mostrarse inmediatamente sin afectar el historial de
           pagos anteriores.
@@ -467,7 +467,7 @@ export const PaymentAccountsView: React.FC = () => {
           <AdminEmptyState
             icon={<CreditCard size={36} color="var(--color-brand-accent, var(--brand-accent))" />}
             title="No hay cuentas de pago configuradas"
-            description="Aún no has registrado ninguna cuenta bancaria o billetera digital oficial. Agrega las cuentas donde los compradores realizarán sus transferencias para que aparezcan en el checkout."
+            description="Aún no has registrado ninguna cuenta bancaria o billetera digital oficial. Agrega las cuentas donde los compradores realizarán sus transferencias."
             actionLabel="Agregar Primera Cuenta Oficial"
             onAction={handleOpenCreate}
           />
@@ -774,7 +774,7 @@ export const PaymentAccountsView: React.FC = () => {
                     />
                     <span>
                       <strong>Cuenta Activa</strong> (Marcar para que los compradores puedan verla y
-                      seleccionarla en el checkout)
+                      seleccionarla durante la compra)
                     </span>
                   </label>
                 </div>
@@ -824,7 +824,7 @@ export const PaymentAccountsView: React.FC = () => {
               nombre de <strong>{deletingAccount.account_holder}</strong>.
             </p>
             <p className={styles.accountDeleteModalNotice}>
-              Esta acción no puede deshacerse. Si solo deseas que no aparezca en el checkout, puedes
+              Esta acción no puede deshacerse. Si solo deseas ocultarla a los compradores, puedes
               marcarla como inactiva en su lugar.
             </p>
 
