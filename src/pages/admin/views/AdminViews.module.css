@@ -213,32 +213,37 @@
 
 .ordersTable th:nth-child(1),
 .ordersTable td:nth-child(1) {
-  width: 17%;
+  width: 15%;
 }
 
 .ordersTable th:nth-child(2),
 .ordersTable td:nth-child(2) {
-  width: 14%;
+  width: 12%;
 }
 
 .ordersTable th:nth-child(3),
 .ordersTable td:nth-child(3) {
-  width: 24%;
+  width: 21%;
 }
 
 .ordersTable th:nth-child(4),
 .ordersTable td:nth-child(4) {
-  width: 12%;
+  width: 11%;
 }
 
 .ordersTable th:nth-child(5),
 .ordersTable td:nth-child(5) {
-  width: 15%;
+  width: 13%;
 }
 
 .ordersTable th:nth-child(6),
 .ordersTable td:nth-child(6) {
-  width: 18%;
+  width: 14%;
+}
+
+.ordersTable th:nth-child(7),
+.ordersTable td:nth-child(7) {
+  width: 14%;
 }
 
 .ordersTable th,

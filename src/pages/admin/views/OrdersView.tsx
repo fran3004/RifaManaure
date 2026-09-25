@@ -32,6 +32,8 @@ import {
   Check,
   X,
   AlertTriangle,
+  Phone,
+  Mail,
 } from 'lucide-react';
 import { AdminOrderReviewModal } from '@/components/admin/orders/AdminOrderReviewModal';
 import { AdminConfirmPaymentModal } from '@/components/admin/orders/AdminConfirmPaymentModal';
@@ -430,6 +432,7 @@ export const OrdersView: React.FC = () => {
                     <th>Comprador</th>
                     <th>Total</th>
                     <th>Estado</th>
+                    <th>Canales</th>
                     <th className={styles.thAlignRight}>Acciones</th>
                   </tr>
                 </thead>
@@ -520,6 +523,37 @@ export const OrdersView: React.FC = () => {
                           {!['pending_verification', 'pending', 'paid', 'rejected', 'expired', 'cancelled'].includes(ord.status) && (
                             <span className={styles.badgeNeutral}>
                               {ord.status}
+                            </span>
+                          )}
+                        </td>
+
+                        {/* Canales de Confirmación */}
+                        <td>
+                          {(!ord.contact_preference || ord.contact_preference === 'both') && (
+                            <span
+                              className={styles.badgeSuccess}
+                              style={{ fontSize: '0.75rem', padding: '0.2rem 0.5rem', gap: '0.25rem' }}
+                              title="Canales: WhatsApp (Manual) + Correo (Automático)"
+                            >
+                              <Phone size={10} /> + <Mail size={10} /> Ambos
+                            </span>
+                          )}
+                          {ord.contact_preference === 'email' && (
+                            <span
+                              className={styles.badgeWarning}
+                              style={{ fontSize: '0.75rem', padding: '0.2rem 0.5rem', gap: '0.25rem' }}
+                              title="Canal: Solo Correo Automático"
+                            >
+                              <Mail size={10} /> Correo
+                            </span>
+                          )}
+                          {ord.contact_preference === 'whatsapp' && (
+                            <span
+                              className={styles.badgeInfo}
+                              style={{ fontSize: '0.75rem', padding: '0.2rem 0.5rem', gap: '0.25rem' }}
+                              title="Canal: Solo WhatsApp Manual"
+                            >
+                              <Phone size={10} /> WhatsApp
                             </span>
                           )}
                         </td>

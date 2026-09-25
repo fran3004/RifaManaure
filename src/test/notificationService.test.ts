@@ -12,6 +12,9 @@ import {
   recordWhatsAppOpened,
   recordWhatsAppSentManually,
   getNotificationStatusBadge,
+  computeEmailTraceability,
+  verifyAndRetryEmailNotification,
+  maskEmail,
   NOTIFICATION_EVENT_TYPES,
   type OrderNotificationData,
 } from '@/services/notificationService';
@@ -568,4 +571,290 @@ describe('Servicio de Notificaciones por WhatsApp (src/services/notificationServ
       expect(badgeEmailFailed.variant).toBe('danger');
     });
   });
+
+  describe('9. Trazabilidad de Correo (computeEmailTraceability) y Reintento Idempotente (verifyAndRetryEmailNotification)', () => {
+    describe('computeEmailTraceability', () => {
+      it('debe retornar not_required cuando contact_preference es exclusivamente whatsapp', () => {
+        const summary = computeEmailTraceability(
+          {
+            status: 'paid',
+            contact_preference: 'whatsapp',
+            buyers: { email: 'comprador@example.com' },
+          },
+          []
+        );
+        expect(summary.status).toBe('not_required');
+        expect(summary.label).toBe('No requerido');
+        expect(summary.canRetry).toBe(false);
+        expect(summary.isAlreadyProcessed).toBe(false);
+      });
+
+      it('debe retornar not_required cuando el comprador no tiene correo registrado', () => {
+        const summary = computeEmailTraceability(
+          {
+            status: 'paid',
+            contact_preference: 'both',
+            buyers: { email: null },
+          },
+          []
+        );
+        expect(summary.status).toBe('not_required');
+        expect(summary.canRetry).toBe(false);
+      });
+
+      it('debe retornar pending sin opción de reintento si la orden está por validar (esperando aprobación)', () => {
+        const summary = computeEmailTraceability(
+          {
+            status: 'pending_verification',
+            contact_preference: 'both',
+            buyers: { email: 'carlos@example.com' },
+          },
+          []
+        );
+        expect(summary.status).toBe('pending');
+        expect(summary.canRetry).toBe(false);
+      });
+
+      it('debe retornar pending con opción de reintento si la orden está pagada pero no tiene log de correo', () => {
+        const summary = computeEmailTraceability(
+          {
+            status: 'paid',
+            contact_preference: 'email',
+            buyers: { email: 'carlos@example.com' },
+          },
+          []
+        );
+        expect(summary.status).toBe('pending');
+        expect(summary.canRetry).toBe(true);
+      });
+
+      it('debe retornar sent con isAlreadyProcessed=true y sin reintento si el correo fue enviado (aceptado por Brevo)', () => {
+        const summary = computeEmailTraceability(
+          {
+            status: 'paid',
+            contact_preference: 'both',
+            buyers: { email: 'carlos@example.com' },
+          },
+          [
+            {
+              id: 'log_em_01',
+              order_id: 'ord_1',
+              channel: 'email',
+              event_type: 'payment_approved',
+              recipient: 'carlos@example.com',
+              status: 'sent',
+              attempts: 1,
+              created_at: '2026-09-25T10:00:00Z',
+              error_message: null,
+              idempotency_key: 'key_1',
+              metadata: { messageId: '<20260925-brevo-123@smtp.brevo.com>' },
+              updated_at: '2026-09-25T10:00:00Z',
+            },
+          ]
+        );
+        expect(summary.status).toBe('sent');
+        expect(summary.label).toBe('Enviado (Aceptado por Brevo)');
+        expect(summary.isAlreadyProcessed).toBe(true);
+        expect(summary.canRetry).toBe(false);
+        expect(summary.messageId).toBe('<20260925-brevo-123@smtp.brevo.com>');
+        expect(summary.recipientMasked).toBe('c***s@example.com');
+      });
+
+      it('debe retornar delivered con isAlreadyProcessed=true si el correo fue entregado', () => {
+        const summary = computeEmailTraceability(
+          {
+            status: 'paid',
+            contact_preference: 'both',
+            buyers: { email: 'carlos@example.com' },
+          },
+          [
+            {
+              id: 'log_em_deliv',
+              order_id: 'ord_1',
+              channel: 'email',
+              event_type: 'payment_approved',
+              recipient: 'carlos@example.com',
+              status: 'delivered',
+              attempts: 1,
+              created_at: '2026-09-25T10:00:00Z',
+              error_message: null,
+              idempotency_key: 'key_deliv',
+              metadata: { messageId: 'msg_deliv_456' },
+              updated_at: '2026-09-25T10:00:00Z',
+            },
+          ]
+        );
+        expect(summary.status).toBe('delivered');
+        expect(summary.label).toBe('Entregado');
+        expect(summary.isAlreadyProcessed).toBe(true);
+        expect(summary.canRetry).toBe(false);
+      });
+
+      it('debe retornar failed con canRetry=true si el correo falló y la orden está pagada', () => {
+        const summary = computeEmailTraceability(
+          {
+            status: 'paid',
+            contact_preference: 'both',
+            buyers: { email: 'carlos@example.com' },
+          },
+          [
+            {
+              id: 'log_em_err',
+              order_id: 'ord_1',
+              channel: 'email',
+              event_type: 'payment_approved',
+              recipient: 'carlos@example.com',
+              status: 'failed',
+              attempts: 1,
+              created_at: '2026-09-25T10:00:00Z',
+              error_message: 'Fallo al autenticar con Brevo',
+              idempotency_key: 'key_err',
+              metadata: null,
+              updated_at: '2026-09-25T10:00:00Z',
+            },
+          ]
+        );
+        expect(summary.status).toBe('failed');
+        expect(summary.label).toBe('Fallido');
+        expect(summary.canRetry).toBe(true);
+        expect(summary.isAlreadyProcessed).toBe(false);
+        expect(summary.errorMessage).toBe('Fallo al autenticar con Brevo');
+      });
+    });
+
+    describe('verifyAndRetryEmailNotification (Blindaje e Idempotencia)', () => {
+      it('debe rechazar reintento si la orden no se encuentra en base de datos', async () => {
+        const mockMaybeSingle = vi.fn().mockResolvedValueOnce({ data: null, error: null });
+        const mockSelect = vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({ maybeSingle: mockMaybeSingle }),
+        });
+
+        vi.mocked(supabase.from).mockReturnValue({ select: mockSelect } as any);
+
+        const result = await verifyAndRetryEmailNotification('ord_not_found', 'payment_approved');
+        expect(result.success).toBe(false);
+        expect(result.error).toContain('No se pudo verificar el estado actual de la orden');
+      });
+
+      it('debe rechazar reintento si la orden no continúa en estado "paid" para payment_approved', async () => {
+        const mockOrder = { id: 'ord_not_paid', status: 'pending_verification', contact_preference: 'both' };
+        const mockMaybeSingle = vi.fn().mockResolvedValueOnce({ data: mockOrder, error: null });
+        const mockSelect = vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({ maybeSingle: mockMaybeSingle }),
+        });
+
+        vi.mocked(supabase.from).mockReturnValue({ select: mockSelect } as any);
+
+        const result = await verifyAndRetryEmailNotification('ord_not_paid', 'payment_approved');
+        expect(result.success).toBe(false);
+        expect(result.error).toContain("La orden debe encontrarse en estado pagada ('paid')");
+      });
+
+      it('debe rechazar reintento si el comprador seleccionó exclusivamente WhatsApp', async () => {
+        const mockOrder = { id: 'ord_wa_only', status: 'paid', contact_preference: 'whatsapp' };
+        const mockMaybeSingle = vi.fn().mockResolvedValueOnce({ data: mockOrder, error: null });
+        const mockSelect = vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({ maybeSingle: mockMaybeSingle }),
+        });
+
+        vi.mocked(supabase.from).mockReturnValue({ select: mockSelect } as any);
+
+        const result = await verifyAndRetryEmailNotification('ord_wa_only', 'payment_approved');
+        expect(result.success).toBe(false);
+        expect(result.error).toContain('El correo no es requerido');
+      });
+
+      it('debe proteger contra duplicados silenciosos y retornar "Correo ya procesado" si ya existe sent o delivered', async () => {
+        const mockOrder = { id: 'ord_dup', status: 'paid', contact_preference: 'both' };
+        const mockMaybeSingleOrder = vi.fn().mockResolvedValueOnce({ data: mockOrder, error: null });
+        const mockExistingLog = [{ status: 'sent', metadata: { messageId: 'm1' } }];
+
+        vi.mocked(supabase.from).mockImplementation((table: string) => {
+          if (table === 'orders') {
+            return {
+              select: vi.fn().mockReturnValue({
+                eq: vi.fn().mockReturnValue({ maybeSingle: mockMaybeSingleOrder }),
+              }),
+            } as any;
+          }
+          if (table === 'notification_logs') {
+            return {
+              select: vi.fn().mockReturnValue({
+                eq: vi.fn().mockReturnValue({
+                  eq: vi.fn().mockReturnValue({
+                    eq: vi.fn().mockResolvedValueOnce({ data: mockExistingLog, error: null }),
+                  }),
+                }),
+              }),
+            } as any;
+          }
+          return {} as any;
+        });
+
+        const result = await verifyAndRetryEmailNotification('ord_dup', 'payment_approved');
+        expect(result.success).toBe(false);
+        expect(result.alreadyProcessed).toBe(true);
+        expect(result.error).toContain('Correo ya procesado');
+      });
+
+      it('debe invocar el reenvío de correo transaccional si la orden continúa paid y no ha sido entregada', async () => {
+        const mockOrder = { id: 'ord_ok', status: 'paid', contact_preference: 'both' };
+        const mockMaybeSingleOrder = vi.fn().mockResolvedValueOnce({ data: mockOrder, error: null });
+        const mockExistingLogs = [{ status: 'failed', metadata: null }];
+
+        vi.mocked(supabase.from).mockImplementation((table: string) => {
+          if (table === 'orders') {
+            return {
+              select: vi.fn().mockReturnValue({
+                eq: vi.fn().mockReturnValue({ maybeSingle: mockMaybeSingleOrder }),
+              }),
+            } as any;
+          }
+          if (table === 'notification_logs') {
+            return {
+              select: vi.fn().mockReturnValue({
+                eq: vi.fn().mockReturnValue({
+                  eq: vi.fn().mockReturnValue({
+                    eq: vi.fn().mockResolvedValueOnce({ data: mockExistingLogs, error: null }),
+                  }),
+                }),
+              }),
+            } as any;
+          }
+          return {} as any;
+        });
+
+        (supabase.functions.invoke as any).mockResolvedValueOnce({
+          data: { success: true, messageId: 'brevo_retried_ok' },
+          error: null,
+        });
+
+        const result = await verifyAndRetryEmailNotification('ord_ok', 'payment_approved', {
+          buyerEmail: 'carlos@example.com',
+          buyerName: 'Carlos Pérez',
+          orderReference: 'MAN-2026-001',
+        });
+
+        expect(result.success).toBe(true);
+        expect(supabase.functions.invoke).toHaveBeenCalledWith('send-brevo-email', {
+          body: expect.objectContaining({
+            orderId: 'ord_ok',
+            eventType: 'payment_approved',
+            isRetry: true,
+          }),
+        });
+      });
+    });
+
+    describe('maskEmail', () => {
+      it('debe enmascarar correos electrónicos protegiendo la privacidad', () => {
+        expect(maskEmail('carlos.perez@example.com')).toBe('c***z@example.com');
+        expect(maskEmail('ana@gmail.com')).toBe('a***a@gmail.com');
+        expect(maskEmail('ab@test.com')).toBe('a*@test.com');
+        expect(maskEmail('')).toBe('');
+        expect(maskEmail(null)).toBe('');
+      });
+    });
+  });
 });
+

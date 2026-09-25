@@ -17,7 +17,8 @@
  */
 
 import { supabase } from '@/lib/supabase';
-import { formatCOP, formatTicketNumber } from '@/lib/utils';
+import { formatCOP, formatTicketNumber, maskEmail } from '@/lib/utils';
+export { maskEmail };
 import { createWhatsAppLink, getWhatsAppProvider, type WhatsAppSendResult } from './whatsappService';
 import { sendTransactionalEmail } from './emailService';
 import type { ContactPreference } from '@/types/raffle.types';
@@ -593,4 +594,265 @@ export async function retryNotification(
   }
 
   return { success: false, error: 'Canal no soportado' };
+}
+
+export type EmailTraceabilityStatus =
+  | 'not_required'
+  | 'pending'
+  | 'sent'
+  | 'delivered'
+  | 'failed';
+
+export interface EmailTraceabilitySummary {
+  status: EmailTraceabilityStatus;
+  label: string;
+  badgeVariant: 'neutral' | 'warning' | 'info' | 'success' | 'danger';
+  canRetry: boolean;
+  isAlreadyProcessed: boolean;
+  messageId?: string;
+  recipientMasked: string;
+  attempts: number;
+  lastAttemptAt?: string;
+  errorMessage?: string;
+  latestLog?: NotificationLogRow;
+}
+
+/**
+ * Calcula el estado de trazabilidad verídico del canal de correo para una orden.
+ * Estados mínimos: 'not_required' | 'pending' | 'sent' | 'delivered' | 'failed'.
+ */
+export function computeEmailTraceability(
+  order: {
+    status: string;
+    contact_preference?: ContactPreference | string | null;
+    buyers?: { email?: string | null } | null;
+  },
+  logs: NotificationLogRow[]
+): EmailTraceabilitySummary {
+  const pref = (order.contact_preference || 'both').toLowerCase();
+  const buyerEmail = order.buyers?.email?.trim();
+  const isRequired = (pref === 'email' || pref === 'both') && Boolean(buyerEmail);
+
+  // Filtrar logs de correo ordenados desc por fecha
+  const emailLogs = logs
+    .filter((l) => l.channel === 'email')
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+  const latestLog = emailLogs[0];
+  const meta = (typeof latestLog?.metadata === 'object' && latestLog?.metadata !== null
+    ? latestLog.metadata
+    : {}) as Record<string, any>;
+  const messageId = meta?.messageId || meta?.message_id;
+  const attempts = latestLog?.attempts || 0;
+  const lastAttemptAt = latestLog?.created_at;
+  const errorMessage = latestLog?.error_message || undefined;
+  const recipientMasked = maskEmail(latestLog?.recipient || buyerEmail) || 'N/A';
+
+  if (!isRequired) {
+    return {
+      status: 'not_required',
+      label: 'No requerido',
+      badgeVariant: 'neutral',
+      canRetry: false,
+      isAlreadyProcessed: false,
+      messageId,
+      recipientMasked,
+      attempts,
+      lastAttemptAt,
+      errorMessage,
+      latestLog,
+    };
+  }
+
+  // Si existe registro en notification_logs
+  if (latestLog) {
+    if (latestLog.status === 'delivered') {
+      return {
+        status: 'delivered',
+        label: 'Entregado',
+        badgeVariant: 'success',
+        canRetry: false,
+        isAlreadyProcessed: true,
+        messageId,
+        recipientMasked,
+        attempts,
+        lastAttemptAt,
+        errorMessage,
+        latestLog,
+      };
+    }
+
+    if (latestLog.status === 'sent') {
+      // Brevo aceptó el mensaje para encolamiento/envío SMTP
+      return {
+        status: 'sent',
+        label: 'Enviado (Aceptado por Brevo)',
+        badgeVariant: 'success',
+        canRetry: false,
+        isAlreadyProcessed: true,
+        messageId,
+        recipientMasked,
+        attempts,
+        lastAttemptAt,
+        errorMessage,
+        latestLog,
+      };
+    }
+
+    if (latestLog.status === 'failed' || latestLog.status === 'bounced') {
+      // Falló el envío. Se permite reintento si la orden sigue siendo apta
+      const isOrderEligible = order.status === 'paid' || order.status === 'rejected';
+
+      return {
+        status: 'failed',
+        label: latestLog.status === 'bounced' ? 'Rebotado' : 'Fallido',
+        badgeVariant: 'danger',
+        canRetry: isOrderEligible,
+        isAlreadyProcessed: false,
+        messageId,
+        recipientMasked,
+        attempts,
+        lastAttemptAt,
+        errorMessage,
+        latestLog,
+      };
+    }
+
+    // Pendiente en logs
+    return {
+      status: 'pending',
+      label: 'Pendiente',
+      badgeVariant: 'warning',
+      canRetry: false,
+      isAlreadyProcessed: false,
+      messageId,
+      recipientMasked,
+      attempts,
+      lastAttemptAt,
+      errorMessage,
+      latestLog,
+    };
+  }
+
+  // Aún no hay log de correo registrado
+  if (order.status === 'paid') {
+    return {
+      status: 'pending',
+      label: 'Pendiente de envío',
+      badgeVariant: 'warning',
+      canRetry: true,
+      isAlreadyProcessed: false,
+      recipientMasked,
+      attempts: 0,
+    };
+  }
+
+  if (order.status === 'rejected') {
+    return {
+      status: 'pending',
+      label: 'Pendiente de notificación',
+      badgeVariant: 'warning',
+      canRetry: true,
+      isAlreadyProcessed: false,
+      recipientMasked,
+      attempts: 0,
+    };
+  }
+
+  if (order.status === 'pending_verification' || order.status === 'pending') {
+    return {
+      status: 'pending',
+      label: 'Pendiente (espera aprobación)',
+      badgeVariant: 'warning',
+      canRetry: false,
+      isAlreadyProcessed: false,
+      recipientMasked,
+      attempts: 0,
+    };
+  }
+
+  return {
+    status: 'not_required',
+    label: 'No requerido',
+    badgeVariant: 'neutral',
+    canRetry: false,
+    isAlreadyProcessed: false,
+    recipientMasked,
+    attempts: 0,
+  };
+}
+
+/**
+ * Reintenta el correo transaccional tras verificar de forma autoritativa en BD:
+ * 1. Que la orden continúe en estado 'paid' para eventos de aprobación.
+ * 2. Que el correo sea requerido según preferencia y exista email de comprador.
+ * 3. Idempotencia: que no exista ya un registro 'sent' o 'delivered' (evita duplicados).
+ */
+export async function verifyAndRetryEmailNotification(
+  orderId: string,
+  eventType: NotificationEventType | string,
+  data?: {
+    buyerEmail?: string;
+    buyerName?: string;
+    orderReference?: string;
+    reason?: string;
+    receiptPngBase64?: string;
+    receiptFileName?: string;
+  }
+): Promise<{ success: boolean; error?: string; alreadyProcessed?: boolean }> {
+  const normalizedType = normalizeEventType(eventType);
+
+  // 1. Consultar estado real actual de la orden en base de datos
+  const { data: orderRow, error: orderErr } = await supabase
+    .from('orders')
+    .select('id, status, contact_preference')
+    .eq('id', orderId)
+    .maybeSingle();
+
+  if (orderErr || !orderRow) {
+    return {
+      success: false,
+      error: 'No se pudo verificar el estado actual de la orden en la base de datos.',
+    };
+  }
+
+  // 2. Verificar que continúe pagada si es confirmación de pago
+  if (normalizedType === NOTIFICATION_EVENT_TYPES.PAYMENT_APPROVED && orderRow.status !== 'paid') {
+    return {
+      success: false,
+      error: `Operación no permitida: La orden debe encontrarse en estado pagada ('paid') para reenviar la confirmación de pago (estado actual: '${orderRow.status}').`,
+    };
+  }
+
+  // 3. Verificar que el correo sea requerido
+  const preference = orderRow.contact_preference || 'both';
+  if (preference === 'whatsapp') {
+    return {
+      success: false,
+      error: 'El comprador seleccionó exclusivamente WhatsApp. El correo no es requerido.',
+    };
+  }
+
+  // 4. Idempotencia: Verificar si ya existe un correo exitoso 'sent' o 'delivered'
+  const { data: existingLogs } = await supabase
+    .from('notification_logs')
+    .select('id, status, metadata')
+    .eq('order_id', orderId)
+    .eq('channel', 'email')
+    .eq('event_type', normalizedType);
+
+  const alreadyProcessed = existingLogs?.some(
+    (l) => l.status === 'sent' || l.status === 'delivered'
+  );
+
+  if (alreadyProcessed) {
+    return {
+      success: false,
+      alreadyProcessed: true,
+      error: 'Correo ya procesado: ya existe registro de envío o entrega exitosa para esta orden.',
+    };
+  }
+
+  // 5. Proceder al reintento
+  return retryNotification(orderId, 'email', normalizedType, data);
 }

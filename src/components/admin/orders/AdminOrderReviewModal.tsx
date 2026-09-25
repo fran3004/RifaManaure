@@ -10,10 +10,12 @@ import {
   dispatchOrderNotifications,
   getOrderNotificationLogs,
   generateOrderNotification,
-  retryNotification,
   recordWhatsAppOpened,
   recordWhatsAppSentManually,
   getNotificationStatusBadge,
+  computeEmailTraceability,
+  verifyAndRetryEmailNotification,
+  maskEmail,
   NOTIFICATION_EVENT_TYPES,
   type GeneratedNotification,
   type NotificationLogRow,
@@ -189,6 +191,8 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
     order.receipt_url?.toLowerCase().endsWith('.pdf') ||
     order.receipt_url?.toLowerCase().includes('.pdf?') ||
     signedProofUrl?.toLowerCase().includes('.pdf');
+
+  const emailTraceability = computeEmailTraceability(order, notificationLogs);
 
   // APROBAR PAGO
   const handleApprove = async () => {
@@ -442,10 +446,10 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
       const eventType =
         log?.event_type ||
         (order.status === 'paid'
-          ? 'payment_approved'
+          ? NOTIFICATION_EVENT_TYPES.PAYMENT_APPROVED
           : order.status === 'rejected'
-            ? 'payment_rejected'
-            : 'payment_received');
+            ? NOTIFICATION_EVENT_TYPES.PAYMENT_REJECTED
+            : NOTIFICATION_EVENT_TYPES.PAYMENT_RECEIVED);
 
       let receiptPngBase64: string | undefined;
       let receiptFileName: string | undefined;
@@ -462,7 +466,7 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
         }
       }
 
-      const res = await retryNotification(order.id, 'email', eventType, {
+      const res = await verifyAndRetryEmailNotification(order.id, eventType, {
         receiptPngBase64,
         receiptFileName,
         buyerEmail: order.buyers?.email,
@@ -473,6 +477,8 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
 
       if (res.success) {
         setNotifActionResult('¡Correo transaccional reenviado exitosamente a través de Brevo!');
+      } else if (res.alreadyProcessed) {
+        setNotifActionResult(res.error || 'Correo ya procesado: ya existe confirmación de despacho para esta orden.');
       } else {
         setNotifActionResult(`Fallo al reenviar correo: ${res.error || 'Error desconocido'}`);
       }
@@ -1004,48 +1010,204 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
             </div>
           )}
 
-          {/* 5. Trazabilidad de Notificaciones (WhatsApp y Correo) */}
+          {/* 5. Canales de Confirmación y Trazabilidad */}
           <div className={`${styles.reviewCard} ${styles.notificationTraceCard}`}>
-            <div className={styles.reviewCardHeader}>
-              <Send size={16} className={styles.notificationTraceIcon} />
-              <span className={styles.reviewCardHeaderTitle}>
-                5. Trazabilidad de Notificaciones (WhatsApp y Correo)
-              </span>
+            <div className={styles.reviewCardHeader} style={{ justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Send size={16} className={styles.notificationTraceIcon} />
+                <span className={styles.reviewCardHeaderTitle}>
+                  5. Canales de Confirmación y Trazabilidad
+                </span>
+              </div>
+
+              {/* Distintivo de preferencia global */}
+              <div>
+                {(!order.contact_preference || order.contact_preference === 'both') && (
+                  <span className={`${styles.badgeSuccess} ${styles.smallBadge}`} title="Preferencia: Ambos canales">
+                    <Phone size={10} /> + <Mail size={10} /> WhatsApp + Correo
+                  </span>
+                )}
+                {order.contact_preference === 'email' && (
+                  <span className={`${styles.badgeWarning} ${styles.smallBadge}`} title="Preferencia: Exclusivamente Correo">
+                    <Mail size={10} /> Solo Correo
+                  </span>
+                )}
+                {order.contact_preference === 'whatsapp' && (
+                  <span className={`${styles.badgeInfo} ${styles.smallBadge}`} title="Preferencia: Exclusivamente WhatsApp">
+                    <Phone size={10} /> Solo WhatsApp
+                  </span>
+                )}
+              </div>
             </div>
 
             <div className={styles.notificationContent}>
-              {/* Resumen de Canales Registrados */}
-              <div className={`${styles.sectionGrid} ${styles.notificationSummaryGrid}`}>
-                <div className={styles.infoRow}>
-                  <span className={styles.infoLabel}>📱 Destino WhatsApp:</span>
-                  <span className={`${styles.infoValue} ${styles.notificationPhone}`}>
-                    {order.buyers?.phone || 'Sin celular registrado'}
-                  </span>
+              {/* Bloque de Canales de Confirmación Separados */}
+              <div className={styles.channelsGrid}>
+                {/* Canal A: Correo Automático (Brevo) */}
+                <div className={`${styles.channelCard} ${styles.channelCardEmail}`}>
+                  <div className={styles.channelCardHeader}>
+                    <div className={styles.channelTitleGroup}>
+                      <Mail size={16} className={styles.channelTitleEmail} />
+                      <span>Correo automático</span>
+                    </div>
+
+                    <span
+                      className={`${
+                        emailTraceability.badgeVariant === 'success'
+                          ? styles.badgeSuccess
+                          : emailTraceability.badgeVariant === 'danger'
+                            ? styles.badgeDanger
+                            : emailTraceability.badgeVariant === 'warning'
+                              ? styles.badgeWarning
+                              : styles.badgeNeutral
+                      } ${styles.smallBadge}`}
+                    >
+                      {emailTraceability.badgeVariant === 'success' && <CheckCircle2 size={12} />}
+                      {emailTraceability.badgeVariant === 'danger' && <XCircle size={12} />}
+                      {emailTraceability.badgeVariant === 'warning' && <Clock size={12} />}
+                      {emailTraceability.label}
+                    </span>
+                  </div>
+
+                  <p className={styles.channelCopy}>
+                    Correo automático: se genera cuando el pago es aprobado.
+                  </p>
+
+                  <div className={styles.channelMetaList}>
+                    <div className={styles.channelMetaRow}>
+                      <span className={styles.channelMetaKey}>Destinatario:</span>
+                      <span className={styles.channelMetaVal}>{emailTraceability.recipientMasked}</span>
+                    </div>
+
+                    <div className={styles.channelMetaRow}>
+                      <span className={styles.channelMetaKey}>Intentos:</span>
+                      <span className={styles.channelMetaVal}>
+                        {emailTraceability.attempts}{' '}
+                        {emailTraceability.attempts === 1 ? 'intento' : 'intentos'}
+                      </span>
+                    </div>
+
+                    {emailTraceability.messageId && (
+                      <div className={styles.channelMetaRow}>
+                        <span className={styles.channelMetaKey}>ID Brevo:</span>
+                        <span className={styles.messageIdCode}>{emailTraceability.messageId}</span>
+                      </div>
+                    )}
+
+                    {emailTraceability.errorMessage && (
+                      <div className={styles.channelMetaRow}>
+                        <span className={styles.channelMetaKey}>Fallo:</span>
+                        <span
+                          className={styles.notificationError}
+                          style={{ margin: 0, padding: '0.2rem 0.4rem', fontSize: '0.75rem' }}
+                        >
+                          {emailTraceability.errorMessage}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className={styles.channelActions}>
+                    {emailTraceability.isAlreadyProcessed ? (
+                      <span className={styles.processedNotice}>
+                        <CheckCircle2 size={13} />
+                        <span>Correo ya procesado</span>
+                      </span>
+                    ) : emailTraceability.canRetry ? (
+                      <button
+                        type="button"
+                        className={`${styles.btnSecondary} ${styles.notificationRetryButton}`}
+                        onClick={() => void handleRetryEmailNotification()}
+                        disabled={isRetryingNotif}
+                        title="Reintentar despacho de correo transaccional oficial"
+                      >
+                        <Mail size={13} color="#0084ff" />
+                        <span>{isRetryingNotif ? 'Enviando...' : 'Reintentar correo'}</span>
+                      </button>
+                    ) : null}
+                  </div>
                 </div>
 
-                <div className={styles.infoRow}>
-                  <span className={styles.infoLabel}>✉️ Destino Correo:</span>
-                  <span className={styles.infoValue}>
-                    {order.buyers?.email || 'Sin correo registrado'}
-                  </span>
+                {/* Canal B: WhatsApp Manual */}
+                <div className={`${styles.channelCard} ${styles.channelCardWhatsApp}`}>
+                  <div className={styles.channelCardHeader}>
+                    <div className={styles.channelTitleGroup}>
+                      <Phone size={16} className={styles.channelTitleWhatsApp} />
+                      <span>WhatsApp manual</span>
+                    </div>
+
+                    <span
+                      className={`${
+                        !order.buyers?.phone
+                          ? styles.badgeDanger
+                          : order.contact_preference === 'email'
+                            ? styles.badgeNeutral
+                            : styles.badgeWarning
+                      } ${styles.smallBadge}`}
+                    >
+                      {order.contact_preference === 'email' ? 'No requerido' : 'Canal manual'}
+                    </span>
+                  </div>
+
+                  <p className={styles.channelCopy}>
+                    WhatsApp: requiere envío manual por el administrador.
+                  </p>
+
+                  <div className={styles.channelMetaList}>
+                    <div className={styles.channelMetaRow}>
+                      <span className={styles.channelMetaKey}>Destinatario:</span>
+                      <span className={styles.channelMetaVal}>
+                        {order.buyers?.phone || 'Sin celular registrado'}
+                      </span>
+                    </div>
+
+                    <div className={styles.channelMetaRow}>
+                      <span className={styles.channelMetaKey}>Modalidad:</span>
+                      <span className={styles.channelMetaVal}>Plantilla web wa.me</span>
+                    </div>
+                  </div>
+
+                  <div className={styles.channelActions}>
+                    <button
+                      type="button"
+                      className={`${styles.btnSecondary} ${styles.notificationRetryButton}`}
+                      onClick={() => void handleRetryWhatsAppNotification()}
+                      disabled={isRetryingNotif || !order.buyers?.phone}
+                      title="Abrir WhatsApp oficial para enviar o reenviar plantilla manual"
+                    >
+                      <Phone size={13} color="#25d366" />
+                      <span>Abrir WhatsApp (Manual)</span>
+                    </button>
+
+                    {isWhatsAppOpened && (
+                      <button
+                        type="button"
+                        className={`${styles.btnSecondary} ${styles.compactCopyButton}`}
+                        onClick={() => void handleMarkWhatsAppAsSent()}
+                        style={{ padding: '0.4rem 0.6rem', fontSize: '0.75rem' }}
+                      >
+                        <CheckCircle2 size={12} color="#10b981" />
+                        <span>Marcar como enviado</span>
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
 
-              {/* Alerta si alguna notificación falló y requiere reintento */}
+              {/* Alerta si alguna notificación falló y requiere atención */}
               {notificationLogs.some((l) => l.status === 'failed') && (
-                <div className={styles.notificationFailure}>
+                <div className={styles.notificationFailure} style={{ marginTop: '1rem' }}>
                   <AlertTriangle size={18} className={styles.notificationFailureIcon} />
                   <div>
-                    <strong>⚠️ Requiere Reintento:</strong> Se detectaron notificaciones que
-                    fallaron en su entrega. Puedes reintentar el envío con los botones de acción
-                    correspondientes.
+                    <strong>⚠️ Atención en Notificaciones:</strong> Se detectaron intentos fallidos.
+                    Puedes verificar las causas en el historial o reintentar el correo según corresponda.
                   </div>
                 </div>
               )}
 
               {/* Historial detallado de notificaciones */}
               {notificationLogs.length > 0 ? (
-                <div className={styles.notificationHistory}>
+                <div className={styles.notificationHistory} style={{ marginTop: '1rem' }}>
                   <span className={styles.notificationHistoryLabel}>
                     Historial de Envíos Registrados ({notificationLogs.length}):
                   </span>
@@ -1055,6 +1217,10 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
                     const eventLabel = formatNotificationEventLabel(log.event_type);
                     const isFailed = log.status === 'failed';
                     const badge = getNotificationStatusBadge(log);
+                    const logMeta = (typeof log.metadata === 'object' && log.metadata !== null
+                      ? log.metadata
+                      : {}) as Record<string, any>;
+                    const logMessageId = logMeta?.messageId || logMeta?.message_id;
 
                     return (
                       <div
@@ -1100,12 +1266,11 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
                           </div>
                         </div>
 
-                        {/* Metadatos: Destinatario y Fecha */}
-                        <div
-                          className={styles.notificationMeta}
-                        >
+                        {/* Metadatos: Destinatario parcialmente visible y Fecha */}
+                        <div className={styles.notificationMeta}>
                           <span>
-                            <strong>Destinatario:</strong> {log.recipient}
+                            <strong>Destinatario:</strong>{' '}
+                            {isWhatsApp ? log.recipient : maskEmail(log.recipient)}
                           </span>
                           <span className={styles.notificationDate}>
                             <Calendar size={11} />
@@ -1116,11 +1281,17 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
                           </span>
                         </div>
 
+                        {/* Brevo messageId para canal email */}
+                        {logMessageId && (
+                          <div className={styles.channelMetaRow} style={{ border: 'none', padding: 0 }}>
+                            <span className={styles.channelMetaKey}>Message ID:</span>
+                            <span className={styles.messageIdCode}>{logMessageId}</span>
+                          </div>
+                        )}
+
                         {/* Error detallado sanitizado si falló */}
                         {log.error_message && (
-                          <div
-                            className={styles.notificationError}
-                          >
+                          <div className={styles.notificationError}>
                             <strong>Causa del error:</strong> {log.error_message}
                           </div>
                         )}
@@ -1129,49 +1300,29 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
                   })}
                 </div>
               ) : (
-                <p className={styles.notificationEmpty}>
+                <p className={styles.notificationEmpty} style={{ marginTop: '0.75rem' }}>
                   Las notificaciones transaccionales quedan registradas al enviar comprobantes,
                   aprobar o rechazar pagos. El correo se envía automáticamente vía Brevo, y WhatsApp
                   se prepara para su envío manual por el administrador.
                 </p>
               )}
 
-              {/* Mensaje de resultado de reintento */}
+              {/* Mensaje de resultado de acción */}
               {notifActionResult && (
                 <div
-                  className={`${styles.notificationActionResult} ${notifActionResult.startsWith('¡') || notifActionResult.includes('abierto') ? styles.notificationActionSuccess : styles.notificationActionWarning}`}
+                  className={`${styles.notificationActionResult} ${
+                    notifActionResult.startsWith('¡') ||
+                    notifActionResult.includes('abierto') ||
+                    notifActionResult.includes('procesado')
+                      ? styles.notificationActionSuccess
+                      : styles.notificationActionWarning
+                  }`}
+                  style={{ marginTop: '0.75rem' }}
                 >
                   <AlertCircle size={15} />
                   <span>{notifActionResult}</span>
                 </div>
               )}
-
-              {/* Acciones de Notificación Administrativa */}
-              <div className={styles.notificationActions}>
-                <button
-                  type="button"
-                  className={`${styles.btnSecondary} ${styles.notificationRetryButton}`}
-                  onClick={() => void handleRetryWhatsAppNotification()}
-                  disabled={isRetryingNotif || !order.buyers?.phone}
-                  title="Abrir WhatsApp oficial para enviar o reenviar plantilla manual"
-                >
-                  <Phone size={13} color="#25d366" />
-                  <span>Abrir WhatsApp (Manual)</span>
-                </button>
-
-                {order.buyers?.email && (
-                  <button
-                    type="button"
-                    className={`${styles.btnSecondary} ${styles.notificationRetryButton}`}
-                    onClick={() => void handleRetryEmailNotification()}
-                    disabled={isRetryingNotif}
-                    title="Reenviar correo transaccional oficial a través de Brevo"
-                  >
-                    <Mail size={13} color="#0084ff" />
-                    <span>{isRetryingNotif ? 'Enviando...' : 'Reenviar Correo (Brevo)'}</span>
-                  </button>
-                )}
-              </div>
             </div>
           </div>
         </div>

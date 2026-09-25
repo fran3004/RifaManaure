@@ -1134,3 +1134,125 @@
     flex: 1 1 180px;
   }
 }
+
+/* Canales de Confirmación Separados */
+.channelsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.channelCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  padding: 1rem;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md, 10px);
+  position: relative;
+  transition: all var(--transition-fast, 150ms ease);
+}
+
+.channelCardEmail {
+  border-left: 4px solid #0084ff;
+}
+
+.channelCardWhatsApp {
+  border-left: 4px solid #25d366;
+}
+
+.channelCardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.channelTitleGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.channelTitleEmail {
+  color: #0070d8;
+}
+
+.channelTitleWhatsApp {
+  color: #128c7e;
+}
+
+.channelCopy {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.35;
+  background-color: var(--bg-base, rgba(0, 0, 0, 0.02));
+  padding: 0.45rem 0.65rem;
+  border-radius: var(--radius-sm, 6px);
+  border-left: 2px solid var(--border-subtle);
+}
+
+.channelMetaRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.825rem;
+  gap: 0.5rem;
+  padding-block: 0.2rem;
+  border-bottom: 1px dashed var(--border-subtle);
+}
+
+.channelMetaRow:last-child {
+  border-bottom: none;
+}
+
+.channelMetaKey {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.channelMetaVal {
+  color: var(--text-primary);
+  font-weight: 600;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+.messageIdCode {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.75rem;
+  background-color: var(--bg-base);
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+  border: 1px solid var(--border-subtle);
+  color: var(--brand-primary);
+  word-break: break-all;
+}
+
+.processedNotice {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.775rem;
+  font-weight: 600;
+  color: var(--admin-success, #10b981);
+  background-color: var(--admin-success-bg, rgba(16, 185, 129, 0.1));
+  padding: 0.25rem 0.6rem;
+  border-radius: var(--radius-sm, 6px);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
+.channelActions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: auto;
+  padding-top: 0.5rem;
+  flex-wrap: wrap;
+}
