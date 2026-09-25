@@ -55,6 +55,8 @@ export const logoPrincipal = {
   web: getOptimizedCloudinaryUrl(BRAND_LOGOS.principal, { width: 320 }),
   grid: getOptimizedCloudinaryUrl(BRAND_LOGOS.principal, { width: 400 }),
   grid2x: getOptimizedCloudinaryUrl(BRAND_LOGOS.principal, { width: 800 }),
+  ogImage:
+    'https://res.cloudinary.com/ky01b0vz/image/upload/c_scale,w_580/b_white,c_lpad,w_1200,h_630,f_jpg,q_auto/v1790100541/manaure-vive/marca/logo-principal.png',
 };
 
 /** Versión institucional completa con subtítulos y detalles ecoturísticos. */

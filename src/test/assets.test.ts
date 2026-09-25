@@ -51,6 +51,10 @@ describe('Inventario de Assets y Aliados (src/assets/assets.ts)', () => {
     expect(logoPrincipal).toBeDefined();
     expect(logoPrincipal.master).toContain('res.cloudinary.com');
     expect(logoPrincipal.web).toContain('res.cloudinary.com');
+    expect(logoPrincipal.ogImage).toContain('res.cloudinary.com');
+    expect(logoPrincipal.ogImage).toContain('b_white');
+    expect(logoPrincipal.ogImage).toContain('w_1200');
+    expect(logoPrincipal.ogImage).toContain('h_630');
     expect(logoPrincipalCompleto).toBeDefined();
     expect(logoPrincipalCompleto.master).toContain('res.cloudinary.com');
     expect(logoPrincipalCompleto.web).toContain('res.cloudinary.com');
