@@ -435,22 +435,28 @@ export const SelectorBoletos: React.FC = () => {
         {!searchTerm && (
           <div className={styles.filterBar}>
             {/* 1. Selector de Rangos de 200 Boletos (Exclusivo Escritorio ≥ 1024px) */}
-            <div
-              className={styles.desktopRangeChips}
-              role="toolbar"
-              aria-label="Filtrar por rango de boletos"
-            >
-              {DESKTOP_RANGES.map((r, idx) => (
-                <button
-                  key={idx}
-                  type="button"
-                  className={`${styles.filterChip} ${selectedDesktopIndex === idx ? styles.filterChipActive : ''}`}
-                  onClick={() => handleDesktopRangeSelect(idx)}
-                  aria-pressed={selectedDesktopIndex === idx}
-                >
-                  {r.label}
-                </button>
-              ))}
+            <div className={styles.desktopFilterGroup}>
+              <span className={styles.desktopFilterLabel}>
+                <Layers size={16} aria-hidden="true" />
+                <span>Rango:</span>
+              </span>
+              <div
+                className={styles.desktopRangeChips}
+                role="toolbar"
+                aria-label="Filtrar por rango de boletos"
+              >
+                {DESKTOP_RANGES.map((r, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    className={`${styles.filterChip} ${selectedDesktopIndex === idx ? styles.filterChipActive : ''}`}
+                    onClick={() => handleDesktopRangeSelect(idx)}
+                    aria-pressed={selectedDesktopIndex === idx}
+                  >
+                    {r.label}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* 2. Navegador de Rangos de 100 Boletos (Exclusivo Móviles y Tablets < 1024px) */}
@@ -512,31 +518,37 @@ export const SelectorBoletos: React.FC = () => {
             </div>
 
             {/* 3. Filtros de Disponibilidad (Todos, Solo Libres, Mis Boletos) */}
-            <div className={styles.statusChips} role="toolbar" aria-label="Filtrar por disponibilidad">
-              <button
-                type="button"
-                className={`${styles.filterChip} ${styles.statusChip} ${filterType === 'all' ? styles.filterChipActive : ''}`}
-                onClick={() => setFilterType('all')}
-                aria-pressed={filterType === 'all'}
-              >
-                Todos
-              </button>
-              <button
-                type="button"
-                className={`${styles.filterChip} ${styles.statusChip} ${filterType === 'available' ? styles.filterChipActive : ''}`}
-                onClick={() => setFilterType('available')}
-                aria-pressed={filterType === 'available'}
-              >
-                Solo Libres
-              </button>
-              <button
-                type="button"
-                className={`${styles.filterChip} ${styles.statusChip} ${filterType === 'selected' ? styles.filterChipActive : ''}`}
-                onClick={() => setFilterType('selected')}
-                aria-pressed={filterType === 'selected'}
-              >
-                Mis Boletos ({selectedTickets.length})
-              </button>
+            <div className={styles.statusFilterGroup}>
+              <span className={styles.desktopFilterLabel}>
+                <Ticket size={16} aria-hidden="true" />
+                <span>Disponibilidad:</span>
+              </span>
+              <div className={styles.statusChips} role="toolbar" aria-label="Filtrar por disponibilidad">
+                <button
+                  type="button"
+                  className={`${styles.filterChip} ${styles.statusChip} ${filterType === 'all' ? styles.filterChipActive : ''}`}
+                  onClick={() => setFilterType('all')}
+                  aria-pressed={filterType === 'all'}
+                >
+                  Todos
+                </button>
+                <button
+                  type="button"
+                  className={`${styles.filterChip} ${styles.statusChip} ${filterType === 'available' ? styles.filterChipActive : ''}`}
+                  onClick={() => setFilterType('available')}
+                  aria-pressed={filterType === 'available'}
+                >
+                  Solo Libres
+                </button>
+                <button
+                  type="button"
+                  className={`${styles.filterChip} ${styles.statusChip} ${filterType === 'selected' ? styles.filterChipActive : ''}`}
+                  onClick={() => setFilterType('selected')}
+                  aria-pressed={filterType === 'selected'}
+                >
+                  Mis Boletos ({selectedTickets.length})
+                </button>
+              </div>
             </div>
           </div>
         )}
