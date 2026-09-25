@@ -491,3 +491,130 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* ── Nuevo: Indicadores de estado público de la rifa principal ── */
+
+/* Badge inequívoco: rifa visible y activa en la web */
+.publicLiveBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.25rem 0.7rem;
+  border-radius: var(--radius-full, 9999px);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  white-space: nowrap;
+}
+
+/* Badge: rifa no publicada actualmente */
+.notPublicBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.25rem 0.7rem;
+  border-radius: var(--radius-full, 9999px);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  background: rgba(148, 163, 184, 0.1);
+  color: var(--text-muted, #7e9c90);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  white-space: nowrap;
+}
+
+/* Acciones de la tarjeta principal */
+.cardActions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+/* Botón "Activar en Web Pública" para la tarjeta principal */
+.btnActivatePublic {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+/* Botón "Pausar Venta Pública" para la tarjeta principal */
+.btnPausePublic {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border-color: rgba(245, 158, 11, 0.5) !important;
+  color: #fbbf24 !important;
+}
+
+.btnPausePublic:hover:not(:disabled) {
+  background: rgba(245, 158, 11, 0.1) !important;
+}
+
+/* Badge "Seleccionada en el panel" para rifas secundarias */
+.otherPanelBadge {
+  font-size: 0.75rem;
+  line-height: 1.2;
+  color: #93c5fd;
+  font-weight: 600;
+  background: rgba(59, 130, 246, 0.12);
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+/* Botón "Usar en panel" para rifas secundarias (acción neutral) */
+.btnUsePanelSmall {
+  padding: 0.3rem 0.55rem;
+  font-size: 0.8rem;
+  line-height: 1.2;
+  border-color: rgba(59, 130, 246, 0.35);
+  color: #93c5fd;
+}
+
+/* Botón "Activar en Web Pública" para rifas secundarias */
+.btnActivateOther {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.65rem;
+  border-radius: 6px;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  background: rgba(16, 185, 129, 0.1);
+  color: #34d399;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.btnActivateOther:hover:not(:disabled) {
+  background: rgba(16, 185, 129, 0.18);
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+}
+
+/* Botón "Pausar" para rifas secundarias activas (icono solo) */
+.btnPauseOther {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  background: rgba(245, 158, 11, 0.1);
+  color: #fbbf24;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.btnPauseOther:hover:not(:disabled) {
+  background: rgba(245, 158, 11, 0.18);
+}
+
