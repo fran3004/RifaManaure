@@ -181,7 +181,7 @@ export const DigitalReceiptModal: React.FC<DigitalReceiptModalProps> = ({
 
         {/* Mensaje de Seguridad / Certificado Autenticado */}
         <div className={styles.securityNotice}>
-          <CheckCircle2 size={18} className={styles.securityIcon} aria-hidden="true" />
+          <CheckCircle2 size={20} className={styles.securityIcon} aria-hidden="true" />
           <div>
             <strong>Documento Oficial Autenticado:</strong> Este comprobante certifica la
             titularidad oficial de los números adquiridos ante la plataforma{' '}
