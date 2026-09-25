@@ -21,6 +21,9 @@ import {
   FolderPlus,
   Tag,
   Shield,
+  Sparkles,
+  Compass,
+  Sliders,
 } from 'lucide-react';
 import {
   getAdminGalleryItems,
@@ -39,11 +42,21 @@ import {
   getOptimizedCloudinaryUrl,
   getCloudinaryResponsiveUrl,
 } from '@/services/cloudinaryService';
+import {
+  getAdminHeroSlides,
+  createHeroSlide,
+  updateHeroSlide,
+  deleteHeroSlide,
+  toggleHeroSlideActive,
+  reorderHeroSlides,
+  uploadHeroPhoto,
+} from '@/services/heroSlideService';
 import type {
   GalleryItemRow,
   GalleryItemInsert,
   GalleryItemUpdate,
   GalleryCategoryItem,
+  HeroSlideRow,
 } from '@/types/raffle.types';
 import {
   catalogoFotosManaure,
@@ -130,6 +143,34 @@ export const GalleryView: React.FC = () => {
   // Modal Lightbox para visualización ampliada
   const [lightboxUrl, setLightboxUrl] = useState<{ url: string; title: string } | null>(null);
 
+  // --- Estados de Pestañas y Fondos del Hero (hero_slides) ---
+  const [activeTab, setActiveTab] = useState<'gallery' | 'hero'>('gallery');
+  const [heroSlides, setHeroSlides] = useState<HeroSlideRow[]>([]);
+  const [heroModalOpen, setHeroModalOpen] = useState(false);
+  const [editingHeroSlide, setEditingHeroSlide] = useState<HeroSlideRow | null>(null);
+  const [heroDeleteModalOpen, setHeroDeleteModalOpen] = useState(false);
+  const [deletingHeroSlide, setDeletingHeroSlide] = useState<HeroSlideRow | null>(null);
+  const [deletingHeroInProgress, setDeletingHeroInProgress] = useState(false);
+  const [savingHeroSlide, setSavingHeroSlide] = useState(false);
+
+  // Formulario de Fondos del Hero
+  const [heroFormSource, setHeroFormSource] = useState<'gallery' | 'upload'>('gallery');
+  const [heroFormTitle, setHeroFormTitle] = useState('');
+  const [heroFormAltText, setHeroFormAltText] = useState('');
+  const [heroFormOrder, setHeroFormOrder] = useState<number>(1);
+  const [heroFormIsActive, setHeroFormIsActive] = useState<boolean>(true);
+  const [heroFormImageSlug, setHeroFormImageSlug] = useState<string | null>(null);
+  const [heroFormImageUrl, setHeroFormImageUrl] = useState<string>('');
+  const [heroSelectedFile, setHeroSelectedFile] = useState<File | null>(null);
+  const [heroFilePreviewUrl, setHeroFilePreviewUrl] = useState<string | null>(null);
+  const [heroDetectedDimensions, setHeroDetectedDimensions] = useState<{
+    width: number;
+    height: number;
+    aspectRatio: number;
+  } | null>(null);
+  const [heroCatalogSearch, setHeroCatalogSearch] = useState('');
+  const heroFileInputRef = useRef<HTMLInputElement>(null);
+
   const showNotification = (type: 'success' | 'error', message: string) => {
     setNotification({ type, message });
     setTimeout(() => {
@@ -157,10 +198,228 @@ export const GalleryView: React.FC = () => {
     }
   };
 
+  const loadHeroSlides = async () => {
+    const res = await getAdminHeroSlides();
+    if (res.success && res.data) {
+      setHeroSlides(res.data);
+    } else {
+      showNotification('error', res.error || 'Error al cargar los fondos del Hero.');
+    }
+  };
+
   useEffect(() => {
     loadItems();
     loadCategories();
+    loadHeroSlides();
   }, []);
+
+  const handleOpenCreateHeroModal = () => {
+    if (heroFilePreviewUrl) {
+      URL.revokeObjectURL(heroFilePreviewUrl);
+      setHeroFilePreviewUrl(null);
+    }
+    setHeroSelectedFile(null);
+    setHeroDetectedDimensions(null);
+    setEditingHeroSlide(null);
+    setHeroFormSource('gallery');
+    setHeroFormTitle('');
+    setHeroFormAltText('');
+    setHeroFormOrder(heroSlides.length + 1);
+    setHeroFormIsActive(true);
+    setHeroFormImageSlug(null);
+    setHeroFormImageUrl('');
+    setHeroCatalogSearch('');
+    if (heroFileInputRef.current) {
+      heroFileInputRef.current.value = '';
+    }
+    setHeroModalOpen(true);
+  };
+
+  const handleOpenEditHeroModal = (slide: HeroSlideRow) => {
+    if (heroFilePreviewUrl) {
+      URL.revokeObjectURL(heroFilePreviewUrl);
+      setHeroFilePreviewUrl(null);
+    }
+    setHeroSelectedFile(null);
+    setHeroDetectedDimensions(null);
+    setEditingHeroSlide(slide);
+    setHeroFormSource(slide.image_slug ? 'gallery' : 'upload');
+    setHeroFormTitle(slide.title);
+    setHeroFormAltText(slide.alt_text);
+    setHeroFormOrder(slide.display_order);
+    setHeroFormIsActive(slide.is_active);
+    setHeroFormImageSlug(slide.image_slug);
+    setHeroFormImageUrl(slide.image_url);
+    setHeroCatalogSearch('');
+    if (heroFileInputRef.current) {
+      heroFileInputRef.current.value = '';
+    }
+    setHeroModalOpen(true);
+  };
+
+  const handleCloseHeroModal = () => {
+    if (heroFilePreviewUrl) {
+      URL.revokeObjectURL(heroFilePreviewUrl);
+      setHeroFilePreviewUrl(null);
+    }
+    setHeroSelectedFile(null);
+    setHeroDetectedDimensions(null);
+    if (heroFileInputRef.current) {
+      heroFileInputRef.current.value = '';
+    }
+    setHeroModalOpen(false);
+  };
+
+  const handleHeroFileSelect = (file: File) => {
+    if (!file) return;
+    setHeroSelectedFile(file);
+    if (heroFilePreviewUrl) {
+      URL.revokeObjectURL(heroFilePreviewUrl);
+    }
+    const preview = URL.createObjectURL(file);
+    setHeroFilePreviewUrl(preview);
+    setHeroFormImageSlug(null);
+    setHeroFormImageUrl(preview);
+
+    const img = new Image();
+    img.onload = () => {
+      const w = img.naturalWidth;
+      const h = img.naturalHeight;
+      const ar = Number((w / h).toFixed(2));
+      setHeroDetectedDimensions({ width: w, height: h, aspectRatio: ar });
+    };
+    img.src = preview;
+  };
+
+  const handleSaveHeroSlide = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!heroFormTitle.trim()) {
+      showNotification('error', 'El título de la experiencia es requerido (ej: "Aventura en Cuatrimoto").');
+      return;
+    }
+
+    setSavingHeroSlide(true);
+    let targetImageUrl = heroFormImageUrl.trim();
+    let targetImageSlug = heroFormImageSlug;
+
+    if (heroFormSource === 'upload' && heroSelectedFile) {
+      const uploadRes = await uploadHeroPhoto(heroSelectedFile);
+      if (!uploadRes.success || !uploadRes.secure_url) {
+        showNotification('error', uploadRes.error || 'Error al subir la fotografía a Cloudinary.');
+        setSavingHeroSlide(false);
+        return;
+      }
+      targetImageUrl = uploadRes.secure_url;
+      targetImageSlug = null;
+    }
+
+    if (!targetImageUrl) {
+      showNotification('error', 'Debes seleccionar una fotografía de la galería o subir una nueva imagen.');
+      setSavingHeroSlide(false);
+      return;
+    }
+
+    if (editingHeroSlide) {
+      const res = await updateHeroSlide(editingHeroSlide.id, {
+        title: heroFormTitle.trim(),
+        image_url: targetImageUrl,
+        image_slug: targetImageSlug,
+        alt_text: heroFormAltText.trim() || heroFormTitle.trim(),
+        display_order: Number(heroFormOrder) || 1,
+        is_active: heroFormIsActive,
+      });
+
+      if (!res.success || !res.data) {
+        showNotification('error', res.error || 'No fue posible actualizar el fondo del Hero.');
+      } else {
+        setHeroSlides((prev) =>
+          prev
+            .map((s) => (s.id === editingHeroSlide.id ? res.data! : s))
+            .sort((a, b) => a.display_order - b.display_order)
+        );
+        handleCloseHeroModal();
+        showNotification('success', 'Fondo del Hero actualizado correctamente.');
+      }
+    } else {
+      const res = await createHeroSlide({
+        title: heroFormTitle.trim(),
+        image_url: targetImageUrl,
+        image_slug: targetImageSlug,
+        alt_text: heroFormAltText.trim() || heroFormTitle.trim(),
+        display_order: Number(heroFormOrder) || heroSlides.length + 1,
+        is_active: heroFormIsActive,
+      });
+
+      if (!res.success || !res.data) {
+        showNotification('error', res.error || 'No fue posible agregar el fondo al Hero.');
+      } else {
+        setHeroSlides((prev) => [...prev, res.data!].sort((a, b) => a.display_order - b.display_order));
+        handleCloseHeroModal();
+        showNotification('success', 'Nuevo fondo agregado exitosamente al carrusel del Hero.');
+      }
+    }
+
+    setSavingHeroSlide(false);
+  };
+
+  const handleToggleHeroActive = async (slide: HeroSlideRow) => {
+    const nextStatus = !slide.is_active;
+    const res = await toggleHeroSlideActive(slide.id, nextStatus);
+    if (!res.success) {
+      showNotification('error', res.error || 'No fue posible cambiar el estado de la diapositiva.');
+    } else {
+      setHeroSlides((prev) =>
+        prev.map((s) => (s.id === slide.id ? { ...s, is_active: nextStatus } : s))
+      );
+      showNotification(
+        'success',
+        nextStatus ? 'Fondo activado en el carrusel del Hero.' : 'Fondo pausado en el Hero.'
+      );
+    }
+  };
+
+  const handleMoveHeroOrder = async (index: number, direction: 'up' | 'down') => {
+    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= heroSlides.length) return;
+
+    const currentSlideItem = heroSlides[index];
+    const targetSlideItem = heroSlides[targetIndex];
+
+    const currentOrder = currentSlideItem.display_order;
+    const targetOrder = targetSlideItem.display_order;
+
+    const updated = [...heroSlides];
+    updated[index] = { ...currentSlideItem, display_order: targetOrder };
+    updated[targetIndex] = { ...targetSlideItem, display_order: currentOrder };
+    updated.sort((a, b) => a.display_order - b.display_order);
+
+    setHeroSlides(updated);
+
+    const res = await reorderHeroSlides([
+      { id: currentSlideItem.id, display_order: targetOrder },
+      { id: targetSlideItem.id, display_order: currentOrder },
+    ]);
+
+    if (!res.success) {
+      showNotification('error', res.error || 'Error al reordenar los fondos.');
+      loadHeroSlides();
+    }
+  };
+
+  const handleDeleteHeroConfirm = async () => {
+    if (!deletingHeroSlide) return;
+    setDeletingHeroInProgress(true);
+    const res = await deleteHeroSlide(deletingHeroSlide.id, deletingHeroSlide.image_url);
+    if (!res.success) {
+      showNotification('error', res.error || 'Error al eliminar el fondo del Hero.');
+    } else {
+      setHeroSlides((prev) => prev.filter((s) => s.id !== deletingHeroSlide.id));
+      setHeroDeleteModalOpen(false);
+      setDeletingHeroSlide(null);
+      showNotification('success', 'Fondo eliminado del Hero permanentemente.');
+    }
+    setDeletingHeroInProgress(false);
+  };
 
   const handleCreateCategory = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -601,6 +860,34 @@ export const GalleryView: React.FC = () => {
     return '';
   }, [imageMode, localPreviewUrl, formImageUrl, availableCatalog, formImageSlug, unavailableImageKeys]);
 
+  // Filtrado de fotos del catálogo en el selector del Hero
+  const heroFilteredCatalog = useMemo(() => {
+    if (!heroCatalogSearch.trim()) return availableCatalog;
+    const q = heroCatalogSearch.toLowerCase().trim();
+    return availableCatalog.filter(
+      (photo) =>
+        photo.caption.toLowerCase().includes(q) ||
+        photo.categoriaLabel.toLowerCase().includes(q) ||
+        photo.alt.toLowerCase().includes(q)
+    );
+  }, [availableCatalog, heroCatalogSearch]);
+
+  // Vista previa de la imagen seleccionada en el modal del Hero
+  const heroModalPreviewUrl = useMemo(() => {
+    if (heroFormSource === 'upload') {
+      if (heroFilePreviewUrl) return heroFilePreviewUrl;
+      if (heroFormImageUrl) return getOptimizedCloudinaryUrl(heroFormImageUrl, { width: 1200 });
+      return '';
+    }
+    // Modo galería / catálogo
+    if (heroFormImageUrl) return heroFormImageUrl;
+    if (heroFormImageSlug) {
+      const match = availableCatalog.find((f) => f.slug === heroFormImageSlug);
+      if (match) return match.imageUrl || match.card || match.full || match.thumb;
+    }
+    return '';
+  }, [heroFormSource, heroFilePreviewUrl, heroFormImageUrl, heroFormImageSlug, availableCatalog]);
+
   return (
     <div className={styles.container}>
       {/* Notificación flotante */}
@@ -643,98 +930,191 @@ export const GalleryView: React.FC = () => {
         <div className={styles.headerTop}>
           <div className={styles.headerTitleGroup}>
             <div className={styles.headerIconBox} aria-hidden="true">
-              <Images size={26} />
+              {activeTab === 'gallery' ? <Images size={26} /> : <Sparkles size={26} />}
             </div>
             <div className={styles.headerTextGroup}>
               <div className={styles.headerBadgeRow}>
                 <h1 id="gallery-admin-title" className={styles.title}>
-                  Galería Fotográfica
+                  {activeTab === 'gallery' ? 'Galería Fotográfica' : 'Fondos del Inicio (Hero Slides)'}
                 </h1>
                 <span className={styles.headerLiveBadge}>
                   <span className={styles.liveDot} aria-hidden="true" />
-                  Catálogo Activo
+                  {activeTab === 'gallery' ? 'Catálogo Activo' : 'Rotación Activa'}
                 </span>
               </div>
               <p className={styles.subtitle}>
-                Gestiona las fotografías auténticas de Manaure visibles en la landing page y organiza futuros catálogos.
+                {activeTab === 'gallery'
+                  ? 'Gestiona las fotografías auténticas de Manaure visibles en la landing page y organiza futuros catálogos.'
+                  : 'Personaliza las fotografías panorámicas en alta resolución que rotan dinámicamente en el fondo de la pantalla principal.'}
               </p>
             </div>
           </div>
 
           <div className={styles.headerActions}>
-            <button
-              type="button"
-              className={styles.headerBtnCategories}
-              onClick={() => setIsCategoriesModalOpen(true)}
-              title="Administrar categorías de la galería"
-            >
-              <FolderPlus size={18} aria-hidden="true" />
-              <span>Gestionar Categorías</span>
-              <span className={styles.headerBtnBadge}>{categories.length}</span>
-            </button>
-            <button
-              type="button"
-              className={styles.headerBtnAdd}
-              onClick={handleOpenCreateModal}
-            >
-              <Plus size={18} aria-hidden="true" />
-              <span>Agregar Fotografía</span>
-            </button>
+            {activeTab === 'gallery' ? (
+              <>
+                <button
+                  type="button"
+                  className={styles.headerBtnCategories}
+                  onClick={() => setIsCategoriesModalOpen(true)}
+                  title="Administrar categorías de la galería"
+                >
+                  <FolderPlus size={18} aria-hidden="true" />
+                  <span>Gestionar Categorías</span>
+                  <span className={styles.headerBtnBadge}>{categories.length}</span>
+                </button>
+                <button
+                  type="button"
+                  className={styles.headerBtnAdd}
+                  onClick={handleOpenCreateModal}
+                >
+                  <Plus size={18} aria-hidden="true" />
+                  <span>Agregar Fotografía</span>
+                </button>
+              </>
+            ) : (
+              <button
+                type="button"
+                className={styles.headerBtnAdd}
+                onClick={handleOpenCreateHeroModal}
+              >
+                <Plus size={18} aria-hidden="true" />
+                <span>Agregar Fondo al Hero</span>
+              </button>
+            )}
           </div>
         </div>
 
         {/* Métricas en vivo */}
-        <div className={styles.metricsGrid}>
-          <div className={styles.metricCard}>
-            <div className={styles.metricCardHeader}>
-              <span className={styles.metricLabel}>Total Fotos</span>
-              <div className={`${styles.metricIconBox} ${styles.metricIconTotal}`} aria-hidden="true">
-                <Images size={18} />
+        {activeTab === 'gallery' ? (
+          <div className={styles.metricsGrid}>
+            <div className={styles.metricCard}>
+              <div className={styles.metricCardHeader}>
+                <span className={styles.metricLabel}>Total Fotos</span>
+                <div className={`${styles.metricIconBox} ${styles.metricIconTotal}`} aria-hidden="true">
+                  <Images size={18} />
+                </div>
               </div>
+              <span className={styles.metricValue}>{totalCount}</span>
+              <span className={styles.metricHint}>Catálogo general</span>
             </div>
-            <span className={styles.metricValue}>{totalCount}</span>
-            <span className={styles.metricHint}>Catálogo general</span>
-          </div>
 
-          <div className={styles.metricCard}>
-            <div className={styles.metricCardHeader}>
-              <span className={styles.metricLabel}>Visibles</span>
-              <div className={`${styles.metricIconBox} ${styles.metricIconVisible}`} aria-hidden="true">
-                <Eye size={18} />
+            <div className={styles.metricCard}>
+              <div className={styles.metricCardHeader}>
+                <span className={styles.metricLabel}>Visibles</span>
+                <div className={`${styles.metricIconBox} ${styles.metricIconVisible}`} aria-hidden="true">
+                  <Eye size={18} />
+                </div>
               </div>
+              <span className={`${styles.metricValue} ${styles.metricValueActive}`}>{activeCount}</span>
+              <span className={styles.metricHint}>Publicadas en la web</span>
             </div>
-            <span className={`${styles.metricValue} ${styles.metricValueActive}`}>{activeCount}</span>
-            <span className={styles.metricHint}>Publicadas en la web</span>
-          </div>
 
-          <div className={styles.metricCard}>
-            <div className={styles.metricCardHeader}>
-              <span className={styles.metricLabel}>Ocultas</span>
-              <div className={`${styles.metricIconBox} ${styles.metricIconHidden}`} aria-hidden="true">
-                <EyeOff size={18} />
+            <div className={styles.metricCard}>
+              <div className={styles.metricCardHeader}>
+                <span className={styles.metricLabel}>Ocultas</span>
+                <div className={`${styles.metricIconBox} ${styles.metricIconHidden}`} aria-hidden="true">
+                  <EyeOff size={18} />
+                </div>
               </div>
+              <span className={`${styles.metricValue} ${hiddenCount > 0 ? styles.metricValueHidden : ''}`}>
+                {hiddenCount}
+              </span>
+              <span className={styles.metricHint}>Borradores o en pausa</span>
             </div>
-            <span className={`${styles.metricValue} ${hiddenCount > 0 ? styles.metricValueHidden : ''}`}>
-              {hiddenCount}
-            </span>
-            <span className={styles.metricHint}>Borradores o en pausa</span>
-          </div>
 
-          <div className={styles.metricCard}>
-            <div className={styles.metricCardHeader}>
-              <span className={styles.metricLabel}>Categorías</span>
-              <div className={`${styles.metricIconBox} ${styles.metricIconCategory}`} aria-hidden="true">
-                <Tag size={18} />
+            <div className={styles.metricCard}>
+              <div className={styles.metricCardHeader}>
+                <span className={styles.metricLabel}>Categorías</span>
+                <div className={`${styles.metricIconBox} ${styles.metricIconCategory}`} aria-hidden="true">
+                  <Tag size={18} />
+                </div>
               </div>
+              <span className={styles.metricValue}>{categories.length}</span>
+              <span className={styles.metricHint}>Filtros activos</span>
             </div>
-            <span className={styles.metricValue}>{categories.length}</span>
-            <span className={styles.metricHint}>Filtros activos</span>
           </div>
-        </div>
+        ) : (
+          <div className={styles.metricsGrid}>
+            <div className={styles.metricCard}>
+              <div className={styles.metricCardHeader}>
+                <span className={styles.metricLabel}>Total Fondos</span>
+                <div className={`${styles.metricIconBox} ${styles.metricIconTotal}`} aria-hidden="true">
+                  <Sparkles size={18} />
+                </div>
+              </div>
+              <span className={styles.metricValue}>{heroSlides.length}</span>
+              <span className={styles.metricHint}>Configurados para el Hero</span>
+            </div>
+
+            <div className={styles.metricCard}>
+              <div className={styles.metricCardHeader}>
+                <span className={styles.metricLabel}>En Rotación</span>
+                <div className={`${styles.metricIconBox} ${styles.metricIconVisible}`} aria-hidden="true">
+                  <Eye size={18} />
+                </div>
+              </div>
+              <span className={`${styles.metricValue} ${styles.metricValueActive}`}>
+                {heroSlides.filter((s) => s.is_active).length}
+              </span>
+              <span className={styles.metricHint}>Visibles cada 4.5s</span>
+            </div>
+
+            <div className={styles.metricCard}>
+              <div className={styles.metricCardHeader}>
+                <span className={styles.metricLabel}>Pausados</span>
+                <div className={`${styles.metricIconBox} ${styles.metricIconHidden}`} aria-hidden="true">
+                  <EyeOff size={18} />
+                </div>
+              </div>
+              <span className={styles.metricValue}>
+                {heroSlides.filter((s) => !s.is_active).length}
+              </span>
+              <span className={styles.metricHint}>Fuera de rotación</span>
+            </div>
+
+            <div className={styles.metricCard}>
+              <div className={styles.metricCardHeader}>
+                <span className={styles.metricLabel}>Aspecto Sugerido</span>
+                <div className={`${styles.metricIconBox} ${styles.metricIconCategory}`} aria-hidden="true">
+                  <Compass size={18} />
+                </div>
+              </div>
+              <span className={styles.metricValue}>16:9</span>
+              <span className={styles.metricHint}>1920 × 1080 px</span>
+            </div>
+          </div>
+        )}
       </section>
 
-      {/* Barra de Búsqueda y Filtros de Categoría */}
-      <section className={styles.controlsCard} aria-label="Filtros de galería">
+      {/* Navegación por Pestañas Principales */}
+      <nav className={styles.mainTabsNav} aria-label="Secciones de la galería">
+        <button
+          type="button"
+          className={`${styles.mainTabBtn} ${activeTab === 'gallery' ? styles.mainTabBtnActive : ''}`}
+          onClick={() => setActiveTab('gallery')}
+        >
+          <Images size={18} />
+          <span>Fotografías de Galería</span>
+          <span className={styles.mainTabBadge}>{items.length}</span>
+        </button>
+        <button
+          type="button"
+          className={`${styles.mainTabBtn} ${activeTab === 'hero' ? styles.mainTabBtnActive : ''}`}
+          onClick={() => setActiveTab('hero')}
+        >
+          <Sparkles size={18} />
+          <span>Fondos del Inicio (Hero Slides)</span>
+          <span className={styles.mainTabBadge}>
+            {heroSlides.filter((s) => s.is_active).length} activas
+          </span>
+        </button>
+      </nav>
+
+      {activeTab === 'gallery' ? (
+        <>
+          {/* Barra de Búsqueda y Filtros de Categoría */}
+          <section className={styles.controlsCard} aria-label="Filtros de galería">
         <div className={styles.controlsTop}>
           <div className={styles.searchBox}>
             <Search size={18} className={styles.searchIcon} aria-hidden="true" />
@@ -967,6 +1347,238 @@ export const GalleryView: React.FC = () => {
               </article>
             );
           })}
+        </div>
+      )}
+        </>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          {/* Tarjeta de Especificaciones Técnicas y Recomendaciones */}
+          <section className={styles.heroSpecsCard} aria-label="Especificaciones recomendadas para fondos de Hero">
+            <div className={styles.heroSpecsHeader}>
+              <div className={styles.heroSpecsIconBox} aria-hidden="true">
+                <Sliders size={20} />
+              </div>
+              <div>
+                <h3 className={styles.heroSpecsTitle}>Especificaciones Técnicas Recomendadas para los Fondos</h3>
+                <p className={styles.heroSpecsSubtitle}>
+                  El Hero rota dinámicamente cada 4.5s de fondo. Sigue estas pautas para máxima nitidez y rendimiento:
+                </p>
+              </div>
+            </div>
+
+            <div className={styles.heroSpecsGrid}>
+              <div className={styles.heroSpecItem}>
+                <div className={styles.heroSpecItemTitle}>
+                  <Compass size={16} />
+                  <span>Proporción y Resolución</span>
+                </div>
+                <p className={styles.heroSpecItemDesc}>
+                  <strong>16:9 Panorámica (1920 × 1080 px mínimo)</strong> o 2560 × 1440 px para pantallas 2K/4K. En móviles el sistema realiza un recorte inteligente focalizado al centro.
+                </p>
+              </div>
+
+              <div className={styles.heroSpecItem}>
+                <div className={styles.heroSpecItemTitle}>
+                  <Upload size={16} />
+                  <span>Formatos y Peso</span>
+                </div>
+                <p className={styles.heroSpecItemDesc}>
+                  Formatos recomendados: <strong>WebP, JPG o PNG</strong>. Peso ideal <strong>menor a 2.5 MB</strong>. Cloudinary aplicará compresión automática con calidad adaptativa inteligente (f_auto, q_auto).
+                </p>
+              </div>
+
+              <div className={styles.heroSpecItem}>
+                <div className={styles.heroSpecItemTitle}>
+                  <Eye size={16} />
+                  <span>Composición Visual</span>
+                </div>
+                <p className={styles.heroSpecItemDesc}>
+                  Ubica el horizonte o sujeto principal preferiblemente en el centro o tercio derecho, ya que el lado izquierdo contendrá los textos principales y el llamado a la acción.
+                </p>
+              </div>
+
+              <div className={styles.heroSpecItem}>
+                <div className={styles.heroSpecItemTitle}>
+                  <Sparkles size={16} />
+                  <span>Rotación y Control</span>
+                </div>
+                <p className={styles.heroSpecItemDesc}>
+                  Puedes activar, pausar, reordenar o añadir cuantas imágenes desees. Recomendamos entre <strong>3 y 6 fondos activos</strong> para una experiencia fluida y ligera.
+                </p>
+              </div>
+            </div>
+          </section>
+
+          {/* Listado de Fondos del Hero */}
+          <section className={styles.heroListSection} aria-label="Gestión de fondos del carrusel de inicio">
+            <div className={styles.heroListHeader}>
+              <div className={styles.heroListTitleGroup}>
+                <h3 className={styles.heroListTitle}>
+                  Fondos Configurados ({heroSlides.length})
+                </h3>
+                <p className={styles.heroListSubtitle}>
+                  {heroSlides.filter((s) => s.is_active).length} activos en rotación continua • Transición cada 4.5 segundos
+                </p>
+              </div>
+
+              <button
+                type="button"
+                className={styles.headerBtnAdd}
+                onClick={handleOpenCreateHeroModal}
+              >
+                <Plus size={18} aria-hidden="true" />
+                <span>Agregar Fondo al Hero</span>
+              </button>
+            </div>
+
+            {heroSlides.length === 0 ? (
+              <div className={styles.emptyState}>
+                <div className={styles.emptyIconBox}>
+                  <Sparkles size={36} color="#059669" />
+                </div>
+                <h4 className={styles.emptyTitle}>No hay fondos configurados para el Hero</h4>
+                <p className={styles.emptyText}>
+                  Agrega diapositivas seleccionando fotos de la galería existente o subiendo nuevas fotos panorámicas a Cloudinary.
+                </p>
+                <button
+                  type="button"
+                  className={styles.btnPrimary}
+                  onClick={handleOpenCreateHeroModal}
+                  style={{ marginTop: '1rem' }}
+                >
+                  <Plus size={18} />
+                  <span>Agregar Primer Fondo</span>
+                </button>
+              </div>
+            ) : (
+              <div className={styles.heroSlideCardsGrid}>
+                {heroSlides.map((slide, index) => {
+                  const displayImg = getCloudinaryResponsiveUrl(slide.image_url, {
+                    width: 768,
+                    height: 432,
+                    crop: 'fill',
+                  });
+
+                  return (
+                    <article key={slide.id} className={styles.heroSlideCard}>
+                      <div className={styles.heroSlideImageWrapper}>
+                        <img
+                          src={displayImg}
+                          alt={slide.alt_text || slide.title}
+                          className={styles.heroSlideImage}
+                          loading="lazy"
+                        />
+                        <div className={styles.heroSlideOrderBadge} title={`Orden de visualización #${index + 1}`}>
+                          #{index + 1}
+                        </div>
+                        <div className={styles.heroSlideChipOverlay}>
+                          <Compass size={12} />
+                          <span>{slide.title}</span>
+                        </div>
+                      </div>
+
+                      <div className={styles.heroSlideCardBody}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem' }}>
+                          <h4 className={styles.heroSlideCardTitle}>{slide.title}</h4>
+                        </div>
+
+                        <p className={styles.heroSlideCardAlt}>
+                          <strong>Texto Alt:</strong> {slide.alt_text || 'Sin texto alternativo'}
+                        </p>
+
+                        <div>
+                          {slide.is_active ? (
+                            <span className={styles.heroSlideStatusActive}>
+                              <CheckCircle2 size={14} /> Activo en rotación
+                            </span>
+                          ) : (
+                            <span className={styles.heroSlideStatusPaused}>
+                              <AlertCircle size={14} /> Pausado (Oculto)
+                            </span>
+                          )}
+                        </div>
+
+                        <div className={styles.heroSlideCardFooter}>
+                          <div className={styles.heroSlideOrderActions}>
+                            <button
+                              type="button"
+                              className={styles.heroOrderBtn}
+                              onClick={() => handleMoveHeroOrder(index, 'up')}
+                              disabled={index === 0}
+                              title="Mover antes en la secuencia"
+                              aria-label={`Mover ${slide.title} antes`}
+                            >
+                              <ArrowUp size={15} />
+                            </button>
+                            <button
+                              type="button"
+                              className={styles.heroOrderBtn}
+                              onClick={() => handleMoveHeroOrder(index, 'down')}
+                              disabled={index === heroSlides.length - 1}
+                              title="Mover después en la secuencia"
+                              aria-label={`Mover ${slide.title} después`}
+                            >
+                              <ArrowDown size={15} />
+                            </button>
+                          </div>
+
+                          <div style={{ display: 'flex', gap: '0.35rem' }}>
+                            <button
+                              type="button"
+                              className={styles.actionBtn}
+                              onClick={() =>
+                                setLightboxUrl({
+                                  url: slide.image_url,
+                                  title: slide.title,
+                                })
+                              }
+                              title="Ver a pantalla completa"
+                              aria-label="Ver ampliada"
+                            >
+                              <Maximize2 size={15} />
+                            </button>
+
+                            <button
+                              type="button"
+                              className={`${styles.actionBtn} ${slide.is_active ? styles.actionBtnActive : ''}`}
+                              onClick={() => handleToggleHeroActive(slide)}
+                              title={slide.is_active ? 'Pausar rotación en inicio' : 'Activar rotación en inicio'}
+                              aria-label={slide.is_active ? 'Pausar' : 'Activar'}
+                            >
+                              {slide.is_active ? <Eye size={15} /> : <EyeOff size={15} />}
+                            </button>
+
+                            <button
+                              type="button"
+                              className={styles.actionBtn}
+                              onClick={() => handleOpenEditHeroModal(slide)}
+                              title="Editar datos de este fondo"
+                              aria-label={`Editar ${slide.title}`}
+                            >
+                              <Edit2 size={15} />
+                            </button>
+
+                            <button
+                              type="button"
+                              className={`${styles.actionBtn} ${styles.actionBtnDanger}`}
+                              onClick={() => {
+                                setDeletingHeroSlide(slide);
+                                setHeroDeleteModalOpen(true);
+                              }}
+                              title="Eliminar del carrusel del Hero"
+                              aria-label={`Eliminar ${slide.title}`}
+                            >
+                              <Trash2 size={15} />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            )}
+          </section>
         </div>
       )}
 
@@ -1626,6 +2238,422 @@ export const GalleryView: React.FC = () => {
                 disabled={creatingCat || deletingCatInProgress}
               >
                 Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Crear / Editar Fondo del Hero */}
+      {heroModalOpen && (
+        <div
+          className={styles.modalBackdrop}
+          onClick={() => !savingHeroSlide && handleCloseHeroModal()}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="hero-modal-title"
+        >
+          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <div className={styles.modalTitleGroup}>
+                <div className={styles.headerIconBox} style={{ width: 36, height: 36 }}>
+                  <Sparkles size={20} />
+                </div>
+                <div>
+                  <h2 id="hero-modal-title" className={styles.modalTitle}>
+                    {editingHeroSlide ? 'Editar Fondo del Hero' : 'Añadir Fondo al Carrusel del Hero'}
+                  </h2>
+                  <p style={{ margin: 0, fontSize: '0.8rem', color: '#41564a' }}>
+                    Esta imagen rotará dinámicamente como fondo en la página de inicio.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                className={styles.actionBtn}
+                onClick={handleCloseHeroModal}
+                disabled={savingHeroSlide}
+                aria-label="Cerrar modal"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveHeroSlide} style={{ display: 'contents' }}>
+              <div className={styles.modalBody}>
+                {/* Selector de Origen: Galería Almacenada vs Subir Nueva */}
+                <div className={styles.formGroup}>
+                  <label className={styles.formLabel}>Origen de la Imagen del Fondo:</label>
+                  <div className={styles.heroSourceTabs}>
+                    <button
+                      type="button"
+                      className={`${styles.heroSourceTabBtn} ${heroFormSource === 'gallery' ? styles.heroSourceTabBtnActive : ''}`}
+                      onClick={() => setHeroFormSource('gallery')}
+                    >
+                      <Images size={16} />
+                      <span>Elegir de la Galería Almacenada ({availableCatalog.length})</span>
+                    </button>
+                    <button
+                      type="button"
+                      className={`${styles.heroSourceTabBtn} ${heroFormSource === 'upload' ? styles.heroSourceTabBtnActive : ''}`}
+                      onClick={() => setHeroFormSource('upload')}
+                    >
+                      <Upload size={16} />
+                      <span>Subir Nueva a Cloudinary</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Opción 1: Elegir de la Galería Almacenada */}
+                {heroFormSource === 'gallery' && (
+                  <div className={styles.formGroup}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span className={styles.formLabel}>
+                        Selecciona una foto para el Hero:
+                      </span>
+                      <span style={{ fontSize: '0.78rem', color: '#41564a' }}>
+                        {heroFilteredCatalog.length} disponibles
+                      </span>
+                    </div>
+
+                    <div className={styles.searchBox} style={{ margin: '0.2rem 0' }}>
+                      <Search size={16} className={styles.searchIcon} aria-hidden="true" />
+                      <input
+                        type="text"
+                        className={styles.searchInput}
+                        placeholder="Buscar por nombre o categoría..."
+                        value={heroCatalogSearch}
+                        onChange={(e) => setHeroCatalogSearch(e.target.value)}
+                        style={{ padding: '0.45rem 2rem 0.45rem 2.2rem', fontSize: '0.85rem' }}
+                      />
+                      {heroCatalogSearch && (
+                        <button
+                          type="button"
+                          onClick={() => setHeroCatalogSearch('')}
+                          className={styles.clearSearchBtn}
+                          aria-label="Limpiar búsqueda del catálogo"
+                        >
+                          <X size={14} />
+                        </button>
+                      )}
+                    </div>
+
+                    <div className={styles.heroCatalogPickerGrid}>
+                      {heroFilteredCatalog.map((photo) => {
+                        const targetUrl = photo.imageUrl || photo.card || photo.full;
+                        const isSelected =
+                          heroFormImageUrl === targetUrl ||
+                          (heroFormImageSlug && heroFormImageSlug === photo.slug);
+
+                        return (
+                          <div
+                            key={photo.id || photo.slug}
+                            className={`${styles.heroCatalogThumbCard} ${isSelected ? styles.heroCatalogThumbCardSelected : ''}`}
+                            onClick={() => {
+                              setHeroFormImageSlug(photo.slug || null);
+                              setHeroFormImageUrl(targetUrl);
+                              if (!heroFormTitle) setHeroFormTitle(photo.caption || photo.alt || '');
+                              if (!heroFormAltText) setHeroFormAltText(photo.alt || photo.caption || '');
+                            }}
+                            title={photo.caption}
+                            role="button"
+                            tabIndex={0}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' || e.key === ' ') {
+                                setHeroFormImageSlug(photo.slug || null);
+                                setHeroFormImageUrl(targetUrl);
+                                if (!heroFormTitle) setHeroFormTitle(photo.caption || photo.alt || '');
+                                if (!heroFormAltText) setHeroFormAltText(photo.alt || photo.caption || '');
+                              }
+                            }}
+                          >
+                            <img
+                              src={photo.thumb || photo.card}
+                              alt={photo.alt}
+                              className={styles.heroCatalogThumbImg}
+                              loading="lazy"
+                            />
+                            {isSelected && (
+                              <div className={styles.heroCatalogSelectedCheck}>
+                                <Check size={13} strokeWidth={3} />
+                              </div>
+                            )}
+                            <div className={styles.heroCatalogThumbLabel}>
+                              {photo.caption}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Opción 2: Subir Nueva a Cloudinary */}
+                {heroFormSource === 'upload' && (
+                  <div className={styles.formGroup}>
+                    <div className={styles.qualityTip}>
+                      <Info size={22} color="#059669" style={{ flexShrink: 0, marginTop: 2 }} />
+                      <div>
+                        <strong>Recomendaciones Cloudinary para Fondos Hero:</strong>
+                        <p style={{ margin: '0.2rem 0 0 0' }}>
+                          Sube fotos horizontales de alta resolución (1920 × 1080 px o 16:9). Se guardarán en Cloudinary en la carpeta protegida <code>manaure-vive/galeria/hero</code> con optimizaciones de entrega automática (WebP/AVIF y CDN global).
+                        </p>
+                      </div>
+                    </div>
+
+                    <input
+                      type="file"
+                      ref={heroFileInputRef}
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleHeroFileSelect(file);
+                      }}
+                      accept="image/jpeg,image/png,image/webp,image/avif"
+                      style={{ display: 'none' }}
+                      aria-label="Subir foto para el Hero"
+                    />
+
+                    <div
+                      className={styles.uploadDropzone}
+                      onClick={() => heroFileInputRef.current?.click()}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => e.key === 'Enter' && heroFileInputRef.current?.click()}
+                    >
+                      {heroSelectedFile ? (
+                        <>
+                          <Check size={28} color="#059669" />
+                          <p className={styles.dropzoneText}>
+                            {heroSelectedFile.name} ({Math.round(heroSelectedFile.size / 1024)} KB)
+                          </p>
+                          <p className={styles.dropzoneHint}>
+                            Fotografía cargada lista para subir a Cloudinary • Clic para reemplazar
+                          </p>
+                        </>
+                      ) : heroFormImageUrl ? (
+                        <>
+                          <Check size={28} color="#059669" />
+                          <p className={styles.dropzoneText}>Fotografía actual seleccionada</p>
+                          <p className={styles.dropzoneHint}>Haz clic aquí si deseas subir un archivo nuevo desde tu dispositivo</p>
+                        </>
+                      ) : (
+                        <>
+                          <Upload size={32} color="#059669" />
+                          <p className={styles.dropzoneText}>Haz clic aquí para seleccionar tu foto panorámica</p>
+                          <p className={styles.dropzoneHint}>Recomendado: 1920 × 1080 px (16:9) • WebP, JPG o PNG hasta 10 MB</p>
+                        </>
+                      )}
+                    </div>
+
+                    {heroDetectedDimensions && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.25rem' }}>
+                        <span style={{ fontSize: '0.8rem', color: '#41564a' }}>
+                          Resolución detectada: <strong>{heroDetectedDimensions.width} × {heroDetectedDimensions.height} px</strong>
+                        </span>
+                        {heroDetectedDimensions.aspectRatio >= 1.55 && heroDetectedDimensions.aspectRatio <= 1.95 ? (
+                          <span className={styles.aspectBadgeOptimal}>
+                            <CheckCircle2 size={12} /> Proporción 16:9 Óptima
+                          </span>
+                        ) : (
+                          <span className={styles.aspectBadgeWarning}>
+                            <AlertCircle size={12} /> {heroDetectedDimensions.aspectRatio}:1 (No es 16:9, se adaptará con recorte)
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Vista Previa de Selección */}
+                {heroModalPreviewUrl && (
+                  <div className={styles.previewBox}>
+                    <img
+                      src={heroModalPreviewUrl}
+                      alt="Vista previa seleccionada"
+                      className={styles.previewThumb}
+                      style={{ width: 110, height: 62, aspectRatio: '16/9' }}
+                    />
+                    <div className={styles.previewInfo}>
+                      <span className={styles.previewTitle}>
+                        {heroFormTitle || 'Sin título asignado'}
+                      </span>
+                      <span className={styles.previewSubtitle}>
+                        {heroFormSource === 'upload' && heroSelectedFile
+                          ? `Archivo local: ${heroSelectedFile.name}`
+                          : heroFormImageSlug
+                          ? `Catálogo: ${heroFormImageSlug}`
+                          : 'URL Cloudinary directa'}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Campos de Información del Fondo */}
+                <div className={styles.formGroup}>
+                  <label htmlFor="hero-form-title" className={styles.formLabel}>
+                    Título de la Experiencia / Fondo: *
+                  </label>
+                  <input
+                    id="hero-form-title"
+                    type="text"
+                    className={styles.formInput}
+                    placeholder="Ej: Salinas Rosadas de Manaure"
+                    value={heroFormTitle}
+                    onChange={(e) => setHeroFormTitle(e.target.value)}
+                    required
+                  />
+                  <span style={{ fontSize: '0.78rem', color: '#41564a' }}>
+                    Este texto se muestra en la insignia flotante con el ícono de brújula sobre la foto.
+                  </span>
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label htmlFor="hero-form-alt" className={styles.formLabel}>
+                    Texto Alternativo (Accesibilidad / SEO):
+                  </label>
+                  <input
+                    id="hero-form-alt"
+                    type="text"
+                    className={styles.formInput}
+                    placeholder="Ej: Vista aérea de las piscinas de evaporación salina rosada al atardecer"
+                    value={heroFormAltText}
+                    onChange={(e) => setHeroFormAltText(e.target.value)}
+                  />
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', alignItems: 'center' }}>
+                  <div className={styles.formGroup}>
+                    <label htmlFor="hero-form-order" className={styles.formLabel}>
+                      Posición / Orden en la secuencia:
+                    </label>
+                    <input
+                      id="hero-form-order"
+                      type="number"
+                      min={1}
+                      max={99}
+                      className={styles.formInput}
+                      value={heroFormOrder}
+                      onChange={(e) => setHeroFormOrder(parseInt(e.target.value, 10) || 1)}
+                    />
+                  </div>
+
+                  <div className={styles.formGroup} style={{ paddingTop: '1.4rem' }}>
+                    <label className={styles.switchGroup}>
+                      <input
+                        type="checkbox"
+                        checked={heroFormIsActive}
+                        onChange={(e) => setHeroFormIsActive(e.target.checked)}
+                        style={{ width: 18, height: 18, accentColor: '#059669' }}
+                      />
+                      <span className={styles.switchLabel}>
+                        {heroFormIsActive ? 'Activo en el inicio (Rotando)' : 'Pausado (No visible)'}
+                      </span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <div className={styles.modalFooter}>
+                <button
+                  type="button"
+                  className={styles.btnSecondary}
+                  onClick={handleCloseHeroModal}
+                  disabled={savingHeroSlide}
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className={styles.btnPrimary}
+                  disabled={savingHeroSlide || (!heroFormImageUrl && !heroSelectedFile)}
+                >
+                  {savingHeroSlide ? (
+                    <>
+                      <Loader2 size={16} className="animate-spin" /> Guardando en Cloudinary...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles size={16} /> {editingHeroSlide ? 'Actualizar Fondo' : 'Guardar Fondo'}
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Eliminación de Fondo del Hero */}
+      {heroDeleteModalOpen && deletingHeroSlide && (
+        <div
+          className={styles.modalBackdrop}
+          onClick={() => !deletingHeroInProgress && setHeroDeleteModalOpen(false)}
+          role="dialog"
+          aria-modal="true"
+        >
+          <div className={styles.modalContent} style={{ maxWidth: 460 }} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <div className={styles.modalTitleGroup}>
+                <div
+                  className={styles.headerIconBox}
+                  style={{ width: 36, height: 36, background: '#fee2e2', color: '#dc2626' }}
+                >
+                  <Trash2 size={20} />
+                </div>
+                <h2 className={styles.modalTitle}>¿Eliminar este fondo del Hero?</h2>
+              </div>
+              <button
+                type="button"
+                className={styles.actionBtn}
+                onClick={() => setHeroDeleteModalOpen(false)}
+                disabled={deletingHeroInProgress}
+                aria-label="Cerrar modal"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className={styles.modalBody}>
+              <p style={{ margin: 0, color: '#16261c', fontSize: '0.92rem', lineHeight: 1.5 }}>
+                Estás a punto de eliminar <strong>&ldquo;{deletingHeroSlide.title}&rdquo;</strong> del carrusel de inicio.
+              </p>
+              {deletingHeroSlide.image_url?.includes('manaure-vive/galeria/hero') && (
+                <div className={styles.qualityTip} style={{ background: '#fef2f2', borderColor: '#fca5a5' }}>
+                  <AlertCircle size={20} color="#dc2626" style={{ flexShrink: 0, marginTop: 2 }} />
+                  <div>
+                    <strong style={{ color: '#991b1b' }}>Limpieza Cloudinary Automática:</strong>
+                    <p style={{ margin: '0.2rem 0 0 0', color: '#7f1d1d' }}>
+                      Este archivo fue subido a la carpeta de Cloudinary y será destruido de forma segura para no consumir cuota de almacenamiento.
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className={styles.modalFooter}>
+              <button
+                type="button"
+                className={styles.btnSecondary}
+                onClick={() => setHeroDeleteModalOpen(false)}
+                disabled={deletingHeroInProgress}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                className={styles.btnDanger}
+                onClick={handleDeleteHeroConfirm}
+                disabled={deletingHeroInProgress}
+              >
+                {deletingHeroInProgress ? (
+                  <>
+                    <Loader2 size={16} className="animate-spin" /> Eliminando...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 size={16} /> Eliminar Permanentemente
+                  </>
+                )}
               </button>
             </div>
           </div>

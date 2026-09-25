@@ -18,6 +18,10 @@ import { useTicketStats } from '@/hooks/useTicketStats';
 import { formatTicketCount } from '@/config/ticketSocialProof';
 import { Button } from '@/components/public/ui/Button';
 import { ResponsiveImage } from '@/components/common/ResponsiveImage';
+import { getPublicHeroSlides } from '@/services/heroSlideService';
+import { getHeroSlideResponsiveUrls } from '@/services/cloudinaryService';
+import { imageManifest, imageAliases } from '@/types/image-manifest';
+import type { HeroSlideRow } from '@/types/raffle.types';
 import styles from './HeroRifa.module.css';
 
 interface HeroRifaProps {
@@ -61,9 +65,33 @@ export const HeroRifa: React.FC<HeroRifaProps> = ({
   const lotteryReference =
     propLottery ?? (raffle?.lottery_reference?.trim() || 'Lotería Oficial');
 
-  // --- Estado del Carrusel de Fondo Automático ---
-  const slides: HeroSlideFoto[] = fotosHeroCarousel.length > 0 ? fotosHeroCarousel : [];
+  // --- Estado del Carrusel de Fondo Automático y Dinámico ---
+  const [dynamicSlides, setDynamicSlides] = useState<HeroSlideRow[]>([]);
   const [currentSlide, setCurrentSlide] = useState(0);
+
+  useEffect(() => {
+    let isMounted = true;
+    getPublicHeroSlides()
+      .then((data) => {
+        if (isMounted && data && data.length > 0) {
+          setDynamicSlides(data);
+        }
+      })
+      .catch((err) => {
+        console.warn('[HeroRifa] Usando fotos canónicas de respaldo:', err);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const slides: Array<HeroSlideRow | HeroSlideFoto> =
+    dynamicSlides.length > 0
+      ? dynamicSlides
+      : fotosHeroCarousel.length > 0
+      ? fotosHeroCarousel
+      : [];
 
   // Referencias para gestos táctiles en móvil (swipe táctil opcional)
   const touchStartXRef = useRef<number | null>(null);
@@ -166,35 +194,76 @@ export const HeroRifa: React.FC<HeroRifaProps> = ({
         <div className={styles.sliderContainer} aria-hidden="true">
           {slides.map((foto, index) => {
             const isActive = index === currentSlide;
+            const slideId = 'id' in foto ? foto.id : (foto as any).slug;
+            const slug = 'image_slug' in foto ? foto.image_slug : (foto as any).slug;
+            const canonicalSlug = slug ? imageAliases[slug] || slug : '';
+            const isManifestEntry = Boolean(canonicalSlug && imageManifest[canonicalSlug]);
+            const rawUrl = 'image_url' in foto ? foto.image_url : (foto as any).full || '';
+            const altText =
+              ('alt_text' in foto ? foto.alt_text : (foto as any).alt) ||
+              ('title' in foto ? foto.title : '');
+
             return (
               <div
-                key={foto.slug}
+                key={slideId || index}
                 className={`${styles.slide} ${isActive ? styles.slideActive : ''}`}
                 aria-hidden={!isActive}
               >
-                <ResponsiveImage
-                  id={foto.slug}
-                  priority={index === 0}
-                  variantRole="hero-desktop"
-                  ratio="16x9"
-                  sizes="100vw"
-                  artDirection={[
-                    {
-                      media: '(max-width: 768px)',
-                      variantRole: 'hero-mobile',
-                      ratio: '4x5',
-                      sizes: '100vw',
-                    },
-                    {
-                      media: '(min-width: 769px)',
-                      variantRole: 'hero-desktop',
-                      ratio: '16x9',
-                      sizes: '100vw',
-                    },
-                  ]}
-                  imgClassName={styles.slideImage}
-                  alt={foto.alt}
-                />
+                {isManifestEntry ? (
+                  <ResponsiveImage
+                    id={canonicalSlug}
+                    priority={index === 0}
+                    variantRole="hero-desktop"
+                    ratio="16x9"
+                    sizes="100vw"
+                    artDirection={[
+                      {
+                        media: '(max-width: 768px)',
+                        variantRole: 'hero-mobile',
+                        ratio: '4x5',
+                        sizes: '100vw',
+                      },
+                      {
+                        media: '(min-width: 769px)',
+                        variantRole: 'hero-desktop',
+                        ratio: '16x9',
+                        sizes: '100vw',
+                      },
+                    ]}
+                    imgClassName={styles.slideImage}
+                    alt={altText}
+                  />
+                ) : (
+                  <picture>
+                    <source
+                      media="(max-width: 768px)"
+                      type="image/webp"
+                      srcSet={getHeroSlideResponsiveUrls(rawUrl).mobile}
+                    />
+                    <source
+                      media="(max-width: 768px)"
+                      type="image/jpeg"
+                      srcSet={getHeroSlideResponsiveUrls(rawUrl).mobileJpg}
+                    />
+                    <source
+                      media="(min-width: 769px)"
+                      type="image/webp"
+                      srcSet={getHeroSlideResponsiveUrls(rawUrl).desktop}
+                    />
+                    <source
+                      media="(min-width: 769px)"
+                      type="image/jpeg"
+                      srcSet={getHeroSlideResponsiveUrls(rawUrl).desktopJpg}
+                    />
+                    <img
+                      src={getHeroSlideResponsiveUrls(rawUrl).desktopJpg || rawUrl}
+                      alt={altText}
+                      loading={index === 0 ? 'eager' : 'lazy'}
+                      fetchPriority={index === 0 ? 'high' : undefined}
+                      className={styles.slideImage}
+                    />
+                  </picture>
+                )}
               </div>
             );
           })}
@@ -207,7 +276,11 @@ export const HeroRifa: React.FC<HeroRifaProps> = ({
         {activePhoto && (
           <div className={styles.experienceChip} role="status" aria-live="polite">
             <Compass size={14} className={styles.experienceIcon} aria-hidden="true" />
-            <span className={styles.experienceText}>{activePhoto.tituloExperiencia}</span>
+            <span className={styles.experienceText}>
+              {'tituloExperiencia' in activePhoto
+                ? (activePhoto as any).tituloExperiencia
+                : ('title' in activePhoto ? activePhoto.title : '')}
+            </span>
           </div>
         )}
       </div>

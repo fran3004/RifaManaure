@@ -180,3 +180,12 @@ export interface GalleryCategoriesCachePayload {
   data: GalleryCategoryItem[];
 }
 
+export type HeroSlideRow = Database['public']['Tables']['hero_slides']['Row'];
+export type HeroSlideInsert = Database['public']['Tables']['hero_slides']['Insert'];
+export type HeroSlideUpdate = Database['public']['Tables']['hero_slides']['Update'];
+
+export interface HeroSlideCachePayload {
+  version: number;
+  timestamp: number;
+  data: HeroSlideRow[];
+}

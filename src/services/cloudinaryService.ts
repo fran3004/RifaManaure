@@ -262,6 +262,9 @@ export function resolveGalleryFolderForCategory(categorySlug?: string | null): s
   if (!clean || clean === 'otro' || clean === 'general') {
     return 'manaure-vive/galeria';
   }
+  if (clean === 'hero') {
+    return 'manaure-vive/galeria/hero';
+  }
   if (clean === 'fogata' || clean === 'glamping') {
     return 'manaure-vive/galeria/glamping';
   }
@@ -330,6 +333,7 @@ export async function deleteCloudinaryFolder(
 
     const protectedFolders = [
       'manaure-vive/galeria',
+      'manaure-vive/galeria/hero',
       'manaure-vive/galeria/cuatrimoto',
       'manaure-vive/galeria/parapente',
       'manaure-vive/galeria/serrania',
@@ -611,5 +615,25 @@ export function getCloudinaryResponsiveUrl(
   return result;
 }
 
-
-
+/**
+ * Genera URLs responsivas optimizadas con transformaciones de Cloudinary para fondos del Hero:
+ * - Desktop: 16:9 cinematográfico (w_1920,h_1080,c_fill,f_auto,q_auto)
+ * - Tablet: 16:9 (w_1280,h_720,c_fill,f_auto,q_auto)
+ * - Mobile: 4:5 vertical centrado (w_768,h_960,c_fill,g_auto,f_auto,q_auto)
+ * - Thumbnail: 320x180 (16:9)
+ */
+export function getHeroSlideResponsiveUrls(url: string | null | undefined) {
+  if (!url || typeof url !== 'string') {
+    return { desktop: '', desktopJpg: '', tablet: '', mobile: '', mobileJpg: '', thumb: '', full: '' };
+  }
+  const clean = url.trim();
+  return {
+    desktop: getCloudinaryResponsiveUrl(clean, { width: 1920, height: 1080, crop: 'fill', format: 'webp' }),
+    desktopJpg: getCloudinaryResponsiveUrl(clean, { width: 1920, height: 1080, crop: 'fill', format: 'jpg' }),
+    tablet: getCloudinaryResponsiveUrl(clean, { width: 1280, height: 720, crop: 'fill', format: 'webp' }),
+    mobile: getCloudinaryResponsiveUrl(clean, { width: 768, height: 960, crop: 'fill', format: 'webp' }),
+    mobileJpg: getCloudinaryResponsiveUrl(clean, { width: 768, height: 960, crop: 'fill', format: 'jpg' }),
+    thumb: getCloudinaryResponsiveUrl(clean, { width: 320, height: 180, crop: 'fill', format: 'webp' }),
+    full: getOptimizedCloudinaryUrl(clean, { width: 1920 }),
+  };
+}
