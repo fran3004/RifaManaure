@@ -17,37 +17,22 @@ import {
   Layers,
 } from 'lucide-react';
 import { formatCOP, formatTicketNumber } from '@/lib/utils';
+import {
+  generateTicketRanges,
+  getTicketDigits,
+  findMatchingRangeIndex,
+} from '@/lib/ticketRanges';
 import { SectionHeader, Button } from '@/components/public/ui';
 import { GanadorShowcase } from './GanadorShowcase';
 import styles from './SelectorBoletos.module.css';
 
 type FilterType = 'all' | 'available' | 'selected';
 
-// Rangos de 200 boletos para pantallas de escritorio (≥ 1024px)
-export const DESKTOP_RANGES = [
-  { label: '000 - 199', min: 0, max: 199 },
-  { label: '200 - 399', min: 200, max: 399 },
-  { label: '400 - 599', min: 400, max: 599 },
-  { label: '600 - 799', min: 600, max: 799 },
-  { label: '800 - 999', min: 800, max: 999 },
-];
+// Rangos predeterminados para compatibilidad absoluta con referencias residuales o HMR
+export const DESKTOP_RANGES = generateTicketRanges(1000, 'desktop');
 
 // Alias para compatibilidad absoluta con referencias residuales o HMR
 export const RANGES = DESKTOP_RANGES;
-
-// Rangos de 100 boletos para teléfonos, tablets y dispositivos pequeños (< 1024px)
-const COMPACT_RANGES = [
-  { label: '000 - 099', min: 0, max: 99 },
-  { label: '100 - 199', min: 100, max: 199 },
-  { label: '200 - 299', min: 200, max: 299 },
-  { label: '300 - 399', min: 300, max: 399 },
-  { label: '400 - 499', min: 400, max: 499 },
-  { label: '500 - 599', min: 500, max: 599 },
-  { label: '600 - 699', min: 600, max: 699 },
-  { label: '700 - 799', min: 700, max: 799 },
-  { label: '800 - 899', min: 800, max: 899 },
-  { label: '900 - 999', min: 900, max: 999 },
-];
 
 export const SelectorBoletos: React.FC = () => {
   const {
@@ -70,6 +55,19 @@ export const SelectorBoletos: React.FC = () => {
   const isRafflePaused = raffle?.status === 'paused';
   const isRaffleClosed = raffle?.status === 'closed' || raffle?.status === 'finished';
   const isMaxLimitReached = selectedTickets.length >= maxTicketsPerBuyer;
+
+  const totalTickets = raffle?.total_tickets || 1000;
+  const ticketDigits = useMemo(() => getTicketDigits(totalTickets), [totalTickets]);
+
+  const desktopRanges = useMemo(
+    () => generateTicketRanges(totalTickets, 'desktop', ticketDigits),
+    [totalTickets, ticketDigits]
+  );
+
+  const compactRanges = useMemo(
+    () => generateTicketRanges(totalTickets, 'compact', ticketDigits),
+    [totalTickets, ticketDigits]
+  );
 
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<FilterType>('all');
@@ -107,25 +105,50 @@ export const SelectorBoletos: React.FC = () => {
   const [selectedDesktopIndex, setSelectedDesktopIndex] = useState<number>(0);
   const [selectedCompactIndex, setSelectedCompactIndex] = useState<number>(0);
 
+  // Reiniciar selección de rangos y búsqueda cuando cambie la rifa o su emisión total
+  useEffect(() => {
+    setSelectedDesktopIndex(0);
+    setSelectedCompactIndex(0);
+    setSearchTerm('');
+  }, [raffle?.id, raffle?.total_tickets]);
+
+  // Índices defensivos para evitar desbordamiento antes de procesar el effect o durante transiciones
+  const safeDesktopIndex = Math.min(
+    Math.max(0, selectedDesktopIndex),
+    Math.max(0, desktopRanges.length - 1)
+  );
+  const safeCompactIndex = Math.min(
+    Math.max(0, selectedCompactIndex),
+    Math.max(0, compactRanges.length - 1)
+  );
+
   const handleDesktopRangeSelect = (idx: number) => {
     setSelectedDesktopIndex(idx);
-    setSelectedCompactIndex(Math.min(idx * 2, COMPACT_RANGES.length - 1));
+    const selectedRange = desktopRanges[idx];
+    if (selectedRange) {
+      const targetCompact = findMatchingRangeIndex(compactRanges, selectedRange.min);
+      setSelectedCompactIndex(targetCompact);
+    }
   };
 
   const handleCompactRangeSelect = (idx: number) => {
     setSelectedCompactIndex(idx);
-    setSelectedDesktopIndex(Math.min(Math.floor(idx / 2), DESKTOP_RANGES.length - 1));
+    const selectedRange = compactRanges[idx];
+    if (selectedRange) {
+      const targetDesktop = findMatchingRangeIndex(desktopRanges, selectedRange.min);
+      setSelectedDesktopIndex(targetDesktop);
+    }
   };
 
   const handlePrevRange = () => {
-    if (selectedCompactIndex > 0) {
-      handleCompactRangeSelect(selectedCompactIndex - 1);
+    if (safeCompactIndex > 0) {
+      handleCompactRangeSelect(safeCompactIndex - 1);
     }
   };
 
   const handleNextRange = () => {
-    if (selectedCompactIndex < COMPACT_RANGES.length - 1) {
-      handleCompactRangeSelect(selectedCompactIndex + 1);
+    if (safeCompactIndex < compactRanges.length - 1) {
+      handleCompactRangeSelect(safeCompactIndex + 1);
     }
   };
 
@@ -190,11 +213,11 @@ export const SelectorBoletos: React.FC = () => {
     };
   }, [selectedTickets.length, isMobileListOpen]);
 
-  // Boletos filtrados: en móviles y tablets muestra estrictamente 100 boletos por grupo; en escritorio 200 boletos
+  // Boletos filtrados: en móviles y tablets según compactRanges; en escritorio según desktopRanges
   const filteredTickets = useMemo(() => {
     let list = [...tickets];
 
-    // Búsqueda por texto (ej. "7" o "007")
+    // Búsqueda por texto (ej. "7", "045", "1000")
     if (searchTerm.trim() !== '') {
       const cleanTerm = searchTerm.trim();
       return list.filter((t) => t.number.includes(cleanTerm));
@@ -208,15 +231,15 @@ export const SelectorBoletos: React.FC = () => {
       return list;
     }
 
-    // Filtro por rango numérico: en móvil y tablet son 100 boletos, en escritorio son 200 boletos
+    // Filtro por rango numérico dinámico
     const curRange = isCompactView
-      ? COMPACT_RANGES[selectedCompactIndex]
-      : DESKTOP_RANGES[selectedDesktopIndex];
+      ? compactRanges[safeCompactIndex]
+      : desktopRanges[safeDesktopIndex];
 
     if (curRange) {
       list = list.filter((t) => {
         const num = parseInt(t.number, 10);
-        return num >= curRange.min && num <= curRange.max;
+        return !isNaN(num) && num >= curRange.min && num <= curRange.max;
       });
     }
 
@@ -226,8 +249,10 @@ export const SelectorBoletos: React.FC = () => {
     searchTerm,
     filterType,
     isCompactView,
-    selectedCompactIndex,
-    selectedDesktopIndex,
+    safeCompactIndex,
+    safeDesktopIndex,
+    compactRanges,
+    desktopRanges,
     selectedTickets,
   ]);
 
@@ -329,22 +354,26 @@ export const SelectorBoletos: React.FC = () => {
 
         {/* Barra de Control, Búsqueda y Azar */}
         <div className={styles.controlPanel}>
-          {/* Buscador */}
+          {/* Buscador Dinámico */}
           <div className={styles.searchBox}>
             <label htmlFor="busqueda-boletos" className="visually-hidden">
-              Buscar número de boleto
+              {`Buscar número de boleto (hasta ${ticketDigits} cifras)`}
             </label>
             <Search size={18} aria-hidden="true" className={styles.searchIcon} />
             <input
               id="busqueda-boletos"
               type="text"
-              placeholder="Buscar número (ej: 045, 777)"
+              placeholder={`Buscar número (ej: ${formatTicketNumber(45, ticketDigits)}, ${formatTicketNumber(Math.min(777, Math.max(0, totalTickets - 1)), ticketDigits)})`}
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => {
+                const val = e.target.value.replace(/\D/g, '').slice(0, ticketDigits);
+                setSearchTerm(val);
+              }}
               className={styles.searchInput}
-              maxLength={3}
+              maxLength={ticketDigits}
               disabled={!isRaffleActive}
-              aria-label="Buscar número de boleto"
+              aria-label={`Buscar número de boleto (hasta ${ticketDigits} cifras)`}
+              title={`Buscar número de boleto de hasta ${ticketDigits} cifras`}
             />
             {searchTerm && (
               <button
@@ -358,7 +387,7 @@ export const SelectorBoletos: React.FC = () => {
             )}
           </div>
 
-          {/* Botones de Azar y Limpieza con Estructura Estable Anti-CLS (MED-01) */}
+          {/* Botones de Azar y Limpieza con Estructura Estable Anti-CLS */}
           <div className={styles.randomButtons}>
             <div className={styles.randomHeaderRow}>
               <div className={styles.randomLabel}>
@@ -434,7 +463,7 @@ export const SelectorBoletos: React.FC = () => {
         {/* Filtros de Rango y Disponibilidad */}
         {!searchTerm && (
           <div className={styles.filterBar}>
-            {/* 1. Selector de Rangos de 200 Boletos (Exclusivo Escritorio ≥ 1024px) */}
+            {/* 1. Selector de Rangos Dinámico (Exclusivo Escritorio ≥ 1024px) */}
             <div className={styles.desktopFilterGroup}>
               <span className={styles.desktopFilterLabel}>
                 <Layers size={16} aria-hidden="true" />
@@ -445,13 +474,13 @@ export const SelectorBoletos: React.FC = () => {
                 role="toolbar"
                 aria-label="Filtrar por rango de boletos"
               >
-                {DESKTOP_RANGES.map((r, idx) => (
+                {desktopRanges.map((r, idx) => (
                   <button
-                    key={idx}
+                    key={`${r.min}-${r.max}`}
                     type="button"
-                    className={`${styles.filterChip} ${selectedDesktopIndex === idx ? styles.filterChipActive : ''}`}
+                    className={`${styles.filterChip} ${safeDesktopIndex === idx ? styles.filterChipActive : ''}`}
                     onClick={() => handleDesktopRangeSelect(idx)}
-                    aria-pressed={selectedDesktopIndex === idx}
+                    aria-pressed={safeDesktopIndex === idx}
                   >
                     {r.label}
                   </button>
@@ -459,19 +488,19 @@ export const SelectorBoletos: React.FC = () => {
               </div>
             </div>
 
-            {/* 2. Navegador de Rangos de 100 Boletos (Exclusivo Móviles y Tablets < 1024px) */}
+            {/* 2. Navegador de Rangos Compacto (Exclusivo Móviles y Tablets < 1024px) */}
             <div
               className={styles.compactRangeNavigator}
               role="region"
-              aria-label="Navegador de rangos de 100 boletos"
+              aria-label="Navegador de rangos de boletos"
             >
               <button
                 type="button"
                 className={styles.rangeNavArrow}
                 onClick={handlePrevRange}
-                disabled={selectedCompactIndex === 0}
-                aria-label="Ver 100 boletos anteriores"
-                title="Ver 100 boletos anteriores"
+                disabled={safeCompactIndex === 0}
+                aria-label="Ver boletos anteriores"
+                title="Ver boletos anteriores"
               >
                 <ChevronLeft size={18} aria-hidden="true" />
               </button>
@@ -481,25 +510,25 @@ export const SelectorBoletos: React.FC = () => {
                   <div className={styles.rangeMainLabelRow}>
                     <Layers size={14} className={styles.rangeIcon} aria-hidden="true" />
                     <span className={styles.rangeMainLabel}>
-                      Boletos {COMPACT_RANGES[selectedCompactIndex]?.label}
+                      Boletos {compactRanges[safeCompactIndex]?.label}
                     </span>
                     <ChevronDown size={14} className={styles.rangeChevronIcon} aria-hidden="true" />
                   </div>
                   <span className={styles.rangeMetaBadge}>
-                    Grupo {selectedCompactIndex + 1} de {COMPACT_RANGES.length} • 100 boletos
+                    Grupo {safeCompactIndex + 1} de {compactRanges.length} • {compactRanges[safeCompactIndex]?.count ?? 0} boletos
                   </span>
                 </div>
 
                 {/* Select nativo overlay para interacción táctil fluida sin desbordamiento */}
                 <select
                   className={styles.rangeNativeSelect}
-                  value={selectedCompactIndex}
+                  value={safeCompactIndex}
                   onChange={(e) => handleCompactRangeSelect(Number(e.target.value))}
-                  aria-label="Elegir grupo de 100 boletos"
+                  aria-label="Elegir grupo de boletos"
                 >
-                  {COMPACT_RANGES.map((r, idx) => (
-                    <option key={r.label} value={idx}>
-                      Boletos {r.label} ({idx + 1} de {COMPACT_RANGES.length} • 100 boletos)
+                  {compactRanges.map((r, idx) => (
+                    <option key={`${r.min}-${r.max}`} value={idx}>
+                      Boletos {r.label} ({idx + 1} de {compactRanges.length} • {r.count} boletos)
                     </option>
                   ))}
                 </select>
@@ -509,9 +538,9 @@ export const SelectorBoletos: React.FC = () => {
                 type="button"
                 className={styles.rangeNavArrow}
                 onClick={handleNextRange}
-                disabled={selectedCompactIndex === COMPACT_RANGES.length - 1}
-                aria-label="Ver 100 boletos siguientes"
-                title="Ver 100 boletos siguientes"
+                disabled={safeCompactIndex === compactRanges.length - 1}
+                aria-label="Ver boletos siguientes"
+                title="Ver boletos siguientes"
               >
                 <ChevronRight size={18} aria-hidden="true" />
               </button>
@@ -590,7 +619,7 @@ export const SelectorBoletos: React.FC = () => {
                   disabled={(!isAvailable && !isSelected) || !isRaffleActive}
                   aria-pressed={isSelected}
                   aria-disabled={!isAvailable && !isSelected ? true : undefined}
-                  title={`Número ${formatTicketNumber(ticket.number)} - ${statusLabel}`}
+                  title={`Número ${formatTicketNumber(ticket.number, ticketDigits)} - ${statusLabel}`}
                   aria-label={`Boleto ${ticket.number}, ${statusLabel}`}
                 >
                   <span className={styles.ticketNumber}>{ticket.number}</span>
@@ -627,27 +656,27 @@ export const SelectorBoletos: React.FC = () => {
         <div className={styles.legendContainer} aria-label="Leyenda de estados de boletos">
           <div className={styles.legendItem}>
             <div className={`${styles.legendBox} ${styles.ticketAvailable}`} aria-hidden="true">
-              <span>042</span>
+              <span>{formatTicketNumber(42, ticketDigits)}</span>
             </div>
             <span className={styles.legendText}>Disponible</span>
           </div>
           <div className={styles.legendItem}>
             <div className={`${styles.legendBox} ${styles.ticketSelected}`} aria-hidden="true">
-              <span>042</span>
+              <span>{formatTicketNumber(42, ticketDigits)}</span>
               <CheckCircle size={10} aria-hidden="true" className={styles.legendIcon} />
             </div>
             <span className={styles.legendText}>Seleccionado</span>
           </div>
           <div className={styles.legendItem}>
             <div className={`${styles.legendBox} ${styles.ticketReserved}`} aria-hidden="true">
-              <span>042</span>
+              <span>{formatTicketNumber(42, ticketDigits)}</span>
               <Clock size={10} aria-hidden="true" className={styles.legendIcon} />
             </div>
             <span className={styles.legendText}>En reserva</span>
           </div>
           <div className={styles.legendItem}>
             <div className={`${styles.legendBox} ${styles.ticketSold}`} aria-hidden="true">
-              <span>042</span>
+              <span>{formatTicketNumber(42, ticketDigits)}</span>
               <Lock size={10} aria-hidden="true" className={styles.legendIcon} />
             </div>
             <span className={styles.legendText}>Vendido</span>

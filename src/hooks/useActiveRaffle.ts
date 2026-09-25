@@ -3,6 +3,7 @@ import type { RaffleRow } from '@/types/raffle.types';
 import { getActiveRaffle } from '@/services/ticketService';
 import { useOptionalTicketCart } from '@/context/useTicketCart';
 import { formatTicketNumber } from '@/lib/utils';
+import { getTicketDigits } from '@/lib/ticketRanges';
 
 export const RAFFLE_CACHE_KEY = 'manaure_active_raffle_cache';
 export const RAFFLE_UPDATED_EVENT = 'manaure_raffle_updated';
@@ -214,12 +215,7 @@ export function useActiveRaffle(): UseActiveRaffleResult {
 
   const totalTickets = activeRaffle?.total_tickets || 1000;
 
-  const ticketDigits = useMemo(() => {
-    if (totalTickets <= 100) return 2;
-    if (totalTickets <= 1000) return 3;
-    if (totalTickets <= 10000) return 4;
-    return String(Math.max(totalTickets - 1, 0)).length;
-  }, [totalTickets]);
+  const ticketDigits = useMemo(() => getTicketDigits(totalTickets), [totalTickets]);
 
   const ticketRange = useMemo(() => {
     const start = formatTicketNumber(0, ticketDigits);
