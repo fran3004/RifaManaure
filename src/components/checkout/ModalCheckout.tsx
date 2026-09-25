@@ -21,6 +21,7 @@ import {
   Hash,
   Bell,
   Search,
+  Mail,
 } from 'lucide-react';
 import { formatCOP, isValidDocument, isValidPhone, isValidEmail } from '@/lib/utils';
 import { createOrder } from '@/services/ticketService';
@@ -88,6 +89,61 @@ function formatOrderDateTime(date: Date): string {
   }
 }
 
+export function formatContactPreferenceLabel(preference: ContactPreference): string {
+  switch (preference) {
+    case 'whatsapp':
+      return '📱 WhatsApp (Gestión manual)';
+    case 'email':
+      return '✉️ Correo electrónico (Automático)';
+    case 'both':
+      return '📱 WhatsApp + ✉️ Correo (Respaldo total)';
+    default:
+      return '📱 WhatsApp Oficial';
+  }
+}
+
+export interface ContactPreferenceOptionItem {
+  id: ContactPreference;
+  title: string;
+  description: string;
+  subtext: string;
+  badge: string;
+  badgeType: 'manual' | 'auto' | 'recommended';
+  icon: typeof MessageCircle;
+}
+
+export const CONTACT_PREFERENCE_OPTIONS: ContactPreferenceOptionItem[] = [
+  {
+    id: 'whatsapp',
+    title: 'WhatsApp',
+    description: 'Recibe la confirmación por WhatsApp.',
+    subtext: 'El envío se gestiona actualmente de forma manual.',
+    badge: 'Gestión manual',
+    badgeType: 'manual',
+    icon: MessageCircle,
+  },
+  {
+    id: 'email',
+    title: 'Correo electrónico',
+    description: 'Recibe la confirmación automática por correo.',
+    subtext:
+      'El correo de confirmación se enviará automáticamente cuando nuestro equipo valide tu pago.',
+    badge: 'Automático',
+    badgeType: 'auto',
+    icon: Mail,
+  },
+  {
+    id: 'both',
+    title: 'WhatsApp + Correo',
+    description: 'Recibe la confirmación por ambos canales.',
+    subtext:
+      'El correo de confirmación se enviará automáticamente cuando nuestro equipo valide tu pago; WhatsApp se gestiona de forma manual.',
+    badge: 'Recomendado',
+    badgeType: 'recommended',
+    icon: Bell,
+  },
+];
+
 export const ModalCheckout: React.FC = () => {
   const {
     raffle,
@@ -129,7 +185,7 @@ export const ModalCheckout: React.FC = () => {
     phone: '',
     email: '',
     city: '',
-    contactPreference: 'whatsapp',
+    contactPreference: 'both',
     acceptTerms: true,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -174,6 +230,7 @@ export const ModalCheckout: React.FC = () => {
       setReceiptFile(null);
       setReceiptPreview(null);
       setHasReservationError(false);
+      setFormData((prev) => ({ ...prev, contactPreference: 'both' }));
       setIdempotencyKey(
         typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
           ? crypto.randomUUID()
@@ -312,6 +369,34 @@ export const ModalCheckout: React.FC = () => {
     }));
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: '' }));
+    }
+  };
+
+  const handlePreferenceKeyDown = (
+    e: React.KeyboardEvent,
+    currentId: ContactPreference
+  ) => {
+    const currentIndex = CONTACT_PREFERENCE_OPTIONS.findIndex((opt) => opt.id === currentId);
+    let nextIndex = -1;
+
+    if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+      e.preventDefault();
+      nextIndex = (currentIndex + 1) % CONTACT_PREFERENCE_OPTIONS.length;
+    } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+      e.preventDefault();
+      nextIndex =
+        (currentIndex - 1 + CONTACT_PREFERENCE_OPTIONS.length) % CONTACT_PREFERENCE_OPTIONS.length;
+    } else if (e.key === ' ' || e.key === 'Enter') {
+      e.preventDefault();
+      setFormData((prev) => ({ ...prev, contactPreference: currentId }));
+      return;
+    }
+
+    if (nextIndex >= 0) {
+      const nextOption = CONTACT_PREFERENCE_OPTIONS[nextIndex];
+      setFormData((prev) => ({ ...prev, contactPreference: nextOption.id }));
+      const nextCard = document.getElementById(`pref-card-${nextOption.id}`);
+      nextCard?.focus();
     }
   };
 
@@ -783,20 +868,100 @@ export const ModalCheckout: React.FC = () => {
 
             {/* Canal Oficial de Notificación */}
             <div className={styles.contactPreferenceContainer}>
-              <label className={styles.contactPreferenceTitle}>
-                <Bell size={15} color="var(--brand-accent, var(--brand-accent))" aria-hidden="true" />
-                Canal oficial de confirmación
-              </label>
-              <div className={styles.contactPreferenceGrid}>
-                <div
-                  className={`${styles.contactOptionCard} ${styles.contactOptionCardSelected} ${styles.contactOptionCardReadonly}`}
-                >
-                  <MessageCircle size={20} className={styles.contactOptionIcon} aria-hidden="true" />
-                  <span className={styles.contactOptionLabel}>
-                    WhatsApp Oficial (Confirmación y enlace de verificación)
-                  </span>
-                </div>
+              <div className={styles.contactPreferenceHeader}>
+                <label id="contact-preference-label" className={styles.contactPreferenceTitle}>
+                  <Bell size={16} className={styles.contactTitleIcon} aria-hidden="true" />
+                  <span>Canal oficial de confirmación</span>
+                </label>
+                <span className={styles.contactPreferenceHint}>
+                  Elige cómo deseas recibir el estado y respaldo de tus números
+                </span>
               </div>
+
+              <div
+                className={styles.contactPreferenceGrid}
+                role="radiogroup"
+                aria-labelledby="contact-preference-label"
+              >
+                {CONTACT_PREFERENCE_OPTIONS.map((option) => {
+                  const isSelected = formData.contactPreference === option.id;
+                  const Icon = option.icon;
+
+                  let badgeClass = styles.badgeManual;
+                  if (option.badgeType === 'auto') badgeClass = styles.badgeAuto;
+                  else if (option.badgeType === 'recommended') badgeClass = styles.badgeRecommended;
+
+                  return (
+                    <div
+                      key={option.id}
+                      id={`pref-card-${option.id}`}
+                      role="radio"
+                      aria-checked={isSelected}
+                      tabIndex={isSelected ? 0 : -1}
+                      onClick={() =>
+                        setFormData((prev) => ({ ...prev, contactPreference: option.id }))
+                      }
+                      onKeyDown={(e) => handlePreferenceKeyDown(e, option.id)}
+                      className={`${styles.contactOptionCard} ${
+                        isSelected ? styles.contactOptionCardSelected : ''
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        id={`input-pref-${option.id}`}
+                        name="contactPreference"
+                        value={option.id}
+                        checked={isSelected}
+                        onChange={() =>
+                          setFormData((prev) => ({ ...prev, contactPreference: option.id }))
+                        }
+                        className={styles.srOnly}
+                        tabIndex={-1}
+                        aria-hidden="true"
+                      />
+
+                      <div
+                        className={`${styles.radioIndicator} ${
+                          isSelected ? styles.radioIndicatorSelected : ''
+                        }`}
+                        aria-hidden="true"
+                      >
+                        {isSelected && <span className={styles.radioDot} />}
+                      </div>
+
+                      <div className={styles.contactOptionContent}>
+                        <div className={styles.contactOptionTopRow}>
+                          <div className={styles.contactOptionTitleWrap}>
+                            <Icon size={18} className={styles.contactOptionIcon} aria-hidden="true" />
+                            <strong className={styles.contactOptionTitle}>{option.title}</strong>
+                          </div>
+                          <span className={`${styles.contactOptionBadge} ${badgeClass}`}>
+                            {option.badge}
+                          </span>
+                        </div>
+
+                        <p className={styles.contactOptionDescription}>{option.description}</p>
+                        <p className={styles.contactOptionSubtext}>{option.subtext}</p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Advertencia / Caja Informativa cuando se selecciona email o both */}
+              {(formData.contactPreference === 'email' || formData.contactPreference === 'both') && (
+                <div className={styles.emailNoticeBox} role="status" aria-live="polite">
+                  <Mail size={18} className={styles.emailNoticeIcon} aria-hidden="true" />
+                  <div className={styles.emailNoticeContent}>
+                    <strong className={styles.emailNoticeTitle}>📩 Importante:</strong>
+                    <p className={styles.emailNoticeText}>
+                      Después de la validación del pago recibirás la confirmación en tu correo. Si no
+                      aparece en la bandeja principal, revisa <strong>Spam</strong>,{' '}
+                      <strong>Correo no deseado</strong> o <strong>Promociones</strong>.
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className={styles.termsCheckbox}>
@@ -1486,7 +1651,7 @@ export const ModalCheckout: React.FC = () => {
                   Canal de Notificación:
                 </span>
                 <span className={`${styles.confirmationTableVal} ${styles.confirmationChannelVal}`}>
-                  📱 WhatsApp Oficial
+                  {formatContactPreferenceLabel(formData.contactPreference)}
                 </span>
               </div>
             </div>
