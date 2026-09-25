@@ -45,7 +45,7 @@ describe('Error Hardening & Diagnostic Logging', () => {
 
       expect(res.kind).toBe('NETWORK_ERROR');
       expect(res.canRetry).toBe(true);
-      expect(res.userMessage).toContain('No se pudo conectar con el servidor');
+      expect(res.userMessage).toContain('No pudimos conectar con el sistema');
       expect(res.technicalMessage).toBe('Failed to fetch');
     });
 
@@ -134,7 +134,7 @@ describe('Error Hardening & Diagnostic Logging', () => {
       expect(res.kind).toBe('SERVER_ERROR');
       expect(res.status).toBe(500);
       expect(res.canRetry).toBe(true);
-      expect(res.userMessage).toBe('Ocurrió una falla interna en el servidor. Por favor intenta más tarde.');
+      expect(res.userMessage).toBe('Ocurrió un problema temporal en el sistema. Por favor intenta de nuevo en unos minutos.');
     });
 
     it('1.10. UNKNOWN: Maneja excepciones no estructuradas o valores falsy', () => {

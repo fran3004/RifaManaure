@@ -221,7 +221,7 @@ export const GaleriaPremio: React.FC = () => {
               Explora los paisajes que <span className="highlight-text">podrías vivir</span>
             </>
           }
-          subtitle="Fotos auténticas de las rutas, el glamping y las actividades extremas en Manaure y la Serranía del Perijá."
+          subtitle="Fotos auténticas de las rutas, el hospedaje campestre y las actividades inolvidables en Manaure y la Serranía del Perijá."
         >
           {/* Filtros por Categoría como Chips */}
           <div

@@ -165,7 +165,7 @@ export const SelectorBoletos: React.FC = () => {
           }
           subtitle={
             <>
-              Haz clic en los números que deseas comprar o usa la selección aleatoria. Valor
+              Toca o selecciona los números que deseas comprar o usa la selección al azar. Valor
               por boleto: <strong>{unitPrice > 0 ? formatCOP(unitPrice) : '...'}</strong>.
             </>
           }

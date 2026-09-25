@@ -199,7 +199,7 @@ export const DigitalReceiptModal: React.FC<DigitalReceiptModalProps> = ({
             disabled={isGenerating || Boolean(errorMsg)}
           >
             <Download size={18} aria-hidden="true" />
-            <span>Descargar Imagen (PNG)</span>
+            <span>Descargar Imagen</span>
           </button>
 
           {/* Botón 2: Guardar como PDF / Imprimir */}

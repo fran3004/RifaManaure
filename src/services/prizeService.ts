@@ -24,7 +24,7 @@ export const DEFAULT_OFFICIAL_TOUR_FEATURES: OfficialTourFeature[] = [
   },
   {
     title: 'Hospedaje:',
-    description: 'en uno de los mejores hoteles / glamping campestre',
+    description: 'en uno de los mejores alojamientos campestres y hoteles locales',
   },
   {
     title: 'Noche romántica:',
@@ -40,7 +40,7 @@ export const DEFAULT_OFFICIAL_TOUR_FEATURES: OfficialTourFeature[] = [
   },
   {
     title: 'Experiencia del parapente:',
-    description: 'vuelo libre tándem con piloto certificado',
+    description: 'vuelo libre biplaza con instructor certificado',
   },
   {
     title: 'Ruta Casa de Vidrio:',
@@ -69,7 +69,7 @@ export const DEFAULT_PRIZE_SETTINGS: PrizeSettingsRow = {
 export const DEFAULT_PRIZE_EXPERIENCES: PrizeExperienceRow[] = [
   {
     id: 'exp-cuatrimotos',
-    title: 'Tour en Cuatrimoto por Trochas',
+    title: 'Paseo en Cuatrimoto por Trochas',
     partner_name: 'Cuatri Tours Manaure',
     description:
       'Recorrido guiado en cuatrimotos todoterreno por caminos veredales y miradores panorámicos de la Serranía.',
@@ -88,12 +88,12 @@ export const DEFAULT_PRIZE_EXPERIENCES: PrizeExperienceRow[] = [
   },
   {
     id: 'exp-glamping',
-    title: 'Noche de Glamping & Fogata',
+    title: 'Noche Campestre & Fogata',
     partner_name: 'Mashiramo Glamping / Villa Adelaida',
     description:
       'Alojamiento exclusivo bajo las estrellas con fogata privada en mirador y desayuno campestre.',
     features: [
-      'Cama King-size & Jacuzzi',
+      'Cama extra grande y tina de hidromasaje',
       'Fogata con malvaviscos y vino',
       'Vista panorámica nocturna',
     ],
@@ -107,7 +107,7 @@ export const DEFAULT_PRIZE_EXPERIENCES: PrizeExperienceRow[] = [
   },
   {
     id: 'exp-parapente',
-    title: 'Vuelo en Parapente Tándem',
+    title: 'Vuelo en Parapente Biplaza',
     partner_name: 'Manaure Aventura',
     description:
       'Experiencia inolvidable de vuelo libre sobre el valle de Manaure con piloto profesional certificado.',
@@ -144,7 +144,7 @@ export const DEFAULT_PRIZE_EXPERIENCES: PrizeExperienceRow[] = [
   },
   {
     id: 'exp-gastronomia',
-    title: 'Tour Gastronómico Local',
+    title: 'Ruta Gastronómica Local',
     partner_name: 'La Casa de las Arepas & Absolom',
     description:
       'Degustación de arepas típicas rellenas, dulces tradicionales de mora y café de altura cosechado en Perijá.',
@@ -163,14 +163,14 @@ export const DEFAULT_PRIZE_EXPERIENCES: PrizeExperienceRow[] = [
   },
   {
     id: 'exp-fotografia',
-    title: 'Registro Fotográfico Pro',
+    title: 'Registro Fotográfico Profesional',
     partner_name: 'PHOTours',
     description:
       'Acompañamiento audiovisual durante las actividades para que te lleves recuerdos inolvidables en alta resolución.',
     features: [
       'Galería digital entregada en 48h',
       'Edición profesional de color',
-      'Reel editado para redes sociales',
+      'Video editado para redes sociales',
     ],
     image_url: null,
     image_slug: 'cuatrimoto-mirador',

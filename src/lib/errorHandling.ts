@@ -167,7 +167,7 @@ export function normalizeAppError(
     return {
       kind: 'NETWORK_ERROR',
       code: rawCode || 'NETWORK_ERROR',
-      userMessage: 'No se pudo conectar con el servidor. Revisa tu conexión a internet e intenta nuevamente.',
+      userMessage: 'No pudimos conectar con el sistema. Revisa tu conexión a internet e intenta de nuevo.',
       technicalMessage,
       details: errObj.details,
       canRetry: true,
@@ -297,7 +297,7 @@ export function normalizeAppError(
       kind: 'SERVER_ERROR',
       code: rawCode || '500',
       status: 500,
-      userMessage: 'Ocurrió una falla interna en el servidor. Por favor intenta más tarde.',
+      userMessage: 'Ocurrió un problema temporal en el sistema. Por favor intenta de nuevo en unos minutos.',
       technicalMessage,
       details: errObj.details,
       canRetry: true,

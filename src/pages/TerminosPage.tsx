@@ -81,7 +81,7 @@ export const TerminosPage: React.FC = () => {
                 </li>
                 <li>
                   <CheckCircle2 size={16} className={styles.bulletIcon} />
-                  <span>Hospedaje en los mejores hoteles / glamping y noche romántica.</span>
+                  <span>Hospedaje en acogedores alojamientos campestres y noche romántica.</span>
                 </li>
                 <li>
                   <CheckCircle2 size={16} className={styles.bulletIcon} />
@@ -93,7 +93,7 @@ export const TerminosPage: React.FC = () => {
                 </li>
                 <li>
                   <CheckCircle2 size={16} className={styles.bulletIcon} />
-                  <span>Vuelo libre en parapente tándem con piloto profesional.</span>
+                  <span>Vuelo libre en parapente biplaza con instructor profesional.</span>
                 </li>
                 <li>
                   <CheckCircle2 size={16} className={styles.bulletIcon} />
@@ -127,8 +127,8 @@ export const TerminosPage: React.FC = () => {
               <div>
                 <strong>Transparencia y Seguridad Garantizada</strong>
                 <p>
-                  Todos los boletos registrados cuentan con sello temporal en base de datos
-                  PostgreSQL auditable.
+                  Todos los boletos registrados cuentan con fecha, hora y respaldo oficial
+                  verificable en el sistema.
                 </p>
               </div>
             </div>

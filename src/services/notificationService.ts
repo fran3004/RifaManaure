@@ -305,7 +305,7 @@ export function buildPaymentApprovedMessage(data: OrderNotificationData): string
   }
 
   message +=
-    `\n🔍 Puedes consultar y validar tus números oficiales en el módulo de verificación:\n` +
+    `\n🔍 Puedes consultar y validar tus números oficiales en la sección «Consultar Boletos»:\n` +
     `${verifyLink}\n\n` +
     `📞 Soporte: ${data.supportPhone || DEFAULT_SUPPORT_CONTACT}\n\n` +
     `¡Te deseamos mucha suerte en el sorteo! 🍀✨`;

@@ -324,7 +324,7 @@ export const HeroRifa: React.FC<HeroRifaProps> = ({
         {/* Subtítulo Descriptivo con Legibilidad Garantizada */}
         <p className={styles.subtitle}>
           {raffle?.description ||
-            'Gana una experiencia ecoturística todo incluido para 2 personas en Manaure (Balcón del Cesar): Hospedaje en Glamping de lujo, Tour en Cuatrimoto por la Serranía del Perijá, Vuelo en Parapente, Cena Gourmet y Fotografía Profesional.'}
+            'Gana una experiencia ecoturística todo incluido para 2 personas en Manaure (Balcón del Cesar): Hospedaje campestre de primer nivel, paseo en cuatrimoto por la Serranía del Perijá, vuelo en parapente, cena especial y fotografía profesional.'}
         </p>
 
         {/* Tarjeta de Precios, CTAs y Progreso Real de Boletos */}
@@ -430,7 +430,7 @@ export const HeroRifa: React.FC<HeroRifaProps> = ({
             </div>
             <div className={styles.trustContent}>
               <strong className={styles.trustTitle}>Premio Mayor Exclusivo</strong>
-              <span className={styles.trustSub}>Experiencia VIP para 2 personas</span>
+              <span className={styles.trustSub}>Experiencia todo incluido para 2 personas</span>
             </div>
           </div>
 

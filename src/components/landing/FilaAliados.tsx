@@ -546,7 +546,7 @@ export const FilaAliados: React.FC = () => {
           badge="Red de Convenios y Turismo Local"
           icon={<Handshake size={16} aria-hidden="true" />}
           title="Nuestros Aliados Oficiales"
-          subtitle="Empresas, operadores turísticos y restaurantes locales que hacen posible el premio y respaldan este sorteo. Haz clic en cualquier logo para abrir su Instagram oficial."
+          subtitle="Empresas, operadores turísticos y restaurantes locales que hacen posible el premio y respaldan este sorteo. Pulsa en cualquier logo para abrir su perfil oficial en Instagram."
         >
           {/* Barra de Controles: Guía de uso y botón accesible de Pausar / Reanudar */}
           <div className={styles.controlsBar}>

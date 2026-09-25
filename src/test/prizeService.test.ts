@@ -35,7 +35,7 @@ describe('prizeService - Gestión del Premio Mayor', () => {
     expect(data.settings.badge_text).toBe(DEFAULT_PRIZE_SETTINGS.badge_text);
     expect(data.settings.title).toBe(DEFAULT_PRIZE_SETTINGS.title);
     expect(data.experiences).toHaveLength(DEFAULT_PRIZE_EXPERIENCES.length);
-    expect(data.experiences[0].title).toBe('Tour en Cuatrimoto por Trochas');
+    expect(data.experiences[0].title).toBe('Paseo en Cuatrimoto por Trochas');
   });
 
   it('debe recuperar fielmente los datos guardados previamente en caché', () => {

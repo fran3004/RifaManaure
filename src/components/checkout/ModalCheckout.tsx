@@ -469,7 +469,7 @@ export const ModalCheckout: React.FC = () => {
         if (orderResult.code === 'CLIENT_TIMEOUT' || orderResult.isTimeout) {
           setErrorMessage(
             orderResult.error ||
-              'La solicitud de reserva tardó más de 15 segundos en responder. Tu selección y clave única de compra se mantienen protegidas. Por favor haz clic en "Confirmar Reserva y Ver Cuentas" para reintentar sin perder tus boletos.'
+              'La solicitud de reserva tardó más de 15 segundos en responder. Tu selección de boletos se mantiene protegida. Por favor pulsa en "Confirmar Reserva y Ver Cuentas" para intentar de nuevo sin perder tus boletos.'
           );
           return;
         }
@@ -477,14 +477,14 @@ export const ModalCheckout: React.FC = () => {
         if (orderResult.code === 'NETWORK_ERROR') {
           setErrorMessage(
             orderResult.error ||
-              'Problema de conexión con el servidor. Revisa tu acceso a internet y haz clic en "Confirmar Reserva y Ver Cuentas" para reintentar.'
+              'No pudimos conectar con el sistema. Revisa tu conexión a internet y pulsa en "Confirmar Reserva y Ver Cuentas" para intentar de nuevo.'
           );
           return;
         }
 
         if (orderResult.code === 'CONFLICT' || orderResult.code === '23505') {
           setErrorMessage(
-            'Ya existe una orden registrada para esta solicitud. Consulta el estado de tus boletos en el módulo de verificación.'
+            'Ya existe una orden registrada para esta solicitud. Consulta el estado de tus boletos en la sección «Consultar Boletos».'
           );
           setHasReservationError(true);
           return;
@@ -646,7 +646,7 @@ export const ModalCheckout: React.FC = () => {
           <div className={styles.modalTitleBox}>
             <ShieldCheck size={22} className={styles.shieldIcon} aria-hidden="true" />
             <div>
-              <h3 id="modal-checkout-title" className={styles.modalTitle}>Checkout Seguro</h3>
+              <h3 id="modal-checkout-title" className={styles.modalTitle}>Compra Segura</h3>
               <span className={styles.modalSub}>Gran Rifa Ecoturística Manaure Vive</span>
             </div>
           </div>
@@ -662,7 +662,7 @@ export const ModalCheckout: React.FC = () => {
 
         {/* Indicador Visual de Progreso (7 Pasos Segmentados) */}
         {!hasReservationError && (
-          <div className={styles.stepperBar} role="region" aria-label="Progreso del checkout">
+          <div className={styles.stepperBar} role="region" aria-label="Progreso de la compra">
             <div className={styles.stepperSegments} aria-hidden="true">
               {([1, 2, 3, 4, 5, 6, 7] as CheckoutStepNumber[]).map((stepNum) => {
                 const isCompleted = currentStep > stepNum;
@@ -1093,10 +1093,10 @@ export const ModalCheckout: React.FC = () => {
               <Clock size={20} className={styles.noticeIcon} aria-hidden="true" />
               <div>
                 <strong className={styles.noticeHeading}>
-                  Bloqueo atómico de números:
+                  Reserva garantizada de números:
                 </strong>
-                Al hacer clic en el botón a continuación, tus números quedarán asegurados y
-                bloqueados por 10 minutos exclusivamente a tu nombre para que realices tu
+                Al pulsar en el botón a continuación, tus números quedarán asegurados y
+                apartados por 10 minutos exclusivamente a tu nombre para que realices tu
                 transferencia bancaria.
               </div>
             </div>
@@ -1128,7 +1128,7 @@ export const ModalCheckout: React.FC = () => {
                 {isReserving ? (
                   <>
                     <div className={`${styles.spinner} ${styles.spinnerSm}`} />
-                    <span>Reservando en Base de Datos...</span>
+                    <span>Asegurando tus boletos...</span>
                   </>
                 ) : (
                   <>
@@ -1405,7 +1405,7 @@ export const ModalCheckout: React.FC = () => {
                 <div className={styles.dropzone} onClick={() => fileInputRef.current?.click()}>
                   <FileImage size={32} color="var(--text-muted)" aria-hidden="true" />
                   <p className={styles.dropzoneText}>
-                    Haz clic aquí para seleccionar tu comprobante
+                    Pulsa aquí para seleccionar tu comprobante
                   </p>
                   <span className={styles.dropzoneSub}>
                     Formatos permitidos: JPG, PNG, WEBP o PDF (Máx. 5 MB)

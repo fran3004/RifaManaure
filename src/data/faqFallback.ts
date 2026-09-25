@@ -32,7 +32,7 @@ export const FALLBACK_FAQS: FaqItem[] = [
     id: 'faq-2',
     question: '¿Qué incluye exactamente el paquete para 2 personas?',
     answer:
-      'Incluye el Tour Vive Manaure de 3 días y 2 noches para la pareja (2 personas) con viaje pago ida y vuelta desde tu lugar de residencia hasta Manaure - Cesar, hospedaje en los mejores hoteles / glamping, noche romántica, alimentación completa (desayunos, almuerzos campestres y cenas típicas), experiencia en cuatrimoto por trochas, vuelo libre en parapente tándem, ruta a la Casa de Vidrio en la Serranía de Perijá con fogata nocturna y registro fotográfico profesional.',
+      'Incluye el viaje de 3 días y 2 noches para la pareja (2 personas) con traslado pago ida y vuelta desde tu lugar de residencia hasta Manaure - Cesar, hospedaje en acogedores alojamientos campestres, noche romántica, alimentación completa (desayunos, almuerzos campestres y cenas típicas), paseo en cuatrimoto por trochas, vuelo libre en parapente biplaza con instructor profesional, ruta a la Casa de Vidrio en la Serranía de Perijá con fogata nocturna y registro fotográfico profesional.',
     sort_order: 20,
     is_published: true,
   },

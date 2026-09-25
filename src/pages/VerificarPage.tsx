@@ -237,7 +237,7 @@ export const VerificarPage: React.FC = () => {
                             </h3>
                             <p className={styles.statusDescription}>
                               Tu pago ha sido verificado y aprobado oficialmente. Tus números están
-                              asegurados e inscritos en la base de datos oficial del sorteo.
+                              asegurados e inscritos en el registro oficial del sorteo.
                             </p>
                             <div className={styles.receiptActionWrapper}>
                               <button

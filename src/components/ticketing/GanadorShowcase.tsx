@@ -276,7 +276,7 @@ export const GanadorShowcase: React.FC<GanadorShowcaseProps> = ({ winner }) => {
                 className={styles.actButton}
               >
                 <FileText size={20} aria-hidden="true" />
-                <span>Consultar Acta Oficial de Adjudicación (PDF)</span>
+                <span>Consultar Acta Oficial de Adjudicación</span>
                 <ExternalLink size={16} aria-hidden="true" />
               </a>
             )}

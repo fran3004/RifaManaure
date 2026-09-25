@@ -367,7 +367,7 @@ export async function uploadPaymentProof(
     if (uploadError) {
       return {
         success: false,
-        error: `Error al subir el comprobante al almacenamiento: ${uploadError.message}`,
+        error: `No se pudo guardar el archivo del comprobante: ${uploadError.message}`,
         code: 'STORAGE_UPLOAD_ERROR',
       };
     }
@@ -438,7 +438,7 @@ export async function uploadPaymentProof(
 
     return {
       success: false,
-      error: 'Respuesta inesperada del servidor al procesar el comprobante.',
+      error: 'Ocurrió una respuesta inesperada del sistema al procesar el comprobante.',
       code: 'UNEXPECTED_RESPONSE',
     };
   } catch (err: unknown) {
@@ -447,7 +447,7 @@ export async function uploadPaymentProof(
       return {
         success: false,
         error:
-          'El envío del comprobante tardó más de 15 segundos en responder. Tu comprobante y datos se mantienen intactos. Por favor haz clic en "Confirmar y Enviar Comprobante" para reintentar de forma segura.',
+          'El envío del comprobante tardó más de 15 segundos en responder. Tu comprobante y datos se mantienen protegidos. Por favor pulsa en «Confirmar y Enviar Comprobante» para intentar de nuevo de forma segura.',
         code: 'CLIENT_TIMEOUT',
         isTimeout: true,
       };
@@ -527,7 +527,7 @@ export async function submitOrderReceipt(
       return {
         success: false,
         error:
-          'El registro del comprobante tardó más de 15 segundos en responder. Por favor intenta nuevamente.',
+          'El registro del comprobante tardó en responder. Por favor intenta nuevamente.',
         code: 'CLIENT_TIMEOUT',
         isTimeout: true,
       };
@@ -535,7 +535,7 @@ export async function submitOrderReceipt(
     if (classified.isNetworkError) {
       return {
         success: false,
-        error: 'Problema de conexión con el servidor. Revisa tu acceso a internet.',
+        error: 'No pudimos conectar con el sistema. Revisa tu conexión a internet e intenta de nuevo.',
         code: 'NETWORK_ERROR',
       };
     }

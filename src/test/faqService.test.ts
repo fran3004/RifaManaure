@@ -50,7 +50,7 @@ describe('faqService - Gestión de Preguntas Frecuentes', () => {
     expect(data).toBeDefined();
     expect(data).toHaveLength(6);
     expect(data[1].question).toBe('¿Qué incluye exactamente el paquete para 2 personas?');
-    expect(data[1].answer).toContain('Tour Vive Manaure de 3 días y 2 noches para la pareja (2 personas) con viaje pago ida y vuelta');
+    expect(data[1].answer).toContain('Incluye el viaje de 3 días y 2 noches para la pareja (2 personas) con traslado pago ida y vuelta');
     expect(data[5].question).toBe('¿Cuáles son los métodos de pago disponibles?');
     expect(data[5].answer).toContain('Aceptamos transferencias directas mediante Bre-B, Nequi, Daviplata, Bancolombia');
   });

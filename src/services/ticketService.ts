@@ -237,7 +237,7 @@ export async function createOrder(
       return {
         success: false,
         error:
-          'La solicitud de reserva tardó más de 15 segundos en responder. Es posible que el servidor aún esté procesando tu orden. Por favor haz clic en "Reintentar" para verificar o reintentar con la misma clave sin perder tus boletos.',
+          'La solicitud de reserva tardó más de 15 segundos en responder. Es posible que el sistema aún esté procesando tu pedido. Por favor pulsa en «Reintentar» para comprobar o intentar de nuevo sin perder tus boletos.',
         code: 'CLIENT_TIMEOUT',
         isTimeout: true,
       };
