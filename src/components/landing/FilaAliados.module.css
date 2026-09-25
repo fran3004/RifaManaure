@@ -70,6 +70,7 @@
   overflow: hidden;
   padding: 1.5rem 0;
   margin-top: 1rem;
+  touch-action: pan-y;
   mask-image: linear-gradient(
     to right,
     transparent 0%,
@@ -97,6 +98,7 @@
   cursor: grab;
   user-select: none;
   -webkit-user-select: none;
+  touch-action: pan-y;
   padding: 0.75rem 1.5rem;
 }
 
@@ -216,6 +218,16 @@
     gap: 0.75rem;
   }
 
+  .interactionHint {
+    border-radius: var(--radius-md, 14px);
+    text-align: center;
+    font-size: 0.8125rem;
+    line-height: 1.35;
+    padding: 0.45rem 0.85rem;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
   .aliadosTrack {
     gap: 1.75rem;
     padding: 0.5rem 1rem;
@@ -252,7 +264,7 @@
 
   .aliadoName {
     font-size: 0.875rem;
-  line-height: 1.2;
+    line-height: 1.25;
   }
 }
 

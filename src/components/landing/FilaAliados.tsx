@@ -73,11 +73,20 @@ export const FilaAliados: React.FC = () => {
   const isTabVisibleRef = useRef(true);
   const isInViewportRef = useRef(false);
 
-  // Referencias para el arrastre
+  // Referencias para el arrastre y detección direccional de gestos táctiles (MED-04)
   const isDraggingRef = useRef(false);
+  const isTrackingTouchRef = useRef(false);
+  const gestureDirectionRef = useRef<'undetermined' | 'horizontal' | 'vertical'>('undetermined');
   const startXRef = useRef(0);
+  const startYRef = useRef(0);
   const startPosRef = useRef(0);
   const dragDeltaRef = useRef(0);
+
+  // Inercia / Momentum tras arrastre
+  const lastTouchXRef = useRef(0);
+  const lastTouchTimeRef = useRef(0);
+  const velocityRef = useRef(0);
+  const momentumVelocityRef = useRef(0);
 
   useEffect(() => {
     isPausedRef.current = isPaused;
@@ -205,8 +214,20 @@ export const FilaAliados: React.FC = () => {
         isDraggingRef.current;
 
       if (!isHalted && oneSetWidthRef.current > 0) {
-        const speed = 0.038 * deltaTime;
-        scrollPosRef.current += speed;
+        let deltaScroll = 0.038 * deltaTime;
+
+        // Desaceleración suave por momentum tras soltar arrastre
+        if (Math.abs(momentumVelocityRef.current) > 0.01) {
+          deltaScroll -= momentumVelocityRef.current * deltaTime;
+          momentumVelocityRef.current *= Math.pow(0.92, deltaTime / 16);
+          if (Math.abs(momentumVelocityRef.current) <= 0.01) {
+            momentumVelocityRef.current = 0;
+          }
+        } else {
+          momentumVelocityRef.current = 0;
+        }
+
+        scrollPosRef.current += deltaScroll;
 
         const oneSet = oneSetWidthRef.current;
         if (scrollPosRef.current >= oneSet * 2) {
@@ -279,7 +300,7 @@ export const FilaAliados: React.FC = () => {
   }, [infiniteList, prefersReducedMotion]);
 
   // ==========================================
-  // Manejadores de Arrastre con Ratón y Touch
+  // Manejadores de Arrastre con Ratón
   // ==========================================
   const handleMouseDown = (e: React.MouseEvent) => {
     if (prefersReducedMotion) return;
@@ -288,9 +309,14 @@ export const FilaAliados: React.FC = () => {
 
     isDraggingRef.current = true;
     setIsDraggingState(true);
+    momentumVelocityRef.current = 0;
     startXRef.current = e.pageX;
     startPosRef.current = scrollPosRef.current;
     dragDeltaRef.current = 0;
+
+    lastTouchXRef.current = e.pageX;
+    lastTouchTimeRef.current = performance.now();
+    velocityRef.current = 0;
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
@@ -299,6 +325,14 @@ export const FilaAliados: React.FC = () => {
     if (!track) return;
 
     const currentX = e.pageX;
+    const now = performance.now();
+    const dt = now - lastTouchTimeRef.current;
+    if (dt > 0) {
+      velocityRef.current = (currentX - lastTouchXRef.current) / dt;
+    }
+    lastTouchXRef.current = currentX;
+    lastTouchTimeRef.current = now;
+
     const diff = (currentX - startXRef.current) * 1.15;
     dragDeltaRef.current = Math.abs(currentX - startXRef.current);
 
@@ -320,64 +354,180 @@ export const FilaAliados: React.FC = () => {
   };
 
   const handleMouseUp = () => {
+    if (!isDraggingRef.current) return;
     isDraggingRef.current = false;
     setIsDraggingState(false);
+
+    // Momentum si hubo inercia al soltar ratón
+    const timeSinceLast = performance.now() - lastTouchTimeRef.current;
+    if (timeSinceLast < 120 && Math.abs(velocityRef.current) > 0.15) {
+      momentumVelocityRef.current = Math.max(-2.5, Math.min(2.5, velocityRef.current * 0.8));
+    }
+
     setTimeout(() => {
       dragDeltaRef.current = 0;
     }, 80);
   };
 
   const handleMouseLeave = () => {
-    isDraggingRef.current = false;
-    setIsDraggingState(false);
+    if (isDraggingRef.current) {
+      isDraggingRef.current = false;
+      setIsDraggingState(false);
+    }
     isHoveredRef.current = false;
   };
 
-  const handleTouchStart = (e: React.TouchEvent) => {
-    if (prefersReducedMotion || e.touches.length === 0) return;
+  // ==============================================================================
+  // Detección Direccional Robusta de Gestos Táctiles Móviles (MED-04)
+  // Permite scroll vertical nativo fluido y drag horizontal voluntario sin jitter
+  // ==============================================================================
+  useEffect(() => {
     const track = trackRef.current;
     if (!track) return;
 
-    isDraggingRef.current = true;
-    setIsDraggingState(true);
-    startXRef.current = e.touches[0].pageX;
-    startPosRef.current = scrollPosRef.current;
-    dragDeltaRef.current = 0;
-  };
+    const GESTURE_THRESHOLD = 8; // Umbral en px para disambiguar dirección sin jitter
 
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isDraggingRef.current || e.touches.length === 0) return;
-    const track = trackRef.current;
-    if (!track) return;
+    const onTouchStart = (e: TouchEvent) => {
+      if (prefersReducedMotion || e.touches.length === 0) return;
 
-    const currentX = e.touches[0].pageX;
-    const diff = (currentX - startXRef.current) * 1.15;
-    dragDeltaRef.current = Math.abs(currentX - startXRef.current);
+      isTrackingTouchRef.current = true;
+      gestureDirectionRef.current = 'undetermined';
+      isDraggingRef.current = false;
+      momentumVelocityRef.current = 0;
 
-    let targetScroll = startPosRef.current - diff;
-    const oneSet = oneSetWidthRef.current;
-
-    if (oneSet > 0) {
-      if (targetScroll >= oneSet * 2) {
-        targetScroll -= oneSet;
-        startPosRef.current -= oneSet;
-      } else if (targetScroll < oneSet) {
-        targetScroll += oneSet;
-        startPosRef.current += oneSet;
-      }
-    }
-
-    scrollPosRef.current = targetScroll;
-    track.style.transform = `translate3d(${-targetScroll}px, 0, 0)`;
-  };
-
-  const handleTouchEnd = () => {
-    isDraggingRef.current = false;
-    setIsDraggingState(false);
-    setTimeout(() => {
+      const touch = e.touches[0];
+      startXRef.current = touch.clientX;
+      startYRef.current = touch.clientY;
+      startPosRef.current = scrollPosRef.current;
       dragDeltaRef.current = 0;
-    }, 80);
-  };
+
+      lastTouchXRef.current = touch.clientX;
+      lastTouchTimeRef.current = performance.now();
+      velocityRef.current = 0;
+    };
+
+    const onTouchMove = (e: TouchEvent) => {
+      if (!isTrackingTouchRef.current || e.touches.length === 0) return;
+
+      // Si el gesto fue catalogado como scroll vertical, se libera al navegador sin interferir
+      if (gestureDirectionRef.current === 'vertical') {
+        return;
+      }
+
+      const touch = e.touches[0];
+      const currentX = touch.clientX;
+      const currentY = touch.clientY;
+      const diffX = currentX - startXRef.current;
+      const diffY = currentY - startYRef.current;
+      const absX = Math.abs(diffX);
+      const absY = Math.abs(diffY);
+
+      // Si la dirección no se ha resuelto aún, evaluar con umbral anti-jitter
+      if (gestureDirectionRef.current === 'undetermined') {
+        if (absX < GESTURE_THRESHOLD && absY < GESTURE_THRESHOLD) {
+          return;
+        }
+
+        // Regla: si el movimiento vertical domina claramente al horizontal, liberar para scroll vertical
+        if (absY >= absX * 1.15) {
+          gestureDirectionRef.current = 'vertical';
+          isTrackingTouchRef.current = false;
+          isDraggingRef.current = false;
+          setIsDraggingState(false);
+          return;
+        } else if (absX > absY * 1.15) {
+          gestureDirectionRef.current = 'horizontal';
+          isDraggingRef.current = true;
+          setIsDraggingState(true);
+        } else {
+          // Movimiento diagonal ambiguo: priorizar scroll vertical para no atrapar al usuario
+          if (absY >= absX) {
+            gestureDirectionRef.current = 'vertical';
+            isTrackingTouchRef.current = false;
+            isDraggingRef.current = false;
+            setIsDraggingState(false);
+            return;
+          } else {
+            gestureDirectionRef.current = 'horizontal';
+            isDraggingRef.current = true;
+            setIsDraggingState(true);
+          }
+        }
+      }
+
+      // Gesto horizontal confirmado: arrastrar carrusel y bloquear scroll vertical indeseado
+      if (gestureDirectionRef.current === 'horizontal') {
+        if (e.cancelable) {
+          e.preventDefault();
+        }
+
+        const now = performance.now();
+        const dt = now - lastTouchTimeRef.current;
+        if (dt > 0) {
+          velocityRef.current = (currentX - lastTouchXRef.current) / dt;
+        }
+        lastTouchXRef.current = currentX;
+        lastTouchTimeRef.current = now;
+
+        const effectiveDiff = diffX * 1.15;
+        dragDeltaRef.current = absX;
+
+        let targetScroll = startPosRef.current - effectiveDiff;
+        const oneSet = oneSetWidthRef.current;
+
+        if (oneSet > 0) {
+          if (targetScroll >= oneSet * 2) {
+            targetScroll -= oneSet;
+            startPosRef.current -= oneSet;
+          } else if (targetScroll < oneSet) {
+            targetScroll += oneSet;
+            startPosRef.current += oneSet;
+          }
+        }
+
+        scrollPosRef.current = targetScroll;
+        track.style.transform = `translate3d(${-targetScroll}px, 0, 0)`;
+      }
+    };
+
+    const onTouchEnd = () => {
+      if (gestureDirectionRef.current === 'horizontal') {
+        const timeSinceLast = performance.now() - lastTouchTimeRef.current;
+        if (timeSinceLast < 120 && Math.abs(velocityRef.current) > 0.15) {
+          momentumVelocityRef.current = Math.max(-2.5, Math.min(2.5, velocityRef.current * 0.8));
+        }
+      }
+
+      isTrackingTouchRef.current = false;
+      isDraggingRef.current = false;
+      gestureDirectionRef.current = 'undetermined';
+      setIsDraggingState(false);
+
+      setTimeout(() => {
+        dragDeltaRef.current = 0;
+      }, 80);
+    };
+
+    const onTouchCancel = () => {
+      isTrackingTouchRef.current = false;
+      isDraggingRef.current = false;
+      gestureDirectionRef.current = 'undetermined';
+      setIsDraggingState(false);
+      dragDeltaRef.current = 0;
+    };
+
+    track.addEventListener('touchstart', onTouchStart, { passive: true });
+    track.addEventListener('touchmove', onTouchMove, { passive: false });
+    track.addEventListener('touchend', onTouchEnd, { passive: true });
+    track.addEventListener('touchcancel', onTouchCancel, { passive: true });
+
+    return () => {
+      track.removeEventListener('touchstart', onTouchStart);
+      track.removeEventListener('touchmove', onTouchMove);
+      track.removeEventListener('touchend', onTouchEnd);
+      track.removeEventListener('touchcancel', onTouchCancel);
+    };
+  }, [prefersReducedMotion]);
 
   const togglePause = () => {
     setIsPaused((prev) => !prev);
@@ -459,9 +609,6 @@ export const FilaAliados: React.FC = () => {
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
           onMouseLeave={handleMouseLeave}
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
         >
           {infiniteList.map((aliado, idx) => {
             const hasInstagram = Boolean(aliado.instagramUrl);
