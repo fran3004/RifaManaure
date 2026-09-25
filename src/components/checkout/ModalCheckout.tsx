@@ -245,7 +245,9 @@ export const ModalCheckout: React.FC = () => {
     if (isCheckoutOpen) {
       triggerElementRef.current = document.activeElement as HTMLElement | null;
       const originalOverflow = document.body.style.overflow;
+      const originalOverscrollBehavior = document.body.style.overscrollBehavior;
       document.body.style.overflow = 'hidden';
+      document.body.style.overscrollBehavior = 'none';
 
       const timer = setTimeout(() => {
         if (modalCardRef.current) {
@@ -261,6 +263,7 @@ export const ModalCheckout: React.FC = () => {
       return () => {
         clearTimeout(timer);
         document.body.style.overflow = originalOverflow;
+        document.body.style.overscrollBehavior = originalOverscrollBehavior;
         if (triggerElementRef.current && typeof triggerElementRef.current.focus === 'function') {
           triggerElementRef.current.focus();
         }
