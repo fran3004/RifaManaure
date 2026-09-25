@@ -62,6 +62,7 @@ export const FilaAliados: React.FC = () => {
 
   // Referencias para el bucle de animación sin lecturas de layout
   const sectionRef = useRef<HTMLElement>(null);
+  const outerRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const scrollPosRef = useRef(0);
   const oneSetWidthRef = useRef(0);
@@ -81,6 +82,8 @@ export const FilaAliados: React.FC = () => {
   const startYRef = useRef(0);
   const startPosRef = useRef(0);
   const dragDeltaRef = useRef(0);
+  const didDragRef = useRef(false);
+  const lastTouchEndTimeRef = useRef(0);
 
   // Inercia / Momentum tras arrastre
   const lastTouchXRef = useRef(0);
@@ -174,14 +177,37 @@ export const FilaAliados: React.FC = () => {
   // Medición de una sola copia fuera del bucle de animación para evitar layout reflows
   const measureWidth = useCallback(() => {
     if (trackRef.current && infiniteList.length > 0) {
-      oneSetWidthRef.current = trackRef.current.scrollWidth / 3;
+      const scrollW = trackRef.current.scrollWidth;
+      if (scrollW > 0) {
+        oneSetWidthRef.current = scrollW / 3;
+        if (scrollPosRef.current === 0) {
+          scrollPosRef.current = scrollW / 3;
+          if (trackRef.current) {
+            trackRef.current.style.transform = `translate3d(${-scrollPosRef.current}px, 0, 0)`;
+          }
+        }
+      }
     }
   }, [infiniteList.length]);
 
   useEffect(() => {
     measureWidth();
+    const track = trackRef.current;
+    if (!track) return;
+
+    let ro: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== 'undefined') {
+      ro = new ResizeObserver(() => {
+        measureWidth();
+      });
+      ro.observe(track);
+    }
     window.addEventListener('resize', measureWidth);
-    return () => window.removeEventListener('resize', measureWidth);
+
+    return () => {
+      if (ro) ro.disconnect();
+      window.removeEventListener('resize', measureWidth);
+    };
   }, [measureWidth]);
 
   // Bucle de animación suave con translate3d, 0 lecturas de layout y 0% CPU inactivo
@@ -213,30 +239,43 @@ export const FilaAliados: React.FC = () => {
         isFocusedRef.current ||
         isDraggingRef.current;
 
-      if (!isHalted && oneSetWidthRef.current > 0) {
-        let deltaScroll = 0.038 * deltaTime;
+      if (!isHalted) {
+        // Auto-recuperación si el ancho no se había podido calcular en el primer paint
+        if (oneSetWidthRef.current <= 0 && track) {
+          const scrollW = track.scrollWidth;
+          if (scrollW > 0) {
+            oneSetWidthRef.current = scrollW / 3;
+            if (scrollPosRef.current === 0) {
+              scrollPosRef.current = scrollW / 3;
+            }
+          }
+        }
 
-        // Desaceleración suave por momentum tras soltar arrastre
-        if (Math.abs(momentumVelocityRef.current) > 0.01) {
-          deltaScroll -= momentumVelocityRef.current * deltaTime;
-          momentumVelocityRef.current *= Math.pow(0.92, deltaTime / 16);
-          if (Math.abs(momentumVelocityRef.current) <= 0.01) {
+        if (oneSetWidthRef.current > 0) {
+          let deltaScroll = 0.038 * deltaTime;
+
+          // Desaceleración suave por momentum tras soltar arrastre
+          if (Math.abs(momentumVelocityRef.current) > 0.01) {
+            deltaScroll -= momentumVelocityRef.current * deltaTime;
+            momentumVelocityRef.current *= Math.pow(0.92, deltaTime / 16);
+            if (Math.abs(momentumVelocityRef.current) <= 0.01) {
+              momentumVelocityRef.current = 0;
+            }
+          } else {
             momentumVelocityRef.current = 0;
           }
-        } else {
-          momentumVelocityRef.current = 0;
+
+          scrollPosRef.current += deltaScroll;
+
+          const oneSet = oneSetWidthRef.current;
+          if (scrollPosRef.current >= oneSet * 2) {
+            scrollPosRef.current -= oneSet;
+          } else if (scrollPosRef.current < oneSet) {
+            scrollPosRef.current += oneSet;
+          }
+
+          track.style.transform = `translate3d(${-scrollPosRef.current}px, 0, 0)`;
         }
-
-        scrollPosRef.current += deltaScroll;
-
-        const oneSet = oneSetWidthRef.current;
-        if (scrollPosRef.current >= oneSet * 2) {
-          scrollPosRef.current -= oneSet;
-        } else if (scrollPosRef.current < oneSet) {
-          scrollPosRef.current += oneSet;
-        }
-
-        track.style.transform = `translate3d(${-scrollPosRef.current}px, 0, 0)`;
       }
 
       rafIdRef.current = requestAnimationFrame(tick);
@@ -261,7 +300,7 @@ export const FilaAliados: React.FC = () => {
       }
     };
 
-    // IntersectionObserver: Detener RAF cuando sale del viewport
+    // IntersectionObserver: Activar RAF con antelación antes de entrar al viewport
     const observer = new IntersectionObserver(
       ([entry]) => {
         isInViewportRef.current = entry.isIntersecting;
@@ -271,7 +310,7 @@ export const FilaAliados: React.FC = () => {
           stopLoop();
         }
       },
-      { threshold: 0.05 }
+      { threshold: 0, rootMargin: '120px 0px' }
     );
     observer.observe(section);
 
@@ -304,6 +343,10 @@ export const FilaAliados: React.FC = () => {
   // ==========================================
   const handleMouseDown = (e: React.MouseEvent) => {
     if (prefersReducedMotion) return;
+    // Ignorar eventos sintéticos de mouse derivados de un toque táctil móvil reciente
+    if (performance.now() - lastTouchEndTimeRef.current < 600) return;
+    if (e.button !== 0) return;
+
     const track = trackRef.current;
     if (!track) return;
 
@@ -313,6 +356,7 @@ export const FilaAliados: React.FC = () => {
     startXRef.current = e.pageX;
     startPosRef.current = scrollPosRef.current;
     dragDeltaRef.current = 0;
+    didDragRef.current = false;
 
     lastTouchXRef.current = e.pageX;
     lastTouchTimeRef.current = performance.now();
@@ -334,7 +378,11 @@ export const FilaAliados: React.FC = () => {
     lastTouchTimeRef.current = now;
 
     const diff = (currentX - startXRef.current) * 1.15;
-    dragDeltaRef.current = Math.abs(currentX - startXRef.current);
+    const absDiff = Math.abs(currentX - startXRef.current);
+    if (absDiff > 6) {
+      didDragRef.current = true;
+    }
+    dragDeltaRef.current = absDiff;
 
     let targetScroll = startPosRef.current - diff;
     const oneSet = oneSetWidthRef.current;
@@ -360,13 +408,14 @@ export const FilaAliados: React.FC = () => {
 
     // Momentum si hubo inercia al soltar ratón
     const timeSinceLast = performance.now() - lastTouchTimeRef.current;
-    if (timeSinceLast < 120 && Math.abs(velocityRef.current) > 0.15) {
-      momentumVelocityRef.current = Math.max(-2.5, Math.min(2.5, velocityRef.current * 0.8));
+    if (timeSinceLast < 140 && Math.abs(velocityRef.current) > 0.12) {
+      momentumVelocityRef.current = Math.max(-2.5, Math.min(2.5, velocityRef.current * 0.85));
     }
 
     setTimeout(() => {
+      didDragRef.current = false;
       dragDeltaRef.current = 0;
-    }, 80);
+    }, 200);
   };
 
   const handleMouseLeave = () => {
@@ -383,17 +432,20 @@ export const FilaAliados: React.FC = () => {
   // ==============================================================================
   useEffect(() => {
     const track = trackRef.current;
-    if (!track) return;
+    const container = outerRef.current || track;
+    if (!container || !track) return;
 
     const GESTURE_THRESHOLD = 8; // Umbral en px para disambiguar dirección sin jitter
 
     const onTouchStart = (e: TouchEvent) => {
-      if (prefersReducedMotion || e.touches.length === 0) return;
+      if (prefersReducedMotion || e.touches.length !== 1) return;
 
+      isHoveredRef.current = false;
       isTrackingTouchRef.current = true;
       gestureDirectionRef.current = 'undetermined';
       isDraggingRef.current = false;
       momentumVelocityRef.current = 0;
+      didDragRef.current = false;
 
       const touch = e.touches[0];
       startXRef.current = touch.clientX;
@@ -407,12 +459,15 @@ export const FilaAliados: React.FC = () => {
     };
 
     const onTouchMove = (e: TouchEvent) => {
-      if (!isTrackingTouchRef.current || e.touches.length === 0) return;
+      if (!isTrackingTouchRef.current || e.touches.length !== 1) return;
 
       // Si el gesto fue catalogado como scroll vertical, se libera al navegador sin interferir
       if (gestureDirectionRef.current === 'vertical') {
         return;
       }
+
+      const currentTrack = trackRef.current;
+      if (!currentTrack) return;
 
       const touch = e.touches[0];
       const currentX = touch.clientX;
@@ -428,30 +483,31 @@ export const FilaAliados: React.FC = () => {
           return;
         }
 
-        // Regla: si el movimiento vertical domina claramente al horizontal, liberar para scroll vertical
-        if (absY >= absX * 1.15) {
+        // Si el usuario mueve claramente en vertical, ceder al scroll nativo de la página
+        if (absY >= 14 && absY >= absX * 1.35) {
           gestureDirectionRef.current = 'vertical';
           isTrackingTouchRef.current = false;
           isDraggingRef.current = false;
           setIsDraggingState(false);
           return;
-        } else if (absX > absY * 1.15) {
+        } else if (absX >= GESTURE_THRESHOLD && absX >= absY) {
+          // Movimiento horizontal confirmado
+          gestureDirectionRef.current = 'horizontal';
+          isDraggingRef.current = true;
+          setIsDraggingState(true);
+        } else if (absY >= absX * 1.15 && absY >= 12) {
+          gestureDirectionRef.current = 'vertical';
+          isTrackingTouchRef.current = false;
+          isDraggingRef.current = false;
+          setIsDraggingState(false);
+          return;
+        } else if (absX > absY) {
           gestureDirectionRef.current = 'horizontal';
           isDraggingRef.current = true;
           setIsDraggingState(true);
         } else {
-          // Movimiento diagonal ambiguo: priorizar scroll vertical para no atrapar al usuario
-          if (absY >= absX) {
-            gestureDirectionRef.current = 'vertical';
-            isTrackingTouchRef.current = false;
-            isDraggingRef.current = false;
-            setIsDraggingState(false);
-            return;
-          } else {
-            gestureDirectionRef.current = 'horizontal';
-            isDraggingRef.current = true;
-            setIsDraggingState(true);
-          }
+          // Ambigüedad en los primeros píxeles: esperar al siguiente evento sin bloquear
+          return;
         }
       }
 
@@ -469,9 +525,12 @@ export const FilaAliados: React.FC = () => {
         lastTouchXRef.current = currentX;
         lastTouchTimeRef.current = now;
 
-        const effectiveDiff = diffX * 1.15;
+        if (absX > 6) {
+          didDragRef.current = true;
+        }
         dragDeltaRef.current = absX;
 
+        const effectiveDiff = diffX * 1.15;
         let targetScroll = startPosRef.current - effectiveDiff;
         const oneSet = oneSetWidthRef.current;
 
@@ -486,15 +545,18 @@ export const FilaAliados: React.FC = () => {
         }
 
         scrollPosRef.current = targetScroll;
-        track.style.transform = `translate3d(${-targetScroll}px, 0, 0)`;
+        currentTrack.style.transform = `translate3d(${-targetScroll}px, 0, 0)`;
       }
     };
 
     const onTouchEnd = () => {
+      lastTouchEndTimeRef.current = performance.now();
+      isHoveredRef.current = false;
+
       if (gestureDirectionRef.current === 'horizontal') {
         const timeSinceLast = performance.now() - lastTouchTimeRef.current;
-        if (timeSinceLast < 120 && Math.abs(velocityRef.current) > 0.15) {
-          momentumVelocityRef.current = Math.max(-2.5, Math.min(2.5, velocityRef.current * 0.8));
+        if (timeSinceLast < 140 && Math.abs(velocityRef.current) > 0.12) {
+          momentumVelocityRef.current = Math.max(-2.5, Math.min(2.5, velocityRef.current * 0.85));
         }
       }
 
@@ -504,28 +566,34 @@ export const FilaAliados: React.FC = () => {
       setIsDraggingState(false);
 
       setTimeout(() => {
+        didDragRef.current = false;
         dragDeltaRef.current = 0;
-      }, 80);
+      }, 350);
     };
 
     const onTouchCancel = () => {
+      lastTouchEndTimeRef.current = performance.now();
+      isHoveredRef.current = false;
       isTrackingTouchRef.current = false;
       isDraggingRef.current = false;
       gestureDirectionRef.current = 'undetermined';
       setIsDraggingState(false);
-      dragDeltaRef.current = 0;
+      setTimeout(() => {
+        didDragRef.current = false;
+        dragDeltaRef.current = 0;
+      }, 350);
     };
 
-    track.addEventListener('touchstart', onTouchStart, { passive: true });
-    track.addEventListener('touchmove', onTouchMove, { passive: false });
-    track.addEventListener('touchend', onTouchEnd, { passive: true });
-    track.addEventListener('touchcancel', onTouchCancel, { passive: true });
+    container.addEventListener('touchstart', onTouchStart, { passive: true });
+    container.addEventListener('touchmove', onTouchMove, { passive: false });
+    container.addEventListener('touchend', onTouchEnd, { passive: true });
+    container.addEventListener('touchcancel', onTouchCancel, { passive: true });
 
     return () => {
-      track.removeEventListener('touchstart', onTouchStart);
-      track.removeEventListener('touchmove', onTouchMove);
-      track.removeEventListener('touchend', onTouchEnd);
-      track.removeEventListener('touchcancel', onTouchCancel);
+      container.removeEventListener('touchstart', onTouchStart);
+      container.removeEventListener('touchmove', onTouchMove);
+      container.removeEventListener('touchend', onTouchEnd);
+      container.removeEventListener('touchcancel', onTouchCancel);
     };
   }, [prefersReducedMotion]);
 
@@ -584,15 +652,31 @@ export const FilaAliados: React.FC = () => {
 
       {/* Contenedor del Carrusel con desvanecido CSS por mask-image */}
       <div
+        ref={outerRef}
         className={styles.marqueeOuter}
         onMouseEnter={() => {
-          isHoveredRef.current = true;
+          // Solo pausar por hover si el dispositivo cuenta con un puntero fino real (mouse/trackpad)
+          // En móviles touch, mouseenter es sintético y se queda pegado para siempre sin emitir mouseleave
+          if (
+            typeof window !== 'undefined' &&
+            window.matchMedia &&
+            window.matchMedia('(hover: hover) and (pointer: fine)').matches
+          ) {
+            isHoveredRef.current = true;
+          }
         }}
         onMouseLeave={() => {
           isHoveredRef.current = false;
         }}
-        onFocusCapture={() => {
-          isFocusedRef.current = true;
+        onFocusCapture={(e) => {
+          // Solo pausar si el foco proviene de navegación por teclado (:focus-visible)
+          try {
+            if (e.target instanceof HTMLElement && e.target.matches(':focus-visible')) {
+              isFocusedRef.current = true;
+            }
+          } catch {
+            // Fallback seguro
+          }
         }}
         onBlurCapture={(e) => {
           if (!e.currentTarget.contains(e.relatedTarget as Node)) {
@@ -623,8 +707,9 @@ export const FilaAliados: React.FC = () => {
                   className={styles.aliadoItem}
                   aria-label={`Visitar Instagram de ${aliado.name}`}
                   onClick={(e) => {
-                    if (dragDeltaRef.current > 6) {
+                    if (didDragRef.current || dragDeltaRef.current > 6) {
                       e.preventDefault();
+                      e.stopPropagation();
                     }
                   }}
                 >

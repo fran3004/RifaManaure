@@ -98,6 +98,7 @@
   cursor: grab;
   user-select: none;
   -webkit-user-select: none;
+  -webkit-touch-callout: none;
   touch-action: pan-y;
   padding: 0.75rem 1.5rem;
 }
@@ -124,6 +125,11 @@
   border-radius: var(--radius-md);
   transition: transform var(--transition-fast);
   box-sizing: border-box;
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-user-drag: none;
+  -webkit-touch-callout: none;
 }
 
 .aliadoItem:focus-visible {
@@ -149,6 +155,9 @@
   position: relative;
   transition: transform var(--transition-normal, 250ms ease);
   box-sizing: border-box;
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 /* Efecto al hover y al recibir foco: elevación suave del logo */
@@ -165,6 +174,9 @@
   height: auto;
   object-fit: contain;
   pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-user-drag: none;
   filter: drop-shadow(0 4px 10px rgba(15, 46, 29, 0.08));
   transition:
     transform var(--transition-normal, 250ms ease),
@@ -274,6 +286,7 @@
     -webkit-mask-image: none;
     overflow-x: auto;
     scrollbar-width: thin;
+    touch-action: pan-x pan-y;
   }
 
   .aliadosTrack,
@@ -282,6 +295,7 @@
     will-change: auto;
     scroll-snap-type: x mandatory;
     cursor: default;
+    touch-action: pan-x pan-y;
   }
 
   .aliadoItem {
