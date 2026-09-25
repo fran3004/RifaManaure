@@ -89,7 +89,7 @@ function getServerConfig(): ServerConfig {
   return {
     brevoApiKey: Deno.env.get("BREVO_API_KEY") || "",
     brevoSenderEmail: Deno.env.get("BREVO_SENDER_EMAIL") || "notificaciones@rifamanaure.com",
-    brevoSenderName: Deno.env.get("BREVO_SENDER_NAME") || "Rifa Manaure Balcón del Cesar",
+    brevoSenderName: Deno.env.get("BREVO_SENDER_NAME") || "Manaure Vive",
     brevoReplyToEmail: Deno.env.get("BREVO_REPLY_TO_EMAIL") || "",
     supabaseUrl: Deno.env.get("SUPABASE_URL") || "",
     supabaseAnonKey: Deno.env.get("SUPABASE_ANON_KEY") || "",

@@ -278,7 +278,7 @@ function createBrevoEdgeFunctionHandler(
 
     const brevoPayload: any = {
       sender: {
-        name: env.BREVO_SENDER_NAME || 'Rifa Manaure Balcón del Cesar',
+        name: env.BREVO_SENDER_NAME || 'Manaure Vive',
         email: env.BREVO_SENDER_EMAIL || 'notificaciones@rifamanaure.com',
       },
       to: [{ email: buyerEmail, name: buyer?.full_name || 'Comprador' }],
@@ -422,7 +422,7 @@ describe('Supabase Edge Function: send-brevo-email', () => {
     defaultEnv = {
       BREVO_API_KEY: 'xkeysib-mock-api-key-12345678',
       BREVO_SENDER_EMAIL: 'notificaciones@rifamanaure.com',
-      BREVO_SENDER_NAME: 'Rifa Manaure Balcón del Cesar',
+      BREVO_SENDER_NAME: 'Manaure Vive',
       SUPABASE_URL: 'https://example.supabase.co',
       SUPABASE_SERVICE_ROLE_KEY: 'service-role-secret-key',
     };
