@@ -315,123 +315,41 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 48px;
-  flex-shrink: 0;
-  border-radius: var(--radius-md, 10px);
-  background-color: var(--bg-card);
-  border: 1px solid var(--border-subtle);
-  color: var(--brand-primary);
+  border: none;
+  background: transparent;
   cursor: pointer;
-  transition: all var(--transition-fast);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-}
-
-.rangeNavArrow:hover:not(:disabled) {
-  background-color: var(--bg-surface);
-  border-color: var(--brand-primary);
-  transform: translateY(-1px);
-}
-
-.rangeNavArrow:focus-visible {
-  outline: 3px solid var(--focus-ring);
-  outline-offset: 2px;
-}
-
-.rangeNavArrow:disabled {
-  opacity: 0.35;
-  cursor: not-allowed;
-  background-color: var(--bg-surface);
-  border-color: var(--border-subtle);
-  transform: none;
 }
 
 .rangeSelectorCard {
   position: relative;
-  flex: 1;
-  min-width: 0;
-  min-height: 48px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.45rem 0.85rem;
-  background-color: var(--bg-card);
-  border: 1.5px solid var(--border-subtle);
-  border-radius: var(--radius-md, 10px);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
   cursor: pointer;
-  overflow: hidden;
-  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
-}
-
-.rangeSelectorCard:hover {
-  border-color: var(--brand-primary);
-}
-
-.rangeSelectorCard:focus-within {
-  outline: 3px solid var(--focus-ring);
-  outline-offset: 2px;
-  border-color: var(--brand-primary);
 }
 
 .rangeSelectorInfo {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  min-width: 0;
-  gap: 0.15rem;
 }
 
 .rangeMainLabelRow {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
-  min-width: 0;
 }
 
 .rangeIcon {
   color: var(--brand-accent);
-  flex-shrink: 0;
 }
 
 .rangeMainLabel {
   font-family: var(--font-mono, 'JetBrains Mono Variable', monospace);
-  font-size: 0.9375rem;
   font-weight: 700;
-  color: var(--brand-primary);
-  white-space: nowrap;
-  letter-spacing: 0.02em;
+}
+
+.rangeChevronIcon {
+  display: inline-flex;
 }
 
 .rangeMetaBadge {
   font-size: 0.72rem;
-  line-height: 1.2;
-  font-weight: 600;
-  color: var(--text-muted);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.rangeChevronBox {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--brand-primary);
-  flex-shrink: 0;
-  margin-left: 0.5rem;
-  opacity: 0.8;
-}
-
-.rangeProgressBar {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  height: 3px;
-  background: linear-gradient(90deg, var(--brand-accent) 0%, var(--brand-primary) 100%);
-  transition: width 0.25s ease-out;
-  border-bottom-left-radius: var(--radius-md, 10px);
-  border-bottom-right-radius: var(--radius-md, 10px);
 }
 
 .rangeNativeSelect {
@@ -452,16 +370,6 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 0.5rem;
-}
-
-.statusChip {
-  flex: 1 1 auto;
-  min-width: 0;
-  text-align: center;
-  box-sizing: border-box;
-  font-variant-numeric: tabular-nums;
-  user-select: none;
-  -webkit-tap-highlight-color: transparent;
 }
 
 .filterChip {
@@ -990,8 +898,146 @@
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    gap: 0.65rem;
+    gap: 0.5rem;
+    padding: 0.35rem 0.5rem;
+    background-color: var(--bg-card);
+    border: 1.5px solid var(--border-subtle);
+    border-radius: var(--radius-full);
+    box-shadow: 0 2px 6px rgba(15, 62, 46, 0.05);
     box-sizing: border-box;
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  }
+
+  .compactRangeNavigator:focus-within {
+    border-color: var(--brand-primary);
+    box-shadow: 0 0 0 3px rgba(15, 62, 46, 0.12);
+  }
+
+  .rangeNavArrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    flex-shrink: 0;
+    border-radius: var(--radius-full);
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    color: var(--brand-primary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    padding: 0;
+  }
+
+  .rangeNavArrow:hover:not(:disabled) {
+    background-color: var(--brand-primary);
+    border-color: var(--brand-primary);
+    color: #FFFFFF;
+    transform: scale(1.05);
+  }
+
+  .rangeNavArrow:active:not(:disabled) {
+    transform: scale(0.95);
+  }
+
+  .rangeNavArrow:focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+  }
+
+  .rangeNavArrow:disabled {
+    opacity: 0.25;
+    cursor: not-allowed;
+    background-color: transparent;
+    border-color: transparent;
+    color: var(--text-muted);
+    transform: none;
+  }
+
+  .rangeSelectorCard {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.2rem 0.5rem;
+    cursor: pointer;
+    text-align: center;
+    border-radius: var(--radius-full);
+    transition: background-color var(--transition-fast);
+  }
+
+  .rangeSelectorCard:hover {
+    background-color: var(--bg-surface);
+  }
+
+  .rangeSelectorInfo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+    gap: 0.1rem;
+    pointer-events: none;
+  }
+
+  .rangeMainLabelRow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    min-width: 0;
+  }
+
+  .rangeIcon {
+    color: var(--brand-accent);
+    flex-shrink: 0;
+  }
+
+  .rangeMainLabel {
+    font-family: var(--font-mono, 'JetBrains Mono Variable', monospace);
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: var(--brand-primary);
+    white-space: nowrap;
+    letter-spacing: 0.02em;
+  }
+
+  .rangeChevronIcon {
+    color: var(--brand-primary);
+    opacity: 0.65;
+    flex-shrink: 0;
+    transition: transform var(--transition-fast), opacity var(--transition-fast);
+  }
+
+  .rangeSelectorCard:hover .rangeChevronIcon {
+    transform: translateY(1px);
+    opacity: 1;
+  }
+
+  .rangeMetaBadge {
+    font-size: 0.72rem;
+    line-height: 1.1;
+    font-weight: 600;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .rangeNativeSelect {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+    z-index: 2;
+    font-size: 16px; /* Evita zoom automático involuntario en iOS Safari */
+    appearance: none;
+    -webkit-appearance: none;
   }
 
   .filterBar {
@@ -1225,17 +1271,22 @@
 
 /* --- Responsive Móvil Muy Pequeño (< 360px, ej: iPhone SE 320px) --- */
 @media (max-width: 359px) {
+  .compactRangeNavigator {
+    gap: 0.25rem;
+    padding: 0.25rem 0.35rem;
+  }
+
   .rangeNavArrow {
-    width: 38px;
-    height: 44px;
+    width: 32px;
+    height: 32px;
   }
 
   .rangeMainLabel {
-    font-size: 0.875rem;
+    font-size: 0.85rem;
   }
 
   .rangeMetaBadge {
-    font-size: 0.6875rem;
+    font-size: 0.65rem;
   }
 
   .statusChips {
@@ -1243,7 +1294,7 @@
   }
 
   .statusChip {
-    font-size: 0.75rem;
+    font-size: 0.72rem;
     padding: 0.45rem 0.15rem;
     min-height: 40px;
   }

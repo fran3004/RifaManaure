@@ -24,13 +24,16 @@ import styles from './SelectorBoletos.module.css';
 type FilterType = 'all' | 'available' | 'selected';
 
 // Rangos de 200 boletos para pantallas de escritorio (≥ 1024px)
-const DESKTOP_RANGES = [
+export const DESKTOP_RANGES = [
   { label: '000 - 199', min: 0, max: 199 },
   { label: '200 - 399', min: 200, max: 399 },
   { label: '400 - 599', min: 400, max: 599 },
   { label: '600 - 799', min: 600, max: 799 },
   { label: '800 - 999', min: 800, max: 999 },
 ];
+
+// Alias para compatibilidad absoluta con referencias residuales o HMR
+export const RANGES = DESKTOP_RANGES;
 
 // Rangos de 100 boletos para teléfonos, tablets y dispositivos pequeños (< 1024px)
 const COMPACT_RANGES = [
@@ -464,7 +467,7 @@ export const SelectorBoletos: React.FC = () => {
                 aria-label="Ver 100 boletos anteriores"
                 title="Ver 100 boletos anteriores"
               >
-                <ChevronLeft size={20} aria-hidden="true" />
+                <ChevronLeft size={18} aria-hidden="true" />
               </button>
 
               <div className={styles.rangeSelectorCard}>
@@ -472,26 +475,14 @@ export const SelectorBoletos: React.FC = () => {
                   <div className={styles.rangeMainLabelRow}>
                     <Layers size={14} className={styles.rangeIcon} aria-hidden="true" />
                     <span className={styles.rangeMainLabel}>
-                      Rango {COMPACT_RANGES[selectedCompactIndex]?.label}
+                      Boletos {COMPACT_RANGES[selectedCompactIndex]?.label}
                     </span>
+                    <ChevronDown size={14} className={styles.rangeChevronIcon} aria-hidden="true" />
                   </div>
                   <span className={styles.rangeMetaBadge}>
                     Grupo {selectedCompactIndex + 1} de {COMPACT_RANGES.length} • 100 boletos
                   </span>
                 </div>
-
-                <div className={styles.rangeChevronBox} aria-hidden="true">
-                  <ChevronDown size={18} />
-                </div>
-
-                {/* Barra de progreso de posición */}
-                <div
-                  className={styles.rangeProgressBar}
-                  style={{
-                    width: `${((selectedCompactIndex + 1) / COMPACT_RANGES.length) * 100}%`,
-                  }}
-                  aria-hidden="true"
-                />
 
                 {/* Select nativo overlay para interacción táctil fluida sin desbordamiento */}
                 <select
@@ -502,7 +493,7 @@ export const SelectorBoletos: React.FC = () => {
                 >
                   {COMPACT_RANGES.map((r, idx) => (
                     <option key={r.label} value={idx}>
-                      Rango {r.label} ({idx + 1} de {COMPACT_RANGES.length} • 100 boletos)
+                      Boletos {r.label} ({idx + 1} de {COMPACT_RANGES.length} • 100 boletos)
                     </option>
                   ))}
                 </select>
@@ -516,7 +507,7 @@ export const SelectorBoletos: React.FC = () => {
                 aria-label="Ver 100 boletos siguientes"
                 title="Ver 100 boletos siguientes"
               >
-                <ChevronRight size={20} aria-hidden="true" />
+                <ChevronRight size={18} aria-hidden="true" />
               </button>
             </div>
 
