@@ -257,7 +257,7 @@ export async function createOrder(
       orderId: res.order_id,
       reference: res.reference,
       buyerId: res.buyer_id,
-      totalAmount: res.total_amount,
+      totalAmount: res.total_amount != null ? Number(res.total_amount) : undefined,
       reservationExpiresAt: res.reservation_expires_at,
       idempotencyReplayed: res.idempotency_replayed,
     };

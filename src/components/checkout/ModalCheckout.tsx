@@ -22,8 +22,16 @@ import {
   Bell,
   Search,
   Mail,
+  AlertTriangle,
+  Trash2,
 } from 'lucide-react';
-import { formatCOP, isValidDocument, isValidPhone, isValidEmail } from '@/lib/utils';
+import {
+  formatCOP,
+  isValidDocument,
+  isValidPhone,
+  isValidEmail,
+  parseNumericPrice,
+} from '@/lib/utils';
 import { createOrder } from '@/services/ticketService';
 import { normalizeAppError, logAppError } from '@/lib/errorHandling';
 import {
@@ -220,12 +228,25 @@ export const ModalCheckout: React.FC = () => {
   const modalCardRef = useRef<HTMLDivElement | null>(null);
   const triggerElementRef = useRef<HTMLElement | null>(null);
 
+  // Diálogo de confirmación de salida y advertencia de liberación de boletos
+  const [showExitConfirm, setShowExitConfirm] = useState<boolean>(false);
+
+  // Cálculos numéricos y de montos blindados contra errores flotantes o datos nulos
+  const effectiveUnitPrice = parseNumericPrice(unitPrice || raffle?.ticket_price);
+  const activeTickets = confirmedTickets.length > 0 ? confirmedTickets : selectedTickets;
+  const computedTotal = Math.round(activeTickets.length * effectiveUnitPrice);
+  const displayedTotal =
+    confirmedTotalAmount > 0
+      ? confirmedTotalAmount
+      : (computedTotal > 0 ? computedTotal : totalAmount);
+
   const handleClose = useCallback(() => {
     if (currentStep === 7) {
       setCurrentStep(1);
       setCreatedOrderId('');
       setCreatedBuyerId('');
       setOrderReference('');
+      setConfirmedTickets([]);
       setConfirmedTotalAmount(0);
       setReceiptFile(null);
       setReceiptPreview(null);
@@ -237,8 +258,51 @@ export const ModalCheckout: React.FC = () => {
           : ''
       );
     }
+    setShowExitConfirm(false);
     closeCheckout();
   }, [currentStep, closeCheckout]);
+
+  // Solicitud de salida: si la orden no está finalizada (pasos 1 a 6), advertir de liberación de boletos
+  const requestCloseCheckout = useCallback(() => {
+    if (currentStep === 7) {
+      handleClose();
+      return;
+    }
+    setShowExitConfirm(true);
+  }, [currentStep, handleClose]);
+
+  // Confirmación definitiva de salida: libera números inmediatamente y restablece todo el proceso
+  const handleConfirmExit = useCallback(() => {
+    setShowExitConfirm(false);
+    clearSelection(); // Liberar boletos seleccionados
+    setCurrentStep(1);
+    setCreatedOrderId('');
+    setCreatedBuyerId('');
+    setOrderReference('');
+    setConfirmedTickets([]);
+    setConfirmedTotalAmount(0);
+    setReceiptFile(null);
+    setReceiptPreview(null);
+    setHasReservationError(false);
+    setErrorMessage('');
+    setFormData({
+      fullName: '',
+      documentId: '',
+      phone: '',
+      email: '',
+      city: '',
+      contactPreference: 'both',
+      acceptTerms: true,
+    });
+    setErrors({});
+    setIdempotencyKey(
+      typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+        ? crypto.randomUUID()
+        : ''
+      );
+    closeCheckout();
+    void refreshTickets();
+  }, [clearSelection, closeCheckout, refreshTickets]);
 
   // Gestión de foco inicial, restauración al cerrar y bloqueo de scroll del body
   useEffect(() => {
@@ -279,7 +343,11 @@ export const ModalCheckout: React.FC = () => {
       if (e.key === 'Escape') {
         if (!isReserving && !isSubmittingProof) {
           e.preventDefault();
-          handleClose();
+          if (showExitConfirm) {
+            setShowExitConfirm(false);
+          } else {
+            requestCloseCheckout();
+          }
         }
         return;
       }
@@ -309,7 +377,7 @@ export const ModalCheckout: React.FC = () => {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isCheckoutOpen, isReserving, isSubmittingProof, handleClose]);
+  }, [isCheckoutOpen, isReserving, isSubmittingProof, showExitConfirm, requestCloseCheckout]);
 
   // Cargar cuentas oficiales de recaudo
   useEffect(() => {
@@ -456,7 +524,7 @@ export const ModalCheckout: React.FC = () => {
           city: formData.city,
         },
         selectedTickets,
-        undefined, // Total calculado exclusivamente en el servidor
+        displayedTotal, // Total calculado seguro para validación de integridad
         'transfer_manual',
         formData.contactPreference,
         undefined,
@@ -499,8 +567,13 @@ export const ModalCheckout: React.FC = () => {
       setOrderCreatedAt(new Date());
       setConfirmedTickets([...selectedTickets]);
       setConfirmedTotalAmount(
-        orderResult.totalAmount ||
-          (raffle?.ticket_price ? raffle.ticket_price * selectedTickets.length : totalAmount)
+        orderResult.totalAmount != null
+          ? Math.round(Number(orderResult.totalAmount))
+          : (displayedTotal > 0
+              ? displayedTotal
+              : (raffle?.ticket_price
+                  ? Math.round(Number(raffle.ticket_price) * selectedTickets.length)
+                  : totalAmount))
       );
       if (orderResult.reservationExpiresAt) {
         const expiresMs = new Date(orderResult.reservationExpiresAt).getTime();
@@ -625,13 +698,13 @@ export const ModalCheckout: React.FC = () => {
     buyerPhone: supportPhone,
     buyerEmail: formData.email,
     ticketNumbers: confirmedTickets.length > 0 ? confirmedTickets : selectedTickets,
-    totalAmount,
+    totalAmount: displayedTotal,
     raffleTitle: raffle?.title,
   });
   const whatsappUrl = receiptNotification.whatsAppLink;
 
   return (
-    <div className={styles.modalBackdrop} onClick={handleClose}>
+    <div className={styles.modalBackdrop}>
       <div
         ref={modalCardRef}
         className={styles.modalCard}
@@ -652,7 +725,7 @@ export const ModalCheckout: React.FC = () => {
           </div>
           <button
             type="button"
-            onClick={handleClose}
+            onClick={requestCloseCheckout}
             className={styles.closeBtn}
             aria-label="Cerrar ventana de compra"
           >
@@ -705,7 +778,7 @@ export const ModalCheckout: React.FC = () => {
             </div>
             <div className={styles.summaryTotalBox}>
               <span className={styles.summaryLabel}>Total:</span>
-              <strong className={styles.summaryTotalAmount}>{formatCOP(totalAmount)}</strong>
+              <strong className={styles.summaryTotalAmount}>{formatCOP(displayedTotal)}</strong>
             </div>
           </div>
         )}
@@ -746,7 +819,7 @@ export const ModalCheckout: React.FC = () => {
               >
                 Elegir otros boletos
               </button>
-              <button type="button" className={styles.cancelBtn} onClick={handleClose}>
+              <button type="button" className={styles.cancelBtn} onClick={requestCloseCheckout}>
                 Cerrar
               </button>
             </div>
@@ -1073,7 +1146,7 @@ export const ModalCheckout: React.FC = () => {
 
               <div className={styles.pricingRow}>
                 <span>Valor Unitario por Boleto:</span>
-                <strong>{formatCOP(unitPrice || raffle?.ticket_price || 0)}</strong>
+                <strong>{formatCOP(effectiveUnitPrice)}</strong>
               </div>
 
               <div className={styles.pricingRow}>
@@ -1085,7 +1158,7 @@ export const ModalCheckout: React.FC = () => {
 
               <div className={styles.pricingTotalRow}>
                 <strong>Total a Pagar:</strong>
-                <span className={styles.pricingTotalVal}>{formatCOP(totalAmount)}</span>
+                <span className={styles.pricingTotalVal}>{formatCOP(displayedTotal)}</span>
               </div>
             </div>
 
@@ -1329,11 +1402,11 @@ export const ModalCheckout: React.FC = () => {
                 <div className={styles.instructionBody}>
                   <h5 className={styles.instructionHeading}>
                     Transfiere el monto exacto:{' '}
-                    <strong className={styles.instructionHighlight}>{formatCOP(totalAmount)}</strong>
+                    <strong className={styles.instructionHighlight}>{formatCOP(displayedTotal)}</strong>
                   </h5>
                   <p className={styles.instructionText}>
                     Asegúrate de enviar la cifra precisa correspondiente a tus{' '}
-                    {confirmedTickets.length} boletos.
+                    {confirmedTickets.length > 0 ? confirmedTickets.length : selectedTickets.length} boletos.
                   </p>
                 </div>
               </div>
@@ -1689,6 +1762,73 @@ export const ModalCheckout: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* ========================================================================= */}
+      {/* DIÁLOGO MODAL DE CONFIRMACIÓN DE SALIDA (LIBERACIÓN DE BOLETOS)          */}
+      {/* ========================================================================= */}
+      {showExitConfirm && (
+        <div
+          className={styles.exitConfirmBackdrop}
+          onClick={(e) => e.stopPropagation()}
+          role="alertdialog"
+          aria-modal="true"
+          aria-labelledby="exit-confirm-title"
+          aria-describedby="exit-confirm-desc"
+        >
+          <div className={styles.exitConfirmCard}>
+            <div className={styles.exitConfirmIconWrapper}>
+              <AlertTriangle size={32} className={styles.exitConfirmIcon} aria-hidden="true" />
+            </div>
+
+            <h4 id="exit-confirm-title" className={styles.exitConfirmTitle}>
+              ¿Deseas cancelar y salir de la compra?
+            </h4>
+
+            <p id="exit-confirm-desc" className={styles.exitConfirmMessage}>
+              Si sales ahora, los números seleccionados serán{' '}
+              <strong className={styles.exitConfirmHighlight}>liberados inmediatamente</strong> y
+              volverán a estar disponibles para cualquier otro comprador. Tendrás que repetir todo el
+              proceso de compra si decides volver a apartarlos.
+            </p>
+
+            {activeTickets.length > 0 && (
+              <div className={styles.exitConfirmTicketsContainer}>
+                <span className={styles.exitConfirmTicketsLabel}>
+                  Boletos que serán liberados ({activeTickets.length}):
+                </span>
+                <div className={styles.exitConfirmTicketsList}>
+                  {activeTickets.map((num) => (
+                    <span key={num} className={styles.exitConfirmTicketChip}>
+                      {formatTicketNumber(num)}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className={styles.exitConfirmActions}>
+              <button
+                type="button"
+                className={styles.exitConfirmStayBtn}
+                onClick={() => setShowExitConfirm(false)}
+                autoFocus
+              >
+                <Check size={18} aria-hidden="true" />
+                <span>Continuar con mi compra</span>
+              </button>
+
+              <button
+                type="button"
+                className={styles.exitConfirmLeaveBtn}
+                onClick={handleConfirmExit}
+              >
+                <Trash2 size={16} aria-hidden="true" />
+                <span>Sí, salir y liberar números</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

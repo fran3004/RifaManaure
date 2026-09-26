@@ -3,15 +3,75 @@
  */
 
 /**
- * Formatea un número a moneda colombiana (COP).
+ * Extrae y normaliza de forma segura un valor de precio numérico entero positivo.
+ * Previene errores de parseo, cadenas corruptas, formatos con separadores de miles ($ 25.000 / 25,000) o valores negativos.
+ */
+export function parseNumericPrice(value: unknown): number {
+  if (typeof value === 'number') {
+    return Number.isFinite(value) && value > 0 ? Math.round(value) : 0;
+  }
+  if (typeof value === 'string') {
+    let cleaned = value.trim().replace(/[$\s]/g, '');
+    if (!cleaned) return 0;
+
+    // Caso 1: Ambos separadores presentes (ej. "25.000,00" o "25,000.00")
+    if (cleaned.includes('.') && cleaned.includes(',')) {
+      if (cleaned.indexOf('.') < cleaned.indexOf(',')) {
+        // Formato latino: 25.000,00
+        cleaned = cleaned.replace(/\./g, '').replace(',', '.');
+      } else {
+        // Formato anglosajón: 25,000.00
+        cleaned = cleaned.replace(/,/g, '');
+      }
+    } else if (cleaned.includes('.')) {
+      // Caso 2: Solo punto(s)
+      const dotCount = (cleaned.match(/\./g) || []).length;
+      if (dotCount > 1) {
+        // Múltiples puntos: "1.000.000" -> separador de miles
+        cleaned = cleaned.replace(/\./g, '');
+      } else {
+        // Un solo punto:
+        const parts = cleaned.split('.');
+        // Si hay exactamente 3 dígitos tras el punto (ej: "25.000", "5.000"), es separador de miles en COP
+        if (parts[1] && parts[1].length === 3 && parts[0].length >= 1) {
+          cleaned = cleaned.replace('.', '');
+        }
+      }
+    } else if (cleaned.includes(',')) {
+      // Caso 3: Solo coma(s)
+      const commaCount = (cleaned.match(/,/g) || []).length;
+      if (commaCount > 1) {
+        cleaned = cleaned.replace(/,/g, '');
+      } else {
+        const parts = cleaned.split(',');
+        if (parts[1] && parts[1].length === 3 && parts[0].length >= 1) {
+          cleaned = cleaned.replace(',', '');
+        } else {
+          cleaned = cleaned.replace(',', '.');
+        }
+      }
+    }
+
+    const num = Number(cleaned);
+    if (Number.isFinite(num) && num > 0) {
+      return Math.round(num);
+    }
+  }
+  return 0;
+}
+
+/**
+ * Formatea un número o string a moneda colombiana (COP) redondeado a entero.
  * Ejemplo: 25000 -> "$ 25.000"
  */
-export function formatCOP(amount: number): string {
+export function formatCOP(amount: number | string | null | undefined): string {
+  const numeric = typeof amount === 'number' ? amount : Number(amount);
+  const safeAmount = Number.isFinite(numeric) && numeric >= 0 ? Math.round(numeric) : 0;
   return new Intl.NumberFormat('es-CO', {
     style: 'currency',
     currency: 'COP',
     maximumFractionDigits: 0,
-  }).format(amount);
+  }).format(safeAmount);
 }
 
 /**

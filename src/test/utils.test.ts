@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   formatCOP,
+  parseNumericPrice,
   formatTicketNumber,
   isValidDocument,
   isValidPhone,
@@ -15,7 +16,7 @@ import {
 } from '@/lib/utils';
 
 describe('Utilidades de Formato y Validación (src/lib/utils.ts)', () => {
-  describe('formatCOP', () => {
+  describe('formatCOP y parseNumericPrice', () => {
     it('debe formatear montos en pesos colombianos sin decimales', () => {
       const formatted = formatCOP(25000);
       expect(formatted).toContain('25.000');
@@ -26,6 +27,25 @@ describe('Utilidades de Formato y Validación (src/lib/utils.ts)', () => {
       const formatted = formatCOP(0);
       expect(formatted).toContain('0');
       expect(formatted).toContain('$');
+    });
+
+    it('debe manejar valores nulos, undefined, cadenas o flotantes sin romper', () => {
+      expect(formatCOP(null)).toContain('0');
+      expect(formatCOP(undefined)).toContain('0');
+      expect(formatCOP('50000')).toContain('50.000');
+      expect(formatCOP(25000.75)).toContain('25.001');
+      expect(formatCOP(NaN)).toContain('0');
+    });
+
+    it('parseNumericPrice debe normalizar y redondear precios de forma segura', () => {
+      expect(parseNumericPrice(25000)).toBe(25000);
+      expect(parseNumericPrice('25000')).toBe(25000);
+      expect(parseNumericPrice('$ 25000')).toBe(25000);
+      expect(parseNumericPrice(24999.8)).toBe(25000);
+      expect(parseNumericPrice(-500)).toBe(0);
+      expect(parseNumericPrice(null)).toBe(0);
+      expect(parseNumericPrice(undefined)).toBe(0);
+      expect(parseNumericPrice('invalido')).toBe(0);
     });
   });
 

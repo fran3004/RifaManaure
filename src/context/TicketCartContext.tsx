@@ -8,7 +8,7 @@ import { getActiveRaffle, getTickets } from '@/services/ticketService';
 import { getWinnerForRaffle } from '@/services/winnerService';
 import { useSystemSettings } from '@/hooks/useSystemSettings';
 import { supabase } from '@/lib/supabase';
-import { getRandomTicketNumbers } from '@/lib/utils';
+import { getRandomTicketNumbers, parseNumericPrice } from '@/lib/utils';
 import { calculateTicketStats } from '@/config/ticketSocialProof';
 import { TicketCartContext } from './TicketCartContextDefinition';
 import { ToastNotification, type ToastItem } from '@/components/common/ToastNotification';
@@ -55,8 +55,19 @@ export const TicketCartProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
   const maxTicketsPerBuyer =
     systemSettings?.max_tickets_per_buyer ?? raffle?.max_tickets_per_buyer ?? 20;
-  const unitPrice = raffle?.ticket_price ? Number(raffle.ticket_price) : 0;
-  const totalAmount = selectedTickets.length * unitPrice;
+
+  // Cálculo matemático ultra-seguro y blindado del precio unitario y total (COP entero)
+  const unitPrice = useMemo(() => {
+    return parseNumericPrice(raffle?.ticket_price);
+  }, [raffle?.ticket_price]);
+
+  const uniqueSelectedTickets = useMemo(() => {
+    return Array.from(new Set(selectedTickets.filter((t) => typeof t === 'string' && t.trim() !== '')));
+  }, [selectedTickets]);
+
+  const totalAmount = useMemo(() => {
+    return Math.round(uniqueSelectedTickets.length * unitPrice);
+  }, [uniqueSelectedTickets.length, unitPrice]);
 
   // Estadísticas unificadas y reactivas en tiempo real derivadas del listado de boletos
   const ticketStats = useMemo(() => {
@@ -377,7 +388,7 @@ export const TicketCartProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         );
         return prev;
       }
-      return [...prev, ticketNumber];
+      return Array.from(new Set([...prev, ticketNumber]));
     });
   };
 
@@ -418,7 +429,7 @@ export const TicketCartProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }
 
     const randomPicks = getRandomTicketNumbers(availableNumbers, availableToPick);
-    setSelectedTickets((prev) => [...prev, ...randomPicks]);
+    setSelectedTickets((prev) => Array.from(new Set([...prev, ...randomPicks])));
 
     if (availableToPick < count) {
       showToast(
