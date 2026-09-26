@@ -48,6 +48,15 @@ export async function getActiveRaffle(): Promise<RaffleRow | null> {
       .maybeSingle();
 
     if (activeRaffle) {
+      if (activeRaffle.draw_date && new Date(activeRaffle.draw_date).getTime() <= Date.now()) {
+        void (async () => {
+          try {
+            await supabase.rpc('check_and_auto_close_expired_raffles');
+          } catch {
+            // Silencioso en segundo plano
+          }
+        })();
+      }
       return activeRaffle as RaffleRow;
     }
 

@@ -1053,6 +1053,10 @@ export type Database = {
         };
         Returns: Json;
       };
+      check_and_auto_close_expired_raffles: {
+        Args: Record<PropertyKey, never>;
+        Returns: Json;
+      };
     };
     Enums: {
       [_ in never]: never;

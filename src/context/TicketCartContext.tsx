@@ -320,13 +320,35 @@ export const TicketCartProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     };
   }, [loadData, raffle?.id, raffle?.status]);
 
-  const toggleTicketSelection = (ticketNumber: string) => {
+  // Validar si la rifa está verdaderamente abierta para ventas (status active y fecha de sorteo no vencida)
+  const isRaffleSalesOpen = useMemo(() => {
+    if (!raffle || raffle.status !== 'active') return false;
+    if (raffle.draw_date) {
+      const drawTime = new Date(raffle.draw_date).getTime();
+      if (!isNaN(drawTime) && drawTime <= Date.now()) {
+        return false;
+      }
+    }
+    return true;
+  }, [raffle]);
 
-    if (raffle && raffle.status !== 'active') {
+  // Limpiar automáticamente el carrito si la fecha límite se vence mientras el usuario está en la página
+  useEffect(() => {
+    if (!isRaffleSalesOpen && selectedTickets.length > 0) {
+      setSelectedTickets([]);
+    }
+  }, [isRaffleSalesOpen, selectedTickets.length]);
+
+  const toggleTicketSelection = (ticketNumber: string) => {
+    if (!isRaffleSalesOpen) {
+      const isPastDate =
+        Boolean(raffle?.draw_date && new Date(raffle.draw_date).getTime() <= Date.now());
       showToast(
         'info',
-        'Sorteo Pausado',
-        'La venta de boletos no está disponible en este momento.'
+        isPastDate ? 'Venta Concluida' : 'Sorteo No Disponible',
+        isPastDate
+          ? 'La venta de boletos para esta edición ha finalizado al haberse cumplido la fecha límite del sorteo.'
+          : 'La venta de boletos no está disponible en este momento.'
       );
       return;
     }
@@ -350,11 +372,15 @@ export const TicketCartProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   };
 
   const selectRandomTickets = (count: number) => {
-    if (raffle && raffle.status !== 'active') {
+    if (!isRaffleSalesOpen) {
+      const isPastDate =
+        Boolean(raffle?.draw_date && new Date(raffle.draw_date).getTime() <= Date.now());
       showToast(
         'info',
-        'Sorteo Pausado',
-        'La venta de boletos no está disponible en este momento.'
+        isPastDate ? 'Venta Concluida' : 'Sorteo No Disponible',
+        isPastDate
+          ? 'La venta de boletos para esta edición ha finalizado al haberse cumplido la fecha límite del sorteo.'
+          : 'La venta de boletos no está disponible en este momento.'
       );
       return;
     }
@@ -398,11 +424,15 @@ export const TicketCartProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   };
 
   const openCheckout = () => {
-    if (raffle && raffle.status !== 'active') {
+    if (!isRaffleSalesOpen) {
+      const isPastDate =
+        Boolean(raffle?.draw_date && new Date(raffle.draw_date).getTime() <= Date.now());
       showToast(
         'info',
-        'Sorteo Pausado',
-        'La rifa se encuentra pausada o no está disponible para compras en este momento.'
+        isPastDate ? 'Venta Concluida' : 'Sorteo No Disponible',
+        isPastDate
+          ? 'La venta de boletos para esta edición ha finalizado al haberse cumplido la fecha límite del sorteo.'
+          : 'La rifa se encuentra pausada o no está disponible para compras en este momento.'
       );
       return;
     }

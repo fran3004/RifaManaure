@@ -7,8 +7,9 @@ import {
   Calendar,
   ShieldCheck,
   MapPin,
-  AlertCircle,
   PauseCircle,
+  Clock,
+  Search,
   Flame,
   Compass,
 } from 'lucide-react';
@@ -56,8 +57,11 @@ export const HeroRifa: React.FC<HeroRifaProps> = ({
   const { raffle, unitPrice } = useTicketCart();
   const stats = useTicketStats();
 
-  const isPaused = raffle?.status === 'paused';
-  const isClosed = raffle?.status === 'closed' || raffle?.status === 'finished';
+  const isDrawDatePassed = Boolean(
+    raffle?.draw_date && new Date(raffle.draw_date).getTime() <= Date.now()
+  );
+  const isPaused = raffle?.status === 'paused' && !isDrawDatePassed;
+  const isClosed = raffle?.status === 'closed' || raffle?.status === 'finished' || isDrawDatePassed;
 
   const ticketPrice =
     propTicketPrice ?? (raffle?.ticket_price ? Number(raffle.ticket_price) : unitPrice);
@@ -305,8 +309,12 @@ export const HeroRifa: React.FC<HeroRifaProps> = ({
             </div>
           ) : isClosed ? (
             <div className={`${styles.badge} ${styles.badgeClosed}`} role="status">
-              <AlertCircle size={16} aria-hidden="true" className={styles.badgeIcon} />
-              <span>Edición Finalizada</span>
+              <Clock size={16} aria-hidden="true" className={styles.badgeIcon} />
+              <span>
+                {raffle?.status === 'finished'
+                  ? 'Edición Finalizada · Ganador Proclamado'
+                  : 'Venta Cerrada · Esperando Resultados'}
+              </span>
             </div>
           ) : (
             <div className={`${styles.badge} ${styles.badgeActive}`} role="status">
@@ -342,21 +350,33 @@ export const HeroRifa: React.FC<HeroRifaProps> = ({
             <div className={styles.ctaActions}>
               <Button
                 as="a"
-                href="#boletos"
+                href={isClosed ? '/verificar' : '#boletos'}
                 variant="primary"
                 size="lg"
-                leftIcon={<Ticket size={20} aria-hidden="true" />}
-                disabled={isPaused || isClosed}
+                leftIcon={
+                  isClosed ? (
+                    <Search size={20} aria-hidden="true" />
+                  ) : (
+                    <Ticket size={20} aria-hidden="true" />
+                  )
+                }
+                disabled={isPaused}
                 className={styles.ctaBtnPrimary}
                 onClick={(e) => {
-                  if (isPaused || isClosed) {
+                  if (isPaused) {
                     e.preventDefault();
                     return;
                   }
-                  handleScrollTo(e, 'boletos');
+                  if (!isClosed) {
+                    handleScrollTo(e, 'boletos');
+                  }
                 }}
               >
-                {isPaused ? 'Sorteo pausado' : isClosed ? 'Sorteo finalizado' : 'Elegir mis Boletos'}
+                {isPaused
+                  ? 'Sorteo pausado'
+                  : isClosed
+                  ? 'Consultar mis Boletos'
+                  : 'Elegir mis Boletos'}
               </Button>
               <Button
                 as="a"

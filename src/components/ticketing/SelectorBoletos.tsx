@@ -24,6 +24,8 @@ import {
 } from '@/lib/ticketRanges';
 import { SectionHeader, Button } from '@/components/public/ui';
 import { GanadorShowcase } from './GanadorShowcase';
+import { RaffleClosedWaitingWinner } from './RaffleClosedWaitingWinner';
+import { useActiveRaffle } from '@/hooks/useActiveRaffle';
 import styles from './SelectorBoletos.module.css';
 
 type FilterType = 'all' | 'available' | 'selected';
@@ -51,9 +53,18 @@ export const SelectorBoletos: React.FC = () => {
     openCheckout,
   } = useTicketCart();
 
-  const isRaffleActive = raffle?.status === 'active';
-  const isRafflePaused = raffle?.status === 'paused';
-  const isRaffleClosed = raffle?.status === 'closed' || raffle?.status === 'finished';
+  const { lotteryReference, drawDateFormatted, cifrasText } = useActiveRaffle();
+
+  const isDrawDatePassed = useMemo(() => {
+    if (!raffle?.draw_date) return false;
+    const drawTime = new Date(raffle.draw_date).getTime();
+    return !isNaN(drawTime) && drawTime <= Date.now();
+  }, [raffle?.draw_date]);
+
+  const isRaffleClosed =
+    raffle?.status === 'closed' || raffle?.status === 'finished' || isDrawDatePassed;
+  const isRaffleActive = raffle?.status === 'active' && !isDrawDatePassed;
+  const isRafflePaused = raffle?.status === 'paused' && !isDrawDatePassed;
   const isMaxLimitReached = selectedTickets.length >= maxTicketsPerBuyer;
 
   const totalTickets = raffle?.total_tickets || 1000;
@@ -256,9 +267,21 @@ export const SelectorBoletos: React.FC = () => {
     selectedTickets,
   ]);
 
-  // Si la edición cuenta con ganador oficial registrado, mostrar la celebración en lugar del selector
+  // 1. Si la edición cuenta con ganador oficial registrado, mostrar la celebración en lugar del selector
   if (winner) {
     return <GanadorShowcase winner={winner} />;
+  }
+
+  // 2. Si la rifa está cerrada (por fecha límite de sorteo cumplida o estado 'closed'/'finished') y aún no hay ganador
+  if (isRaffleClosed) {
+    return (
+      <RaffleClosedWaitingWinner
+        raffle={raffle}
+        lotteryReference={lotteryReference}
+        drawDateFormatted={drawDateFormatted}
+        cifrasText={cifrasText}
+      />
+    );
   }
 
   return (

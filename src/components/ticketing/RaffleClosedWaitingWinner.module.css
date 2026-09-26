@@ -1,0 +1,244 @@
+/* ========================================================================= */
+/* RAFFLE CLOSED WAITING WINNER - SISTEMA DE DISEÑO MANAURE VIVE             */
+/* Paleta: Crema (#F4EFE4), Verde Bosque (var(--brand-primary)), Ámbar (var(--brand-accent)) */
+/* ========================================================================= */
+
+.section {
+  position: relative;
+  padding: clamp(3rem, 6vw, 6rem) clamp(1rem, 3vw, 2rem);
+  background-color: var(--bg-surface, #FBF8F1);
+  overflow: hidden;
+  border-top: 1px solid var(--border-subtle, #DCD5C4);
+  border-bottom: 1px solid var(--border-subtle, #DCD5C4);
+}
+
+.container {
+  position: relative;
+  max-width: 920px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(1.5rem, 3vw, 2.25rem);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Badge Superior */
+.headerBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.4rem 1.15rem;
+  border-radius: 9999px;
+  background-color: var(--brand-accent-soft, #FDF1D8);
+  border: 1px solid rgba(245, 166, 35, 0.45);
+  box-shadow: 0 2px 8px rgba(245, 166, 35, 0.12);
+  color: var(--brand-accent-strong, #8A5200);
+  font-size: 0.8125rem;
+  line-height: 1.2;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* Tarjeta Principal */
+.mainCard {
+  position: relative;
+  width: 100%;
+  background: linear-gradient(180deg, #FFFFFF 0%, #FAF7F0 100%);
+  border: 2px solid rgba(245, 166, 35, 0.35);
+  border-radius: var(--radius-xl, 20px);
+  padding: clamp(1.75rem, 4vw, 3rem) clamp(1.25rem, 3vw, 2.5rem);
+  box-shadow: 0 12px 40px -10px rgba(10, 46, 28, 0.08), 0 2px 12px rgba(245, 166, 35, 0.15);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 1.75rem;
+  box-sizing: border-box;
+}
+
+/* Halo e Icono de Trofeo en Espera */
+.iconWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--brand-accent-soft, #FDF1D8) 0%, rgba(245, 166, 35, 0.25) 100%);
+  border: 2px solid rgba(245, 166, 35, 0.5);
+  color: var(--brand-accent-strong, #8A5200);
+  box-shadow: 0 0 24px rgba(245, 166, 35, 0.25);
+  animation: gentlePulse 3s ease-in-out infinite;
+}
+
+@keyframes gentlePulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 20px rgba(245, 166, 35, 0.2);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 32px rgba(245, 166, 35, 0.35);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .iconWrapper {
+    animation: none;
+  }
+}
+
+/* Título y Subtítulo */
+.titleGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  max-width: 720px;
+}
+
+.mainTitle {
+  font-family: var(--font-heading, Georgia, serif);
+  font-size: clamp(1.6rem, 1.3rem + 1.5vw, 2.35rem);
+  line-height: 1.2;
+  font-weight: 800;
+  color: var(--brand-primary, #0A2E1C);
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.goldenHighlight {
+  background: linear-gradient(135deg, var(--brand-accent, #F5A623) 0%, #D97706 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.subtitle {
+  font-size: clamp(0.95rem, 0.9rem + 0.2vw, 1.05rem);
+  line-height: 1.55;
+  color: var(--text-secondary, #4A5568);
+  margin: 0;
+}
+
+/* Mensaje Cálido al Cliente */
+.messageCard {
+  background-color: rgba(245, 166, 35, 0.06);
+  border: 1px solid rgba(245, 166, 35, 0.3);
+  border-radius: var(--radius-lg, 14px);
+  padding: 1.25rem 1.5rem;
+  max-width: 680px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  text-align: left;
+}
+
+.messageItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--text-primary, #1A202C);
+}
+
+.messageItemIcon {
+  color: var(--brand-accent-strong, #B45309);
+  flex-shrink: 0;
+  margin-top: 0.15rem;
+}
+
+.messageItem strong {
+  color: var(--brand-primary, #0A2E1C);
+}
+
+/* Grid de Trazabilidad del Sorteo */
+.detailsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  width: 100%;
+  max-width: 720px;
+}
+
+.detailItem {
+  background-color: #FFFFFF;
+  border: 1px solid var(--border-subtle, #DCD5C4);
+  border-radius: var(--radius-md, 10px);
+  padding: 0.9rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-align: left;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.detailIcon {
+  color: var(--brand-primary, #0A2E1C);
+  background-color: var(--brand-primary-soft, rgba(10, 46, 28, 0.08));
+  padding: 0.45rem;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.detailContent {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.detailLabel {
+  font-size: 0.75rem;
+  line-height: 1.2;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted, #718096);
+  font-weight: 600;
+}
+
+.detailValue {
+  font-size: 0.875rem;
+  line-height: 1.35;
+  font-weight: 700;
+  color: var(--text-primary, #1A202C);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Fila de Botones de Acción */
+.actionsRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+.btnVerify {
+  min-width: 220px;
+}
+
+.btnPrize {
+  min-width: 190px;
+}
+
+/* Nota de Transparencia */
+.transparencyNote {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  color: var(--text-muted, #718096);
+  max-width: 600px;
+}
