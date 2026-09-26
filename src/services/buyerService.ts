@@ -47,6 +47,7 @@ export interface FetchBuyersParams {
   searchTerm?: string;
   page?: number;
   pageSize?: number;
+  raffleId?: string | null;
 }
 
 export interface FetchBuyersResponse {
@@ -71,20 +72,71 @@ export interface UpdateBuyerAdminResult {
 }
 
 /**
- * Consulta la lista de compradores registrados con paginación en servidor y búsqueda integrada.
+ * Consulta la lista de compradores registrados con paginación en servidor y búsqueda integrada,
+ * estrictamente filtrados por la rifa activa/seleccionada para evitar mezclas con otras ediciones.
  */
 export async function fetchBuyersPaginated(
   params: FetchBuyersParams = {}
 ): Promise<FetchBuyersResponse> {
-  const { searchTerm = '', page = 1, pageSize = 20 } = params;
+  const { searchTerm = '', page = 1, pageSize = 20, raffleId } = params;
+
+  // Aislamiento estricto: si no hay rifa seleccionada, no devolver compradores
+  if (!raffleId) {
+    return {
+      buyers: [],
+      totalCount: 0,
+      page: 1,
+      pageSize,
+      totalPages: 1,
+    };
+  }
 
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
 
   try {
+    // 1. Intentar mediante la RPC administrativa optimizada y segura
+    const { data: rpcData, error: rpcError } = await supabase.rpc('admin_get_buyers_by_raffle', {
+      p_raffle_id: raffleId,
+      p_search: searchTerm.trim(),
+      p_limit: pageSize,
+      p_offset: from,
+    });
+
+    if (!rpcError && rpcData && typeof rpcData === 'object') {
+      const res = rpcData as {
+        success?: boolean;
+        total_count?: number;
+        buyers?: BuyerItem[];
+      };
+
+      if (res.success && Array.isArray(res.buyers)) {
+        const totalCount = res.total_count || 0;
+        const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+        return {
+          buyers: res.buyers,
+          totalCount,
+          page,
+          pageSize,
+          totalPages,
+        };
+      }
+    }
+
+    if (rpcError) {
+      console.warn(
+        '[buyerService] RPC admin_get_buyers_by_raffle no disponible o retornó error, recurriendo a consulta fallback:',
+        rpcError.message
+      );
+    }
+
+    // 2. Fallback resiliente: consultar en Supabase filtrando estrictamente por orders.raffle_id
     let query = supabase
       .from('buyers')
-      .select('*, orders(id, status, total_amount, ticket_count)', { count: 'exact' });
+      .select('*, orders!inner(id, status, total_amount, ticket_count, raffle_id)', {
+        count: 'exact',
+      })
+      .eq('orders.raffle_id', raffleId);
 
     const trimmed = searchTerm.trim();
     if (trimmed) {
@@ -98,7 +150,7 @@ export async function fetchBuyersPaginated(
     const { data, count, error } = await query;
 
     if (error) {
-      console.error('[buyerService] Error al consultar compradores:', error);
+      console.error('[buyerService] Error en fallback al consultar compradores:', error);
       return {
         buyers: [],
         totalCount: 0,
@@ -111,15 +163,18 @@ export async function fetchBuyersPaginated(
     const totalCount = count ?? 0;
     const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
 
-    // Procesar agregados de órdenes por comprador
+    // Procesar agregados de órdenes por comprador exclusivamente para la rifa seleccionada
     interface RawBuyerWithOrders extends BuyerRow {
-      orders?: Array<Pick<OrderRow, 'id' | 'status' | 'total_amount' | 'ticket_count'>>;
+      orders?: Array<
+        Pick<OrderRow, 'id' | 'status' | 'total_amount' | 'ticket_count' | 'raffle_id'>
+      >;
     }
 
     const rawList = (data || []) as unknown as RawBuyerWithOrders[];
 
     const buyers: BuyerItem[] = rawList.map((b) => {
-      const orders = b.orders || [];
+      // Filtrar órdenes estrictamente por la rifa actual
+      const orders = (b.orders || []).filter((o) => o.raffle_id === raffleId);
       const totalOrders = orders.length;
       const paidOrders = orders.filter((o) => o.status === 'paid');
       const totalSpent = paidOrders.reduce((sum, o) => sum + (Number(o.total_amount) || 0), 0);
@@ -161,9 +216,13 @@ export async function fetchBuyersPaginated(
 }
 
 /**
- * Obtiene el historial completo de órdenes y boletos asociados a un comprador específico.
+ * Obtiene el historial de órdenes y boletos asociados a un comprador específico,
+ * opcionalmente restringido a una rifa particular para evitar mezclas entre ediciones.
  */
-export async function fetchBuyerOrdersHistory(buyerId: string): Promise<{
+export async function fetchBuyerOrdersHistory(
+  buyerId: string,
+  raffleId?: string | null
+): Promise<{
   success: boolean;
   orders: BuyerOrderSummary[];
   error?: string;
@@ -173,8 +232,8 @@ export async function fetchBuyerOrdersHistory(buyerId: string): Promise<{
   }
 
   try {
-    // 1. Consultar órdenes del comprador
-    const { data: ordersData, error: ordersError } = await supabase
+    // 1. Consultar órdenes del comprador (filtradas por rifa si aplica)
+    let ordersQuery = supabase
       .from('orders')
       .select(
         `
@@ -196,19 +255,32 @@ export async function fetchBuyerOrdersHistory(buyerId: string): Promise<{
         )
       `
       )
-      .eq('buyer_id', buyerId)
-      .order('created_at', { ascending: false });
+      .eq('buyer_id', buyerId);
+
+    if (raffleId) {
+      ordersQuery = ordersQuery.eq('raffle_id', raffleId);
+    }
+
+    const { data: ordersData, error: ordersError } = await ordersQuery.order('created_at', {
+      ascending: false,
+    });
 
     if (ordersError) {
       console.error('[buyerService] Error al consultar órdenes del comprador:', ordersError);
       return { success: false, orders: [], error: ordersError.message };
     }
 
-    // 2. Consultar boletos del comprador
-    const { data: ticketsData, error: ticketsError } = await supabase
+    // 2. Consultar boletos del comprador (filtrados por rifa si aplica)
+    let ticketsQuery = supabase
       .from('tickets')
-      .select('id, number, status, order_id')
+      .select('id, number, status, order_id, raffle_id')
       .eq('buyer_id', buyerId);
+
+    if (raffleId) {
+      ticketsQuery = ticketsQuery.eq('raffle_id', raffleId);
+    }
+
+    const { data: ticketsData, error: ticketsError } = await ticketsQuery;
 
     if (ticketsError) {
       console.warn('[buyerService] Advertencia al consultar boletos del comprador:', ticketsError);

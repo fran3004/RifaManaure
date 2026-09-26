@@ -1044,6 +1044,15 @@ export type Database = {
         };
         Returns: Json;
       };
+      admin_get_buyers_by_raffle: {
+        Args: {
+          p_raffle_id: string;
+          p_search?: string;
+          p_limit?: number;
+          p_offset?: number;
+        };
+        Returns: Json;
+      };
     };
     Enums: {
       [_ in never]: never;

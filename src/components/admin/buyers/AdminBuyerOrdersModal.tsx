@@ -25,14 +25,23 @@ interface AdminBuyerOrdersModalProps {
   buyer: BuyerItem | null;
   isOpen: boolean;
   onClose: () => void;
+  raffleId?: string | null;
+  raffleTitle?: string;
 }
 
 interface AdminBuyerOrdersContentProps {
   buyer: BuyerItem;
   onClose: () => void;
+  raffleId?: string | null;
+  raffleTitle?: string;
 }
 
-const AdminBuyerOrdersContent: React.FC<AdminBuyerOrdersContentProps> = ({ buyer, onClose }) => {
+const AdminBuyerOrdersContent: React.FC<AdminBuyerOrdersContentProps> = ({
+  buyer,
+  onClose,
+  raffleId,
+  raffleTitle,
+}) => {
   const [orders, setOrders] = useState<BuyerOrderSummary[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -41,7 +50,7 @@ const AdminBuyerOrdersContent: React.FC<AdminBuyerOrdersContentProps> = ({ buyer
     let isMounted = true;
     const load = async () => {
       try {
-        const res = await fetchBuyerOrdersHistory(buyer.id);
+        const res = await fetchBuyerOrdersHistory(buyer.id, raffleId);
         if (isMounted) {
           if (res.success) {
             setOrders(res.orders);
@@ -62,7 +71,7 @@ const AdminBuyerOrdersContent: React.FC<AdminBuyerOrdersContentProps> = ({ buyer
     return () => {
       isMounted = false;
     };
-  }, [buyer.id]);
+  }, [buyer.id, raffleId]);
 
   const paidOrders = orders.filter((o) => o.status === 'paid');
   const totalSpent = paidOrders.reduce((sum, o) => sum + o.total_amount, 0);
@@ -136,7 +145,9 @@ const AdminBuyerOrdersContent: React.FC<AdminBuyerOrdersContentProps> = ({ buyer
             <div>
               <h3 className={styles.headerTitle}>Historial de Órdenes</h3>
               <span className={styles.headerSubtitle}>
-                Trazabilidad de compras y boletos adquiridos
+                {raffleTitle
+                  ? `Trazabilidad de compras en: ${raffleTitle}`
+                  : 'Trazabilidad de compras y boletos adquiridos'}
               </span>
             </div>
           </div>
@@ -194,7 +205,7 @@ const AdminBuyerOrdersContent: React.FC<AdminBuyerOrdersContentProps> = ({ buyer
             </div>
           </div>
 
-          {/* Estadísticas de Compra */}
+          {/* Estadísticas de Compra en la Rifa */}
           <div className={styles.statsRow}>
             <div className={styles.statCard}>
               <span className={styles.statLabel}>Total Órdenes</span>
@@ -241,7 +252,7 @@ const AdminBuyerOrdersContent: React.FC<AdminBuyerOrdersContentProps> = ({ buyer
               </div>
             ) : orders.length === 0 ? (
               <div className={styles.ordersEmpty}>
-                Este comprador aún no tiene órdenes registradas.
+                Este comprador no registra órdenes en esta edición.
               </div>
             ) : (
               <div className={styles.tableWrapper}>
@@ -338,8 +349,18 @@ export const AdminBuyerOrdersModal: React.FC<AdminBuyerOrdersModalProps> = ({
   buyer,
   isOpen,
   onClose,
+  raffleId,
+  raffleTitle,
 }) => {
   if (!isOpen || !buyer) return null;
 
-  return <AdminBuyerOrdersContent key={buyer.id} buyer={buyer} onClose={onClose} />;
+  return (
+    <AdminBuyerOrdersContent
+      key={`${buyer.id}_${raffleId || 'all'}`}
+      buyer={buyer}
+      onClose={onClose}
+      raffleId={raffleId}
+      raffleTitle={raffleTitle}
+    />
+  );
 };

@@ -418,3 +418,38 @@
   color: var(--text-secondary, #9cb5ab);
 }
 
+
+.raffleIndicatorBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.35rem 0.75rem;
+  background-color: var(--brand-accent-soft, rgba(245, 166, 35, 0.1));
+  border: 1px solid rgba(245, 166, 35, 0.35);
+  border-radius: var(--radius-md, 8px);
+  font-size: 0.8125rem;
+  line-height: 1.3;
+}
+
+.raffleDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--color-success, #10b981);
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.6);
+  flex-shrink: 0;
+}
+
+.raffleIndicatorLabel {
+  color: var(--text-secondary, #9cb5ab);
+  font-weight: 500;
+}
+
+.raffleIndicatorTitle {
+  color: var(--brand-accent-strong, #f5a623);
+  font-weight: 700;
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

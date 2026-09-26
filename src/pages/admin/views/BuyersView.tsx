@@ -20,12 +20,16 @@ import { AdminErrorState } from '@/components/admin/common/AdminErrorState';
 import { AdminEditBuyerModal } from '@/components/admin/buyers/AdminEditBuyerModal';
 import { AdminBuyerOrdersModal } from '@/components/admin/buyers/AdminBuyerOrdersModal';
 import { fetchBuyersPaginated, type BuyerItem } from '@/services/buyerService';
+import { useAdminRaffle } from '@/context/AdminRaffleContext';
 import { formatCOP } from '@/lib/utils';
 import { normalizeAppError, logAppError } from '@/lib/errorHandling';
 import commonStyles from './AdminViews.module.css';
 import styles from './BuyersView.module.css';
 
 export const BuyersView: React.FC = () => {
+  // Contexto de la rifa activa / seleccionada en el panel
+  const { selectedRaffleId, selectedRaffle, isLoadingRaffles } = useAdminRaffle();
+
   const [buyers, setBuyers] = useState<BuyerItem[]>([]);
   const [totalCount, setTotalCount] = useState<number>(0);
   const [page, setPage] = useState<number>(1);
@@ -46,7 +50,22 @@ export const BuyersView: React.FC = () => {
   );
   const [copiedDocId, setCopiedDocId] = useState<string | null>(null);
 
+  // Reiniciar paginación a página 1 si cambia la rifa seleccionada
+  const [prevRaffleId, setPrevRaffleId] = useState(selectedRaffleId);
+  if (prevRaffleId !== selectedRaffleId) {
+    setPrevRaffleId(selectedRaffleId);
+    setPage(1);
+  }
+
   const loadBuyers = useCallback(async () => {
+    if (!selectedRaffleId) {
+      setBuyers([]);
+      setTotalCount(0);
+      setTotalPages(1);
+      setIsLoading(false);
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
     try {
@@ -54,6 +73,7 @@ export const BuyersView: React.FC = () => {
         searchTerm,
         page,
         pageSize,
+        raffleId: selectedRaffleId,
       });
 
       setBuyers(res.buyers);
@@ -68,11 +88,21 @@ export const BuyersView: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [searchTerm, page, pageSize]);
+  }, [searchTerm, page, pageSize, selectedRaffleId]);
 
   useEffect(() => {
     let isMounted = true;
     const init = async () => {
+      if (!selectedRaffleId) {
+        if (isMounted) {
+          setBuyers([]);
+          setTotalCount(0);
+          setTotalPages(1);
+          setIsLoading(false);
+        }
+        return;
+      }
+
       setIsLoading(true);
       setError(null);
       try {
@@ -80,6 +110,7 @@ export const BuyersView: React.FC = () => {
           searchTerm,
           page,
           pageSize,
+          raffleId: selectedRaffleId,
         });
         if (isMounted) {
           setBuyers(res.buyers);
@@ -102,7 +133,7 @@ export const BuyersView: React.FC = () => {
     return () => {
       isMounted = false;
     };
-  }, [searchTerm, page, pageSize]);
+  }, [searchTerm, page, pageSize, selectedRaffleId]);
 
   // Manejador de búsqueda con reinicio de página
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -130,20 +161,64 @@ export const BuyersView: React.FC = () => {
     });
   };
 
+  // Si está cargando el contexto de rifas y aún no tenemos el ID
+  if (isLoadingRaffles && !selectedRaffleId) {
+    return (
+      <div className={styles.viewContainer}>
+        <AdminPageHeader
+          title="Gestión de Compradores"
+          description="Supervisión de clientes, trazabilidad de compras y actualización segura de datos de contacto."
+          badge="Cargando..."
+        />
+        <div className={commonStyles.cardSection}>
+          <AdminLoadingState message="Cargando información de la rifa seleccionada..." />
+        </div>
+      </div>
+    );
+  }
+
+  // Si no hay rifa seleccionada o configurada en el panel
+  if (!selectedRaffleId) {
+    return (
+      <div className={styles.viewContainer}>
+        <AdminPageHeader
+          title="Gestión de Compradores"
+          description="Supervisión de clientes, trazabilidad de compras y actualización segura de datos de contacto."
+          badge="0 compradores"
+        />
+        <div className={commonStyles.cardSection}>
+          <AdminEmptyState
+            icon={<Users size={40} />}
+            title="Ninguna rifa seleccionada"
+            description="Por favor selecciona o activa una rifa desde el panel para consultar y gestionar a sus compradores."
+          />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={styles.viewContainer}>
-      {/* Encabezado de Página */}
+      {/* Encabezado de Página con contexto dinámico de la rifa */}
       <AdminPageHeader
         title="Gestión de Compradores"
-        description="Supervisión de clientes, trazabilidad de compras y actualización segura de datos de contacto."
-        badge={`${totalCount} compradores registrados`}
+        description={
+          selectedRaffle
+            ? `Supervisión de clientes y compras para: ${selectedRaffle.title}`
+            : 'Supervisión de clientes, trazabilidad de compras y actualización segura de datos de contacto.'
+        }
+        badge={
+          selectedRaffle
+            ? `${totalCount} compradores en esta edición`
+            : `${totalCount} compradores registrados`
+        }
         actions={
           <button
             type="button"
             className={commonStyles.btnPrimary}
             onClick={loadBuyers}
             disabled={isLoading}
-            title="Refrescar listado"
+            title="Refrescar listado de compradores de esta rifa"
           >
             <RefreshCw size={16} className={isLoading ? 'animate-spin' : ''} />
             <span>Actualizar</span>
@@ -187,6 +262,13 @@ export const BuyersView: React.FC = () => {
         </div>
 
         <div className={styles.toolbarActions}>
+          {selectedRaffle && (
+            <div className={styles.raffleIndicatorBadge} title="Rifa actualmente en gestión">
+              <span className={styles.raffleDot} />
+              <span className={styles.raffleIndicatorLabel}>Edición:</span>
+              <strong className={styles.raffleIndicatorTitle}>{selectedRaffle.title}</strong>
+            </div>
+          )}
           <span className={styles.toolbarSummary}>
             Mostrando <strong>{buyers.length}</strong> de <strong>{totalCount}</strong> clientes
           </span>
@@ -196,7 +278,7 @@ export const BuyersView: React.FC = () => {
       {/* Contenedor Principal / Tabla */}
       {isLoading ? (
         <div className={commonStyles.cardSection}>
-          <AdminLoadingState message="Cargando compradores..." />
+          <AdminLoadingState message="Cargando compradores de la rifa..." />
         </div>
       ) : error ? (
         <div className={commonStyles.cardSection}>
@@ -210,11 +292,11 @@ export const BuyersView: React.FC = () => {
       ) : buyers.length === 0 ? (
         <AdminEmptyState
           icon={<Users size={40} />}
-          title="Sin compradores encontrados"
+          title="Sin compradores en esta rifa"
           description={
             searchTerm
-              ? 'No se encontraron compradores que coincidan con el término de búsqueda.'
-              : 'Aún no hay compradores registrados en la plataforma.'
+              ? 'No se encontraron compradores que coincidan con la búsqueda en esta edición.'
+              : `Aún no se han registrado compras para la edición "${selectedRaffle?.title || 'seleccionada'}".`
           }
         />
       ) : (
@@ -296,7 +378,7 @@ export const BuyersView: React.FC = () => {
                         }`}
                         title={`${buyer.paid_orders_count || 0} órdenes aprobadas de ${
                           buyer.total_orders_count || 0
-                        } totales`}
+                        } totales en esta rifa`}
                       >
                         {buyer.paid_orders_count || 0} / {buyer.total_orders_count || 0}
                       </span>
@@ -316,7 +398,7 @@ export const BuyersView: React.FC = () => {
                           type="button"
                           className={styles.btnActionHistory}
                           onClick={() => setViewingOrdersBuyer(buyer)}
-                          title="Ver historial de órdenes de este comprador"
+                          title="Ver historial de órdenes de este comprador en esta rifa"
                         >
                           <ShoppingBag size={13} />
                           <span>Historial</span>
@@ -342,13 +424,11 @@ export const BuyersView: React.FC = () => {
           <div className={styles.tableFooterPagination}>
             <div className={commonStyles.paginationInfo}>
               Mostrando <strong>{buyers.length}</strong> de <strong>{totalCount}</strong>{' '}
-              compradores
+              compradores en esta rifa
             </div>
             <div className={commonStyles.paginationControls}>
               <div className={styles.pageSizeWrapper}>
-                <span className={styles.pageSizeLabel}>
-                  Por pág.:
-                </span>
+                <span className={styles.pageSizeLabel}>Por pág.:</span>
                 <select
                   className={commonStyles.pageSizeSelect}
                   value={pageSize}
@@ -396,11 +476,13 @@ export const BuyersView: React.FC = () => {
         onSuccess={handleBuyerUpdated}
       />
 
-      {/* Modal de Historial de Órdenes */}
+      {/* Modal de Historial de Órdenes filtrado estrictamente por la rifa actual */}
       <AdminBuyerOrdersModal
         buyer={viewingOrdersBuyer}
         isOpen={Boolean(viewingOrdersBuyer)}
         onClose={() => setViewingOrdersBuyer(null)}
+        raffleId={selectedRaffleId}
+        raffleTitle={selectedRaffle?.title}
       />
     </div>
   );
