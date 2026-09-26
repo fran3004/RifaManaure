@@ -31,9 +31,12 @@ import {
   ChevronsLeft,
   ChevronsRight,
   ShieldCheck,
+  Trash2,
 } from 'lucide-react';
 import { AdminOrderReviewModal } from '@/components/admin/orders/AdminOrderReviewModal';
 import { AdminConfirmPaymentModal } from '@/components/admin/orders/AdminConfirmPaymentModal';
+import { AdminPurgeStorageModal } from '@/components/admin/orders/AdminPurgeStorageModal';
+import type { PurgeStorageResult } from '@/services/paymentService';
 import styles from './AdminViews.module.css';
 
 interface ReceiptThumbnailProps {
@@ -171,6 +174,17 @@ export const ReceiptsView: React.FC = () => {
     type: 'success' | 'error';
     text: string;
   } | null>(null);
+  const [isPurgeModalOpen, setIsPurgeModalOpen] = useState<boolean>(false);
+
+  const handlePurgeSuccess = (res: PurgeStorageResult) => {
+    setActionMessage({
+      type: 'success',
+      text:
+        res.message ||
+        `Almacenamiento vaciado con éxito: se depuraron ${res.purgedProofsCount} comprobante(s).`,
+    });
+    void loadReceipts();
+  };
 
   // Reiniciar página a 1 si cambia la rifa seleccionada
   const [prevRaffleId, setPrevRaffleId] = useState(selectedRaffleId);
@@ -334,15 +348,27 @@ export const ReceiptsView: React.FC = () => {
             : `${totalCount} en bandeja`
         }
         actions={
-          <button
-            type="button"
-            className={styles.btnPrimary}
-            onClick={() => void loadReceipts()}
-            disabled={isLoading}
-          >
-            <RefreshCw size={16} />
-            <span>Refrescar Bandeja</span>
-          </button>
+          <div className={styles.receiptsHeaderActions}>
+            <button
+              type="button"
+              className={styles.btnSecondaryDanger}
+              onClick={() => setIsPurgeModalOpen(true)}
+              disabled={isLoading}
+              title="Vaciar almacenamiento de comprobantes para liberar espacio de inmediato"
+            >
+              <Trash2 size={16} />
+              <span>Vaciar Almacenamiento</span>
+            </button>
+            <button
+              type="button"
+              className={styles.btnPrimary}
+              onClick={() => void loadReceipts()}
+              disabled={isLoading}
+            >
+              <RefreshCw size={16} />
+              <span>Refrescar Bandeja</span>
+            </button>
+          </div>
         }
       />
 
@@ -363,9 +389,20 @@ export const ReceiptsView: React.FC = () => {
       <div className={styles.retentionNoticeBanner}>
         <ShieldCheck size={22} className={styles.retentionNoticeBannerIcon} />
         <div className={styles.retentionNoticeBannerContent}>
-          <strong className={styles.retentionNoticeBannerTitle}>
-            Política de Retención y Depuración de Soportes (5 días)
-          </strong>
+          <div className={styles.retentionNoticeHeaderRow}>
+            <strong className={styles.retentionNoticeBannerTitle}>
+              Política de Retención y Depuración de Soportes (5 días)
+            </strong>
+            <button
+              type="button"
+              className={styles.btnPurgeInline}
+              onClick={() => setIsPurgeModalOpen(true)}
+              title="Vaciar almacenamiento de comprobantes de inmediato sin esperar los 5 días"
+            >
+              <Trash2 size={13} />
+              <span>Vaciar Almacenamiento Ahora</span>
+            </button>
+          </div>
           <p className={styles.retentionNoticeBannerDesc}>
             Para optimizar el almacenamiento del sistema, los comprobantes de órdenes <strong>aprobadas o rechazadas</strong> se conservan durante <strong>5 días</strong> para auditoría y luego son depurados automáticamente. Los comprobantes pendientes de validación <strong>nunca se eliminan</strong>. Toda la información contable, referencia, datos del comprador y boletos asignados permanecen 100% protegidos y registrados de forma permanente.
           </p>
@@ -764,6 +801,15 @@ export const ReceiptsView: React.FC = () => {
         isProcessing={Boolean(actionProcessingId)}
         onConfirm={handleConfirmApprove}
         onClose={() => setApprovingOrder(null)}
+      />
+
+      {/* Modal de Vaciado de Almacenamiento de Comprobantes */}
+      <AdminPurgeStorageModal
+        isOpen={isPurgeModalOpen}
+        onClose={() => setIsPurgeModalOpen(false)}
+        onSuccess={handlePurgeSuccess}
+        selectedRaffleId={selectedRaffleId}
+        selectedRaffleTitle={selectedRaffle?.title}
       />
     </div>
   );

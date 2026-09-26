@@ -390,6 +390,181 @@ export async function cleanupExpiredPaymentProofs(
   }
 }
 
+export interface StorageStatsResult {
+  success: boolean;
+  raffleId?: string | null;
+  raffleTitle?: string | null;
+  totalProofs: number;
+  activeFilesCount: number;
+  resolvedFilesCount: number;
+  pendingFilesCount: number;
+  purgedFilesCount: number;
+  storageObjectsCount: number;
+  error?: string;
+  code?: string;
+  isTimeout?: boolean;
+}
+
+/**
+ * Consulta las métricas de almacenamiento de comprobantes de pago en tiempo real.
+ * Permite conocer cuántos comprobantes están resueltos y listos para vaciado inmediato.
+ */
+export async function adminGetPaymentProofsStorageStats(
+  raffleId?: string | null,
+  timeoutMs: number = DEFAULT_REQUEST_TIMEOUT_MS
+): Promise<StorageStatsResult> {
+  try {
+    return await withTimeout(
+      async () => {
+        const { data, error } = await supabase.rpc(
+          'admin_get_payment_proofs_storage_stats',
+          {
+            p_raffle_id: raffleId || undefined,
+          }
+        );
+
+        if (error) {
+          return {
+            success: false,
+            totalProofs: 0,
+            activeFilesCount: 0,
+            resolvedFilesCount: 0,
+            pendingFilesCount: 0,
+            purgedFilesCount: 0,
+            storageObjectsCount: 0,
+            error: error.message || 'Error al obtener estadísticas de almacenamiento.',
+            code: error.code,
+          };
+        }
+
+        const res = data as {
+          success?: boolean;
+          raffle_id?: string | null;
+          raffle_title?: string | null;
+          total_proofs?: number;
+          active_files_count?: number;
+          resolved_files_count?: number;
+          pending_files_count?: number;
+          purged_files_count?: number;
+          storage_objects_count?: number;
+        } | null;
+
+        return {
+          success: res?.success ?? true,
+          raffleId: res?.raffle_id ?? raffleId,
+          raffleTitle: res?.raffle_title,
+          totalProofs: res?.total_proofs ?? 0,
+          activeFilesCount: res?.active_files_count ?? 0,
+          resolvedFilesCount: res?.resolved_files_count ?? 0,
+          pendingFilesCount: res?.pending_files_count ?? 0,
+          purgedFilesCount: res?.purged_files_count ?? 0,
+          storageObjectsCount: res?.storage_objects_count ?? 0,
+        };
+      },
+      { timeoutMs }
+    );
+  } catch (err: unknown) {
+    const classified = classifyRequestError(err);
+    return {
+      success: false,
+      totalProofs: 0,
+      activeFilesCount: 0,
+      resolvedFilesCount: 0,
+      pendingFilesCount: 0,
+      purgedFilesCount: 0,
+      storageObjectsCount: 0,
+      isTimeout: classified.isTimeout,
+      code: classified.isTimeout ? 'TIMEOUT' : 'UNKNOWN',
+      error: err instanceof Error ? err.message : 'Error inesperado al consultar almacenamiento.',
+    };
+  }
+}
+
+export interface PurgeStorageResult {
+  success: boolean;
+  message?: string;
+  purgedProofsCount: number;
+  purgedFilesCount: number;
+  scope?: string;
+  raffleId?: string | null;
+  error?: string;
+  code?: string;
+  isTimeout?: boolean;
+}
+
+/**
+ * Vacía el almacenamiento de comprobantes de pago a demanda (sin esperar los 5 días).
+ * Por defecto ('resolved') depura todos los comprobantes de compras ya aprobadas o rechazadas,
+ * manteniendo las órdenes pendientes protegidas. Si se selecciona 'all', vacía todo el almacenamiento.
+ */
+export async function adminPurgePaymentProofsStorage(options?: {
+  scope?: 'resolved' | 'all';
+  raffleId?: string | null;
+  timeoutMs?: number;
+}): Promise<PurgeStorageResult> {
+  const scope = options?.scope || 'resolved';
+  const raffleId = options?.raffleId || undefined;
+  const timeoutMs = options?.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS;
+
+  try {
+    return await withTimeout(
+      async () => {
+        const { data, error } = await supabase.rpc(
+          'admin_purge_payment_proofs_storage',
+          {
+            p_scope: scope,
+            p_raffle_id: raffleId,
+          }
+        );
+
+        if (error) {
+          return {
+            success: false,
+            purgedProofsCount: 0,
+            purgedFilesCount: 0,
+            error: error.message || 'Error al ejecutar el vaciado del almacenamiento.',
+            code: error.code,
+          };
+        }
+
+        const res = data as {
+          success?: boolean;
+          message?: string;
+          purged_proofs_count?: number;
+          purged_files_count?: number;
+          scope?: string;
+          raffle_id?: string | null;
+        } | null;
+
+        return {
+          success: res?.success ?? true,
+          message: res?.message,
+          purgedProofsCount: res?.purged_proofs_count ?? 0,
+          purgedFilesCount: res?.purged_files_count ?? 0,
+          scope: res?.scope ?? scope,
+          raffleId: res?.raffle_id ?? raffleId,
+        };
+      },
+      { timeoutMs }
+    );
+  } catch (err: unknown) {
+    const classified = classifyRequestError(err);
+    return {
+      success: false,
+      purgedProofsCount: 0,
+      purgedFilesCount: 0,
+      isTimeout: classified.isTimeout,
+      code: classified.isTimeout ? 'TIMEOUT' : 'UNKNOWN',
+      error:
+        classified.isTimeout
+          ? 'El proceso de vaciado excedió el tiempo límite. Verifica tu conexión.'
+          : err instanceof Error
+            ? err.message
+            : 'Error inesperado al vaciar almacenamiento.',
+    };
+  }
+}
+
 /**
  * Sube el comprobante de pago al bucket PRIVADO 'payment-proofs' y lo asocia
  * de manera transaccional con la rifa, orden, comprador y boletos.

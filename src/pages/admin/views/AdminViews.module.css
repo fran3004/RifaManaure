@@ -656,11 +656,43 @@
   flex: 1;
 }
 
+.retentionNoticeHeaderRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.35rem;
+}
+
 .retentionNoticeBannerTitle {
   display: block;
   font-size: 0.9rem;
   color: var(--text-primary, #0f172a);
-  margin-bottom: 0.25rem;
+  margin-bottom: 0;
+}
+
+.btnPurgeInline {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.7rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border-radius: 6px;
+  border: 1px solid #fca5a5;
+  background: #fff5f5;
+  color: #b91c1c;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.btnPurgeInline:hover {
+  background: #dc2626;
+  border-color: #b91c1c;
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(220, 38, 38, 0.2);
 }
 
 .retentionNoticeBannerDesc {
@@ -668,6 +700,44 @@
   font-size: 0.825rem;
   line-height: 1.5;
   color: var(--text-secondary, #475569);
+}
+
+.receiptsHeaderActions {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.btnSecondaryDanger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.55rem 1.05rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  border-radius: 8px;
+  border: 1.5px solid #fca5a5;
+  background: #fff5f5;
+  color: #b91c1c;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  white-space: nowrap;
+  min-height: 40px;
+  box-shadow: 0 1px 3px rgba(185, 28, 28, 0.08);
+}
+
+.btnSecondaryDanger:hover:not(:disabled) {
+  background: #dc2626;
+  border-color: #b91c1c;
+  color: #ffffff;
+  box-shadow: 0 4px 10px rgba(220, 38, 38, 0.25);
+  transform: translateY(-1px);
+}
+
+.btnSecondaryDanger:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .receiptThumbNoticeIcon {

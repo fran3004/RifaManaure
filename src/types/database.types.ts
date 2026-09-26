@@ -1075,6 +1075,19 @@ export type Database = {
         };
         Returns: Json;
       };
+      admin_get_payment_proofs_storage_stats: {
+        Args: {
+          p_raffle_id?: string | null;
+        };
+        Returns: Json;
+      };
+      admin_purge_payment_proofs_storage: {
+        Args: {
+          p_scope?: string;
+          p_raffle_id?: string | null;
+        };
+        Returns: Json;
+      };
     };
     Enums: {
       [_ in never]: never;
