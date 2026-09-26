@@ -438,7 +438,7 @@ export const RafflesView: React.FC = () => {
                     <Pause size={15} aria-hidden="true" />
                     <span>Pausar Venta Pública</span>
                   </button>
-                ) : panelRaffle.status !== 'finished' && panelRaffle.status !== 'closed' ? (
+                ) : (
                   <button
                     type="button"
                     className={styles.btnActivatePublic}
@@ -448,7 +448,7 @@ export const RafflesView: React.FC = () => {
                     <Globe size={15} aria-hidden="true" />
                     <span>Activar en Web Pública</span>
                   </button>
-                ) : null}
+                )}
 
                 {/* Botón Editar: SIEMPRE disponible en la rifa que se está viendo en el panel */}
                 <button

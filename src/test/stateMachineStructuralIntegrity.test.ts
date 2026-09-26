@@ -72,35 +72,30 @@ describe('Auditoría 03: Blindaje de Máquinas de Estados e Invariantes', () => 
   });
 
   it('la máquina de estados de raffles debe validar las transiciones canónicas permitidas', () => {
+    const validStates = ['draft', 'active', 'paused', 'closed', 'finished'];
     const validTransitions: Record<string, string[]> = {
-      draft: ['active'],
-      active: ['paused', 'closed', 'finished'],
-      paused: ['active', 'closed', 'finished'],
-      closed: ['active', 'finished'],
-      finished: [], // Estado terminal absoluto
+      draft: ['draft', 'active', 'paused', 'closed', 'finished'],
+      active: ['draft', 'active', 'paused', 'closed', 'finished'],
+      paused: ['draft', 'active', 'paused', 'closed', 'finished'],
+      closed: ['draft', 'active', 'paused', 'closed', 'finished'],
+      finished: ['draft', 'active', 'paused', 'closed', 'finished'],
     };
 
-    // Validar transiciones legales
-    expect(validTransitions['draft']).toContain('active');
-    expect(validTransitions['draft']).not.toContain('paused');
-    expect(validTransitions['draft']).not.toContain('closed');
-    expect(validTransitions['draft']).not.toContain('finished');
+    // Validar que cada estado puede transicionar a los otros estados válidos para flexibilidad administrativa
+    validStates.forEach((state) => {
+      expect(validTransitions[state]).toContain('active');
+      expect(validTransitions[state]).toContain('paused');
+      expect(validTransitions[state]).toContain('closed');
+      expect(validTransitions[state]).toContain('finished');
+      expect(validTransitions[state]).toContain('draft');
+      expect(validTransitions[state]).not.toContain('archived');
+      expect(validTransitions[state]).not.toContain('deleted');
+    });
 
-    expect(validTransitions['active']).toContain('paused');
-    expect(validTransitions['active']).toContain('closed');
-    expect(validTransitions['active']).toContain('finished');
-    expect(validTransitions['active']).not.toContain('draft');
-
-    expect(validTransitions['paused']).toContain('active');
-    expect(validTransitions['paused']).toContain('closed');
-    expect(validTransitions['paused']).not.toContain('draft');
-
-    expect(validTransitions['closed']).toContain('active');
-    expect(validTransitions['closed']).toContain('finished');
-    expect(validTransitions['closed']).not.toContain('draft');
-    expect(validTransitions['closed']).not.toContain('paused');
-
-    expect(validTransitions['finished']).toHaveLength(0);
+    // Validar específicamente la reapertura y reutilización desde 'finished'
+    expect(validTransitions['finished']).toContain('active');
+    expect(validTransitions['finished']).toContain('draft');
+    expect(validTransitions['finished']).toContain('paused');
   });
 
   it('un boleto bloqueado solo debe poder desbloquearse a available, nunca a sold ni reserved directamente', () => {

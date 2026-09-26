@@ -78,61 +78,34 @@ describe('Gobernanza de Ganadores y Máquina de Estados de Rifas', () => {
     });
   });
 
-  describe('2. Máquina de Estados de Rifas (Inmutabilidad de estado finished)', () => {
-    // Modelo formal de transiciones admitidas y denegadas
-    const validateRaffleTransition = (oldStatus: string, newStatus: string): boolean => {
-      // Estado finished es terminal
-      if (oldStatus === 'finished') {
-        if (newStatus !== 'finished') {
-          throw new Error(
-            `Operación denegada por gobernanza: La rifa ya se encuentra en estado terminal "finished" y no puede reabrirse ni modificarse a "${newStatus}".`
-          );
-        }
-        return true; // Permitir actualización de metadatos conservando finished
-      }
+  describe('2. Máquina de Estados de Rifas (Flexibilidad y Reutilización de Rifas)', () => {
+    const validStatuses = ['draft', 'active', 'paused', 'closed', 'finished'];
 
-      const validTransitions: Record<string, string[]> = {
-        draft: ['draft', 'active', 'paused', 'closed'],
-        active: ['active', 'paused', 'closed', 'finished'],
-        paused: ['paused', 'active', 'closed', 'finished'],
-        closed: ['closed', 'active', 'paused', 'finished'],
-      };
-
-      const allowed = validTransitions[oldStatus] || [];
-      if (!allowed.includes(newStatus)) {
+    // Modelo formal de transiciones admitidas por el administrador
+    const validateRaffleTransition = (_oldStatus: string, newStatus: string): boolean => {
+      if (!validStatuses.includes(newStatus)) {
         throw new Error(
-          `Transición ilegítima de "${oldStatus}" a "${newStatus}".`
+          `Estado de rifa "${newStatus}" no válido. Estados permitidos: draft, active, paused, closed, finished.`
         );
       }
       return true;
     };
 
-    it('2.1 Debe rechazar terminantemente reabrir una rifa finished a active', () => {
-      expect(() => validateRaffleTransition('finished', 'active')).toThrowError(
-        /estado terminal "finished" y no puede reabrirse.*active/
-      );
+    it('2.1 Debe permitir reabrir una rifa finalizada a active para su reutilización', () => {
+      expect(validateRaffleTransition('finished', 'active')).toBe(true);
     });
 
-    it('2.2 Debe rechazar pasar una rifa finished a paused', () => {
-      expect(() => validateRaffleTransition('finished', 'paused')).toThrowError(
-        /estado terminal "finished" y no puede reabrirse.*paused/
-      );
+    it('2.2 Debe permitir pasar una rifa finalizada a paused, closed o draft', () => {
+      expect(validateRaffleTransition('finished', 'paused')).toBe(true);
+      expect(validateRaffleTransition('finished', 'closed')).toBe(true);
+      expect(validateRaffleTransition('finished', 'draft')).toBe(true);
     });
 
-    it('2.3 Debe rechazar pasar una rifa finished a closed o draft', () => {
-      expect(() => validateRaffleTransition('finished', 'closed')).toThrowError(
-        /estado terminal "finished"/
-      );
-      expect(() => validateRaffleTransition('finished', 'draft')).toThrowError(
-        /estado terminal "finished"/
-      );
-    });
-
-    it('2.4 Debe permitir editar metadatos conservando el estado finished (finished -> finished)', () => {
+    it('2.3 Debe permitir editar metadatos conservando el estado finished (finished -> finished)', () => {
       expect(validateRaffleTransition('finished', 'finished')).toBe(true);
     });
 
-    it('2.5 Debe permitir todas las transiciones operativas legítimas', () => {
+    it('2.4 Debe permitir todas las transiciones operativas entre cualquier estado', () => {
       expect(validateRaffleTransition('draft', 'active')).toBe(true);
       expect(validateRaffleTransition('active', 'paused')).toBe(true);
       expect(validateRaffleTransition('paused', 'active')).toBe(true);
@@ -142,31 +115,58 @@ describe('Gobernanza de Ganadores y Máquina de Estados de Rifas', () => {
       expect(validateRaffleTransition('active', 'finished')).toBe(true);
       expect(validateRaffleTransition('paused', 'finished')).toBe(true);
       expect(validateRaffleTransition('closed', 'finished')).toBe(true);
+      expect(validateRaffleTransition('active', 'draft')).toBe(true);
+      expect(validateRaffleTransition('closed', 'paused')).toBe(true);
     });
 
-    it('2.6 updateRaffleAdmin debe retornar error controlado cuando el backend rechaza la reapertura', async () => {
+    it('2.5 Debe rechazar estados inexistentes o no soportados', () => {
+      expect(() => validateRaffleTransition('active', 'archived')).toThrowError(
+        /Estado de rifa "archived" no válido/
+      );
+      expect(() => validateRaffleTransition('finished', 'deleted')).toThrowError(
+        /Estado de rifa "deleted" no válido/
+      );
+    });
+
+    it('2.6 updateRaffleAdmin debe actualizar exitosamente una rifa finalizada a activa', async () => {
+      const updatedRaffleMock = {
+        id: 'raffle-finished-id',
+        title: 'Rifa Reutilizada 2026',
+        description: 'Nuevo Premio',
+        ticket_price: 30000,
+        draw_date: '2026-12-31T20:00:00Z',
+        lottery_reference: 'Lotería de La Guajira',
+        status: 'active',
+        max_tickets_per_buyer: 20,
+        total_tickets: 1000,
+        slug: 'rifa-reutilizada',
+        hero_image_url: null,
+        created_at: '2026-01-01T00:00:00Z',
+        updated_at: new Date().toISOString(),
+      };
+
       vi.spyOn(supabase, 'rpc').mockResolvedValueOnce({
         data: {
-          success: false,
-          error:
-            'Operación denegada por gobernanza: La rifa ya se encuentra en estado terminal "finished" y no puede reabrirse ni modificarse a otro estado.',
+          success: true,
+          raffle: updatedRaffleMock,
         },
         error: null,
       } as unknown as ReturnType<typeof supabase.rpc>);
 
       const res = await raffleService.updateRaffleAdmin({
         raffleId: 'raffle-finished-id',
-        title: 'Rifa Finalizada',
-        description: 'Premio',
-        ticketPrice: 10000,
-        drawDate: '2026-10-01T00:00:00Z',
-        lotteryReference: 'La Guajira',
-        status: 'active', // Intento de reapertura
-        maxTicketsPerBuyer: 10,
+        title: 'Rifa Reutilizada 2026',
+        description: 'Nuevo Premio',
+        ticketPrice: 30000,
+        drawDate: '2026-12-31T20:00:00Z',
+        lotteryReference: 'Lotería de La Guajira',
+        status: 'active',
+        maxTicketsPerBuyer: 20,
       });
 
-      expect(res.success).toBe(false);
-      expect(res.error).toContain('estado terminal "finished"');
+      expect(res.success).toBe(true);
+      expect(res.raffle?.status).toBe('active');
+      expect(res.raffle?.title).toBe('Rifa Reutilizada 2026');
     });
   });
 });
