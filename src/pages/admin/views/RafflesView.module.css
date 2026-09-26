@@ -5,14 +5,15 @@
   width: 100%;
 }
 
+/* ── Tarjeta de Rifa Principal (En Gestión en el Panel) ── */
 .activeRaffleCard {
   background: var(--admin-surface-2, #ffffff);
-  border: 1px solid var(--admin-border-strong, #1b4a2e);
+  border: 1.5px solid var(--admin-border-strong, #1b4a2e);
   border-radius: 16px;
   padding: 1.75rem;
   box-shadow:
-    0 12px 32px -8px rgba(15, 46, 29, 0.16),
-    0 0 0 1px rgba(27, 74, 46, 0.08);
+    0 12px 32px -8px rgba(15, 46, 29, 0.14),
+    0 0 0 1px rgba(27, 74, 46, 0.06);
   position: relative;
   overflow: clip;
 }
@@ -24,7 +25,7 @@
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(90deg, var(--admin-brand), var(--admin-accent), var(--admin-brand));
+  background: linear-gradient(90deg, var(--admin-brand, #1b4a2e), #10b981, var(--admin-brand, #1b4a2e));
 }
 
 .cardHeader {
@@ -39,86 +40,176 @@
 .cardHeaderLeft {
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
-  max-width: 700px;
+  gap: 0.5rem;
+  max-width: 680px;
+  flex: 1;
+  min-width: 280px;
 }
 
 .badgesRow {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: 0.5rem;
   flex-wrap: wrap;
 }
 
-.badgeActive,
-.badgePaused,
+/* ── Badges de Estado Principal (Alto Contraste WCAG) ── */
+.badgePublicLive,
+.badgePublicPaused,
 .badgeDraft,
-.badgeFinished {
+.badgeFinished,
+.badgeInPanelFocus {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
-  padding: 0.25rem 0.65rem;
+  gap: 0.4rem;
+  padding: 0.3rem 0.75rem;
   border-radius: var(--radius-full, 9999px);
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   line-height: 1.2;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  letter-spacing: 0.03em;
   white-space: nowrap;
-  border-width: 1px;
+  border-width: 1.5px;
   border-style: solid;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
 }
 
-.badgeActive {
-  background-color: var(--admin-success-bg, rgba(16, 185, 129, 0.12));
-  color: var(--admin-brand, #1b4a2e);
-  border-color: rgba(16, 185, 129, 0.3);
+/* Verde bosque con fondo menta suave: Ratio > 7:1 (AAA) */
+.badgePublicLive {
+  background-color: #ecfdf5;
+  color: #065f46;
+  border-color: #10b981;
 }
 
-.badgePaused {
-  background-color: var(--admin-warning-bg, rgba(245, 158, 11, 0.12));
-  color: var(--admin-warning, #8a5200);
-  border-color: rgba(245, 158, 11, 0.3);
+/* Ámbar oscuro con fondo amarillo pastel: Ratio > 6:1 (AAA) */
+.badgePublicPaused {
+  background-color: #fef3c7;
+  color: #92400e;
+  border-color: #f59e0b;
 }
 
+/* Gris pizarra con fondo gris suave: Ratio > 7:1 (AAA) */
 .badgeDraft {
-  background-color: var(--admin-neutral-bg, rgba(148, 163, 184, 0.12));
-  color: var(--admin-neutral, var(--text-muted, #7e9c90));
-  border-color: rgba(148, 163, 184, 0.25);
+  background-color: #f3f4f6;
+  color: #374151;
+  border-color: #d1d5db;
 }
 
+/* Azul marino con fondo celeste suave: Ratio > 7:1 (AAA) */
 .badgeFinished {
-  background-color: var(--admin-info-bg, rgba(59, 130, 246, 0.12));
-  color: var(--admin-info, #245a8d);
-  border-color: rgba(59, 130, 246, 0.3);
+  background-color: #eff6ff;
+  color: #1e40af;
+  border-color: #93c5fd;
 }
 
-.raffleEditionTag {
-  font-size: 0.875rem;
-  line-height: 1.2;
-  color: var(--admin-text-2, #41564a);
-  font-weight: 500;
+/* Badge distintivo: Rifa en gestión del panel */
+.badgeInPanelFocus {
+  background-color: #eff6ff;
+  color: #1e40af;
+  border-color: #bfdbfe;
 }
 
 .raffleTitle {
   font-size: 1.5rem;
-  line-height: 1.2;
   font-weight: 700;
   color: var(--admin-text, #16261c);
   margin: 0;
-  line-height: 1.2;
+  line-height: 1.25;
 }
 
 .raffleDescription {
   font-size: 0.875rem;
-  line-height: 1.45;
+  line-height: 1.5;
   color: var(--admin-text-2, #41564a);
-  margin: 0.35rem 0 0 0;
-  line-height: 1.45;
+  margin: 0;
 }
 
-/* Barra de Progreso de Ventas */
+/* ── Acciones de la Tarjeta Principal ── */
+.cardActions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+/* Botón Activar en Web Pública (Verde primario institucional con alto contraste) */
+.btnActivatePublic {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.55rem 1.15rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  border-radius: 8px;
+  border: 1.5px solid #15803d;
+  background: #166534;
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(22, 101, 52, 0.25);
+  min-height: 40px;
+}
+
+.btnActivatePublic:hover {
+  background: #14532d;
+  border-color: #166534;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(22, 101, 52, 0.35);
+}
+
+/* Botón Pausar Venta Pública (Ámbar legible con alto contraste) */
+.btnPausePublic {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.55rem 1.15rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  border-radius: 8px;
+  border: 1.5px solid #d97706;
+  background: #fffbeb;
+  color: #92400e;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  min-height: 40px;
+}
+
+.btnPausePublic:hover {
+  background: #fef3c7;
+  border-color: #b45309;
+  color: #78350f;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(217, 119, 6, 0.15);
+}
+
+/* Botón Editar Parámetros (Estilo secundario limpio) */
+.btnEditMain {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.55rem 1.15rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border-radius: 8px;
+  border: 1.5px solid #cbd5e1;
+  background: #ffffff;
+  color: #1e293b;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  min-height: 40px;
+}
+
+.btnEditMain:hover {
+  background: #f8fafc;
+  border-color: #94a3b8;
+  color: #0f172a;
+  transform: translateY(-1px);
+}
+
+/* ── Barra de Progreso de Ventas ── */
 .salesProgressSection {
   background: var(--admin-surface-3, #edf5f0);
   border: 1px solid var(--admin-border, #dcd5c4);
@@ -144,35 +235,41 @@
   gap: 0.5rem;
 }
 
+.progressIcon {
+  color: var(--admin-brand, #1b4a2e);
+}
+
 .progressLabel {
   font-size: 0.875rem;
-  line-height: 1.2;
   font-weight: 600;
   color: var(--admin-text, #16261c);
 }
 
 .progressBadge {
-  background: var(--admin-success-bg, #edf5f0);
-  color: var(--admin-brand, #1b4a2e);
-  font-size: 0.875rem;
-  line-height: 1.2;
+  background: #dcfce7;
+  color: #14532d;
+  font-size: 0.8125rem;
   font-variant-numeric: tabular-nums;
   font-weight: 700;
-  padding: 0.15rem 0.5rem;
+  padding: 0.15rem 0.55rem;
   border-radius: 6px;
+  border: 1px solid rgba(16, 185, 129, 0.3);
 }
 
 .progressStats {
   font-size: 0.875rem;
-  line-height: 1.45;
   font-variant-numeric: tabular-nums;
   color: var(--admin-text-2, #41564a);
+}
+
+.revenueHighlight {
+  color: var(--admin-brand, #1b4a2e);
 }
 
 .progressBarContainer {
   width: 100%;
   height: 10px;
-  background: #c2d0c6;
+  background: #d1dcce;
   border: 1px solid var(--admin-border, #dcd5c4);
   border-radius: 9999px;
   overflow: hidden;
@@ -183,10 +280,10 @@
   width: var(--progress-percentage, 0%);
   background: var(--admin-brand, #1b4a2e);
   border-radius: 9999px;
-  box-shadow: 0 0 0 1px rgba(27, 74, 46, 0.12);
   transition: width 0.4s ease;
 }
 
+/* ── Grilla de Métricas Operativas ── */
 .metricsGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -194,23 +291,18 @@
 }
 
 .metricCard {
-  background-color: var(--bg-card);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg, 16px);
-  color: var(--text-primary);
-  box-shadow: var(--shadow-sm);
-  padding: 1.25rem 1.5rem;
+  background: var(--admin-surface-2, #ffffff);
+  border: 1px solid var(--admin-border, #dcd5c4);
+  border-radius: 14px;
+  padding: 1.25rem 1.35rem;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  position: relative;
-  overflow: clip;
-  min-width: 0;
-  transition: border-color var(--transition-fast, 150ms ease), transform var(--transition-fast, 150ms ease);
+  gap: 0.4rem;
+  transition: border-color 0.15s ease, transform 0.15s ease;
 }
 
 .metricCard:hover {
-  border-color: rgba(16, 185, 129, 0.35);
+  border-color: rgba(27, 74, 46, 0.4);
   transform: translateY(-2px);
 }
 
@@ -222,12 +314,11 @@
 }
 
 .metricLabel {
-  font-size: 0.875rem;
-  line-height: 1.2;
-  font-weight: 600;
-  color: var(--admin-text-2, #41564a);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--admin-text-muted, #5a6b5f);
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.05em;
 }
 
 .metricIcon {
@@ -242,115 +333,226 @@
 }
 
 .metricValue {
-  font-size: 1.5rem;
-  line-height: 1.2;
+  font-size: 1.375rem;
   font-variant-numeric: tabular-nums;
   font-weight: 700;
   color: var(--admin-text, #16261c);
   line-height: 1.2;
 }
 
-.metricHint {
-  font-size: 0.75rem;
-  line-height: 1.45;
-  color: var(--admin-text-muted, #5a6b5f);
+.metricValueMedium {
+  font-size: 1.05rem;
+  line-height: 1.3;
 }
 
-/* Listado de Otras Rifas */
+.metricValueDate {
+  font-size: 1.05rem;
+  line-height: 1.3;
+}
+
+.metricHint {
+  font-size: 0.75rem;
+  color: var(--admin-text-muted, #5a6b5f);
+  line-height: 1.4;
+}
+
+/* ── Listado de Otras Ediciones y Sorteos ── */
 .otherRafflesSection {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  margin-top: 1rem;
+  margin-top: 0.75rem;
 }
 
 .sectionHeader {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
 .sectionTitle {
   font-size: 1.125rem;
-  line-height: 1.2;
   font-weight: 700;
-  color: var(--text-primary, #ffffff);
+  color: var(--admin-text, #16261c);
   margin: 0;
+}
+
+.sectionSubtitle {
+  font-size: 0.8125rem;
+  color: var(--admin-text-muted, #5a6b5f);
 }
 
 .otherRafflesGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
   gap: 1rem;
 }
 
+/* Tarjeta secundaria de rifa */
 .otherRaffleCard {
-  background: var(--bg-surface-elevated, #0d231a);
-  border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
-  border-radius: 12px;
-  padding: 1.25rem;
+  background: var(--admin-surface-2, #ffffff);
+  border: 1.5px solid var(--admin-border, #dcd5c4);
+  border-radius: 14px;
+  padding: 1.25rem 1.35rem;
   display: flex;
   flex-direction: column;
   gap: 0.85rem;
-  transition:
-    transform 0.2s ease,
-    border-color 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .otherRaffleCard:hover {
-  border-color: rgba(255, 255, 255, 0.15);
+  border-color: var(--admin-brand, #1b4a2e);
   transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(27, 74, 46, 0.08);
 }
 
 .otherCardTop {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 0.5rem;
+  gap: 0.75rem;
+}
+
+.otherCardInfo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.otherBadgesRow {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
 .otherTitle {
   font-size: 1rem;
-  line-height: 1.2;
   font-weight: 700;
-  color: var(--text-primary, #ffffff);
+  color: var(--admin-text, #16261c);
   margin: 0;
+  line-height: 1.35;
+  word-break: break-word;
 }
 
-.otherSlug {
-  font-size: 0.75rem;
-  line-height: 1.2;
-  color: var(--text-muted, #7e9c90);
+/* Badges compactos para tarjetas secundarias */
+.badgePublicLiveSmall,
+.badgePausedSmall,
+.badgeDraftSmall,
+.badgeFinishedSmall {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.15rem 0.55rem;
+  border-radius: var(--radius-full, 9999px);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  border-width: 1px;
+  border-style: solid;
+}
+
+.badgePublicLiveSmall {
+  background-color: #ecfdf5;
+  color: #065f46;
+  border-color: #10b981;
+}
+
+.badgePausedSmall {
+  background-color: #fef3c7;
+  color: #92400e;
+  border-color: #f59e0b;
+}
+
+.badgeDraftSmall {
+  background-color: #f3f4f6;
+  color: #374151;
+  border-color: #d1d5db;
+}
+
+.badgeFinishedSmall {
+  background-color: #eff6ff;
+  color: #1e40af;
+  border-color: #93c5fd;
+}
+
+/* ÚNICO BOTÓN: Usar en el panel */
+.btnUseInPanel {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.85rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  border-radius: 8px;
+  border: 1.5px solid var(--admin-brand, #1b4a2e);
+  background: #ffffff;
+  color: var(--admin-brand, #1b4a2e);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+  min-height: 34px;
+}
+
+.btnUseInPanel:hover {
+  background: var(--admin-surface-3, #edf5f0);
+  border-color: var(--admin-brand, #1b4a2e);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(27, 74, 46, 0.12);
 }
 
 .otherStatsRow {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0.5rem;
-  padding-top: 0.5rem;
-  border-top: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.06));
+  gap: 0.65rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--admin-border, #e5e0d3);
 }
 
 .otherStatItem {
   display: flex;
   flex-direction: column;
+  gap: 0.15rem;
 }
 
 .otherStatLabel {
-  font-size: 0.875rem;
-  line-height: 1.2;
-  color: var(--text-muted, #7e9c90);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--admin-text-muted, #5a6b5f);
+  font-weight: 600;
 }
 
 .otherStatVal {
-  font-size: 1rem;
-  line-height: 1.2;
+  font-size: 0.9375rem;
   font-variant-numeric: tabular-nums;
-  font-weight: 600;
-  color: var(--text-primary, #ffffff);
+  font-weight: 700;
+  color: var(--admin-text, #16261c);
 }
 
-/* Feedback Toast */
+.otherDrawDate {
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--admin-text-2, #41564a);
+  line-height: 1.3;
+}
+
+.otherSoldValue {
+  color: var(--admin-brand, #1b4a2e);
+  font-size: 0.9375rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Feedback Toast ── */
 .feedbackToast {
   display: flex;
   align-items: center;
@@ -358,21 +560,26 @@
   padding: 0.85rem 1.25rem;
   border-radius: 10px;
   font-size: 0.875rem;
-  line-height: 1.45;
   font-weight: 500;
   animation: fadeIn 0.2s ease;
 }
 
 .feedbackSuccess {
-  background: var(--overlay-success-subtle);
-  border: 1px solid rgba(16, 185, 129, 0.3);
-  color: #a7f3d0;
+  background: #ecfdf5;
+  border: 1px solid #10b981;
+  color: #065f46;
 }
 
 .feedbackError {
-  background: var(--overlay-danger-subtle);
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  color: #fca5a5;
+  background: #fef2f2;
+  border: 1px solid #ef4444;
+  color: #991b1b;
+}
+
+.feedbackContent {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .feedbackCloseBtn {
@@ -396,225 +603,13 @@
   gap: 0.6rem;
 }
 
-.feedbackContent {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
-
-.activeInPanelTag {
-  border: 0;
-  color: var(--admin-accent-dark, #8a5200);
-  background: transparent;
-  font-weight: 600;
-  padding: 0;
-}
-
-.btnSelectInPanel {
-  padding: 0.2rem 0.55rem;
-  font-size: 0.875rem;
-  line-height: 1.2;
-  border-color: var(--admin-accent-dark, #8a5200);
-  color: var(--admin-accent-dark, #8a5200);
-}
-
-.progressIcon {
-  color: var(--admin-brand, #1b4a2e);
-}
-
-.revenueHighlight {
-  color: var(--admin-brand, #1b4a2e);
-}
-
-.metricValueMedium {
-  font-size: 1.125rem;
-  line-height: 1.2;
-  font-variant-numeric: tabular-nums;
-}
-
-.metricValueDate {
-  font-size: 1.125rem;
-  line-height: 1.2;
-  font-variant-numeric: tabular-nums;
-}
-
-.otherBadgesRow {
-  margin-bottom: 0.35rem;
-  display: flex;
-  gap: 0.4rem;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.otherActiveBadge {
-  font-size: 0.875rem;
-  line-height: 1.2;
-  color: #fbbf24;
-  font-weight: 600;
-  background: rgba(217, 119, 6, 0.15);
-  padding: 0.15rem 0.45rem;
-  border-radius: 4px;
-  border: 1px solid rgba(217, 119, 6, 0.4);
-}
-
-.otherActionsGroup {
-  display: flex;
-  gap: 0.4rem;
-  align-items: center;
-}
-
-.btnManageOther {
-  padding: 0.35rem 0.55rem;
-  font-size: 0.875rem;
-  line-height: 1.2;
-  border-color: #d97706;
-  color: #fbbf24;
-}
-
-.btnEditSmall {
-  padding: 0.35rem 0.55rem;
-  font-size: 0.875rem;
-  line-height: 1.2;
-}
-
-.otherDrawDate {
-  font-size: 0.875rem;
-  line-height: 1.45;
-  font-variant-numeric: tabular-nums;
-  color: #9cb5ab;
-}
-
-.otherSoldValue {
-  color: var(--color-success);
-  font-size: 0.875rem;
-  line-height: 1.2;
-  font-variant-numeric: tabular-nums;
-}
-
-/* ── Nuevo: Indicadores de estado público de la rifa principal ── */
-
-/* Badge inequívoco: rifa visible y activa en la web */
-.publicLiveBadge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-  padding: 0.25rem 0.7rem;
-  border-radius: var(--radius-full, 9999px);
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  background: rgba(16, 185, 129, 0.15);
-  color: #34d399;
-  border: 1px solid rgba(16, 185, 129, 0.4);
-  white-space: nowrap;
-}
-
-/* Badge: rifa no publicada actualmente */
-.notPublicBadge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-  padding: 0.25rem 0.7rem;
-  border-radius: var(--radius-full, 9999px);
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  background: rgba(148, 163, 184, 0.1);
-  color: var(--text-muted, #7e9c90);
-  border: 1px solid rgba(148, 163, 184, 0.2);
-  white-space: nowrap;
-}
-
-/* Acciones de la tarjeta principal */
-.cardActions {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-}
-
-/* Botón "Activar en Web Pública" para la tarjeta principal */
-.btnActivatePublic {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-}
-
-/* Botón "Pausar Venta Pública" para la tarjeta principal */
-.btnPausePublic {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  border-color: rgba(245, 158, 11, 0.5) !important;
-  color: #fbbf24 !important;
-}
-
-.btnPausePublic:hover:not(:disabled) {
-  background: rgba(245, 158, 11, 0.1) !important;
-}
-
-/* Badge "Seleccionada en el panel" para rifas secundarias */
-.otherPanelBadge {
-  font-size: 0.75rem;
-  line-height: 1.2;
-  color: #93c5fd;
-  font-weight: 600;
-  background: rgba(59, 130, 246, 0.12);
-  padding: 0.15rem 0.45rem;
-  border-radius: 4px;
-  border: 1px solid rgba(59, 130, 246, 0.3);
-}
-
-/* Botón "Usar en panel" para rifas secundarias (acción neutral) */
-.btnUsePanelSmall {
-  padding: 0.3rem 0.55rem;
-  font-size: 0.8rem;
-  line-height: 1.2;
-  border-color: rgba(59, 130, 246, 0.35);
-  color: #93c5fd;
-}
-
-/* Botón "Activar en Web Pública" para rifas secundarias */
-.btnActivateOther {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.3rem 0.65rem;
-  border-radius: 6px;
-  border: 1px solid rgba(16, 185, 129, 0.4);
-  background: rgba(16, 185, 129, 0.1);
-  color: #34d399;
-  font-size: 0.8rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  white-space: nowrap;
-}
-
-.btnActivateOther:hover:not(:disabled) {
-  background: rgba(16, 185, 129, 0.18);
-  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
-}
-
-/* Botón "Pausar" para rifas secundarias activas (icono solo) */
-.btnPauseOther {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 30px;
-  height: 30px;
-  border-radius: 6px;
-  border: 1px solid rgba(245, 158, 11, 0.4);
-  background: rgba(245, 158, 11, 0.1);
-  color: #fbbf24;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  flex-shrink: 0;
-}
-
-.btnPauseOther:hover:not(:disabled) {
-  background: rgba(245, 158, 11, 0.18);
-}
-

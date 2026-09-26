@@ -173,7 +173,7 @@ export const RafflesView: React.FC = () => {
   };
 
   const closeActivationModal = () => {
-    if (isActivating) return; // evitar cerrar durante operación
+    if (isActivating) return;
     setActivationModal(null);
     setActivationError(null);
   };
@@ -206,7 +206,7 @@ export const RafflesView: React.FC = () => {
       await loadRaffles();
       void reloadRaffles();
 
-      // Si se activó, seleccionarla automáticamente en el panel también
+      // Si se activó, seleccionarla en el panel para mantener el foco en la rifa activa
       if (mode === 'activate') {
         setSelectedRaffleId(raffle.id);
       }
@@ -216,7 +216,7 @@ export const RafflesView: React.FC = () => {
         type: 'success',
         message:
           mode === 'activate'
-            ? `"${raffle.title}" fue publicada como la rifa activa. La anterior quedó pausada.`
+            ? `"${raffle.title}" fue publicada como la rifa activa en la web. La anterior quedó pausada automáticamente.`
             : `La venta pública de "${raffle.title}" fue pausada correctamente.`,
       });
     } catch (err: unknown) {
@@ -228,51 +228,101 @@ export const RafflesView: React.FC = () => {
   }, [activationModal, isActivating, loadRaffles, reloadRaffles, setSelectedRaffleId]);
 
   // ─── Identificación de rifas ─────────────────────────────────────────────────
+  // La rifa que se muestra en la tarjeta principal es la que está seleccionada en el panel
+  // (o la activa pública como fallback si ninguna coincide).
+  const panelRaffle =
+    raffles.find((r) => r.id === selectedRaffleId) ||
+    raffles.find((r) => r.status === 'active') ||
+    (raffles.length > 0 ? raffles[0] : null);
 
-  const activeRaffle =
-    raffles.find((r) => r.status === 'active') || (raffles.length > 0 ? raffles[0] : null);
-  const otherRaffles = activeRaffle ? raffles.filter((r) => r.id !== activeRaffle.id) : [];
+  // Las otras rifas para el listado inferior son todas excepto la que está en la tarjeta principal
+  const otherRaffles = panelRaffle ? raffles.filter((r) => r.id !== panelRaffle.id) : [];
 
-  const trueActiveRaffle = raffles.find((r) => r.status === 'active') || null;
-
-  const renderStatusBadge = (status: string) => {
+  // Función para renderizar el badge de estado principal sin ambigüedades
+  const renderPanelRaffleStatusBadge = (status: string) => {
     switch (status) {
       case 'active':
         return (
-          <span className={styles.badgeActive}>
-            <CheckCircle size={12} /> Activa
+          <span className={styles.badgePublicLive} title="Esta rifa está actualmente visible y abierta a compras en la página web pública">
+            <Globe size={13} aria-hidden="true" />
+            Visible y Activa en Web Pública
           </span>
         );
       case 'paused':
         return (
-          <span className={styles.badgePaused}>
-            <Clock size={12} /> Pausada
+          <span className={styles.badgePublicPaused} title="La venta de boletos está suspendida temporalmente">
+            <Pause size={13} aria-hidden="true" />
+            Venta Pública Pausada
           </span>
         );
       case 'finished':
         return (
-          <span className={styles.badgeFinished}>
-            <Award size={12} /> Finalizada
+          <span className={styles.badgeFinished} title="El sorteo ya concluyó y tiene ganador oficial">
+            <Award size={13} aria-hidden="true" />
+            Sorteo Finalizado
           </span>
         );
       case 'closed':
         return (
-          <span className={styles.badgeFinished}>
-            <Lock size={12} /> Cerrada
+          <span className={styles.badgeFinished} title="El sorteo está cerrado">
+            <Lock size={13} aria-hidden="true" />
+            Sorteo Cerrado
           </span>
         );
       default:
         return (
-          <span className={styles.badgeDraft}>
-            <AlertCircle size={12} /> Borrador
+          <span className={styles.badgeDraft} title="Esta rifa está en borrador y no es visible para compradores">
+            <AlertCircle size={13} aria-hidden="true" />
+            Borrador (No Publicada)
           </span>
         );
     }
   };
 
-  const activeSalesProgressStyle: React.CSSProperties | undefined = activeRaffle
+  // Badge compacto para las tarjetas secundarias
+  const renderOtherRaffleStatusBadge = (status: string) => {
+    switch (status) {
+      case 'active':
+        return (
+          <span className={styles.badgePublicLiveSmall}>
+            <Globe size={11} aria-hidden="true" />
+            Activa en Web
+          </span>
+        );
+      case 'paused':
+        return (
+          <span className={styles.badgePausedSmall}>
+            <Clock size={11} aria-hidden="true" />
+            Pausada
+          </span>
+        );
+      case 'finished':
+        return (
+          <span className={styles.badgeFinishedSmall}>
+            <Award size={11} aria-hidden="true" />
+            Finalizada
+          </span>
+        );
+      case 'closed':
+        return (
+          <span className={styles.badgeFinishedSmall}>
+            <Lock size={11} aria-hidden="true" />
+            Cerrada
+          </span>
+        );
+      default:
+        return (
+          <span className={styles.badgeDraftSmall}>
+            <AlertCircle size={11} aria-hidden="true" />
+            Borrador
+          </span>
+        );
+    }
+  };
+
+  const activeSalesProgressStyle: React.CSSProperties | undefined = panelRaffle
     ? ({
-        ['--progress-percentage' as string]: `${Math.min(100, activeRaffle.sales_percentage)}%`,
+        ['--progress-percentage' as string]: `${Math.min(100, panelRaffle.sales_percentage)}%`,
       } as React.CSSProperties)
     : undefined;
 
@@ -346,7 +396,7 @@ export const RafflesView: React.FC = () => {
             onRetry={() => void loadRaffles()}
           />
         </div>
-      ) : !activeRaffle ? (
+      ) : !panelRaffle ? (
         <AdminEmptyState
           icon={<Sparkles size={40} />}
           title="No hay rifas registradas"
@@ -354,77 +404,60 @@ export const RafflesView: React.FC = () => {
         />
       ) : (
         <>
-          {/* ── Tarjeta de Rifa Principal ── */}
+          {/* ── Tarjeta de Rifa en Gestión del Panel (Principal) ── */}
           <div className={styles.activeRaffleCard}>
             <div className={styles.cardHeader}>
               <div className={styles.cardHeaderLeft}>
                 <div className={styles.badgesRow}>
-                  {renderStatusBadge(activeRaffle.status)}
+                  {/* Badge de estado en la web pública */}
+                  {renderPanelRaffleStatusBadge(panelRaffle.status)}
 
-                  {/* Indicador inequívoco: visible públicamente o no */}
-                  {activeRaffle.status === 'active' ? (
-                    <span className={styles.publicLiveBadge} aria-label="Rifa visible en la web pública">
-                      <Globe size={11} aria-hidden="true" />
-                      Visible y Activa en la Web Pública
-                    </span>
-                  ) : (
-                    <span className={styles.notPublicBadge}>
-                      No publicada actualmente
-                    </span>
-                  )}
-
-                  {/* Indicador de panel — separado del estado público */}
-                  {activeRaffle.id === selectedRaffleId ? (
-                    <span className={`${styles.raffleEditionTag} ${styles.activeInPanelTag}`}>
-                      ★ Seleccionada en el panel
-                    </span>
-                  ) : (
-                    <button
-                      type="button"
-                      className={`${adminStyles.btnSecondary} ${styles.btnSelectInPanel}`}
-                      onClick={() => setSelectedRaffleId(activeRaffle.id)}
-                      title="Seleccionar esta rifa para gestionar en todo el panel (sin publicar)"
-                    >
-                      Usar en el panel
-                    </button>
-                  )}
+                  {/* Badge de foco en el panel de control */}
+                  <span
+                    className={styles.badgeInPanelFocus}
+                    title="Esta es la edición sobre la que operan todos los módulos del panel (boletos, órdenes, compradores)"
+                  >
+                    <Layers size={13} aria-hidden="true" />
+                    Rifa en Gestión del Panel
+                  </span>
                 </div>
-                <h2 className={styles.raffleTitle}>{activeRaffle.title}</h2>
-                <p className={styles.raffleDescription}>{activeRaffle.description}</p>
+
+                <h2 className={styles.raffleTitle}>{panelRaffle.title}</h2>
+                <p className={styles.raffleDescription}>{panelRaffle.description}</p>
               </div>
 
               <div className={styles.cardActions}>
-                {/* Acción pública — visualmente separada de "Editar Parámetros" */}
-                {activeRaffle.status === 'active' ? (
-                  // Rifa activa → ofrecer Pausar
+                {/* Acción de venta pública */}
+                {panelRaffle.status === 'active' ? (
                   <button
                     type="button"
-                    className={`${adminStyles.btnSecondary} ${styles.btnPausePublic}`}
-                    onClick={() => openActivationModal(activeRaffle, 'pause')}
-                    title="Pausar la venta pública de esta rifa"
+                    className={styles.btnPausePublic}
+                    onClick={() => openActivationModal(panelRaffle, 'pause')}
+                    title="Pausar temporalmente la venta pública de esta rifa"
                   >
                     <Pause size={15} aria-hidden="true" />
                     <span>Pausar Venta Pública</span>
                   </button>
-                ) : (
-                  // Rifa no activa → ofrecer Activar
+                ) : panelRaffle.status !== 'finished' && panelRaffle.status !== 'closed' ? (
                   <button
                     type="button"
-                    className={`${adminStyles.btnPrimary} ${styles.btnActivatePublic}`}
-                    onClick={() => openActivationModal(activeRaffle, 'activate')}
-                    title="Publicar esta rifa en la web pública para compradores"
+                    className={styles.btnActivatePublic}
+                    onClick={() => openActivationModal(panelRaffle, 'activate')}
+                    title="Publicar esta rifa en la web para compradores"
                   >
                     <Globe size={15} aria-hidden="true" />
                     <span>Activar en Web Pública</span>
                   </button>
-                )}
+                ) : null}
 
+                {/* Botón Editar: SIEMPRE disponible en la rifa que se está viendo en el panel */}
                 <button
                   type="button"
-                  className={adminStyles.btnSecondary}
-                  onClick={() => setSelectedRaffleToEdit(activeRaffle)}
+                  className={styles.btnEditMain}
+                  onClick={() => setSelectedRaffleToEdit(panelRaffle)}
+                  title="Modificar precio, fecha de sorteo, lotería y parámetros de esta rifa"
                 >
-                  <Edit3 size={16} />
+                  <Edit3 size={15} aria-hidden="true" />
                   <span>Editar Parámetros</span>
                 </button>
               </div>
@@ -437,14 +470,14 @@ export const RafflesView: React.FC = () => {
                   <TrendingUp size={16} className={styles.progressIcon} />
                   <span className={styles.progressLabel}>Rendimiento de Ventas</span>
                   <span className={styles.progressBadge}>
-                    {activeRaffle.sales_percentage}% vendido
+                    {panelRaffle.sales_percentage}% vendido
                   </span>
                 </div>
                 <div className={styles.progressStats}>
-                  <strong>{activeRaffle.sold_tickets}</strong> de{' '}
-                  <strong>{activeRaffle.total_tickets}</strong> boletos pagados (
+                  <strong>{panelRaffle.sold_tickets}</strong> de{' '}
+                  <strong>{panelRaffle.total_tickets}</strong> boletos pagados (
                   <strong className={styles.revenueHighlight}>
-                    {formatCOP(activeRaffle.total_revenue)}
+                    {formatCOP(panelRaffle.total_revenue)}
                   </strong>{' '}
                   recaudados)
                 </div>
@@ -468,7 +501,7 @@ export const RafflesView: React.FC = () => {
                   </div>
                 </div>
                 <div className={styles.metricValue}>
-                  {formatCOP(Number(activeRaffle.ticket_price) || 0)} COP
+                  {formatCOP(Number(panelRaffle.ticket_price) || 0)} COP
                 </div>
                 <span className={styles.metricHint}>Por boleto individual</span>
               </div>
@@ -481,11 +514,10 @@ export const RafflesView: React.FC = () => {
                   </div>
                 </div>
                 <div className={styles.metricValue}>
-                  {activeRaffle.total_tickets.toLocaleString('es-CO')} Boletos
+                  {panelRaffle.total_tickets.toLocaleString('es-CO')} Boletos
                 </div>
                 <span className={styles.metricHint}>
-                  {activeRaffle.available_tickets} disponibles • {activeRaffle.reserved_tickets} en
-                  reserva
+                  {panelRaffle.available_tickets} disponibles • {panelRaffle.reserved_tickets} en reserva
                 </span>
               </div>
 
@@ -497,7 +529,7 @@ export const RafflesView: React.FC = () => {
                   </div>
                 </div>
                 <div className={`${styles.metricValue} ${styles.metricValueMedium}`}>
-                  {activeRaffle.lottery_reference || 'Lotería Oficial'}
+                  {panelRaffle.lottery_reference || 'Lotería Oficial'}
                 </div>
                 <span className={styles.metricHint}>Premio mayor auditable</span>
               </div>
@@ -510,90 +542,48 @@ export const RafflesView: React.FC = () => {
                   </div>
                 </div>
                 <div className={`${styles.metricValue} ${styles.metricValueDate}`}>
-                  {formatColombianDate(activeRaffle.draw_date)}
+                  {formatColombianDate(panelRaffle.draw_date)}
                 </div>
                 <span className={styles.metricHint}>
-                  Límite: {activeRaffle.max_tickets_per_buyer || 50} boletos / comprador
+                  Límite: {panelRaffle.max_tickets_per_buyer || 50} boletos / comprador
                 </span>
               </div>
             </div>
           </div>
 
-          {/* ── Listado de Otras Ediciones ── */}
+          {/* ── Listado de Otras Ediciones y Sorteos ── */}
           {otherRaffles.length > 0 && (
             <div className={styles.otherRafflesSection}>
               <div className={styles.sectionHeader}>
                 <h3 className={styles.sectionTitle}>
                   Otras Ediciones y Sorteos ({otherRaffles.length})
                 </h3>
+                <span className={styles.sectionSubtitle}>
+                  Haz clic en &ldquo;Usar en el panel&rdquo; para cargar y editar cualquier edición.
+                </span>
               </div>
 
               <div className={styles.otherRafflesGrid}>
                 {otherRaffles.map((r) => (
                   <div key={r.id} className={styles.otherRaffleCard}>
                     <div className={styles.otherCardTop}>
-                      <div>
+                      <div className={styles.otherCardInfo}>
                         <div className={styles.otherBadgesRow}>
-                          {renderStatusBadge(r.status)}
-                          {/* Panel badge — solo indica selección en el panel, no estado público */}
-                          {r.id === selectedRaffleId ? (
-                            <span className={styles.otherPanelBadge}>
-                              ★ Seleccionada en el panel
-                            </span>
-                          ) : null}
+                          {renderOtherRaffleStatusBadge(r.status)}
                         </div>
                         <h4 className={styles.otherTitle}>{r.title}</h4>
                       </div>
 
-                      <div className={styles.otherActionsGroup}>
-                        {/* Selección de panel — acción neutral, sin publicar */}
-                        {r.id !== selectedRaffleId && (
-                          <button
-                            type="button"
-                            className={`${adminStyles.btnSecondary} ${styles.btnUsePanelSmall}`}
-                            onClick={() => setSelectedRaffleId(r.id)}
-                            title="Ver esta rifa en el panel (sin publicarla)"
-                          >
-                            Usar en panel
-                          </button>
-                        )}
-
-                        {/* Activación pública — solo si no está finalizada ni cerrada */}
-                        {r.status !== 'active' &&
-                          r.status !== 'finished' &&
-                          r.status !== 'closed' && (
-                            <button
-                              type="button"
-                              className={`${styles.btnActivateOther}`}
-                              onClick={() => openActivationModal(r, 'activate')}
-                              title="Publicar esta rifa como la activa para compradores"
-                            >
-                              <Globe size={13} aria-hidden="true" />
-                              Activar en Web Pública
-                            </button>
-                          )}
-
-                        {/* Pausa pública — solo si está activa */}
-                        {r.status === 'active' && trueActiveRaffle?.id !== activeRaffle.id && (
-                          <button
-                            type="button"
-                            className={`${styles.btnPauseOther}`}
-                            onClick={() => openActivationModal(r, 'pause')}
-                            title="Pausar venta pública de esta rifa"
-                          >
-                            <Pause size={13} aria-hidden="true" />
-                          </button>
-                        )}
-
-                        <button
-                          type="button"
-                          className={`${adminStyles.btnSecondary} ${styles.btnEditSmall}`}
-                          onClick={() => setSelectedRaffleToEdit(r)}
-                        >
-                          <Edit3 size={13} />
-                          <span>Editar</span>
-                        </button>
-                      </div>
+                      {/* ÚNICO BOTÓN: Usar en el panel */}
+                      <button
+                        type="button"
+                        className={styles.btnUseInPanel}
+                        onClick={() => setSelectedRaffleId(r.id)}
+                        title={`Poner "${r.title}" en gestión en el panel para editarla y ver sus datos`}
+                      >
+                        <Layers size={14} aria-hidden="true" />
+                        <span>Usar en el panel</span>
+                      </button>
                     </div>
 
                     <div className={styles.otherStatsRow}>
@@ -643,7 +633,7 @@ export const RafflesView: React.FC = () => {
         onSuccess={handleCreateSuccess}
       />
 
-      {/* Modal de Activación / Pausa Pública */}
+      {/* Modal de Confirmación de Activación / Pausa Pública */}
       <AdminActivateRaffleModal
         raffle={activationModal?.raffle ?? null}
         mode={activationModal?.mode ?? 'activate'}
