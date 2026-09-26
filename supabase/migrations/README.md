@@ -88,6 +88,7 @@ Este directorio (`supabase/migrations/`) constituye la **única fuente de verdad
 | **066** | `066_allow_raffle_reuse_and_flexible_status_transitions.sql` | **(Reutilización Flexible)** Flexibilización de máquina de estados para administración libre de rifas y auto-pausa de rifas competidoras. |
 | **067** | `067_progressive_public_verification_by_document.sql` | **(Verificación Progresiva)** Consulta pública escalonada por cédula con validación telefónica condicional. |
 | **068** | `068_public_winner_and_raffle_activation_hardening.sql` | **(Reconocimiento de Ganadores y Hardening de Activación)** Entrega pública segura de ganador (`get_public_winner`) con enmascaramiento PII y validación de fecha futura obligatoria al reactivar rifas. |
+| **069** | `069_admin_delete_winner_and_delete_raffle.sql` | **(Eliminación de Ganadores y Rifas)** RPCs transaccionales `admin_delete_winner` y `admin_delete_raffle` con autorización administrativa estricta, limpieza en cascada y auditoría. |
 
 ---
 

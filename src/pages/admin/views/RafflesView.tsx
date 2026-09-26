@@ -4,6 +4,7 @@ import {
   fetchAdminRaffles,
   activateRafflePublic,
   pauseRafflePublic,
+  deleteRaffleAdmin,
   type RaffleWithStats,
 } from '@/services/raffleService';
 import { saveCachedRaffle } from '@/hooks/useActiveRaffle';
@@ -14,6 +15,7 @@ import { AdminErrorState } from '@/components/admin/common/AdminErrorState';
 import { AdminEditRaffleModal } from '@/components/admin/raffles/AdminEditRaffleModal';
 import { AdminCreateRaffleModal } from '@/components/admin/raffles/AdminCreateRaffleModal';
 import { AdminActivateRaffleModal } from '@/components/admin/raffles/AdminActivateRaffleModal';
+import { AdminDeleteRaffleModal } from '@/components/admin/raffles/AdminDeleteRaffleModal';
 import { formatCOP } from '@/lib/utils';
 import { normalizeAppError, logAppError } from '@/lib/errorHandling';
 import {
@@ -33,6 +35,7 @@ import {
   X,
   Globe,
   Pause,
+  Trash2,
 } from 'lucide-react';
 import adminStyles from './AdminViews.module.css';
 import { useAdminRaffle } from '@/context/AdminRaffleContext';
@@ -77,6 +80,11 @@ export const RafflesView: React.FC = () => {
   const [activationModal, setActivationModal] = useState<ActivationModalState | null>(null);
   const [isActivating, setIsActivating] = useState(false);
   const [activationError, setActivationError] = useState<string | null>(null);
+
+  // Estado del modal de eliminación de rifa
+  const [raffleToDelete, setRaffleToDelete] = useState<RaffleRow | null>(null);
+  const [isDeletingRaffle, setIsDeletingRaffle] = useState(false);
+  const [deleteRaffleError, setDeleteRaffleError] = useState<string | null>(null);
 
   const loadRaffles = useCallback(async () => {
     setIsLoading(true);
@@ -226,6 +234,52 @@ export const RafflesView: React.FC = () => {
       setIsActivating(false);
     }
   }, [activationModal, isActivating, loadRaffles, reloadRaffles, setSelectedRaffleId]);
+
+  // ─── Eliminación de Rifa ───────────────────────────────────────────────────────
+
+  const handleOpenDeleteRaffleModal = (raffle: RaffleRow) => {
+    setDeleteRaffleError(null);
+    setRaffleToDelete(raffle);
+  };
+
+  const handleCloseDeleteRaffleModal = () => {
+    if (isDeletingRaffle) return;
+    setRaffleToDelete(null);
+    setDeleteRaffleError(null);
+  };
+
+  const handleConfirmDeleteRaffle = async () => {
+    if (!raffleToDelete || isDeletingRaffle) return;
+
+    setIsDeletingRaffle(true);
+    setDeleteRaffleError(null);
+
+    try {
+      const res = await deleteRaffleAdmin(raffleToDelete.id);
+      if (!res.success) {
+        setDeleteRaffleError(res.error || 'No fue posible eliminar la rifa.');
+        return;
+      }
+
+      setRaffleToDelete(null);
+      setFeedback({
+        type: 'success',
+        message: `La edición "${res.title || raffleToDelete.title}" fue eliminada exitosamente.`,
+      });
+
+      if (selectedRaffleId === raffleToDelete.id) {
+        setSelectedRaffleId('');
+      }
+
+      await loadRaffles();
+      void reloadRaffles();
+    } catch (err: unknown) {
+      const normalized = normalizeAppError(err, 'Error inesperado al eliminar la rifa.');
+      setDeleteRaffleError(normalized.userMessage);
+    } finally {
+      setIsDeletingRaffle(false);
+    }
+  };
 
   // ─── Identificación de rifas ─────────────────────────────────────────────────
   // La rifa que se muestra en la tarjeta principal es la que está seleccionada en el panel
@@ -460,6 +514,17 @@ export const RafflesView: React.FC = () => {
                   <Edit3 size={15} aria-hidden="true" />
                   <span>Editar Parámetros</span>
                 </button>
+
+                {/* Botón Eliminar Rifa */}
+                <button
+                  type="button"
+                  className={styles.btnDeleteMain}
+                  onClick={() => handleOpenDeleteRaffleModal(panelRaffle)}
+                  title={`Eliminar la edición "${panelRaffle.title}"`}
+                >
+                  <Trash2 size={15} aria-hidden="true" />
+                  <span>Eliminar Rifa</span>
+                </button>
               </div>
             </div>
 
@@ -574,16 +639,27 @@ export const RafflesView: React.FC = () => {
                         <h4 className={styles.otherTitle}>{r.title}</h4>
                       </div>
 
-                      {/* ÚNICO BOTÓN: Usar en el panel */}
-                      <button
-                        type="button"
-                        className={styles.btnUseInPanel}
-                        onClick={() => setSelectedRaffleId(r.id)}
-                        title={`Poner "${r.title}" en gestión en el panel para editarla y ver sus datos`}
-                      >
-                        <Layers size={14} aria-hidden="true" />
-                        <span>Usar en el panel</span>
-                      </button>
+                      {/* Botones de acción: Usar en panel y Eliminar */}
+                      <div className={styles.otherCardActions}>
+                        <button
+                          type="button"
+                          className={styles.btnUseInPanel}
+                          onClick={() => setSelectedRaffleId(r.id)}
+                          title={`Poner "${r.title}" en gestión en el panel para editarla y ver sus datos`}
+                        >
+                          <Layers size={14} aria-hidden="true" />
+                          <span>Usar en el panel</span>
+                        </button>
+                        <button
+                          type="button"
+                          className={styles.btnDeleteSecondary}
+                          onClick={() => handleOpenDeleteRaffleModal(r)}
+                          title={`Eliminar la edición "${r.title}"`}
+                        >
+                          <Trash2 size={13} aria-hidden="true" />
+                          <span>Eliminar</span>
+                        </button>
+                      </div>
                     </div>
 
                     <div className={styles.otherStatsRow}>
@@ -642,6 +718,16 @@ export const RafflesView: React.FC = () => {
         error={activationError}
         onConfirm={handleConfirmActivation}
         onCancel={closeActivationModal}
+      />
+
+      {/* Modal de Eliminación Definitiva de Rifa */}
+      <AdminDeleteRaffleModal
+        raffle={raffleToDelete}
+        isOpen={!!raffleToDelete}
+        isLoading={isDeletingRaffle}
+        error={deleteRaffleError}
+        onConfirm={handleConfirmDeleteRaffle}
+        onCancel={handleCloseDeleteRaffleModal}
       />
     </div>
   );

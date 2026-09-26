@@ -337,3 +337,78 @@ export async function pauseRafflePublic(
     timeoutMs
   );
 }
+
+export interface DeleteRaffleResult {
+  success: boolean;
+  deletedId?: string;
+  title?: string;
+  error?: string;
+  code?: string;
+  isTimeout?: boolean;
+}
+
+/**
+ * Eliminar una edición de rifa (vía RPC transaccional admin_delete_raffle).
+ * Realiza la limpieza en cascada de boletos, órdenes y registros vinculados.
+ */
+export async function deleteRaffleAdmin(
+  raffleId: string,
+  timeoutMs: number = DEFAULT_REQUEST_TIMEOUT_MS
+): Promise<DeleteRaffleResult> {
+  if (!raffleId?.trim()) {
+    return { success: false, error: 'El ID de la rifa es obligatorio.' };
+  }
+
+  try {
+    return await withTimeout(async () => {
+      const { data, error } = await supabase.rpc('admin_delete_raffle', {
+        p_raffle_id: raffleId,
+      });
+
+      if (error) {
+        return {
+          success: false,
+          code: error.code,
+          error: error.message || 'Error al eliminar la rifa.',
+        };
+      }
+
+      const response = data as {
+        success: boolean;
+        deleted_id?: string;
+        title?: string;
+        error?: string;
+        code?: string;
+      } | null;
+
+      if (response?.success) {
+        return {
+          success: true,
+          deletedId: response.deleted_id,
+          title: response.title,
+        };
+      }
+
+      return {
+        success: false,
+        code: response?.code || 'UNKNOWN',
+        error: response?.error || 'No fue posible eliminar la rifa.',
+      };
+    }, { timeoutMs });
+  } catch (err: unknown) {
+    const classified = classifyRequestError(err);
+    if (classified.isTimeout) {
+      return {
+        success: false,
+        isTimeout: true,
+        code: 'TIMEOUT',
+        error: 'La solicitud de eliminación excedió el tiempo límite. Verifica tu conexión.',
+      };
+    }
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : 'Error inesperado al eliminar la rifa.',
+    };
+  }
+}
+

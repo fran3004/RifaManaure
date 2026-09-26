@@ -1063,6 +1063,18 @@ export type Database = {
         };
         Returns: Json;
       };
+      admin_delete_winner: {
+        Args: {
+          p_winner_id: string;
+        };
+        Returns: Json;
+      };
+      admin_delete_raffle: {
+        Args: {
+          p_raffle_id: string;
+        };
+        Returns: Json;
+      };
     };
     Enums: {
       [_ in never]: never;

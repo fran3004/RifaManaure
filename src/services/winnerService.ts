@@ -1,5 +1,10 @@
 import { supabase } from '@/lib/supabase';
 import { uploadToCloudinary } from '@/services/cloudinaryService';
+import {
+  withTimeout,
+  classifyRequestError,
+  DEFAULT_REQUEST_TIMEOUT_MS,
+} from '@/lib/requestTimeout';
 import type {
   WinnerWithDetails,
   RegisterWinnerPayload,
@@ -408,4 +413,82 @@ export async function uploadWinnerActDocument(
     };
   }
 }
+
+export interface DeleteWinnerResult {
+  success: boolean;
+  deletedId?: string;
+  raffleId?: string;
+  ticketNumber?: string;
+  error?: string;
+  code?: string;
+  isTimeout?: boolean;
+}
+
+/**
+ * Eliminar el registro oficial de un ganador (vía RPC transaccional admin_delete_winner).
+ * Si la rifa estaba en estado 'finished', la base de datos la pasa a 'closed' para permitir reutilización.
+ */
+export async function deleteWinnerAdmin(
+  winnerId: string,
+  timeoutMs: number = DEFAULT_REQUEST_TIMEOUT_MS
+): Promise<DeleteWinnerResult> {
+  if (!winnerId?.trim()) {
+    return { success: false, error: 'El ID del ganador es obligatorio.' };
+  }
+
+  try {
+    return await withTimeout(async () => {
+      const { data, error } = await supabase.rpc('admin_delete_winner', {
+        p_winner_id: winnerId,
+      });
+
+      if (error) {
+        return {
+          success: false,
+          code: error.code,
+          error: error.message || 'Error al eliminar el ganador oficial.',
+        };
+      }
+
+      const response = data as {
+        success: boolean;
+        deleted_id?: string;
+        raffle_id?: string;
+        ticket_number?: string;
+        error?: string;
+        code?: string;
+      } | null;
+
+      if (response?.success) {
+        return {
+          success: true,
+          deletedId: response.deleted_id,
+          raffleId: response.raffle_id,
+          ticketNumber: response.ticket_number,
+        };
+      }
+
+      return {
+        success: false,
+        code: response?.code || 'UNKNOWN',
+        error: response?.error || 'No fue posible eliminar el registro del ganador.',
+      };
+    }, { timeoutMs });
+  } catch (err: unknown) {
+    const classified = classifyRequestError(err);
+    if (classified.isTimeout) {
+      return {
+        success: false,
+        isTimeout: true,
+        code: 'TIMEOUT',
+        error: 'La solicitud de eliminación excedió el tiempo límite. Verifica tu conexión.',
+      };
+    }
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : 'Error inesperado al eliminar el ganador.',
+    };
+  }
+}
+
 

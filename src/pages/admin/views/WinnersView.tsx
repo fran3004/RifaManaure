@@ -17,17 +17,19 @@ import {
   FileSpreadsheet,
   CheckCircle,
   RefreshCw,
+  Trash2,
 } from 'lucide-react';
-import { getWinners } from '@/services/winnerService';
+import { getWinners, deleteWinnerAdmin } from '@/services/winnerService';
 import { fetchAdminRaffles } from '@/services/raffleService';
 import type { WinnerWithDetails, RaffleRow } from '@/types/raffle.types';
 import { useAdminRaffle } from '@/context/AdminRaffleContext';
 import { formatCOP } from '@/lib/utils';
 import { normalizeAppError, logAppError } from '@/lib/errorHandling';
+import { AdminDeleteWinnerModal } from '@/components/admin/winners/AdminDeleteWinnerModal';
 import styles from './WinnersView.module.css';
 
 export const WinnersView: React.FC = () => {
-  const { selectedRaffleId, selectedRaffle } = useAdminRaffle();
+  const { selectedRaffleId, selectedRaffle, reloadRaffles } = useAdminRaffle();
   const [winners, setWinners] = useState<WinnerWithDetails[]>([]);
   const [raffles, setRaffles] = useState<RaffleRow[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -35,6 +37,9 @@ export const WinnersView: React.FC = () => {
   const [isForbidden, setIsForbidden] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState<boolean>(false);
+  const [winnerToDelete, setWinnerToDelete] = useState<WinnerWithDetails | null>(null);
+  const [isDeletingWinner, setIsDeletingWinner] = useState<boolean>(false);
+  const [deleteWinnerError, setDeleteWinnerError] = useState<string | null>(null);
   const [successToast, setSuccessToast] = useState<string | null>(null);
 
   const loadData = useCallback(async () => {
@@ -66,6 +71,45 @@ export const WinnersView: React.FC = () => {
     setSuccessToast('¡Ganador oficial y actas registradas con éxito!');
     loadData();
     setTimeout(() => setSuccessToast(null), 5000);
+  };
+
+  const handleOpenDeleteWinnerModal = (winner: WinnerWithDetails) => {
+    setDeleteWinnerError(null);
+    setWinnerToDelete(winner);
+  };
+
+  const handleCloseDeleteWinnerModal = () => {
+    if (isDeletingWinner) return;
+    setWinnerToDelete(null);
+    setDeleteWinnerError(null);
+  };
+
+  const handleConfirmDeleteWinner = async () => {
+    if (!winnerToDelete || isDeletingWinner) return;
+
+    setIsDeletingWinner(true);
+    setDeleteWinnerError(null);
+
+    try {
+      const res = await deleteWinnerAdmin(winnerToDelete.id);
+      if (!res.success) {
+        setDeleteWinnerError(res.error || 'No fue posible eliminar el registro del ganador.');
+        return;
+      }
+
+      setWinnerToDelete(null);
+      setSuccessToast(
+        `Ganador del boleto #${res.ticketNumber || winnerToDelete.ticket_number} eliminado correctamente. La rifa quedó disponible para reutilización.`
+      );
+      await loadData();
+      void reloadRaffles();
+      setTimeout(() => setSuccessToast(null), 5000);
+    } catch (err: unknown) {
+      const normalized = normalizeAppError(err, 'Error inesperado al eliminar el ganador.');
+      setDeleteWinnerError(normalized.userMessage);
+    } finally {
+      setIsDeletingWinner(false);
+    }
   };
 
   const filteredWinners = useMemo(() => {
@@ -282,9 +326,9 @@ export const WinnersView: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Evidencias y Acta Oficial */}
+                {/* Evidencias y Acciones */}
                 <div className={styles.winnerEvidencesSection}>
-                  <div className={styles.evidenceRow}>
+                  <div className={styles.cardActionsRow}>
                     {winner.official_act_url ? (
                       <a
                         href={winner.official_act_url}
@@ -302,6 +346,15 @@ export const WinnersView: React.FC = () => {
                       </span>
                     )}
 
+                    <button
+                      type="button"
+                      className={styles.btnDeleteWinner}
+                      onClick={() => handleOpenDeleteWinnerModal(winner)}
+                      title={`Eliminar asignación de ganador para el boleto #${winner.ticket_number}`}
+                    >
+                      <Trash2 size={15} aria-hidden="true" />
+                      <span>Eliminar Ganador</span>
+                    </button>
                   </div>
 
                   {winner.notes && (
@@ -323,6 +376,16 @@ export const WinnersView: React.FC = () => {
         onWinnerRegistered={handleWinnerRegistered}
         raffles={raffles}
         initialRaffleId={selectedRaffleId || undefined}
+      />
+
+      {/* Modal para Eliminar Ganador */}
+      <AdminDeleteWinnerModal
+        winner={winnerToDelete}
+        isOpen={!!winnerToDelete}
+        isLoading={isDeletingWinner}
+        error={deleteWinnerError}
+        onConfirm={handleConfirmDeleteWinner}
+        onCancel={handleCloseDeleteWinnerModal}
       />
     </div>
   );
