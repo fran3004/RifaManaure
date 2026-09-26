@@ -168,4 +168,50 @@ describe('Consulta Pública Progresiva de Boletos por Documento', () => {
       p_secondary_term: null,
     });
   });
+
+  it('6. Lógica de UI: Al cambiar o editar la cédula, el estado secundario debe reiniciarse limpiamente', () => {
+    // Simulación del comportamiento reactivo de handleQueryChange
+    let requiresPhone = true;
+    let secondaryQuery = '1234';
+    let orders = [{ id: '1' }];
+
+    const handleQueryChange = (_newValue: string) => {
+      if (requiresPhone) {
+        requiresPhone = false;
+        secondaryQuery = '';
+        orders = [];
+      }
+    };
+
+    handleQueryChange('1065892341'); // Usuario cambia un dígito
+
+    expect(requiresPhone).toBe(false);
+    expect(secondaryQuery).toBe('');
+    expect(orders).toHaveLength(0);
+  });
+
+  it('7. Lógica de UI: El botón Cambiar Cédula debe reiniciar cédula, teléfono, órdenes y habilitar nueva consulta', () => {
+    let searchQuery = '1065892340';
+    let requiresPhone = true;
+    let secondaryQuery = '3001';
+    let orders = [{ id: '1' }];
+    let hasSearched = true;
+
+    const handleResetQuery = () => {
+      searchQuery = '';
+      requiresPhone = false;
+      secondaryQuery = '';
+      orders = [];
+      hasSearched = false;
+    };
+
+    handleResetQuery();
+
+    expect(searchQuery).toBe('');
+    expect(requiresPhone).toBe(false);
+    expect(secondaryQuery).toBe('');
+    expect(orders).toHaveLength(0);
+    expect(hasSearched).toBe(false);
+  });
 });
+

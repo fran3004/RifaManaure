@@ -11,6 +11,7 @@ import {
   MessageCircle,
   Download,
   ArrowLeft,
+  RotateCcw,
 } from 'lucide-react';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
@@ -41,25 +42,37 @@ export const VerificarPage: React.FC = () => {
 
   // Control del flujo progresivo en dos pasos
   const [requiresPhone, setRequiresPhone] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const secondaryInputRef = useRef<HTMLInputElement>(null);
 
   const handleQueryChange = (value: string) => {
     setSearchQuery(value);
+    // Si el usuario edita o borra caracteres de la cédula, reseteamos el estado secundario para permitir retroceder libremente
     if (requiresPhone) {
       setRequiresPhone(false);
       setSecondaryQuery('');
       setErrorMsg('');
+      setOrders([]);
     }
     if (hasSearched) {
       setHasSearched(false);
     }
   };
 
-  const handleResetQuery = () => {
+  const handleResetQuery = (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     setRequiresPhone(false);
+    setSearchQuery('');
     setSecondaryQuery('');
     setErrorMsg('');
     setHasSearched(false);
+    setOrders([]);
+    setTimeout(() => {
+      searchInputRef.current?.focus();
+    }, 50);
   };
 
   const handleSearch = async (e: React.FormEvent) => {
@@ -216,27 +229,28 @@ export const VerificarPage: React.FC = () => {
               <div className={styles.inputWrapper}>
                 <input
                   id="searchInput"
+                  ref={searchInputRef}
                   type="text"
                   placeholder="Ej: 1065892340 o referencia (MV-L8X9...)"
                   value={searchQuery}
                   onChange={(e) => handleQueryChange(e.target.value)}
                   className={styles.input}
                   maxLength={50}
-                  readOnly={requiresPhone}
                 />
                 {requiresPhone ? (
                   <button
                     type="button"
                     className={styles.btnChangeQuery}
                     onClick={handleResetQuery}
-                    title="Editar o cambiar el número de cédula"
+                    title="Borrar o ingresar otra cédula"
+                    aria-label="Cambiar o borrar número de cédula"
                   >
-                    <ArrowLeft
+                    <RotateCcw
                       size={15}
                       aria-hidden="true"
                       style={{ verticalAlign: 'middle', marginRight: '0.35rem' }}
                     />
-                    Cambiar
+                    Cambiar Cédula
                   </button>
                 ) : (
                   <button type="submit" className={styles.submitBtn} disabled={isLoading}>

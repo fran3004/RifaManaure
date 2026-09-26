@@ -140,22 +140,34 @@
 }
 
 .btnChangeQuery {
-  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  background-color: #FFFFFF;
   border: 1.5px solid var(--border-subtle, #DCD5C4);
   border-radius: var(--radius-md, 14px);
-  padding: 0.75rem 1.15rem;
+  padding: 0.75rem 1.25rem;
+  font-family: var(--font-sans, system-ui, sans-serif);
   font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--text-secondary, #41564A);
+  font-weight: 700;
+  color: var(--brand-deep, #0F2E1D);
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .btnChangeQuery:hover {
   background-color: var(--bg-surface, #FBF8F1);
-  color: var(--text-primary, #16261C);
+  color: var(--brand-primary, #1B4A2E);
   border-color: var(--brand-primary, #1B4A2E);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+.btnChangeQuery:active {
+  transform: translateY(0);
 }
 
 .input {
@@ -735,7 +747,8 @@
     flex-direction: column;
   }
 
-  .submitBtn {
+  .submitBtn,
+  .btnChangeQuery {
     width: 100%;
     justify-content: center;
   }
