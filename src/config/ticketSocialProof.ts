@@ -28,8 +28,14 @@ export interface TicketStats {
 /**
  * Calcula de forma determinista y pura las estadísticas de boletos
  */
-export function calculateTicketStats(tickets: Array<{ status: string }>): TicketStats {
-  const total = tickets.length || TICKET_STATS_CONFIG.DEFAULT_TOTAL_TICKETS;
+export function calculateTicketStats(
+  tickets: Array<{ status: string }>,
+  expectedTotal?: number
+): TicketStats {
+  const total =
+    expectedTotal && expectedTotal > 0
+      ? expectedTotal
+      : tickets.length || TICKET_STATS_CONFIG.DEFAULT_TOTAL_TICKETS;
   let available = 0;
   let reserved = 0;
   let sold = 0;

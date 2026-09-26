@@ -19,10 +19,21 @@ export function formatCOP(amount: number): string {
  * Ejemplo: formatTicketNumber(7, 3) -> "007"
  */
 export function formatTicketNumber(num: number | string, digits = 3): string {
+  if (typeof num === 'string') {
+    const trimmed = num.trim();
+    if (/^\d+$/.test(trimmed)) {
+      const targetDigits = Math.max(digits, trimmed.length);
+      const parsed = parseInt(trimmed, 10);
+      if (isNaN(parsed)) return trimmed.padStart(targetDigits, '0');
+      return String(parsed).padStart(targetDigits, '0');
+    }
+    return trimmed;
+  }
   const parsed = typeof num === 'number' ? num : parseInt(num, 10);
   if (isNaN(parsed)) return String(num).padStart(digits, '0');
   return String(parsed).padStart(digits, '0');
 }
+
 
 /**
  * Valida formato de documento de identidad (Cédula de Ciudadanía / Extranjería / NIT básico).

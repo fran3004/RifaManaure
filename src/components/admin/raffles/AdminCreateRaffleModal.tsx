@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import type { RaffleRow } from '@/types/raffle.types';
 import { createRaffleAdmin } from '@/services/raffleService';
 import { saveCachedRaffle } from '@/hooks/useActiveRaffle';
+import { formatTicketNumber } from '@/lib/utils';
+import { getTicketDigits } from '@/lib/ticketRanges';
 import {
   X,
   PlusCircle,
@@ -258,7 +260,9 @@ const CreateRaffleForm: React.FC<{
                   disabled={isSubmitting}
                 />
                 <span className={styles.helpText}>
-                  Ej. 1.000 generará automáticamente los números del 000 al 999.
+                  {totalTickets > 0
+                    ? `Generará automáticamente ${totalTickets.toLocaleString('es-CO')} boletos (del ${formatTicketNumber(0, getTicketDigits(totalTickets))} al ${formatTicketNumber(totalTickets - 1, getTicketDigits(totalTickets))}).`
+                    : 'Indica la cantidad de boletos a emitir.'}
                 </span>
               </div>
 

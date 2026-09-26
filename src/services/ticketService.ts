@@ -78,23 +78,44 @@ export async function getActiveRaffle(): Promise<RaffleRow | null> {
  */
 export async function getTickets(raffleId: string): Promise<TicketPublicStateRow[]> {
   try {
-    const { data, error } = await supabase
-      .from('ticket_public_state')
-      .select('id, raffle_id, number, status, updated_at')
-      .eq('raffle_id', raffleId)
-      .order('number', { ascending: true });
+    const allTickets: TicketPublicStateRow[] = [];
+    const CHUNK_SIZE = 1000;
+    let from = 0;
+    let hasMore = true;
 
-    if (error) {
-      console.error('Error al cargar boletos:', error);
-      return [];
+    while (hasMore) {
+      const { data, error } = await supabase
+        .from('ticket_public_state')
+        .select('id, raffle_id, number, status, updated_at')
+        .eq('raffle_id', raffleId)
+        .order('number', { ascending: true })
+        .range(from, from + CHUNK_SIZE - 1);
+
+      if (error) {
+        console.error('Error al cargar boletos:', error);
+        break;
+      }
+
+      if (!data || data.length === 0) {
+        break;
+      }
+
+      allTickets.push(...(data as TicketPublicStateRow[]));
+
+      if (data.length < CHUNK_SIZE) {
+        hasMore = false;
+      } else {
+        from += CHUNK_SIZE;
+      }
     }
 
-    return (data || []) as TicketPublicStateRow[];
+    return allTickets;
   } catch (err) {
     console.error('Error de red al cargar boletos:', err);
     return [];
   }
 }
+
 
 /**
  * Registra o actualiza los datos del comprador.

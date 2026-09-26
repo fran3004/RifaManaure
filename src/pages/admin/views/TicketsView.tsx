@@ -16,6 +16,7 @@ import {
 import { useAdminRaffle } from '@/context/AdminRaffleContext';
 import { supabase } from '@/lib/supabase';
 import { formatCOP, formatTicketNumber, maskDocumentId } from '@/lib/utils';
+import { getTicketDigits } from '@/lib/ticketRanges';
 import { normalizeAppError, logAppError } from '@/lib/errorHandling';
 import {
   Ticket,
@@ -368,6 +369,9 @@ export const TicketsView: React.FC = () => {
     setIsOrderReviewModalOpen(true);
   };
 
+  const effectiveTotal = selectedRaffle?.total_tickets || ticketCounts.totalCount || 1000;
+  const ticketDigits = getTicketDigits(effectiveTotal);
+
   return (
     <div className={styles.viewContainer}>
       <AdminPageHeader
@@ -379,8 +383,8 @@ export const TicketsView: React.FC = () => {
         }
         badge={
           selectedRaffle
-            ? `${ticketCounts.totalCount} Boletos (${selectedRaffle.status})`
-            : `${ticketCounts.totalCount} Boletos`
+            ? `${(ticketCounts.totalCount || effectiveTotal).toLocaleString('es-CO')} Boletos (${selectedRaffle.status})`
+            : `${(ticketCounts.totalCount || effectiveTotal).toLocaleString('es-CO')} Boletos`
         }
         actions={
           <button
@@ -421,8 +425,10 @@ export const TicketsView: React.FC = () => {
               <Layers size={20} />
             </div>
           </div>
-          <div className={styles.metricValue}>{ticketCounts.totalCount}</div>
-          <span className={styles.metricHint}>Numeración 000 a 999</span>
+          <div className={styles.metricValue}>{(ticketCounts.totalCount || effectiveTotal).toLocaleString('es-CO')}</div>
+          <span className={styles.metricHint}>
+            Numeración {formatTicketNumber(0, ticketDigits)} a {formatTicketNumber(Math.max(0, (ticketCounts.totalCount || effectiveTotal) - 1), ticketDigits)}
+          </span>
         </div>
 
         <div className={styles.metricCard}>
@@ -485,7 +491,7 @@ export const TicketsView: React.FC = () => {
           <input
             type="text"
             className={styles.searchInput}
-            placeholder="Buscar por número (ej. 777), comprador, cédula, teléfono u orden..."
+            placeholder={`Buscar por número (ej. ${formatTicketNumber(7, ticketDigits)}), comprador, cédula, teléfono u orden...`}
             value={searchTicket}
             onChange={(e) => {
               setSearchTicket(e.target.value);
@@ -595,7 +601,7 @@ export const TicketsView: React.FC = () => {
                     onClick={() => handleSelectTicket(t)}
                     title={`Boleto #${t.number} | Estado: ${t.status}${t.buyers?.full_name ? ` | Comprador: ${t.buyers.full_name}` : ''}${t.orders?.reference ? ` | Orden: ${t.orders.reference}` : ''}`}
                   >
-                    {formatTicketNumber(t.number)}
+                    {formatTicketNumber(t.number, ticketDigits)}
                     <span className={styles.ticketMatrixSubtext}>{label}</span>
                   </div>
                 );
@@ -666,7 +672,7 @@ export const TicketsView: React.FC = () => {
                   {tickets.map((t) => (
                     <tr key={t.id || t.number}>
                       <td className={styles.ticketNumberCell}>
-                        {formatTicketNumber(t.number)}
+                        {formatTicketNumber(t.number, ticketDigits)}
                       </td>
                       <td>
                         {t.status === 'available' && (
@@ -845,11 +851,11 @@ export const TicketsView: React.FC = () => {
             <div className={styles.detailHeader}>
               <div className={styles.detailHeaderGroup}>
                 <div className={styles.ticketNumberBadge}>
-                  {formatTicketNumber(selectedTicket.number)}
+                  {formatTicketNumber(selectedTicket.number, ticketDigits)}
                 </div>
                 <div>
                   <h3 className={styles.detailTitle}>
-                    Boleto #{formatTicketNumber(selectedTicket.number)}
+                    Boleto #{formatTicketNumber(selectedTicket.number, ticketDigits)}
                   </h3>
                   <div className={styles.detailStatus}>
                     {selectedTicket.status === 'available' && (
@@ -1041,7 +1047,7 @@ export const TicketsView: React.FC = () => {
               </div>
               <div>
                 <h3 className={styles.modalTitle}>
-                  Bloquear Boleto #{formatTicketNumber(selectedTicket.number)}
+                  Bloquear Boleto #{formatTicketNumber(selectedTicket.number, ticketDigits)}
                 </h3>
                 <span className={styles.dangerModalSubtitle}>
                   Acción administrativa con registro en bitácora de auditoría
@@ -1050,7 +1056,7 @@ export const TicketsView: React.FC = () => {
             </div>
 
             <p className={styles.modalParagraph}>
-              Al bloquear el boleto <strong>#{formatTicketNumber(selectedTicket.number)}</strong>,
+              Al bloquear el boleto <strong>#{formatTicketNumber(selectedTicket.number, ticketDigits)}</strong>,
               este dejará de estar disponible para compra pública y cualquier reserva temporal
               asociada será cancelada.
             </p>
@@ -1128,7 +1134,7 @@ export const TicketsView: React.FC = () => {
               </div>
               <div>
                 <h3 className={styles.modalTitle}>
-                  Desbloquear Boleto #{formatTicketNumber(selectedTicket.number)}
+                  Desbloquear Boleto #{formatTicketNumber(selectedTicket.number, ticketDigits)}
                 </h3>
                 <span className={styles.successModalSubtitle}>
                   Habilitación para venta en plataforma pública
@@ -1138,7 +1144,7 @@ export const TicketsView: React.FC = () => {
 
             <p className={styles.modalParagraph}>
               ¿Deseas desbloquear el boleto{' '}
-              <strong>#{formatTicketNumber(selectedTicket.number)}</strong>? Este volverá a estar en
+              <strong>#{formatTicketNumber(selectedTicket.number, ticketDigits)}</strong>? Este volverá a estar en
               estado <strong>disponible</strong> para que cualquier comprador pueda seleccionarlo y
               reservarlo.
             </p>

@@ -61,30 +61,44 @@ export async function fetchAdminRaffles(): Promise<{
       return { success: true, raffles: [] };
     }
 
-    // Consultar boletos para calcular estadísticas agregadas por cada rifa
-    const { data: ticketsData, error: ticketsError } = await supabase
-      .from('tickets')
-      .select('raffle_id, status');
+    // Consultar conteos exactos de boletos por cada rifa para evitar límites de 1000 filas de PostgREST
+    const raffleStatsPromises = rafflesData.map(async (r) => {
+      try {
+        const [availRes, resRes, soldRes, blockRes] = await Promise.all([
+          supabase.from('tickets').select('*', { count: 'exact', head: true }).eq('raffle_id', r.id).eq('status', 'available'),
+          supabase.from('tickets').select('*', { count: 'exact', head: true }).eq('raffle_id', r.id).eq('status', 'reserved'),
+          supabase.from('tickets').select('*', { count: 'exact', head: true }).eq('raffle_id', r.id).eq('status', 'sold'),
+          supabase.from('tickets').select('*', { count: 'exact', head: true }).eq('raffle_id', r.id).eq('status', 'blocked'),
+        ]);
 
-    if (ticketsError) {
-      console.warn('[raffleService] Error al consultar estadísticas de boletos:', ticketsError);
-    }
+        return {
+          id: r.id,
+          stats: {
+            available: availRes.count ?? 0,
+            reserved: resRes.count ?? 0,
+            sold: soldRes.count ?? 0,
+            blocked: blockRes.count ?? 0,
+          },
+        };
+      } catch (err) {
+        console.warn(`[raffleService] Error al consultar estadísticas de boletos para la rifa ${r.id}:`, err);
+        return {
+          id: r.id,
+          stats: { available: 0, reserved: 0, sold: 0, blocked: 0 },
+        };
+      }
+    });
 
+    const statsResults = await Promise.all(raffleStatsPromises);
     const ticketStatsMap: Record<
       string,
       { available: number; reserved: number; sold: number; blocked: number }
     > = {};
 
-    (ticketsData || []).forEach((t) => {
-      const rId = t.raffle_id;
-      if (!ticketStatsMap[rId]) {
-        ticketStatsMap[rId] = { available: 0, reserved: 0, sold: 0, blocked: 0 };
-      }
-      if (t.status === 'available') ticketStatsMap[rId].available += 1;
-      else if (t.status === 'reserved') ticketStatsMap[rId].reserved += 1;
-      else if (t.status === 'sold') ticketStatsMap[rId].sold += 1;
-      else if (t.status === 'blocked') ticketStatsMap[rId].blocked += 1;
+    statsResults.forEach((item) => {
+      ticketStatsMap[item.id] = item.stats;
     });
+
 
     const enrichedRaffles: RaffleWithStats[] = rafflesData.map((r) => {
       const stats = ticketStatsMap[r.id] || { available: 0, reserved: 0, sold: 0, blocked: 0 };

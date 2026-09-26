@@ -1394,38 +1394,33 @@ export interface AdminTicketCounts {
  */
 export async function fetchAdminTicketCounts(raffleId?: string | null): Promise<AdminTicketCounts> {
   try {
-    let query = supabase.from('tickets').select('status');
+    const buildQuery = (status?: TicketStatus) => {
+      let q = supabase.from('tickets').select('*', { count: 'exact', head: true });
+      if (raffleId) {
+        q = q.eq('raffle_id', raffleId);
+      }
+      if (status) {
+        q = q.eq('status', status);
+      }
+      return q;
+    };
 
-    if (raffleId) {
-      query = query.eq('raffle_id', raffleId);
-    }
+    const [totalRes, availRes, resRes, soldRes, blockRes] = await Promise.all([
+      buildQuery(),
+      buildQuery('available'),
+      buildQuery('reserved'),
+      buildQuery('sold'),
+      buildQuery('blocked'),
+    ]);
 
-    const { data, error } = await query;
-
-    if (error || !data) {
-      return {
-        totalCount: 1000,
-        availableCount: 0,
-        reservedCount: 0,
-        soldCount: 0,
-        blockedCount: 0,
-      };
-    }
-
-    let availableCount = 0;
-    let reservedCount = 0;
-    let soldCount = 0;
-    let blockedCount = 0;
-
-    for (const t of data) {
-      if (t.status === 'available') availableCount++;
-      else if (t.status === 'reserved') reservedCount++;
-      else if (t.status === 'sold') soldCount++;
-      else if (t.status === 'blocked') blockedCount++;
-    }
+    const totalCount = totalRes.count ?? 0;
+    const availableCount = availRes.count ?? 0;
+    const reservedCount = resRes.count ?? 0;
+    const soldCount = soldRes.count ?? 0;
+    const blockedCount = blockRes.count ?? 0;
 
     return {
-      totalCount: data.length,
+      totalCount,
       availableCount,
       reservedCount,
       soldCount,
@@ -1433,9 +1428,10 @@ export async function fetchAdminTicketCounts(raffleId?: string | null): Promise<
     };
   } catch (err) {
     console.error('Error al obtener conteos de boletos:', err);
-    return { totalCount: 1000, availableCount: 0, reservedCount: 0, soldCount: 0, blockedCount: 0 };
+    return { totalCount: 0, availableCount: 0, reservedCount: 0, soldCount: 0, blockedCount: 0 };
   }
 }
+
 
 /**
  * Consulta boletos para el panel administrativo con paginación real en PostgreSQL/Supabase (.range),
