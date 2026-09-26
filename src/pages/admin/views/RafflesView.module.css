@@ -215,15 +215,16 @@
   gap: 0.45rem;
   padding: 0.55rem 1.15rem;
   font-size: 0.875rem;
-  font-weight: 600;
+  font-weight: 700;
   border-radius: 8px;
-  border: 1.5px solid rgba(239, 68, 68, 0.4);
-  background: rgba(239, 68, 68, 0.08);
-  color: #dc2626;
+  border: 1.5px solid #fca5a5;
+  background: #fff5f5;
+  color: #b91c1c;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all 0.18s ease;
   white-space: nowrap;
   min-height: 40px;
+  box-shadow: 0 1px 3px rgba(185, 28, 28, 0.08);
 }
 
 .btnDeleteMain:hover {
@@ -231,7 +232,7 @@
   border-color: #b91c1c;
   color: #ffffff;
   transform: translateY(-1px);
-  box-shadow: 0 4px 10px rgba(220, 38, 38, 0.25);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.28);
 }
 
 
