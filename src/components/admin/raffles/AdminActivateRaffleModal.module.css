@@ -259,3 +259,77 @@
     transform: rotate(360deg);
   }
 }
+
+.warningBox {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  border-radius: 8px;
+  padding: 0.85rem 1rem;
+  color: #fbbf24;
+}
+
+.warningBoxContent {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.warningBoxTitle {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #fde68a;
+}
+
+.warningBoxText {
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--text-secondary, #b8d4c2);
+  margin: 0;
+}
+
+.datePickerGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-top: 0.25rem;
+}
+
+.inputLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-primary, #f0faf4);
+}
+
+.dateTimeInput {
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--admin-border, rgba(255, 255, 255, 0.15));
+  border-radius: 8px;
+  padding: 0.65rem 0.85rem;
+  font-size: 0.875rem;
+  color: #ffffff;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  color-scheme: dark;
+}
+
+.dateTimeInput:focus {
+  border-color: #34d399;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+}
+
+.inputHelp {
+  font-size: 0.75rem;
+  color: var(--text-muted, #7e9c90);
+  line-height: 1.35;
+}
+
+.inputHelpWarning {
+  color: #f87171;
+  font-weight: 500;
+}

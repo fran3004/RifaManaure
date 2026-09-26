@@ -178,7 +178,7 @@ export const RafflesView: React.FC = () => {
     setActivationError(null);
   };
 
-  const handleConfirmActivation = useCallback(async () => {
+  const handleConfirmActivation = useCallback(async (newDrawDate?: string) => {
     if (!activationModal || isActivating) return;
 
     setIsActivating(true);
@@ -189,7 +189,7 @@ export const RafflesView: React.FC = () => {
     try {
       const result =
         mode === 'activate'
-          ? await activateRafflePublic(raffle)
+          ? await activateRafflePublic(raffle, newDrawDate)
           : await pauseRafflePublic(raffle);
 
       if (!result.success) {

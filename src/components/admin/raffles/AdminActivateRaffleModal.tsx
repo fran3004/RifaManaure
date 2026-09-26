@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import type { RaffleRow } from '@/types/raffle.types';
-import { Globe, Pause, Loader2, X, AlertTriangle } from 'lucide-react';
+import { Globe, Pause, Loader2, X, AlertTriangle, Calendar } from 'lucide-react';
 import styles from './AdminActivateRaffleModal.module.css';
 
 interface AdminActivateRaffleModalProps {
@@ -9,8 +9,23 @@ interface AdminActivateRaffleModalProps {
   isOpen: boolean;
   isLoading: boolean;
   error: string | null;
-  onConfirm: () => void;
+  onConfirm: (newDrawDate?: string) => void;
   onCancel: () => void;
+}
+
+function getDefaultFutureDate(): string {
+  const d = new Date(Date.now() + 24 * 60 * 60 * 1000);
+  d.setMinutes(0, 0, 0);
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+function toDatetimeLocalString(isoString?: string | null): string {
+  if (!isoString) return getDefaultFutureDate();
+  const d = new Date(isoString);
+  if (isNaN(d.getTime())) return getDefaultFutureDate();
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
 export const AdminActivateRaffleModal: React.FC<AdminActivateRaffleModalProps> = ({
@@ -22,9 +37,68 @@ export const AdminActivateRaffleModal: React.FC<AdminActivateRaffleModalProps> =
   onConfirm,
   onCancel,
 }) => {
-  if (!isOpen || !raffle) return null;
+  const [newDrawDate, setNewDrawDate] = useState<string>('');
 
   const isActivate = mode === 'activate';
+
+  const isDrawDateExpired = useMemo(() => {
+    if (!raffle?.draw_date) return true;
+    const d = new Date(raffle.draw_date);
+    return isNaN(d.getTime()) || d.getTime() <= Date.now();
+  }, [raffle?.draw_date]);
+
+  const minDateTime = useMemo(() => {
+    const d = new Date(Date.now() + 5 * 60 * 1000);
+    const pad = (n: number) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  }, []);
+
+  useEffect(() => {
+    if (isOpen && raffle) {
+      if (isDrawDateExpired) {
+        setNewDrawDate(getDefaultFutureDate());
+      } else {
+        setNewDrawDate(toDatetimeLocalString(raffle.draw_date));
+      }
+    }
+  }, [isOpen, raffle, isDrawDateExpired]);
+
+  if (!isOpen || !raffle) return null;
+
+  const isDateSelectedValid = Boolean(
+    newDrawDate && new Date(newDrawDate).getTime() > Date.now()
+  );
+
+  const canSubmit =
+    !isLoading &&
+    (!isActivate || !isDrawDateExpired || isDateSelectedValid);
+
+  const handleConfirmClick = () => {
+    if (!canSubmit) return;
+    if (isActivate) {
+      const finalIso = newDrawDate ? new Date(newDrawDate).toISOString() : undefined;
+      onConfirm(finalIso);
+    } else {
+      onConfirm();
+    }
+  };
+
+  const formatPreviousDate = (dateStr?: string | null) => {
+    if (!dateStr) return 'No configurada';
+    try {
+      const d = new Date(dateStr);
+      return d.toLocaleString('es-CO', {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true,
+      });
+    } catch {
+      return dateStr;
+    }
+  };
 
   return (
     <div
@@ -72,19 +146,61 @@ export const AdminActivateRaffleModal: React.FC<AdminActivateRaffleModalProps> =
           </div>
 
           {isActivate ? (
-            <p className={styles.confirmText}>
-              ¿Deseas activar{' '}
-              <strong>"{raffle.title}"</strong> como la rifa pública principal?
-              <br />
-              <span className={styles.confirmNote}>
-                Se publicará de inmediato en la página de inicio. La rifa activa anterior
-                pasará a estado <strong>Pausado</strong> automáticamente.
-              </span>
-            </p>
+            <>
+              <p className={styles.confirmText}>
+                ¿Deseas activar <strong>"{raffle.title}"</strong> como la rifa pública principal?
+                <br />
+                <span className={styles.confirmNote}>
+                  Se publicará de inmediato en la página de inicio. La rifa activa anterior
+                  pasará a estado <strong>Pausado</strong> automáticamente.
+                </span>
+              </p>
+
+              {isDrawDateExpired ? (
+                <div className={styles.warningBox} role="alert">
+                  <AlertTriangle size={20} aria-hidden="true" style={{ flexShrink: 0, marginTop: '2px' }} />
+                  <div className={styles.warningBoxContent}>
+                    <span className={styles.warningBoxTitle}>Fecha de sorteo vencida</span>
+                    <p className={styles.warningBoxText}>
+                      La fecha anterior (<strong>{formatPreviousDate(raffle.draw_date)}</strong>) ya concluyó. Asigna una nueva fecha y hora para que el sistema mantenga la rifa activa y los clientes puedan comprar boletos.
+                    </p>
+                  </div>
+                </div>
+              ) : null}
+
+              <div className={styles.datePickerGroup}>
+                <label htmlFor="new-draw-date" className={styles.inputLabel}>
+                  <Calendar size={14} aria-hidden="true" />
+                  {isDrawDateExpired
+                    ? 'Nueva Fecha y Hora del Sorteo (Requerida)'
+                    : 'Fecha y Hora del Sorteo (Programada)'}
+                </label>
+                <input
+                  id="new-draw-date"
+                  type="datetime-local"
+                  className={styles.dateTimeInput}
+                  value={newDrawDate}
+                  min={minDateTime}
+                  onChange={(e) => setNewDrawDate(e.target.value)}
+                  disabled={isLoading}
+                  required={isDrawDateExpired}
+                />
+                <span
+                  className={`${styles.inputHelp} ${
+                    isDrawDateExpired && !isDateSelectedValid ? styles.inputHelpWarning : ''
+                  }`}
+                >
+                  {isDrawDateExpired
+                    ? isDateSelectedValid
+                      ? 'Fecha futura válida. La rifa permanecerá activa para la venta.'
+                      : 'Debes seleccionar una fecha y hora futura para poder activar la rifa.'
+                    : 'Puedes mantener la fecha actual o ajustarla antes de publicar.'}
+                </span>
+              </div>
+            </>
           ) : (
             <p className={styles.confirmText}>
-              ¿Deseas pausar la venta pública de{' '}
-              <strong>"{raffle.title}"</strong>?
+              ¿Deseas pausar la venta pública de <strong>"{raffle.title}"</strong>?
               <br />
               <span className={styles.confirmNote}>
                 Los compradores no podrán adquirir boletos hasta que la rifa sea reactivada
@@ -115,8 +231,8 @@ export const AdminActivateRaffleModal: React.FC<AdminActivateRaffleModalProps> =
           <button
             type="button"
             className={`${styles.btnConfirm} ${isActivate ? styles.btnActivate : styles.btnPause}`}
-            onClick={onConfirm}
-            disabled={isLoading}
+            onClick={handleConfirmClick}
+            disabled={!canSubmit}
             aria-busy={isLoading}
           >
             {isLoading ? (
@@ -140,3 +256,4 @@ export const AdminActivateRaffleModal: React.FC<AdminActivateRaffleModalProps> =
     </div>
   );
 };
+

@@ -300,15 +300,17 @@ export interface ActivateRaffleResult {
 
 export async function activateRafflePublic(
   raffle: RaffleRow,
+  newDrawDate?: string,
   timeoutMs: number = DEFAULT_REQUEST_TIMEOUT_MS
 ): Promise<ActivateRaffleResult> {
+  const drawDateIso = newDrawDate || raffle.draw_date || new Date().toISOString();
   return updateRaffleAdmin(
     {
       raffleId: raffle.id,
       title: raffle.title,
       description: raffle.description || '',
       ticketPrice: Number(raffle.ticket_price),
-      drawDate: raffle.draw_date || new Date().toISOString(),
+      drawDate: drawDateIso,
       lotteryReference: raffle.lottery_reference || '',
       status: 'active',
       maxTicketsPerBuyer: raffle.max_tickets_per_buyer || 50,

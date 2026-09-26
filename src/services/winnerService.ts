@@ -89,7 +89,18 @@ export async function getWinners(raffleId?: string | null): Promise<WinnerWithDe
  * Obtener el ganador oficial de una rifa específica si ya fue registrado.
  */
 export async function getWinnerForRaffle(raffleId: string): Promise<WinnerWithDetails | null> {
+  if (!raffleId) return null;
   try {
+    // 1. Intentar consultar mediante RPC pública segura (SECURITY DEFINER con bypass de RLS)
+    const { data: rpcData, error: rpcError } = await supabase.rpc('get_public_winner', {
+      p_raffle_id: raffleId,
+    });
+
+    if (!rpcError && rpcData) {
+      return rpcData as unknown as WinnerWithDetails;
+    }
+
+    // 2. Fallback resiliente a consulta directa si la RPC no está disponible
     const { data, error } = await supabase
       .from('winners')
       .select(
@@ -123,7 +134,7 @@ export async function getWinnerForRaffle(raffleId: string): Promise<WinnerWithDe
       .maybeSingle();
 
     if (error) {
-      console.error('Error al consultar ganador de la rifa:', error);
+      console.warn('Error al consultar ganador de la rifa vía tabla:', error.message);
       return null;
     }
 

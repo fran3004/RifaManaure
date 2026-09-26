@@ -96,7 +96,12 @@ export const TicketCartProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
         // Consultar si esta edición de la rifa ya tiene ganador oficial registrado
         const raffleWinner = await getWinnerForRaffle(currentRaffle.id);
-        if (raffleWinner && currentRaffle.status === 'finished') {
+        const isRaffleConcluded =
+          currentRaffle.status === 'finished' ||
+          currentRaffle.status === 'closed' ||
+          Boolean(currentRaffle.draw_date && new Date(currentRaffle.draw_date).getTime() <= Date.now());
+
+        if (raffleWinner && isRaffleConcluded) {
           setWinner(raffleWinner);
           try {
             if (typeof window !== 'undefined') {
@@ -148,7 +153,12 @@ export const TicketCartProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
           const raffleWinner = await getWinnerForRaffle(currentRaffle.id);
           if (ignore) return;
-          if (raffleWinner && currentRaffle.status === 'finished') {
+          const isRaffleConcluded =
+            currentRaffle.status === 'finished' ||
+            currentRaffle.status === 'closed' ||
+            Boolean(currentRaffle.draw_date && new Date(currentRaffle.draw_date).getTime() <= Date.now());
+
+          if (raffleWinner && isRaffleConcluded) {
             setWinner(raffleWinner);
             try {
               if (typeof window !== 'undefined') {

@@ -83,6 +83,11 @@ Este directorio (`supabase/migrations/`) constituye la **única fuente de verdad
 | **061** | `061_restore_winner_documents_bucket.sql` | **(Almacenamiento de Actas)** Restauración del bucket `winner-documents` en Supabase Storage (`public = true`, cuota 10 MB, solo `application/pdf`) con políticas RLS de lectura pública y mutación administrativa, garantizando visualización nativa de actas en el navegador. |
 | **062** | `062_retention_and_purge_resolved_payment_proofs.sql` | **(Política de Almacenamiento)** Retención y depuración automática de comprobantes de pago: eliminación segura de archivos adjuntos tras 5 días de aprobación o rechazo (`verified_at < NOW() - 5 días`), exclusión total de comprobantes pendientes y preservación íntegra de registros contables y boletos. |
 | **063** | `063_dynamic_ticket_digits_emission.sql` | **(Emisión y Dígitos Dinámicos)** Homologación de dígitos canónicos en `admin_create_raffle` (2 cifras para <= 100, 3 para <= 1000, 4 para <= 10000, dinámico para > 10000) y sincronización idempotente de boletos faltantes para cualquier rifa existente. |
+| **064** | `064_admin_buyers_by_raffle.sql` | **(Gestión de Compradores)** Aislamiento estricto de compradores vinculados a la rifa activa vía RPC `admin_get_buyers_by_raffle`. |
+| **065** | `065_auto_close_raffle_on_draw_date.sql` | **(Automatización de Cierre)** Cierre automático de rifas cumplida la fecha de sorteo vía `check_and_auto_close_expired_raffles` y estado público de espera de ganador. |
+| **066** | `066_allow_raffle_reuse_and_flexible_status_transitions.sql` | **(Reutilización Flexible)** Flexibilización de máquina de estados para administración libre de rifas y auto-pausa de rifas competidoras. |
+| **067** | `067_progressive_public_verification_by_document.sql` | **(Verificación Progresiva)** Consulta pública escalonada por cédula con validación telefónica condicional. |
+| **068** | `068_public_winner_and_raffle_activation_hardening.sql` | **(Reconocimiento de Ganadores y Hardening de Activación)** Entrega pública segura de ganador (`get_public_winner`) con enmascaramiento PII y validación de fecha futura obligatoria al reactivar rifas. |
 
 ---
 
