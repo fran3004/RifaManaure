@@ -639,27 +639,15 @@ export const RafflesView: React.FC = () => {
                         <h4 className={styles.otherTitle}>{r.title}</h4>
                       </div>
 
-                      {/* Botones de acción: Usar en panel y Eliminar */}
-                      <div className={styles.otherCardActions}>
-                        <button
-                          type="button"
-                          className={styles.btnUseInPanel}
-                          onClick={() => setSelectedRaffleId(r.id)}
-                          title={`Poner "${r.title}" en gestión en el panel para editarla y ver sus datos`}
-                        >
-                          <Layers size={14} aria-hidden="true" />
-                          <span>Usar en el panel</span>
-                        </button>
-                        <button
-                          type="button"
-                          className={styles.btnDeleteSecondary}
-                          onClick={() => handleOpenDeleteRaffleModal(r)}
-                          title={`Eliminar la edición "${r.title}"`}
-                        >
-                          <Trash2 size={13} aria-hidden="true" />
-                          <span>Eliminar</span>
-                        </button>
-                      </div>
+                      <button
+                        type="button"
+                        className={styles.btnUseInPanel}
+                        onClick={() => setSelectedRaffleId(r.id)}
+                        title={`Poner "${r.title}" en gestión en el panel para editarla y ver sus datos`}
+                      >
+                        <Layers size={14} aria-hidden="true" />
+                        <span>Usar en el panel</span>
+                      </button>
                     </div>
 
                     <div className={styles.otherStatsRow}>

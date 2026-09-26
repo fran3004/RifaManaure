@@ -535,38 +535,6 @@
   box-shadow: 0 2px 6px rgba(27, 74, 46, 0.12);
 }
 
-.otherCardActions {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  flex-shrink: 0;
-  flex-wrap: wrap;
-}
-
-.btnDeleteSecondary {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.45rem 0.75rem;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  border-radius: 8px;
-  border: 1.5px solid rgba(239, 68, 68, 0.35);
-  background: rgba(239, 68, 68, 0.06);
-  color: #dc2626;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  white-space: nowrap;
-  min-height: 34px;
-}
-
-.btnDeleteSecondary:hover {
-  background: #dc2626;
-  border-color: #b91c1c;
-  color: #ffffff;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 6px rgba(220, 38, 38, 0.25);
-}
 
 
 .otherStatsRow {
