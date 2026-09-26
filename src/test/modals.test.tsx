@@ -160,16 +160,26 @@ describe('7 Modales Clonados - Integridad y Renderizado en Contexto Real', () =>
     expect(html).toContain('Autorizar Nuevo Administrador');
   });
 
-  it('6. AdminRegisterWinnerModal debe renderizar selector de ganador y caparazón', () => {
+  it('6. AdminRegisterWinnerModal debe renderizar selector de ganador y caparazón reconociendo la fecha de la rifa de forma inmutable', () => {
     const html = renderToString(
       React.createElement(AdminRegisterWinnerModal, {
         isOpen: true,
-        raffles: [{ id: 'raf-1', title: 'Rifa Oficial', status: 'active' } as any],
+        raffles: [
+          {
+            id: 'raf-1',
+            title: 'Rifa Oficial',
+            status: 'active',
+            draw_date: '2026-12-31T20:00:00Z',
+          } as any,
+        ],
         onClose: () => {},
         onWinnerRegistered: () => {},
       })
     );
     expect(html).toContain('Registrar Ganador');
+    expect(html).toContain('Oficial de la Rifa');
+    expect(html).toContain('2026-12-31');
+    expect(html).toContain('readonly');
   });
 
   it('7. DigitalReceiptModal (Contexto Dual: Público y Admin) debe renderizar recibo digital', () => {

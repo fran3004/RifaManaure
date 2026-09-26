@@ -9,6 +9,8 @@ import {
   FileText,
   Loader2,
   Trash2,
+  Lock,
+  Calendar,
 } from 'lucide-react';
 import type { RaffleRow } from '@/types/raffle.types';
 import {
@@ -19,6 +21,40 @@ import {
 } from '@/services/winnerService';
 import { formatCOP } from '@/lib/utils';
 import styles from './AdminRegisterWinnerModal.module.css';
+
+const formatDateForInput = (isoDate?: string | null): string => {
+  if (!isoDate) return '';
+  try {
+    const d = new Date(isoDate);
+    if (isNaN(d.getTime())) return '';
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    const hours = String(d.getHours()).padStart(2, '0');
+    const minutes = String(d.getMinutes()).padStart(2, '0');
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  } catch {
+    return '';
+  }
+};
+
+const formatDateFriendly = (isoDate?: string | null): string => {
+  if (!isoDate) return 'Sin fecha asignada';
+  try {
+    const d = new Date(isoDate);
+    if (isNaN(d.getTime())) return 'Fecha inválida';
+    return d.toLocaleDateString('es-CO', {
+      weekday: 'short',
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  } catch {
+    return isoDate;
+  }
+};
 
 interface AdminRegisterWinnerModalProps {
   isOpen: boolean;
@@ -45,7 +81,6 @@ const AdminRegisterWinnerModalContent: React.FC<AdminRegisterWinnerModalProps> =
   const selectedRaffle = raffles.find((r) => r.id === selectedRaffleId);
   const [lotteryDrawNumber, setLotteryDrawNumber] = useState<string>('');
   const [ticketNumber, setTicketNumber] = useState<string>('');
-  const [drawDate, setDrawDate] = useState<string>(new Date().toISOString().slice(0, 16));
 
   const [candidate, setCandidate] = useState<TicketWinnerCandidate | null>(null);
   const [candidateError, setCandidateError] = useState<string | null>(null);
@@ -134,12 +169,16 @@ const AdminRegisterWinnerModalContent: React.FC<AdminRegisterWinnerModalProps> =
         officialActUrl = uploadActRes.url || null;
       }
 
-      // 2. Invocar RPC administrativa register_winner
+      // 2. Invocar RPC administrativa register_winner con la fecha y hora oficial de la rifa seleccionada
+      const officialDrawDate = selectedRaffle?.draw_date
+        ? new Date(selectedRaffle.draw_date).toISOString()
+        : new Date().toISOString();
+
       const regRes = await registerWinner({
         raffleId: selectedRaffleId,
         ticketNumber: candidate.ticketNumber,
         lotteryDrawNumber: lotteryDrawNumber.trim(),
-        drawDate: new Date(drawDate).toISOString(),
+        drawDate: officialDrawDate,
         officialActUrl,
         notes: notes.trim() || null,
       });
@@ -237,14 +276,45 @@ const AdminRegisterWinnerModalContent: React.FC<AdminRegisterWinnerModalProps> =
                 </div>
 
                 <div className={styles.formGroup}>
-                  <label className={styles.formLabel}>Fecha y Hora del Sorteo *</label>
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: '0.5rem',
+                      flexWrap: 'wrap',
+                    }}
+                  >
+                    <label className={styles.formLabel}>Fecha y Hora del Sorteo *</label>
+                    <span className={styles.badgeLocked}>
+                      <Lock size={11} aria-hidden="true" />
+                      Oficial de la Rifa
+                    </span>
+                  </div>
                   <input
                     type="datetime-local"
-                    value={drawDate}
-                    onChange={(e) => setDrawDate(e.target.value)}
-                    className={styles.inputField}
+                    value={formatDateForInput(selectedRaffle?.draw_date)}
+                    readOnly
+                    tabIndex={-1}
+                    aria-readonly="true"
+                    className={`${styles.inputField} ${styles.inputLocked}`}
+                    title="Esta fecha y hora no se puede cambiar manualmente; reconoce automáticamente la fecha y hora que el administrador asignó a esta rifa."
                     required
                   />
+                  {selectedRaffle?.draw_date ? (
+                    <span className={styles.fieldHintLocked}>
+                      <Calendar size={12} aria-hidden="true" />
+                      Configurada en la rifa: {formatDateFriendly(selectedRaffle.draw_date)}
+                    </span>
+                  ) : (
+                    <span
+                      className={styles.fieldHintLocked}
+                      style={{ color: 'var(--color-danger, #B42318)' }}
+                    >
+                      <AlertTriangle size={12} aria-hidden="true" />
+                      La rifa seleccionada no tiene una fecha oficial asignada.
+                    </span>
+                  )}
                 </div>
               </div>
             </div>

@@ -191,6 +191,40 @@
   outline-offset: 1px;
 }
 
+.inputLocked {
+  background-color: var(--bg-surface, #fbf8f1) !important;
+  color: var(--text-primary, #16261c) !important;
+  border: 1.5px solid var(--border-subtle, #dcd5c4) !important;
+  cursor: not-allowed !important;
+  pointer-events: none !important;
+  user-select: none;
+  font-weight: 600;
+  opacity: 0.95;
+}
+
+.badgeLocked {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--brand-deep, #0f2e1d);
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  padding: 0.2rem 0.55rem;
+  border-radius: 12px;
+}
+
+.fieldHintLocked {
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: var(--text-secondary, #41564a);
+  margin-top: 0.2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
 .searchTicketRow {
   display: flex;
   gap: 0.75rem;

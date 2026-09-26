@@ -10,7 +10,6 @@ import {
   Calendar,
   MessageCircle,
   Download,
-  ArrowLeft,
   RotateCcw,
 } from 'lucide-react';
 import { Navbar } from '@/components/layout/Navbar';
