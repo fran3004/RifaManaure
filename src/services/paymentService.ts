@@ -487,6 +487,7 @@ export interface PurgeStorageResult {
   purgedFilesCount: number;
   scope?: string;
   raffleId?: string | null;
+  purgedPaths?: string[];
   error?: string;
   code?: string;
   isTimeout?: boolean;
@@ -534,7 +535,19 @@ export async function adminPurgePaymentProofsStorage(options?: {
           purged_files_count?: number;
           scope?: string;
           raffle_id?: string | null;
+          purged_paths?: string[];
         } | null;
+
+        const purgedPaths = res?.purged_paths || [];
+
+        // Eliminación física complementaria en el almacenamiento mediante Supabase Storage API
+        if (Array.isArray(purgedPaths) && purgedPaths.length > 0) {
+          try {
+            await supabase.storage.from('payment-proofs').remove(purgedPaths);
+          } catch (storageErr) {
+            console.warn('Aviso no crítico al remover archivos en Storage API:', storageErr);
+          }
+        }
 
         return {
           success: res?.success ?? true,
@@ -543,6 +556,7 @@ export async function adminPurgePaymentProofsStorage(options?: {
           purgedFilesCount: res?.purged_files_count ?? 0,
           scope: res?.scope ?? scope,
           raffleId: res?.raffle_id ?? raffleId,
+          purgedPaths,
         };
       },
       { timeoutMs }

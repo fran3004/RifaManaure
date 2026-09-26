@@ -155,5 +155,40 @@ describe('Admin Purge Payment Proofs Storage Functionality', () => {
       expect(res.code).toBe('P0001');
       expect(res.purgedProofsCount).toBe(0);
     });
+
+    it('invoca supabase.storage.remove cuando la RPC retorna purged_paths', async () => {
+      const mockRemove = vi.fn().mockResolvedValue({ data: [], error: null });
+      vi.spyOn(supabase.storage, 'from').mockReturnValue({
+        remove: mockRemove,
+      } as any);
+
+      const mockRpc = vi.fn().mockResolvedValue({
+        data: {
+          success: true,
+          message: 'Vaciado completado.',
+          purged_proofs_count: 2,
+          purged_files_count: 2,
+          scope: 'resolved',
+          raffle_id: null,
+          purged_paths: ['proofs/r1/o1/comprobante1.jpg', 'proofs/r1/o2/comprobante2.png'],
+        },
+        error: null,
+      });
+
+      vi.spyOn(supabase, 'rpc').mockImplementation(mockRpc);
+
+      const res = await adminPurgePaymentProofsStorage({ scope: 'resolved' });
+
+      expect(res.success).toBe(true);
+      expect(mockRemove).toHaveBeenCalledWith([
+        'proofs/r1/o1/comprobante1.jpg',
+        'proofs/r1/o2/comprobante2.png',
+      ]);
+      expect(res.purgedPaths).toEqual([
+        'proofs/r1/o1/comprobante1.jpg',
+        'proofs/r1/o2/comprobante2.png',
+      ]);
+    });
   });
 });
+

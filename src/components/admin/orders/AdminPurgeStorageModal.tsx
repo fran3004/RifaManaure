@@ -60,9 +60,14 @@ export const AdminPurgeStorageModal: React.FC<AdminPurgeStorageModalProps> = ({
       setFilterByCurrentRaffle(Boolean(selectedRaffleId));
       setScope('resolved');
       setError(null);
+    }
+  }, [isOpen, selectedRaffleId]);
+
+  useEffect(() => {
+    if (isOpen) {
       void loadStats();
     }
-  }, [isOpen, selectedRaffleId, loadStats]);
+  }, [isOpen, activeRaffleId, loadStats]);
 
   if (!isOpen) return null;
 
@@ -272,8 +277,12 @@ export const AdminPurgeStorageModal: React.FC<AdminPurgeStorageModalProps> = ({
             type="button"
             className={styles.btnPurge}
             onClick={handleConfirmPurge}
-            disabled={isPurging || loadingStats}
-            title="Proceder con el vaciado manual de comprobantes"
+            disabled={isPurging || loadingStats || targetCount === 0}
+            title={
+              targetCount === 0
+                ? 'No hay comprobantes pendientes por vaciar con los filtros actuales'
+                : 'Proceder con el vaciado manual de comprobantes'
+            }
           >
             {isPurging ? (
               <>

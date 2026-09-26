@@ -178,10 +178,12 @@ export const ReceiptsView: React.FC = () => {
 
   const handlePurgeSuccess = (res: PurgeStorageResult) => {
     setActionMessage({
-      type: 'success',
+      type: res.purgedProofsCount > 0 ? 'success' : 'error',
       text:
         res.message ||
-        `Almacenamiento vaciado con éxito: se depuraron ${res.purgedProofsCount} comprobante(s).`,
+        (res.purgedProofsCount > 0
+          ? `Almacenamiento vaciado con éxito: se depuraron ${res.purgedProofsCount} comprobante(s).`
+          : 'No se encontraron comprobantes pendientes por vaciar para los filtros seleccionados.'),
     });
     void loadReceipts();
   };
