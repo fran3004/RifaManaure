@@ -316,6 +316,9 @@ export interface PublicVerificationResult {
   searchedBy: 'reference' | 'document';
   searchTerm: string;
   orders: PublicOrderVerification[];
+  found?: boolean;
+  requiresSecondary?: boolean;
+  message?: string;
   error?: string;
   code?: string;
   isTimeout?: boolean;
@@ -379,6 +382,9 @@ export async function verifyPublicOrderOrTickets(
       searchTerm: string;
       searchedBy: 'reference' | 'document';
       orders: any[];
+      found?: boolean;
+      requiresSecondary?: boolean;
+      message?: string;
       code?: string;
       error?: string;
     };
@@ -394,6 +400,9 @@ export async function verifyPublicOrderOrTickets(
         searchedBy: res?.searchedBy || fallbackSearchBy,
         searchTerm: raw,
         orders: [],
+        found: res?.found,
+        requiresSecondary: res?.requiresSecondary,
+        message: res?.message,
         error: normalized.userMessage,
         code: res?.code,
       };
@@ -426,6 +435,9 @@ export async function verifyPublicOrderOrTickets(
       searchedBy: res.searchedBy || fallbackSearchBy,
       searchTerm: raw,
       orders: formattedOrders,
+      found: res.found,
+      requiresSecondary: res.requiresSecondary,
+      message: res.message,
     };
   } catch (err: unknown) {
     const classified = classifyRequestError(err);

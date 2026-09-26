@@ -110,7 +110,7 @@ describe('Flexibilidad de Estados y Reutilización de Rifas por el Administrador
     }));
   });
 
-  it('4. Debe permitir transicionar libremente entre cualquiera de los 5 estados (draft, active, paused, closed, finished)', async () => {
+  it('4. Debe permitir transicionar libremente entre cualquiera de los 5 estados', async () => {
     const states: Array<'draft' | 'active' | 'paused' | 'closed' | 'finished'> = [
       'draft',
       'active',

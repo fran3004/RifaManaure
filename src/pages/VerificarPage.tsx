@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   Search,
   ShieldCheck,
@@ -10,6 +10,7 @@ import {
   Calendar,
   MessageCircle,
   Download,
+  ArrowLeft,
 } from 'lucide-react';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
@@ -38,7 +39,28 @@ export const VerificarPage: React.FC = () => {
   const [selectedReceiptData, setSelectedReceiptData] = useState<DigitalReceiptData | null>(null);
   const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
 
-  const isNumericSearch = searchQuery.trim().length > 0 && /^[0-9]+$/.test(searchQuery.trim());
+  // Control del flujo progresivo en dos pasos
+  const [requiresPhone, setRequiresPhone] = useState(false);
+  const secondaryInputRef = useRef<HTMLInputElement>(null);
+
+  const handleQueryChange = (value: string) => {
+    setSearchQuery(value);
+    if (requiresPhone) {
+      setRequiresPhone(false);
+      setSecondaryQuery('');
+      setErrorMsg('');
+    }
+    if (hasSearched) {
+      setHasSearched(false);
+    }
+  };
+
+  const handleResetQuery = () => {
+    setRequiresPhone(false);
+    setSecondaryQuery('');
+    setErrorMsg('');
+    setHasSearched(false);
+  };
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,46 +69,87 @@ export const VerificarPage: React.FC = () => {
     const query = searchQuery.trim();
     if (!query) {
       setErrorMsg(
-        'Por favor ingresa un número de referencia (ej. MV-...) o tu cédula de ciudadanía.'
+        'Por favor ingresa un número de cédula de ciudadanía o la referencia de tu orden.'
       );
       return;
     }
 
-    const isNumeric = /^[0-9]+$/.test(query);
-    if (isNumeric && (!secondaryQuery || secondaryQuery.trim().length < 4)) {
-      setErrorMsg(
-        'Para consultar por número de cédula es obligatorio ingresar tu teléfono registrado o al menos sus últimos 4 dígitos.'
-      );
+    // PASO 2: Si el sistema ya confirmó que la cédula existe con boletos y se está validando el teléfono
+    if (requiresPhone) {
+      if (!secondaryQuery || secondaryQuery.trim().length < 4) {
+        setErrorMsg(
+          'Por favor ingresa tu número de teléfono registrado o sus últimos 4 dígitos.'
+        );
+        secondaryInputRef.current?.focus();
+        return;
+      }
+
+      setIsLoading(true);
+      try {
+        const result = await verifyPublicOrderOrTickets(query, secondaryQuery.trim());
+        if (result.success && result.orders.length > 0) {
+          setOrders(result.orders);
+          setHasSearched(true);
+          setSearchedTerm(query);
+          setErrorMsg('');
+        } else {
+          setErrorMsg(
+            result.error ||
+              'El número de teléfono o los últimos 4 dígitos no coinciden con los registrados para esta cédula. Intenta nuevamente.'
+          );
+          setOrders([]);
+          setTimeout(() => secondaryInputRef.current?.focus(), 80);
+        }
+      } catch (err) {
+        const normalized = normalizeAppError(
+          err,
+          'Ocurrió un problema de conexión al verificar los datos. Por favor intenta nuevamente.'
+        );
+        logAppError('VerificarPage.handleSearch.phone', normalized);
+        setErrorMsg(normalized.userMessage);
+      } finally {
+        setIsLoading(false);
+      }
       return;
     }
 
+    // PASO 1: Consulta inicial por cédula o por referencia
     setIsLoading(true);
-    setHasSearched(true);
+    setHasSearched(false);
     setSearchedTerm(query);
 
     try {
-      const result = await verifyPublicOrderOrTickets(query, secondaryQuery.trim());
-      if (result.success) {
-        setOrders(result.orders);
-        if (result.orders.length === 0) {
-          setErrorMsg('');
-        }
-      } else {
-        const normalized = normalizeAppError(
-          { code: result.code, message: result.error },
-          'No se pudo realizar la consulta.'
-        );
-        setErrorMsg(normalized.userMessage);
+      const result = await verifyPublicOrderOrTickets(query);
+      if (result.requiresSecondary) {
+        // La cédula fue detectada con boletos -> Solicitar segundo factor (teléfono)
+        setRequiresPhone(true);
         setOrders([]);
+        setErrorMsg('');
+        setTimeout(() => {
+          secondaryInputRef.current?.focus();
+        }, 100);
+      } else if (result.success && result.orders.length > 0) {
+        // Consulta por referencia o directa encontrada
+        setRequiresPhone(false);
+        setOrders(result.orders);
+        setHasSearched(true);
+        setErrorMsg('');
+      } else {
+        // No se encontraron registros para la cédula o referencia -> mostrar estado vacío sin pedir teléfono
+        setRequiresPhone(false);
+        setOrders([]);
+        setHasSearched(true);
+        setErrorMsg('');
       }
     } catch (err) {
       const normalized = normalizeAppError(
         err,
         'Ocurrió un problema de conexión al verificar los datos. Por favor intenta nuevamente.'
       );
-      logAppError('VerificarPage.handleSearch', normalized);
+      logAppError('VerificarPage.handleSearch.initial', normalized);
       setErrorMsg(normalized.userMessage);
       setOrders([]);
+      setHasSearched(true);
     } finally {
       setIsLoading(false);
     }
@@ -127,63 +190,102 @@ export const VerificarPage: React.FC = () => {
             </p>
           </div>
 
-          {/* Formulario de Consulta */}
+          {/* Formulario de Consulta Progresiva */}
           <form onSubmit={handleSearch} className={styles.searchCard}>
             <div className={styles.inputGroup}>
-              <label htmlFor="searchInput" className={styles.label}>
-                Número de Cédula o Referencia de Orden
-              </label>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  flexWrap: 'wrap',
+                  gap: '0.5rem',
+                }}
+              >
+                <label htmlFor="searchInput" className={styles.label}>
+                  Número de Cédula o Referencia de Orden
+                </label>
+                {requiresPhone && (
+                  <div className={styles.detectedBadge}>
+                    <CheckCircle2 size={13} aria-hidden="true" />
+                    <span>Cédula con boletos registrados</span>
+                  </div>
+                )}
+              </div>
+
               <div className={styles.inputWrapper}>
                 <input
                   id="searchInput"
                   type="text"
-                  placeholder="Ej: MV-L8X9... o tu número de cédula (1065892340)"
+                  placeholder="Ej: 1065892340 o referencia (MV-L8X9...)"
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={(e) => handleQueryChange(e.target.value)}
                   className={styles.input}
                   maxLength={50}
+                  readOnly={requiresPhone}
                 />
-                {!isNumericSearch && (
+                {requiresPhone ? (
+                  <button
+                    type="button"
+                    className={styles.btnChangeQuery}
+                    onClick={handleResetQuery}
+                    title="Editar o cambiar el número de cédula"
+                  >
+                    <ArrowLeft
+                      size={15}
+                      aria-hidden="true"
+                      style={{ verticalAlign: 'middle', marginRight: '0.35rem' }}
+                    />
+                    Cambiar
+                  </button>
+                ) : (
                   <button type="submit" className={styles.submitBtn} disabled={isLoading}>
-                    <Search size={18} /> {isLoading ? 'Consultando...' : 'Consultar Estado'}
+                    <Search size={18} aria-hidden="true" />{' '}
+                    {isLoading ? 'Consultando...' : 'Consultar Estado'}
                   </button>
                 )}
               </div>
 
-              {isNumericSearch && (
+              {/* Sección de Teléfono: SOLO SE MUESTRA si el sistema detecta que la cédula SÍ tiene boletos registrados */}
+              {requiresPhone && (
                 <div className={styles.secondaryFieldGroup}>
                   <label htmlFor="secondaryInput" className={styles.label}>
-                    Teléfono Registrado o Últimos 4 Dígitos
+                    Confirmar Teléfono Registrado o Últimos 4 Dígitos
                   </label>
                   <div className={styles.inputWrapper}>
                     <input
                       id="secondaryInput"
+                      ref={secondaryInputRef}
                       type="tel"
                       placeholder="Ej: 3001234567 o 4567"
                       value={secondaryQuery}
                       onChange={(e) => setSecondaryQuery(e.target.value)}
                       className={styles.input}
                       maxLength={20}
+                      autoFocus
                     />
                     <button type="submit" className={styles.submitBtn} disabled={isLoading}>
-                      <Search size={18} /> {isLoading ? 'Consultando...' : 'Consultar Estado'}
+                      <Search size={18} aria-hidden="true" />{' '}
+                      {isLoading ? 'Verificando...' : 'Confirmar y Ver Boletos'}
                     </button>
                   </div>
                   <span className={styles.searchHint}>
-                    Por seguridad y para proteger la privacidad de los participantes, la consulta por cédula requiere confirmar el teléfono registrado.
+                    Por seguridad y para proteger la privacidad de los participantes, confirma el número
+                    de teléfono o los últimos 4 dígitos con los que realizaste la compra.
                   </span>
                 </div>
               )}
 
-              {!isNumericSearch && (
+              {!requiresPhone && (
                 <span className={styles.searchHint}>
-                  Puedes ingresar la referencia que recibiste al completar el pedido (ej. MV-...) o tu número de cédula.
+                  Ingresa tu número de cédula o la referencia de tu orden para consultar el estado
+                  oficial de tus boletos.
                 </span>
               )}
 
               {errorMsg && (
-                <p className={styles.errorText}>
-                  <AlertCircle size={14} /> {errorMsg}
+                <p className={styles.errorText} role="alert">
+                  <AlertCircle size={14} aria-hidden="true" /> {errorMsg}
                 </p>
               )}
             </div>

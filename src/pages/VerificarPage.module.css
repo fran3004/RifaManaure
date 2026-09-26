@@ -125,6 +125,39 @@
   box-sizing: border-box;
 }
 
+.detectedBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--brand-deep, #0F2E1D);
+  background: rgba(16, 185, 129, 0.15);
+  padding: 0.3rem 0.75rem;
+  border-radius: 20px;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  width: fit-content;
+}
+
+.btnChangeQuery {
+  background: transparent;
+  border: 1.5px solid var(--border-subtle, #DCD5C4);
+  border-radius: var(--radius-md, 14px);
+  padding: 0.75rem 1.15rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-secondary, #41564A);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btnChangeQuery:hover {
+  background-color: var(--bg-surface, #FBF8F1);
+  color: var(--text-primary, #16261C);
+  border-color: var(--brand-primary, #1B4A2E);
+}
+
 .input {
   flex: 1;
   min-width: 0;
