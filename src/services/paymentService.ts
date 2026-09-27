@@ -622,9 +622,13 @@ export async function uploadPaymentProof(
     );
 
     if (uploadError) {
+      const normalizedUpload = normalizeAppError(
+        uploadError,
+        'No fue posible subir el archivo de tu comprobante. Por favor intenta de nuevo.'
+      );
       return {
         success: false,
-        error: `No se pudo guardar el archivo del comprobante: ${uploadError.message}`,
+        error: normalizedUpload.userMessage,
         code: 'STORAGE_UPLOAD_ERROR',
       };
     }
@@ -695,7 +699,7 @@ export async function uploadPaymentProof(
 
     return {
       success: false,
-      error: 'Ocurrió una respuesta inesperada del sistema al procesar el comprobante.',
+      error: 'No fue posible validar tu comprobante en este momento. Por favor intenta de nuevo.',
       code: 'UNEXPECTED_RESPONSE',
     };
   } catch (err: unknown) {
@@ -709,7 +713,10 @@ export async function uploadPaymentProof(
         isTimeout: true,
       };
     }
-    const normalized = normalizeAppError(err, 'Error inesperado al enviar comprobante');
+    const normalized = normalizeAppError(
+      err,
+      'No fue posible enviar tu comprobante en este momento. Por favor intenta de nuevo.'
+    );
     logAppError('paymentService.uploadPaymentProof.catch', normalized);
     return {
       success: false,

@@ -337,7 +337,7 @@ export async function registerWinner(
       console.error('Error al ejecutar RPC register_winner:', error);
       return {
         success: false,
-        error: error.message || 'Error en la base de datos al registrar ganador.',
+        error: error.message || 'Error al registrar el ganador en el sistema.',
       };
     }
 

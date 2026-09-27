@@ -126,7 +126,7 @@ export async function updateSystemSettingsAdmin(
       error:
         err instanceof Error
           ? formatSettingsRpcError(err.message)
-          : 'Error de conexión al servidor.',
+          : 'No fue posible conectar con el servicio. Por favor intenta de nuevo.',
     };
   }
 }

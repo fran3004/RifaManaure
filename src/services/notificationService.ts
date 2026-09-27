@@ -882,7 +882,7 @@ export async function verifyAndRetryEmailNotification(
   if (orderErr || !orderRow) {
     return {
       success: false,
-      error: 'No se pudo verificar el estado actual de la orden en la base de datos.',
+      error: 'No se pudo verificar el estado actual de la orden en el sistema.',
     };
   }
 
@@ -890,7 +890,7 @@ export async function verifyAndRetryEmailNotification(
   if (normalizedType === NOTIFICATION_EVENT_TYPES.PAYMENT_APPROVED && orderRow.status !== 'paid') {
     return {
       success: false,
-      error: `Operación no permitida: La orden debe encontrarse en estado pagada ('paid') para reenviar la confirmación de pago (estado actual: '${orderRow.status}').`,
+      error: 'Operación no permitida: La orden debe encontrarse en estado pagada para reenviar la confirmación de pago.',
     };
   }
 

@@ -37,7 +37,7 @@ export const PageLoadingFallback: React.FC<PageLoadingFallbackProps> = ({
       {isSlow && (
         <div className={styles.slowNotice}>
           <p className={styles.slowText}>
-            La carga está tomando más tiempo del habitual debido a la red o actualización de recursos.
+            La carga está tomando más tiempo del habitual. Por favor verifica tu conexión a internet o intenta recargar.
           </p>
           <button
             type="button"

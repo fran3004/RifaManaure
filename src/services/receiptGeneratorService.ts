@@ -466,14 +466,14 @@ export async function generateDigitalReceiptCanvas(
   }
 
   if (typeof document === 'undefined') {
-    throw new Error('Canvas solo puede generarse en un entorno con soporte de DOM.');
+    throw new Error('Tu navegador no admite la generación directa de imágenes de comprobante.');
   }
 
   const { width: W, height: H } = calculateReceiptCanvasDimensions(data);
 
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
-  if (!ctx) throw new Error('No se pudo inicializar el contexto 2D de Canvas.');
+  if (!ctx) throw new Error('No fue posible procesar la imagen del comprobante en este navegador.');
 
   canvas.width = W;
   canvas.height = H;

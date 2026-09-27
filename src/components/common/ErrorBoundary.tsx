@@ -59,8 +59,8 @@ export class ErrorBoundary extends Component<Props, State> {
             Algo no cargó correctamente
           </h2>
           <p className={styles.description}>
-            Ocurrió una eventualidad inesperada al inicializar este módulo. Puedes intentar recargar
-            la página.
+            Ocurrió un problema temporal al cargar esta sección. Puedes intentar recargar la página
+            para continuar.
           </p>
           <button
             type="button"

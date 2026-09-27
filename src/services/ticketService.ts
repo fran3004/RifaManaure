@@ -272,7 +272,10 @@ export async function createOrder(
         isTimeout: true,
       };
     }
-    const normalized = normalizeAppError(err, 'Error inesperado al crear orden');
+    const normalized = normalizeAppError(
+      err,
+      'No fue posible procesar tu orden en este momento. Por favor intenta de nuevo.'
+    );
     logAppError('ticketService.createOrder.catch', normalized);
     return {
       success: false,
@@ -453,7 +456,10 @@ export async function verifyPublicOrderOrTickets(
         isTimeout: true,
       };
     }
-    const normalized = normalizeAppError(err, 'Error inesperado al consultar boletos');
+    const normalized = normalizeAppError(
+      err,
+      'No fue posible consultar tus boletos en este momento. Por favor intenta de nuevo.'
+    );
     logAppError('ticketService.verifyPublicOrderOrTickets.catch', normalized);
     return {
       success: false,

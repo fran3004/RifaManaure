@@ -765,7 +765,7 @@ describe('Servicio de Notificaciones por WhatsApp (src/services/notificationServ
 
         const result = await verifyAndRetryEmailNotification('ord_not_paid', 'payment_approved');
         expect(result.success).toBe(false);
-        expect(result.error).toContain("La orden debe encontrarse en estado pagada ('paid')");
+        expect(result.error).toContain('La orden debe encontrarse en estado pagada');
       });
 
       it('debe rechazar reintento si el comprador seleccionó exclusivamente WhatsApp', async () => {
