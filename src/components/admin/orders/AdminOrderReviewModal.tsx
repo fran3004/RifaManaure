@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import {
   type OrderWithDetails,
   approveOrderPayment,
@@ -42,6 +43,7 @@ import {
   Send,
   AlertCircle,
   Download,
+  Receipt,
 } from 'lucide-react';
 import { DigitalReceiptModal } from '@/components/receipt/DigitalReceiptModal';
 import { AdminConfirmPaymentModal } from './AdminConfirmPaymentModal';
@@ -62,6 +64,7 @@ interface AdminOrderReviewModalProps {
   isOpen: boolean;
   onClose: () => void;
   onOrderUpdated: () => void | Promise<void>;
+  allowPaymentActions?: boolean;
 }
 
 const REJECTION_PRESETS = [
@@ -86,6 +89,7 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
   isOpen,
   onClose,
   onOrderUpdated,
+  allowPaymentActions = false,
 }) => {
   // Configuración del sistema dinámica
   const systemSettings = useSystemSettings();
@@ -200,7 +204,7 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
 
   const hasReceipt = Boolean(order.receipt_url && order.receipt_url.trim().length > 0);
   const isPurged = Boolean(order.receipt_purged || isPurgedProof);
-  const canReviewPayment = order.status === 'pending_verification' && hasReceipt;
+  const canReviewPayment = allowPaymentActions && order.status === 'pending_verification' && hasReceipt;
   const isPendingAction = canReviewPayment;
 
   const dateStr = new Date(order.created_at).toLocaleString('es-CO', {
@@ -1397,8 +1401,14 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
         {/* Pie de Acciones del Modal */}
         <div className={styles.modalFooter}>
           <div className={styles.footerStatusText}>
-            {canReviewPayment ? (
-              <span>⚠️ La orden tiene comprobante adjunto y requiere verificación manual.</span>
+            {order.status === 'pending_verification' ? (
+              !allowPaymentActions ? (
+                <span className={styles.centralizedNoticeText}>
+                  🔒 <strong>Validación centralizada:</strong> Para aprobar o rechazar pagos, procesa el soporte en la bandeja oficial de <strong>Comprobantes</strong>.
+                </span>
+              ) : (
+                <span>⚠️ La orden tiene comprobante adjunto y requiere verificación manual.</span>
+              )
             ) : order.status === 'pending' ? (
               <span>⏳ Reserva temporal ({reservationMinutes} min): en espera de que el comprador suba su comprobante.</span>
             ) : (
@@ -1428,6 +1438,18 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
             >
               Cerrar
             </button>
+
+            {order.status === 'pending_verification' && !allowPaymentActions && (
+              <Link
+                to={`/admin/comprobantes?ref=${encodeURIComponent(order.reference)}`}
+                onClick={onClose}
+                className={styles.btnPrimary}
+                title="Ir a Comprobantes para validar el pago"
+              >
+                <Receipt size={16} />
+                <span>Validar en Comprobantes ↗</span>
+              </Link>
+            )}
 
             {isPendingAction && !showRejectionForm && (
               <>

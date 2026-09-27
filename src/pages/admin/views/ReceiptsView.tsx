@@ -829,6 +829,7 @@ export const ReceiptsView: React.FC = () => {
         isOpen={Boolean(selectedReviewOrder)}
         onClose={() => setSelectedReviewOrder(null)}
         onOrderUpdated={loadReceipts}
+        allowPaymentActions={true}
       />
 
       {/* Modal de Confirmación de Aprobación de Pago */}

@@ -213,7 +213,7 @@
 
 .ordersTable th:nth-child(1),
 .ordersTable td:nth-child(1) {
-  width: 15%;
+  width: 14%;
 }
 
 .ordersTable th:nth-child(2),
@@ -223,27 +223,29 @@
 
 .ordersTable th:nth-child(3),
 .ordersTable td:nth-child(3) {
-  width: 21%;
+  width: 19%;
 }
 
 .ordersTable th:nth-child(4),
 .ordersTable td:nth-child(4) {
-  width: 11%;
+  width: 10%;
 }
 
 .ordersTable th:nth-child(5),
 .ordersTable td:nth-child(5) {
-  width: 13%;
+  width: 12%;
 }
 
 .ordersTable th:nth-child(6),
 .ordersTable td:nth-child(6) {
   width: 14%;
+  white-space: nowrap;
 }
 
 .ordersTable th:nth-child(7),
 .ordersTable td:nth-child(7) {
-  width: 14%;
+  width: 19%;
+  min-width: 175px;
 }
 
 .ordersTable th,
@@ -267,9 +269,9 @@
 .btnValidateReceipt {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
-  padding: 0.3rem 0.65rem;
-  font-size: 0.8rem;
+  gap: 0.25rem;
+  padding: 0.3rem 0.55rem;
+  font-size: 0.78rem;
   font-weight: 600;
   border-radius: var(--radius-md, 6px);
   background-color: var(--admin-success, #10b981);
@@ -278,6 +280,7 @@
   transition: all 0.2s ease;
   white-space: nowrap;
   border: 1px solid transparent;
+  line-height: 1.2;
 }
 
 .btnValidateReceipt:hover {

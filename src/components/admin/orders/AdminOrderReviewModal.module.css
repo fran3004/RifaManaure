@@ -1343,3 +1343,10 @@
   padding-top: 0.5rem;
   flex-wrap: wrap;
 }
+
+.centralizedNoticeText {
+  color: var(--color-warning, #d97706);
+  font-size: 0.85rem;
+  line-height: 1.4;
+  font-weight: 500;
+}

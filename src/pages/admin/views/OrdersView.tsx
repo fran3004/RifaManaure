@@ -491,7 +491,7 @@ export const OrdersView: React.FC = () => {
                                   title="Ir a Comprobantes para contrastar comprobante y procesar pago"
                                 >
                                   <Receipt size={14} />
-                                  <span>Validar Comprobante ↗</span>
+                                  <span>Validar ↗</span>
                                 </Link>
                                 <button
                                   type="button"
@@ -603,6 +603,7 @@ export const OrdersView: React.FC = () => {
         isOpen={Boolean(selectedReviewOrder)}
         onClose={() => setSelectedReviewOrder(null)}
         onOrderUpdated={loadOrders}
+        allowPaymentActions={false}
       />
 
       </div>

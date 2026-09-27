@@ -701,14 +701,26 @@ export const DashboardView: React.FC = () => {
                               )}
                             </td>
                               <td className={styles.dashboardTableAction}>
-                              <button
-                                type="button"
-                                className={`${styles.btnSecondary} ${styles.btnSmallSecondary}`}
-                                onClick={() => handleOpenReview(ord)}
-                              >
-                                <Eye size={13} />
-                                <span>Revisar</span>
-                              </button>
+                              {ord.status === 'pending_verification' ? (
+                                <Link
+                                  to={`/admin/comprobantes?ref=${encodeURIComponent(ord.reference)}`}
+                                  className={`${styles.btnSuccess} ${styles.btnSmallSecondary}`}
+                                  title="Ir a Comprobantes para validar el pago"
+                                >
+                                  <Receipt size={13} />
+                                  <span>Validar ↗</span>
+                                </Link>
+                              ) : (
+                                <button
+                                  type="button"
+                                  className={`${styles.btnSecondary} ${styles.btnSmallSecondary}`}
+                                  onClick={() => handleOpenReview(ord)}
+                                  title="Ver detalle de la orden"
+                                >
+                                  <Eye size={13} />
+                                  <span>Detalle</span>
+                                </button>
+                              )}
                             </td>
                           </tr>
                         ))}
@@ -761,6 +773,7 @@ export const DashboardView: React.FC = () => {
           isOpen={isReviewModalOpen}
           onClose={handleCloseReview}
           onOrderUpdated={handleOrderUpdated}
+          allowPaymentActions={false}
         />
       )}
     </div>
