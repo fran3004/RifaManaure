@@ -97,7 +97,7 @@ export const RafflesView: React.FC = () => {
       } else {
         const normalized = normalizeAppError(
           { message: res.error },
-          'No fue posible cargar las rifas desde la base de datos.'
+          'No fue posible cargar las rifas en este momento.'
         );
         logAppError('RafflesView.loadRaffles.res', normalized);
         setError(normalized.userMessage);
@@ -130,7 +130,7 @@ export const RafflesView: React.FC = () => {
           } else {
             const normalized = normalizeAppError(
               { message: res.error },
-              'No fue posible cargar las rifas desde la base de datos.'
+              'No fue posible cargar las rifas en este momento.'
             );
             logAppError('RafflesView.init.res', normalized);
             setError(normalized.userMessage);

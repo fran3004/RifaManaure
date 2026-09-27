@@ -355,7 +355,7 @@ export const AdminFaqManager: React.FC = () => {
           <Loader2 size={32} className={`animate-spin ${styles.faqTitleIcon}`} />
           <h4 className={styles.emptyStateTitle}>Cargando preguntas frecuentes...</h4>
           <p className={styles.emptyStateText}>
-            Obteniendo información de la base de datos...
+            Obteniendo información del sistema...
           </p>
         </div>
       ) : faqs.length === 0 ? (
@@ -363,7 +363,7 @@ export const AdminFaqManager: React.FC = () => {
           <HelpCircle size={40} className={styles.faqTitleIcon} />
           <h4 className={styles.emptyStateTitle}>No hay preguntas frecuentes registradas</h4>
           <p className={styles.emptyStateText}>
-            Aún no has agregado preguntas o la tabla está vacía. Crea la primera pregunta para
+            Aún no has agregado preguntas frecuentes. Crea la primera pregunta para
             orientar a tus participantes.
           </p>
           <button type="button" className={styles.addBtn} onClick={handleOpenCreate}>

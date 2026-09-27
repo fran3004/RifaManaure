@@ -361,7 +361,7 @@ function getNarrative(log: AuditLogItem): NarrativeResult {
     const total = d.total_tickets as number;
     return {
       headline: `Nueva edición de rifa "${title}" creada.`,
-      detail: `Se configuraron los parámetros de la rifa y se generaron los boletos en la base de datos de manera atómica.`,
+      detail: `Se configuraron los parámetros de la rifa y se generaron todos los boletos en el sistema de manera segura y ordenada.`,
       chips: [
         { label: title, type: 'emerald' as const },
         ...(total ? [{ label: `${total} boletos`, type: 'gold' as const }] : []),
@@ -963,7 +963,7 @@ export const AuditView: React.FC = () => {
           <div className={`${styles.metricValue} ${styles.metricValueSuccess}`}>
             Activa y Protegida
           </div>
-          <span className={styles.metricHint}>Triggers inmutables de PostgreSQL</span>
+          <span className={styles.metricHint}>Historial protegido y verificado</span>
         </div>
 
         <div className={styles.metricCard}>

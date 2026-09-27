@@ -134,7 +134,7 @@ const CreateRaffleForm: React.FC<{
       onSuccess(result.raffle);
       onClose();
     } else {
-      setErrorMessage(result.error || 'No fue posible crear la nueva rifa en el servidor.');
+      setErrorMessage(result.error || 'No fue posible crear la nueva rifa. Por favor, intenta nuevamente.');
     }
   };
 

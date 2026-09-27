@@ -49,7 +49,7 @@ export const AdminPurgeStorageModal: React.FC<AdminPurgeStorageModalProps> = ({
         setError(res.error || 'No fue posible cargar las estadísticas de almacenamiento.');
       }
     } catch {
-      setError('Error al conectar con el servidor.');
+      setError('No fue posible conectar con el servicio. Por favor, intenta nuevamente.');
     } finally {
       setLoadingStats(false);
     }
@@ -118,7 +118,7 @@ export const AdminPurgeStorageModal: React.FC<AdminPurgeStorageModalProps> = ({
               Vaciar Almacenamiento de Comprobantes
             </h3>
             <p className={styles.subtitle}>
-              Liberación manual de espacio en almacenamiento de transferencias bancarias
+              Liberar espacio de fotos y comprobantes de transferencias bancarias
             </p>
           </div>
           <button
@@ -158,7 +158,7 @@ export const AdminPurgeStorageModal: React.FC<AdminPurgeStorageModalProps> = ({
             </div>
 
             <div className={styles.statCard}>
-              <span className={styles.statLabel}>Archivos en Disco</span>
+              <span className={styles.statLabel}>Comprobantes Guardados</span>
               <span className={styles.statValue}>
                 {loadingStats ? '...' : (stats?.activeFilesCount ?? 0)}
               </span>
@@ -238,7 +238,7 @@ export const AdminPurgeStorageModal: React.FC<AdminPurgeStorageModalProps> = ({
                   Vaciar Todo el Almacenamiento
                 </span>
                 <span className={styles.scopeDesc}>
-                  Elimina <strong>todos los archivos de comprobantes</strong> del bucket (incluyendo comprobantes pendientes y archivos huérfanos). Toda la información contable y boletos permanecen intactos.
+                  Elimina <strong>todos los archivos de comprobantes</strong> almacenados (incluyendo comprobantes pendientes y archivos no vinculados). Toda la información contable y boletos permanecen intactos.
                 </span>
               </div>
             </div>
@@ -250,7 +250,7 @@ export const AdminPurgeStorageModal: React.FC<AdminPurgeStorageModalProps> = ({
             <div>
               <strong>¿Confirmas el vaciado inmediato de almacenamiento?</strong>
               <p>
-                Esta acción eliminará físicamente los archivos adjuntos (imágenes/PDFs) del almacenamiento para liberar espacio. Los registros contables, compradores, referencias y boletos vendidos <strong>permanecerán 100% protegidos e intactos</strong> en la base de datos.
+                Esta acción eliminará los comprobantes (imágenes/PDFs) para liberar espacio. La información de los pedidos, compradores, referencias y boletos vendidos <strong>permanecerá 100% protegida e intacta</strong> en el sistema.
               </p>
             </div>
           </div>

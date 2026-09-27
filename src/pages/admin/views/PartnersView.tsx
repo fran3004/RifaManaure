@@ -540,7 +540,7 @@ export const PartnersView: React.FC = () => {
             </div>
           </div>
           <div className={styles.metricValue}>{metrics.total}</div>
-          <span className={styles.metricHint}>Convenios en base de datos</span>
+          <span className={styles.metricHint}>Convenios registrados</span>
         </div>
 
         <div className={styles.metricCard}>
@@ -993,7 +993,7 @@ export const PartnersView: React.FC = () => {
                         {logoFile
                           ? `${logoFile.name} (${Math.round(logoFile.size / 1024)} KB)`
                           : logoUrl?.includes('res.cloudinary.com')
-                            ? 'Alojado y optimizado en la nube'
+                            ? 'Logotipo listo para publicación'
                             : 'Logotipo asignado'}
                       </div>
                     </div>
@@ -1170,7 +1170,7 @@ export const PartnersView: React.FC = () => {
             <p className={partnerStyles.deleteModalDescription}>
               Estás a punto de eliminar a{' '}
               <strong className={partnerStyles.highlightText}>{deletingPartner.name}</strong>. Esta acción
-              removerá el convenio de la base de datos y eliminará permanentemente su logotipo para no dejar archivos residuales.
+              removerá el convenio del sistema y eliminará su logotipo de forma definitiva.
             </p>
 
             <div className={partnerStyles.deleteModalActions}>

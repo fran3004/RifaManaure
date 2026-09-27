@@ -844,14 +844,14 @@ export const SettingsView: React.FC = () => {
                             className={`animate-spin ${styles.tableStatusSpinner}`}
                           />
                           <span className={styles.tableStatusText}>
-                            Cargando administradores autorizados desde la base de datos...
+                            Cargando administradores autorizados del sistema...
                           </span>
                         </td>
                       </tr>
                     ) : adminUsers.length === 0 ? (
                       <tr>
                         <td colSpan={6} className={styles.tableEmptyCell}>
-                          No se encontraron administradores registrados en la base de datos.
+                          No se encontraron administradores registrados en el sistema.
                         </td>
                       </tr>
                     ) : (

@@ -121,7 +121,7 @@ export const AdminConfirmPaymentModal: React.FC<AdminConfirmPaymentModalProps> =
             <AlertCircle size={18} className={styles.warningIcon} />
             <div>
               Al confirmar, los boletos se marcarán como <strong>VENDIDOS</strong> permanentemente,
-              se emitirá el registro de auditoría en la base de datos y se despacharán las
+              se guardará el registro de seguridad en el sistema y se despacharán las
               notificaciones transaccionales automáticas al comprador.
             </div>
           </div>

@@ -184,7 +184,7 @@ const AdminRegisterWinnerModalContent: React.FC<AdminRegisterWinnerModalProps> =
       });
 
       if (!regRes.success) {
-        throw new Error(regRes.error || 'Error al registrar ganador en la base de datos.');
+        throw new Error(regRes.error || 'Error al registrar el ganador en el sistema.');
       }
 
       onWinnerRegistered();
