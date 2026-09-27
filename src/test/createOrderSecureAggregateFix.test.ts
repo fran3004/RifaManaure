@@ -172,3 +172,4 @@ describe('Auditoría y Corrección de Bloqueo Pesimista en create_order_secure (
     });
   });
 });
+
