@@ -31,6 +31,9 @@ import {
   Sparkles,
   Trophy,
   ExternalLink,
+  Trash2,
+  UserPlus,
+  Settings,
 } from 'lucide-react';
 import commonStyles from './AdminViews.module.css';
 import styles from './AuditView.module.css';
@@ -43,9 +46,133 @@ interface ActionConfig {
   actor: string;
 }
 
-function getActionConfig(action: string): ActionConfig {
-  const upper = (action || '').toUpperCase();
+/**
+ * Traduce y estandariza cualquier identificador de actividad a un título amigable en español
+ * libre de tecnicismos, siglas en inglés o mayúsculas sostenidas de código.
+ */
+function formatActionTitle(action: string): string {
+  const upper = (action || '').toUpperCase().trim();
+  if (upper.includes('PURGE') || upper.includes('CLEANUP') || upper.includes('STORAGE')) {
+    return 'Vaciado de Comprobantes';
+  }
+  if (upper.includes('INVITED') || upper.includes('INVITE')) {
+    return 'Invitación de Administrador';
+  }
+  if (upper.includes('SETTINGS')) {
+    return 'Ajustes del Sistema';
+  }
+  if (upper.includes('AUTO_CLOSE')) {
+    return 'Cierre Automático de Rifa';
+  }
+  if (upper.includes('AUTO_EXPIRE') || upper.includes('EXPIR')) {
+    return 'Reserva Expirada';
+  }
+  if (upper.includes('PAID') || upper.includes('APPROVED')) {
+    return 'Pago Aprobado';
+  }
+  if (upper.includes('PROOF_SUBMITTED') || upper.includes('PROOF')) {
+    return 'Comprobante Enviado';
+  }
+  if (upper.includes('PENDING')) {
+    return 'Por Validar';
+  }
+  if (upper.includes('CREATED')) {
+    return 'Orden Reservada';
+  }
+  if (upper.includes('REJECT') || upper.includes('CANCEL')) {
+    return 'Pago Rechazado';
+  }
+  if (upper.includes('UNBLOCKED')) {
+    return 'Boleto Desbloqueado';
+  }
+  if (upper.includes('BLOCKED')) {
+    return 'Boleto Bloqueado';
+  }
+  if (upper.includes('BUYER')) {
+    return 'Comprador Editado';
+  }
+  if (upper.includes('WINNER_DELETED')) {
+    return 'Ganador Anulado';
+  }
+  if (upper.includes('WINNER')) {
+    return 'Ganador Registrado';
+  }
+  if (upper.includes('RAFFLE_DELETED')) {
+    return 'Rifa Eliminada';
+  }
+  if (upper.includes('RAFFLE_UPDATED') || upper.includes('RAFFLE_EDIT')) {
+    return 'Parámetros Editados';
+  }
+  if (upper.includes('RAFFLE_CREATED') || upper.includes('RAFFLE')) {
+    return 'Nueva Rifa Creada';
+  }
+  if (upper.includes('ORDER')) {
+    return 'Gestión de Orden';
+  }
+  if (upper.includes('TICKET')) {
+    return 'Gestión de Boletos';
+  }
+  return 'Actividad Registrada';
+}
 
+function getActionConfig(action: string, log?: AuditLogItem): ActionConfig {
+  const upper = (action || '').toUpperCase();
+  const isActorAdmin = Boolean(
+    log?.performed_by ||
+    upper.includes('ADMIN') ||
+    upper.includes('UPDATE') ||
+    upper.includes('DELETE') ||
+    upper.includes('CREATE') ||
+    upper.includes('PURGE') ||
+    upper.includes('BLOCKED') ||
+    upper.includes('UNBLOCKED')
+  );
+
+  if (upper.includes('PURGE') || upper.includes('CLEANUP') || upper.includes('STORAGE')) {
+    return {
+      title: 'Vaciado de Comprobantes',
+      pillClass: styles.pillWarning,
+      nodeClass: styles.nodeWarning,
+      icon: <Trash2 size={15} />,
+      actor: isActorAdmin ? 'Administrador (Mantenimiento)' : 'Mantenimiento del Sistema',
+    };
+  }
+  if (upper.includes('INVITED') || upper.includes('INVITE')) {
+    return {
+      title: 'Invitación de Administrador',
+      pillClass: styles.pillInfo,
+      nodeClass: styles.nodeInfo,
+      icon: <UserPlus size={15} />,
+      actor: 'Administrador (Equipo)',
+    };
+  }
+  if (upper.includes('SETTINGS')) {
+    return {
+      title: 'Ajustes del Sistema',
+      pillClass: styles.pillInfo,
+      nodeClass: styles.nodeInfo,
+      icon: <Settings size={15} />,
+      actor: 'Administrador (Configuración)',
+    };
+  }
+  if (upper.includes('AUTO_CLOSE')) {
+    return {
+      title: 'Cierre Automático de Rifa',
+      pillClass: styles.pillWarning,
+      nodeClass: styles.nodeWarning,
+      icon: <Clock size={15} />,
+      actor: 'Sistema (Cierre Automático)',
+    };
+  }
+  if (upper.includes('AUTO_EXPIRE') || upper.includes('EXPIR')) {
+    return {
+      title: 'Reserva Expirada',
+      pillClass: styles.pillWarning,
+      nodeClass: styles.nodeWarning,
+      icon: <Clock size={15} />,
+      actor: 'Sistema (Liberación Automática)',
+    };
+  }
   if (upper.includes('PAID') || upper.includes('APPROVED')) {
     return {
       title: 'Pago Aprobado',
@@ -55,7 +182,7 @@ function getActionConfig(action: string): ActionConfig {
       actor: 'Administrador (Confirmación)',
     };
   }
-  if (upper.includes('PROOF_SUBMITTED')) {
+  if (upper.includes('PROOF_SUBMITTED') || upper.includes('PROOF')) {
     return {
       title: 'Comprobante Enviado',
       pillClass: styles.pillInfo,
@@ -88,7 +215,7 @@ function getActionConfig(action: string): ActionConfig {
       pillClass: styles.pillDanger,
       nodeClass: styles.nodeDanger,
       icon: <XCircle size={15} />,
-      actor: 'Administrador (Auditoría)',
+      actor: 'Administrador (Revisión)',
     };
   }
   if (upper.includes('UNBLOCKED')) {
@@ -109,15 +236,6 @@ function getActionConfig(action: string): ActionConfig {
       actor: 'Administrador',
     };
   }
-  if (upper.includes('EXPIR')) {
-    return {
-      title: 'Reserva Expirada',
-      pillClass: styles.pillWarning,
-      nodeClass: styles.nodeWarning,
-      icon: <Clock size={15} />,
-      actor: 'Cron / Limpieza Automática',
-    };
-  }
   if (upper.includes('BUYER')) {
     return {
       title: 'Comprador Editado',
@@ -127,6 +245,15 @@ function getActionConfig(action: string): ActionConfig {
       actor: 'Administrador (Edición)',
     };
   }
+  if (upper.includes('WINNER_DELETED')) {
+    return {
+      title: 'Ganador Anulado',
+      pillClass: styles.pillDanger,
+      nodeClass: styles.nodeDanger,
+      icon: <XCircle size={15} />,
+      actor: 'Administrador (Corrección)',
+    };
+  }
   if (upper.includes('WINNER')) {
     return {
       title: 'Ganador Oficial Registrado',
@@ -134,6 +261,15 @@ function getActionConfig(action: string): ActionConfig {
       nodeClass: styles.nodeSuccess,
       icon: <Trophy size={15} />,
       actor: 'Administrador (Sorteo)',
+    };
+  }
+  if (upper.includes('RAFFLE_DELETED')) {
+    return {
+      title: 'Rifa Eliminada',
+      pillClass: styles.pillDanger,
+      nodeClass: styles.nodeDanger,
+      icon: <XCircle size={15} />,
+      actor: 'Administrador',
     };
   }
   if (upper.includes('RAFFLE_UPDATED') || upper.includes('RAFFLE_EDIT')) {
@@ -156,11 +292,11 @@ function getActionConfig(action: string): ActionConfig {
   }
 
   return {
-    title: action.replace(/_/g, ' '),
+    title: formatActionTitle(action),
     pillClass: styles.pillNeutral,
     nodeClass: styles.nodeNeutral,
     icon: <Activity size={15} />,
-    actor: 'Sistema',
+    actor: isActorAdmin ? 'Administrador' : 'Sistema',
   };
 }
 
@@ -178,6 +314,96 @@ function getNarrative(log: AuditLogItem): NarrativeResult {
   const ticketCount = typeof d.ticket_count === 'number' ? d.ticket_count : 0;
   const ticketNum = (d.ticket_number as string) || '';
   const reason = (d.reason as string) || '';
+
+  // 1. Vaciado y Mantenimiento de Almacenamiento (comprobantes de pago)
+  if (action.includes('PURGE') || action.includes('STORAGE') || action.includes('CLEANUP')) {
+    const scope = String(d.scope || '').toLowerCase();
+    const isAll = scope === 'all' || !scope;
+    const filesCount =
+      typeof d.purged_files_count === 'number'
+        ? d.purged_files_count
+        : typeof d.purged_count === 'number'
+          ? d.purged_count
+          : 0;
+
+    return {
+      headline: isAll
+        ? 'Vaciado general del almacenamiento de comprobantes.'
+        : 'Liberación de almacenamiento de comprobantes ya verificados.',
+      detail:
+        filesCount > 0
+          ? `Se eliminaron de forma segura ${filesCount} ${filesCount === 1 ? 'archivo de comprobante' : 'archivos de comprobantes'} para liberar y optimizar el almacenamiento del sistema.`
+          : 'El almacenamiento fue revisado y optimizado con éxito; no había archivos antiguos pendientes por depurar.',
+      chips: [
+        { label: isAll ? 'Vaciado Total' : 'Comprobantes Verificados', type: 'gold' as const },
+        { label: 'Almacenamiento Optimizado', type: 'emerald' as const },
+        ...(filesCount > 0
+          ? [
+              {
+                label: `${filesCount} ${filesCount === 1 ? 'archivo liberado' : 'archivos liberados'}`,
+                type: 'muted' as const,
+              },
+            ]
+          : []),
+      ],
+    };
+  }
+
+  // 2. Invitación a administradores del equipo
+  if (action.includes('INVITED') || action.includes('INVITE')) {
+    const email = (d.email as string) || (d.invited_email as string) || '';
+    const role = (d.role as string) === 'super_admin' ? 'Super Administrador' : 'Administrador';
+    return {
+      headline: 'Invitación enviada a nuevo miembro del equipo.',
+      detail: `Se generó y envió invitación de acceso a ${email ? `"${email}"` : 'un nuevo administrador'} con permisos de ${role}.`,
+      chips: [
+        ...(email ? [{ label: email, type: 'gold' as const }] : []),
+        { label: `Rol: ${role}`, type: 'emerald' as const },
+      ],
+    };
+  }
+
+  // 3. Ajustes y Configuración del Sistema
+  if (action.includes('SETTINGS')) {
+    return {
+      headline: 'Ajustes generales del sistema actualizados.',
+      detail: 'Se guardaron nuevos parámetros operativos, información de contacto o configuración de pagos.',
+      chips: [{ label: 'Ajustes Guardados', type: 'emerald' as const }],
+    };
+  }
+
+  // 4. Cierre Automático por fecha de sorteo
+  if (action.includes('AUTO_CLOSE') || (action.includes('CLOSE') && action.includes('DRAW'))) {
+    return {
+      headline: 'Cierre automático de venta por fecha del sorteo.',
+      detail: 'Se cumplió la fecha programada para el sorteo oficial. La venta de boletos fue cerrada automáticamente para garantizar la transparencia.',
+      chips: [
+        { label: 'Cierre por Fecha', type: 'gold' as const },
+        { label: 'Sorteo Oficial', type: 'emerald' as const },
+      ],
+    };
+  }
+
+  // 5. Ganador Anulado
+  if (
+    action.includes('WINNER') &&
+    (action.includes('DELETE') || action.includes('REVOKE') || action.includes('CANCEL'))
+  ) {
+    return {
+      headline: 'Registro de ganador anulado.',
+      detail: 'Se revocó administrativamente el resultado del sorteo para realizar ajustes o reprogramar el sorteo oficial.',
+      chips: [{ label: 'Resultado Anulado', type: 'gold' as const }],
+    };
+  }
+
+  // 6. Rifa Eliminada
+  if (action.includes('RAFFLE') && (action.includes('DELETE') || action.includes('REMOVE'))) {
+    return {
+      headline: 'Rifa eliminada del sistema.',
+      detail: 'La rifa y su información asociada fueron retiradas por administración.',
+      chips: [{ label: 'Rifa Eliminada', type: 'gold' as const }],
+    };
+  }
 
   if (action.includes('PAID') || action.includes('APPROVED')) {
     return {
@@ -400,39 +626,77 @@ function getNarrative(log: AuditLogItem): NarrativeResult {
     };
   }
 
-  // Filtrar claves técnicas internas para evitar volcados crudos ("poco de letras")
-  const technicalKeys = new Set([
-    'buyer_id',
-    'order_id',
-    'raffle_id',
-    'user_id',
-    'admin_id',
-    'registered_by_admin',
-    'official_act_url',
-    'proof_url',
-    'receipt_url',
-    'payment_proof_url',
-    'id',
-  ]);
+  // Filtrar estrictamente cualquier clave técnica interna para evitar volcados crudos de datos o código
+  const isExcludedKey = (k: string): boolean => {
+    const lower = k.toLowerCase();
+    return (
+      lower.endsWith('_id') ||
+      lower.endsWith('_uuid') ||
+      lower.endsWith('_hash') ||
+      lower.endsWith('_token') ||
+      lower.endsWith('_key') ||
+      lower.startsWith('id') ||
+      lower.includes('count') ||
+      lower.includes('url') ||
+      lower === 'timestamp' ||
+      lower === 'executed_by' ||
+      lower === 'performed_by' ||
+      lower === 'registered_by_admin' ||
+      lower === 'user_id' ||
+      lower === 'admin_id' ||
+      lower === 'buyer_id' ||
+      lower === 'order_id' ||
+      lower === 'raffle_id' ||
+      lower === 'scope' ||
+      lower === 'session_id' ||
+      lower === 'ip_address' ||
+      lower === 'user_agent' ||
+      lower === 'entity_id' ||
+      lower === 'entity_type'
+    );
+  };
+
+  const isExcludedVal = (val: unknown): boolean => {
+    if (val === null || val === undefined || typeof val === 'object') return true;
+    const s = String(val).trim();
+    if (!s || s.startsWith('http://') || s.startsWith('https://')) return true;
+    // UUID v4
+    if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s)) return true;
+    // Marca de tiempo ISO
+    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/i.test(s)) return true;
+    return false;
+  };
+
+  const friendlyKeyLabels: Record<string, string> = {
+    reason: 'Motivo',
+    notes: 'Notas',
+    note: 'Nota',
+    title: 'Título',
+    name: 'Nombre',
+    buyer_name: 'Comprador',
+    status: 'Estado',
+    message: 'Mensaje',
+    channel: 'Canal',
+    phone: 'Teléfono',
+    email: 'Correo',
+    amount: 'Monto',
+  };
 
   const readableEntries = Object.entries(d).filter(
-    ([k, v]) =>
-      !technicalKeys.has(k) &&
-      !k.endsWith('_id') &&
-      !k.includes('uuid') &&
-      typeof v !== 'object' &&
-      v !== null &&
-      v !== '' &&
-      !String(v).startsWith('http')
+    ([k, v]) => !isExcludedKey(k) && !isExcludedVal(v)
   );
 
+  const actionTitle = formatActionTitle(action);
+
   return {
-    headline: `Transición de estado: ${action.replace(/_/g, ' ')}.`,
+    headline: `Actividad registrada: ${actionTitle}.`,
     detail:
       readableEntries.length > 0
-        ? readableEntries.map(([k, v]) => `${k.replace(/_/g, ' ')}: ${v}`).join(' • ')
-        : 'Operación procesada y respaldada en la bitácora inmutable de seguridad.',
-    chips: [...(ref ? [{ label: `Ref: ${ref}`, type: 'gold' as const }] : [])],
+        ? readableEntries
+            .map(([k, v]) => `${friendlyKeyLabels[k] || k.replace(/_/g, ' ')}: ${String(v)}`)
+            .join(' • ')
+        : 'Operación procesada y respaldada en el historial de seguridad del sistema.',
+    chips: [...(ref ? [{ label: `Orden ${ref}`, type: 'gold' as const }] : [])],
   };
 }
 
@@ -512,6 +776,148 @@ function getAuditRowData(log: AuditLogItem): AuditRowData {
   const ticketNum = (d.ticket_number as string) || '';
   const reason = (d.reason as string) || '';
   const time = getFormattedTime(log.created_at);
+  const isActorAdmin = Boolean(
+    log.performed_by ||
+    action.includes('ADMIN') ||
+    action.includes('UPDATE') ||
+    action.includes('DELETE') ||
+    action.includes('CREATE') ||
+    action.includes('PURGE') ||
+    action.includes('BLOCKED') ||
+    action.includes('UNBLOCKED')
+  );
+
+  // 1. Vaciado de comprobantes y almacenamiento
+  if (action.includes('PURGE') || action.includes('STORAGE') || action.includes('CLEANUP')) {
+    const scope = String(d.scope || '').toLowerCase();
+    const isAll = scope === 'all' || !scope;
+    const filesCount =
+      typeof d.purged_files_count === 'number'
+        ? d.purged_files_count
+        : typeof d.purged_count === 'number'
+          ? d.purged_count
+          : 0;
+
+    return {
+      time,
+      event: {
+        title: 'Vaciado de Comprobantes',
+        pillClass: styles.pillWarning,
+        icon: <Trash2 size={14} />,
+      },
+      reference: isAll ? 'Vaciado Total' : 'Comprobantes Verificados',
+      referenceType: null,
+      description:
+        filesCount > 0
+          ? `Se liberó espacio en el sistema eliminando ${filesCount} ${filesCount === 1 ? 'archivo de comprobante' : 'archivos de comprobantes'}.`
+          : 'Almacenamiento verificado y optimizado; no había archivos antiguos pendientes.',
+      amount: null,
+      tickets: filesCount > 0 ? `${filesCount} archivos` : null,
+      fileInfo: 'Almacenamiento',
+      actor: { label: isActorAdmin ? 'Administrador' : 'Sistema', type: isActorAdmin ? 'admin' : 'system' },
+    };
+  }
+
+  // 2. Invitación a administrador
+  if (action.includes('INVITED') || action.includes('INVITE')) {
+    const email = (d.email as string) || (d.invited_email as string) || '';
+    return {
+      time,
+      event: {
+        title: 'Invitación Admin',
+        pillClass: styles.pillInfo,
+        icon: <UserPlus size={14} />,
+      },
+      reference: email || null,
+      referenceType: null,
+      description: email
+        ? `Invitación de acceso enviada a "${email}".`
+        : 'Invitación enviada a nuevo miembro del equipo.',
+      amount: null,
+      tickets: null,
+      fileInfo: null,
+      actor: { label: 'Administrador', type: 'admin' },
+    };
+  }
+
+  // 3. Ajustes del Sistema
+  if (action.includes('SETTINGS')) {
+    return {
+      time,
+      event: {
+        title: 'Ajustes del Sistema',
+        pillClass: styles.pillInfo,
+        icon: <Settings size={14} />,
+      },
+      reference: null,
+      referenceType: null,
+      description: 'Configuración general y parámetros operativos del sistema actualizados.',
+      amount: null,
+      tickets: null,
+      fileInfo: null,
+      actor: { label: 'Administrador', type: 'admin' },
+    };
+  }
+
+  // 4. Cierre Automático por fecha de sorteo
+  if (action.includes('AUTO_CLOSE') || (action.includes('CLOSE') && action.includes('DRAW'))) {
+    return {
+      time,
+      event: {
+        title: 'Cierre Automático',
+        pillClass: styles.pillWarning,
+        icon: <Clock size={14} />,
+      },
+      reference: null,
+      referenceType: null,
+      description: 'Venta cerrada automáticamente al alcanzarse la fecha oficial del sorteo.',
+      amount: null,
+      tickets: null,
+      fileInfo: null,
+      actor: { label: 'Sistema', type: 'system' },
+    };
+  }
+
+  // 5. Ganador Anulado
+  if (
+    action.includes('WINNER') &&
+    (action.includes('DELETE') || action.includes('REVOKE') || action.includes('CANCEL'))
+  ) {
+    return {
+      time,
+      event: {
+        title: 'Ganador Anulado',
+        pillClass: styles.pillDanger,
+        icon: <XCircle size={14} />,
+      },
+      reference: null,
+      referenceType: null,
+      description: 'Registro de ganador revocado administrativamente para corrección.',
+      amount: null,
+      tickets: null,
+      fileInfo: null,
+      actor: { label: 'Administrador', type: 'admin' },
+    };
+  }
+
+  // 6. Rifa Eliminada
+  if (action.includes('RAFFLE') && (action.includes('DELETE') || action.includes('REMOVE'))) {
+    return {
+      time,
+      event: {
+        title: 'Rifa Eliminada',
+        pillClass: styles.pillDanger,
+        icon: <XCircle size={14} />,
+      },
+      reference: null,
+      referenceType: null,
+      description: 'Rifa eliminada permanentemente por administración.',
+      amount: null,
+      tickets: null,
+      fileInfo: null,
+      actor: { label: 'Administrador', type: 'admin' },
+    };
+  }
 
   if (action.includes('PAID') || action.includes('APPROVED')) {
     return {
@@ -807,20 +1213,8 @@ function getAuditRowData(log: AuditLogItem): AuditRowData {
     };
   }
 
-  // Fallback con nombres amigables en español y actor coherente
-  const isActorAdmin = Boolean(
-    log.performed_by ||
-    action.includes('ADMIN') ||
-    action.includes('UPDATE') ||
-    action.includes('DELETE') ||
-    action.includes('CREATE')
-  );
-
-  let fallbackTitle = action.replace(/_/g, ' ');
-  if (action.includes('RAFFLE')) fallbackTitle = 'Gestión de Rifa';
-  else if (action.includes('PAYMENT')) fallbackTitle = 'Gestión de Pago';
-  else if (action.includes('TICKET')) fallbackTitle = 'Gestión de Boletos';
-  else if (action.includes('ORDER')) fallbackTitle = 'Gestión de Orden';
+  // Fallback seguro con títulos limpios en español y actor coherente
+  const fallbackTitle = formatActionTitle(action);
 
   return {
     time,
@@ -831,7 +1225,7 @@ function getAuditRowData(log: AuditLogItem): AuditRowData {
     },
     reference: ref || null,
     referenceType: ref ? 'order' : null,
-    description: 'Operación registrada y respaldada en la bitácora inmutable de seguridad.',
+    description: 'Operación registrada y respaldada en el historial de seguridad del sistema.',
     amount: total,
     tickets: null,
     fileInfo: null,
@@ -934,8 +1328,8 @@ export const AuditView: React.FC = () => {
         title="Bitácora de Auditoría"
         description={
           selectedRaffle
-            ? `Flujo de actividades y eventos transaccionales para: ${selectedRaffle.title}`
-            : 'Flujo de actividades, transiciones transaccionales y confirmaciones de pago en tiempo real.'
+            ? `Historial de actividades, movimientos y validaciones de pago para: ${selectedRaffle.title}`
+            : 'Historial de actividades, confirmaciones de pago y movimientos del sistema en tiempo real.'
         }
         badge="Seguridad y actividad"
         actions={
@@ -955,7 +1349,7 @@ export const AuditView: React.FC = () => {
       <div className={styles.metricsContainer}>
         <div className={styles.metricCard}>
           <div className={styles.metricHeader}>
-            <span className={styles.metricLabel}>Integridad de Datos</span>
+            <span className={styles.metricLabel}>Seguridad del Registro</span>
             <div className={styles.metricIcon}>
               <ShieldCheck size={18} color="var(--color-success)" />
             </div>
@@ -963,18 +1357,18 @@ export const AuditView: React.FC = () => {
           <div className={`${styles.metricValue} ${styles.metricValueSuccess}`}>
             Activa y Protegida
           </div>
-          <span className={styles.metricHint}>Historial protegido y verificado</span>
+          <span className={styles.metricHint}>Historial protegido contra alteraciones</span>
         </div>
 
         <div className={styles.metricCard}>
           <div className={styles.metricHeader}>
-            <span className={styles.metricLabel}>Total de Eventos</span>
+            <span className={styles.metricLabel}>Total de Actividades</span>
             <div className={styles.metricIcon}>
               <History size={18} color="var(--brand-accent)" />
             </div>
           </div>
           <div className={styles.metricValue}>{totalCount}</div>
-          <span className={styles.metricHint}>Historial de operaciones auditadas</span>
+          <span className={styles.metricHint}>Operaciones y movimientos registrados</span>
         </div>
       </div>
 
@@ -985,7 +1379,7 @@ export const AuditView: React.FC = () => {
           <input
             type="text"
             className={commonStyles.searchInput}
-            placeholder="Buscar por referencia, comprador o acción..."
+            placeholder="Buscar por número de orden, comprador o actividad..."
             value={searchTerm}
             onChange={handleSearchChange}
           />
@@ -1008,7 +1402,9 @@ export const AuditView: React.FC = () => {
             <option value="TICKET">Gestión de Boletos</option>
             <option value="RAFFLE">Configuración de Rifa</option>
             <option value="WINNER">Ganadores Registrados</option>
-            <option value="REJECTED">Pagos Rechazados</option>
+            <option value="REJECT">Pagos Rechazados</option>
+            <option value="PURGE">Vaciado y Almacenamiento</option>
+            <option value="SETTINGS">Ajustes del Sistema</option>
           </select>
 
           {/* Selector de Modo: Línea de Tiempo o Tabla */}
@@ -1026,7 +1422,7 @@ export const AuditView: React.FC = () => {
               type="button"
               className={`${styles.switcherBtn} ${viewMode === 'table' ? styles.switcherBtnActive : ''}`}
               onClick={() => setViewMode('table')}
-              title="Ver en formato Tabla Ejecutiva"
+              title="Ver en formato Tabla"
             >
               <TableIcon size={15} />
               <span>Tabla</span>
@@ -1060,9 +1456,9 @@ export const AuditView: React.FC = () => {
         <div className={commonStyles.cardSection}>
           <div className={styles.viewSectionHeader}>
             <h2 className={`${commonStyles.sectionTitle} ${styles.sectionTitleCompact}`}>
-              Actividades y Transiciones Recientes{' '}
+              Actividades y Movimientos Recientes{' '}
               <span className={styles.eventCountBadge}>
-                ({totalCount} eventos)
+                ({totalCount} registros)
               </span>
             </h2>
           </div>
@@ -1071,7 +1467,7 @@ export const AuditView: React.FC = () => {
             <div className={styles.timelineSpine} />
 
             {logs.map((log) => {
-              const config = getActionConfig(log.action);
+              const config = getActionConfig(log.action, log);
               const narrative = getNarrative(log);
               const time = getFormattedTime(log.created_at);
 
@@ -1208,9 +1604,9 @@ export const AuditView: React.FC = () => {
         <div>
           <div className={styles.viewSectionHeader}>
             <h2 className={`${commonStyles.sectionTitle} ${styles.sectionTitleCompact}`}>
-              Actividades y Transiciones Recientes{' '}
+              Actividades y Movimientos Recientes{' '}
               <span className={styles.eventCountBadge}>
-                ({totalCount} eventos)
+                ({totalCount} registros)
               </span>
             </h2>
           </div>
@@ -1221,7 +1617,7 @@ export const AuditView: React.FC = () => {
                 <thead>
                   <tr>
                     <th className={styles.thDateTime}>Fecha y Hora</th>
-                    <th className={styles.thEvent}>Evento</th>
+                    <th className={styles.thEvent}>Actividad</th>
                     <th className={styles.thReference}>Referencia</th>
                     <th>Detalle de la Operación</th>
                     <th className={styles.thImpact}>Impacto / Monto</th>
@@ -1299,7 +1695,7 @@ export const AuditView: React.FC = () => {
                           {row.actor.type === 'admin' && (
                             <span className={styles.actorBadgeAdmin}>
                               <Shield size={12} />
-                              <span>Admin</span>
+                              <span>Administrador</span>
                             </span>
                           )}
                           {row.actor.type === 'buyer' && (
