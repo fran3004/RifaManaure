@@ -264,17 +264,25 @@
   gap: 0.35rem;
 }
 
-.ordersTable .tableActions > .btnSuccess,
-.ordersTable .tableActions > .btnDanger {
-  width: 38px;
-  min-width: 38px;
-  padding-inline: 0;
-  justify-content: center;
+.btnValidateReceipt {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.65rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border-radius: var(--radius-md, 6px);
+  background-color: var(--admin-success, #10b981);
+  color: #ffffff !important;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  border: 1px solid transparent;
 }
 
-.ordersTable .tableActions > .btnSuccess span,
-.ordersTable .tableActions > .btnDanger span {
-  display: none;
+.btnValidateReceipt:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
 }
 
 .badgeSuccess,

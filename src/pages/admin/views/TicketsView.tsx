@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import { AdminPageHeader } from '@/components/admin/common/AdminPageHeader';
 import { AdminEmptyState } from '@/components/admin/common/AdminEmptyState';
 import { AdminLoadingState } from '@/components/admin/common/AdminLoadingState';
@@ -11,7 +12,6 @@ import {
   triggerReleaseExpiredReservations,
   type AdminTicketWithDetails,
   type AdminTicketCounts,
-  type OrderWithDetails,
 } from '@/services/paymentService';
 import { useAdminRaffle } from '@/context/AdminRaffleContext';
 import { supabase } from '@/lib/supabase';
@@ -39,8 +39,8 @@ import {
   ChevronRight,
   User,
   Shield,
+  Receipt,
 } from 'lucide-react';
-import { AdminOrderReviewModal } from '@/components/admin/orders/AdminOrderReviewModal';
 import styles from './AdminViews.module.css';
 
 const BLOCK_REASONS_PRESETS = [
@@ -126,12 +126,6 @@ export const TicketsView: React.FC = () => {
   // Modal de Desbloqueo
   const [isUnblockModalOpen, setIsUnblockModalOpen] = useState(false);
   const [unblockReason, setUnblockReason] = useState('Habilitado nuevamente para venta pública');
-
-  // Modal de Orden Completa
-  const [selectedOrderForReview, setSelectedOrderForReview] = useState<OrderWithDetails | null>(
-    null
-  );
-  const [isOrderReviewModalOpen, setIsOrderReviewModalOpen] = useState(false);
 
   // Reiniciar a página 1 si cambia la rifa seleccionada
   const [prevRaffleId, setPrevRaffleId] = useState(selectedRaffleId);
@@ -335,38 +329,6 @@ export const TicketsView: React.FC = () => {
     } finally {
       setIsProcessingAction(false);
     }
-  };
-
-  // Abrir Modal de Orden Asociada
-  const handleOpenAssociatedOrder = () => {
-    if (!selectedTicket?.orders) return;
-    const orderData: OrderWithDetails = {
-      id: selectedTicket.orders.id,
-      raffle_id: selectedTicket.raffle_id,
-      buyer_id: selectedTicket.buyer_id || '',
-      reference: selectedTicket.orders.reference,
-      total_amount: selectedTicket.orders.total_amount,
-      ticket_count: selectedTicket.orders.ticket_count,
-      status: selectedTicket.orders.status,
-      payment_method: selectedTicket.orders.payment_method || 'transfer_manual',
-      payment_gateway_id: null,
-      payment_gateway_data: null,
-      receipt_url: selectedTicket.orders.receipt_url,
-      rejection_reason: null,
-      contact_preference: 'both',
-      verified_at: null,
-      verified_by: null,
-      created_at: selectedTicket.orders.created_at,
-      updated_at: selectedTicket.orders.created_at,
-      client_idempotency_key: '',
-      idempotency_fingerprint: null,
-      buyers: selectedTicket.buyers,
-      tickets: [
-        { id: selectedTicket.id, number: selectedTicket.number, status: selectedTicket.status },
-      ],
-    };
-    setSelectedOrderForReview(orderData);
-    setIsOrderReviewModalOpen(true);
   };
 
   const effectiveTotal = selectedRaffle?.total_tickets || ticketCounts.totalCount || 1000;
@@ -922,14 +884,25 @@ export const TicketsView: React.FC = () => {
                       <strong className={styles.metaCount}>{selectedTicket.orders.ticket_count}</strong>
                     </div>
                   </div>
-                  <button
-                    type="button"
-                    className={`${styles.btnSecondary} ${styles.modalActionBtn}`}
-                    onClick={handleOpenAssociatedOrder}
-                  >
-                    <ShoppingBag size={14} />
-                    <span>Revisar Orden Completa</span>
-                  </button>
+                  {selectedTicket.orders.status === 'pending_verification' ? (
+                    <Link
+                      to={`/admin/comprobantes?ref=${encodeURIComponent(selectedTicket.orders.reference)}`}
+                      className={`${styles.btnSuccess} ${styles.modalActionBtn}`}
+                      title="Ir a Comprobantes para validar el pago"
+                    >
+                      <Receipt size={14} />
+                      <span>Validar Comprobante ↗</span>
+                    </Link>
+                  ) : (
+                    <Link
+                      to={`/admin/ordenes?search=${encodeURIComponent(selectedTicket.orders.reference)}`}
+                      className={`${styles.btnSecondary} ${styles.modalActionBtn}`}
+                      title="Ver trazabilidad completa en Órdenes"
+                    >
+                      <ShoppingBag size={14} />
+                      <span>Ver Orden en Órdenes ↗</span>
+                    </Link>
+                  )}
                 </div>
               ) : (
                 <div className={styles.detailEmpty}>
@@ -1191,22 +1164,6 @@ export const TicketsView: React.FC = () => {
         </div>
       )}
 
-      {/* ========================================================================= */}
-      {/* MODAL 4: REVISIÓN DE LA ORDEN ASOCIADA                                    */}
-      {/* ========================================================================= */}
-      {isOrderReviewModalOpen && selectedOrderForReview && (
-        <AdminOrderReviewModal
-          order={selectedOrderForReview}
-          isOpen={isOrderReviewModalOpen}
-          onClose={() => {
-            setIsOrderReviewModalOpen(false);
-            setSelectedOrderForReview(null);
-          }}
-          onOrderUpdated={async () => {
-            await loadTickets();
-          }}
-        />
-      )}
-    </div>
+      </div>
   );
 };

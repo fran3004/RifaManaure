@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import type { RaffleRow } from '@/types/raffle.types';
 import {
   fetchAdminRaffles,
@@ -36,8 +36,6 @@ import {
   Globe,
   Pause,
   Trash2,
-  MoreHorizontal,
-  ExternalLink,
 } from 'lucide-react';
 import adminStyles from './AdminViews.module.css';
 import { useAdminRaffle } from '@/context/AdminRaffleContext';
@@ -87,30 +85,6 @@ export const RafflesView: React.FC = () => {
   const [raffleToDelete, setRaffleToDelete] = useState<RaffleRow | null>(null);
   const [isDeletingRaffle, setIsDeletingRaffle] = useState(false);
   const [deleteRaffleError, setDeleteRaffleError] = useState<string | null>(null);
-
-  // Menú contextual desplegable de acciones secundarias de la rifa principal
-  const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
-  const actionsMenuRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!isActionsMenuOpen) return;
-    const handleOutsideClick = (e: MouseEvent) => {
-      if (actionsMenuRef.current && !actionsMenuRef.current.contains(e.target as Node)) {
-        setIsActionsMenuOpen(false);
-      }
-    };
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setIsActionsMenuOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleOutsideClick);
-    document.addEventListener('keydown', handleKeyDown);
-    return () => {
-      document.removeEventListener('mousedown', handleOutsideClick);
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [isActionsMenuOpen]);
 
   const loadRaffles = useCallback(async () => {
     setIsLoading(true);
@@ -324,36 +298,36 @@ export const RafflesView: React.FC = () => {
       case 'active':
         return (
           <span className={styles.badgePublicLive} title="Esta rifa está actualmente visible y abierta a compras en la página web pública">
-            <span className={styles.livePulseDot} aria-hidden="true" />
-            <span>Visible y Activa en Web</span>
+            <Globe size={13} aria-hidden="true" />
+            Visible y Activa en Web Pública
           </span>
         );
       case 'paused':
         return (
           <span className={styles.badgePublicPaused} title="La venta de boletos está suspendida temporalmente">
-            <Pause size={12} aria-hidden="true" />
-            <span>Venta Pausada</span>
+            <Pause size={13} aria-hidden="true" />
+            Venta Pública Pausada
           </span>
         );
       case 'finished':
         return (
           <span className={styles.badgeFinished} title="El sorteo ya concluyó y tiene ganador oficial">
-            <Award size={12} aria-hidden="true" />
-            <span>Sorteo Finalizado</span>
+            <Award size={13} aria-hidden="true" />
+            Sorteo Finalizado
           </span>
         );
       case 'closed':
         return (
           <span className={styles.badgeFinished} title="El sorteo está cerrado">
-            <Lock size={12} aria-hidden="true" />
-            <span>Sorteo Cerrado</span>
+            <Lock size={13} aria-hidden="true" />
+            Sorteo Cerrado
           </span>
         );
       default:
         return (
           <span className={styles.badgeDraft} title="Esta rifa está en borrador y no es visible para compradores">
-            <AlertCircle size={12} aria-hidden="true" />
-            <span>Borrador</span>
+            <AlertCircle size={13} aria-hidden="true" />
+            Borrador (No Publicada)
           </span>
         );
     }
@@ -486,232 +460,158 @@ export const RafflesView: React.FC = () => {
         <>
           {/* ── Tarjeta de Rifa en Gestión del Panel (Principal) ── */}
           <div className={styles.activeRaffleCard}>
-            {/* ── 1. Barra Superior: Metadatos de Estado y Barra de Acciones Unificada ── */}
-            <div className={styles.cardTopMetaBar}>
-              <div className={styles.statusBadgesGroup}>
-                {/* Badge de foco en el panel de control */}
-                <span
-                  className={styles.badgePanelContext}
-                  title="Esta es la edición sobre la que operan todos los módulos del panel (boletos, órdenes, compradores)"
-                >
-                  <Layers size={13} aria-hidden="true" />
-                  <span>Edición en Gestión</span>
-                </span>
+            <div className={styles.cardHeader}>
+              <div className={styles.cardHeaderLeft}>
+                <div className={styles.badgesRow}>
+                  {/* Badge de estado en la web pública */}
+                  {renderPanelRaffleStatusBadge(panelRaffle.status)}
 
-                {/* Badge de estado en la web pública */}
-                {renderPanelRaffleStatusBadge(panelRaffle.status)}
+                  {/* Badge de foco en el panel de control */}
+                  <span
+                    className={styles.badgeInPanelFocus}
+                    title="Esta es la edición sobre la que operan todos los módulos del panel (boletos, órdenes, compradores)"
+                  >
+                    <Layers size={13} aria-hidden="true" />
+                    Rifa en Gestión del Panel
+                  </span>
+                </div>
+
+                <h2 className={styles.raffleTitle}>{panelRaffle.title}</h2>
+                <p className={styles.raffleDescription}>{panelRaffle.description}</p>
               </div>
 
-              {/* Grupo de Acciones Unificado (Sin ruido visual ni botones desordenados) */}
-              <div className={styles.cardActionsToolbar} ref={actionsMenuRef}>
+              <div className={styles.cardActions}>
                 {/* Acción de venta pública */}
                 {panelRaffle.status === 'active' ? (
                   <button
                     type="button"
-                    className={styles.btnActionPause}
+                    className={styles.btnPausePublic}
                     onClick={() => openActivationModal(panelRaffle, 'pause')}
                     title="Pausar temporalmente la venta pública de esta rifa"
                   >
-                    <Pause size={14} aria-hidden="true" />
-                    <span>Pausar Venta</span>
+                    <Pause size={15} aria-hidden="true" />
+                    <span>Pausar Venta Pública</span>
                   </button>
                 ) : (
                   <button
                     type="button"
-                    className={styles.btnActionActivate}
+                    className={styles.btnActivatePublic}
                     onClick={() => openActivationModal(panelRaffle, 'activate')}
                     title="Publicar esta rifa en la web para compradores"
                   >
-                    <Globe size={14} aria-hidden="true" />
-                    <span>Activar en Web</span>
+                    <Globe size={15} aria-hidden="true" />
+                    <span>Activar en Web Pública</span>
                   </button>
                 )}
 
                 {/* Botón Editar: SIEMPRE disponible en la rifa que se está viendo en el panel */}
                 <button
                   type="button"
-                  className={styles.btnActionEdit}
+                  className={styles.btnEditMain}
                   onClick={() => setSelectedRaffleToEdit(panelRaffle)}
                   title="Modificar precio, fecha de sorteo, lotería y parámetros de esta rifa"
                 >
-                  <Edit3 size={14} aria-hidden="true" />
+                  <Edit3 size={15} aria-hidden="true" />
                   <span>Editar Parámetros</span>
                 </button>
 
-                {/* Menú de Más Opciones (...) */}
-                <div className={styles.moreActionsContainer}>
-                  <button
-                    type="button"
-                    className={`${styles.btnMoreActions} ${isActionsMenuOpen ? styles.btnMoreActionsActive : ''}`}
-                    onClick={() => setIsActionsMenuOpen((prev) => !prev)}
-                    title="Más opciones de la rifa"
-                    aria-haspopup="true"
-                    aria-expanded={isActionsMenuOpen}
-                  >
-                    <MoreHorizontal size={16} aria-hidden="true" />
-                  </button>
-
-                  {isActionsMenuOpen && (
-                    <div className={styles.actionsDropdownMenu} role="menu">
-                      <a
-                        href="/"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={styles.dropdownMenuItem}
-                        role="menuitem"
-                        onClick={() => setIsActionsMenuOpen(false)}
-                      >
-                        <ExternalLink size={14} aria-hidden="true" />
-                        <span>Ver en Web Pública</span>
-                      </a>
-
-                      <div className={styles.dropdownMenuDivider} role="separator" />
-
-                      <button
-                        type="button"
-                        className={styles.dropdownMenuItemDanger}
-                        role="menuitem"
-                        onClick={() => {
-                          setIsActionsMenuOpen(false);
-                          handleOpenDeleteRaffleModal(panelRaffle);
-                        }}
-                      >
-                        <Trash2 size={14} aria-hidden="true" />
-                        <span>Eliminar Rifa</span>
-                      </button>
-                    </div>
-                  )}
-                </div>
+                {/* Botón Eliminar Rifa */}
+                <button
+                  type="button"
+                  className={styles.btnDeleteMain}
+                  onClick={() => handleOpenDeleteRaffleModal(panelRaffle)}
+                  title={`Eliminar la edición "${panelRaffle.title}"`}
+                >
+                  <Trash2 size={15} aria-hidden="true" />
+                  <span>Eliminar Rifa</span>
+                </button>
               </div>
             </div>
 
-            {/* ── 2. Bloque de Identidad: Título y Descripción ── */}
-            <div className={styles.identitySection}>
-              <h2 className={styles.raffleTitle}>{panelRaffle.title}</h2>
-              {panelRaffle.description && (
-                <p className={styles.raffleDescription}>{panelRaffle.description}</p>
-              )}
-            </div>
-
-            {/* ── 3. Panel Analítico: Rendimiento y Recaudación de Ventas ── */}
+            {/* Barra de Progreso de Emisión y Ventas */}
             <div className={styles.salesProgressSection}>
               <div className={styles.progressInfoRow}>
                 <div className={styles.progressLabelGroup}>
-                  <div className={styles.progressIconWrap}>
-                    <TrendingUp size={15} />
-                  </div>
+                  <TrendingUp size={16} className={styles.progressIcon} />
                   <span className={styles.progressLabel}>Rendimiento de Ventas</span>
                   <span className={styles.progressBadge}>
                     {panelRaffle.sales_percentage}% vendido
                   </span>
                 </div>
                 <div className={styles.progressStats}>
-                  <span className={styles.statTickets}>
-                    <strong>{panelRaffle.sold_tickets}</strong> de{' '}
-                    <strong>{panelRaffle.total_tickets}</strong> boletos pagados
-                  </span>
-                  <span className={styles.statDivider} aria-hidden="true">•</span>
-                  <span className={styles.statRevenue}>
-                    (
-                    <strong className={styles.revenueHighlight}>
-                      {formatCOP(panelRaffle.total_revenue)} COP
-                    </strong>{' '}
-                    recaudados)
-                  </span>
+                  <strong>{panelRaffle.sold_tickets}</strong> de{' '}
+                  <strong>{panelRaffle.total_tickets}</strong> boletos pagados (
+                  <strong className={styles.revenueHighlight}>
+                    {formatCOP(panelRaffle.total_revenue)}
+                  </strong>{' '}
+                  recaudados)
                 </div>
               </div>
 
               <div
                 className={styles.progressBarContainer}
                 style={activeSalesProgressStyle}
-                role="progressbar"
-                aria-valuenow={panelRaffle.sales_percentage}
-                aria-valuemin={0}
-                aria-valuemax={100}
-                aria-label="Progreso de ventas de la rifa"
               >
                 <div className={styles.progressBarFill} />
               </div>
             </div>
 
-            {/* ── 4. Grilla de Métricas Operativas (Armoniosa y Equilibrada) ── */}
+            {/* Grilla de Métricas Operativas */}
             <div className={styles.metricsGrid}>
               <div className={styles.metricCard}>
                 <div className={styles.metricHeader}>
-                  <div className={`${styles.metricIcon} ${styles.iconEmerald}`}>
-                    <DollarSign size={16} />
-                  </div>
                   <span className={styles.metricLabel}>Precio Unitario</span>
-                </div>
-                <div className={styles.metricBody}>
-                  <div className={styles.metricValue}>
-                    {formatCOP(Number(panelRaffle.ticket_price) || 0)} COP
+                  <div className={styles.metricIcon}>
+                    <DollarSign size={18} />
                   </div>
                 </div>
-                <div className={styles.metricFooter}>
-                  <span className={styles.metricHint}>Por boleto individual</span>
+                <div className={styles.metricValue}>
+                  {formatCOP(Number(panelRaffle.ticket_price) || 0)} COP
                 </div>
+                <span className={styles.metricHint}>Por boleto individual</span>
               </div>
 
               <div className={styles.metricCard}>
                 <div className={styles.metricHeader}>
-                  <div className={`${styles.metricIcon} ${styles.iconBlue}`}>
-                    <Layers size={16} />
-                  </div>
                   <span className={styles.metricLabel}>Total Emisión</span>
-                </div>
-                <div className={styles.metricBody}>
-                  <div className={styles.metricValue}>
-                    {panelRaffle.total_tickets.toLocaleString('es-CO')} Boletos
+                  <div className={styles.metricIcon}>
+                    <Layers size={18} />
                   </div>
                 </div>
-                <div className={styles.metricFooter}>
-                  <span className={styles.metricHint}>
-                    <strong>{panelRaffle.available_tickets}</strong> disp. · <strong>{panelRaffle.reserved_tickets}</strong> reserva
-                  </span>
+                <div className={styles.metricValue}>
+                  {panelRaffle.total_tickets.toLocaleString('es-CO')} Boletos
                 </div>
+                <span className={styles.metricHint}>
+                  {panelRaffle.available_tickets} disponibles • {panelRaffle.reserved_tickets} en reserva
+                </span>
               </div>
 
               <div className={styles.metricCard}>
                 <div className={styles.metricHeader}>
-                  <div className={`${styles.metricIcon} ${styles.iconAmber}`}>
-                    <Award size={16} />
-                  </div>
                   <span className={styles.metricLabel}>Modalidad Sorteo</span>
-                </div>
-                <div className={styles.metricBody}>
-                  <div
-                    className={`${styles.metricValue} ${styles.metricValueText}`}
-                    title={panelRaffle.lottery_reference || 'Lotería Oficial'}
-                  >
-                    {panelRaffle.lottery_reference || 'Lotería Oficial'}
+                  <div className={styles.metricIcon}>
+                    <Award size={18} />
                   </div>
                 </div>
-                <div className={styles.metricFooter}>
-                  <span className={styles.metricHint}>Premio mayor auditable</span>
+                <div className={`${styles.metricValue} ${styles.metricValueMedium}`}>
+                  {panelRaffle.lottery_reference || 'Lotería Oficial'}
                 </div>
+                <span className={styles.metricHint}>Premio mayor auditable</span>
               </div>
 
               <div className={styles.metricCard}>
                 <div className={styles.metricHeader}>
-                  <div className={`${styles.metricIcon} ${styles.iconPurple}`}>
-                    <Calendar size={16} />
-                  </div>
                   <span className={styles.metricLabel}>Fecha de Sorteo</span>
-                </div>
-                <div className={styles.metricBody}>
-                  <div
-                    className={`${styles.metricValue} ${styles.metricValueDate}`}
-                    title={formatColombianDate(panelRaffle.draw_date)}
-                  >
-                    {formatColombianDate(panelRaffle.draw_date)}
+                  <div className={styles.metricIcon}>
+                    <Calendar size={18} />
                   </div>
                 </div>
-                <div className={styles.metricFooter}>
-                  <span className={styles.metricHint}>
-                    Límite: {panelRaffle.max_tickets_per_buyer || 50} boletos / comprador
-                  </span>
+                <div className={`${styles.metricValue} ${styles.metricValueDate}`}>
+                  {formatColombianDate(panelRaffle.draw_date)}
                 </div>
+                <span className={styles.metricHint}>
+                  Límite: {panelRaffle.max_tickets_per_buyer || 50} boletos / comprador
+                </span>
               </div>
             </div>
           </div>

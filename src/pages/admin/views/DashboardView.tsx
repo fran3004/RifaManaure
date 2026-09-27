@@ -32,17 +32,16 @@ import {
   ArrowUpRight,
   Layers,
 } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { AdminOrderReviewModal } from '@/components/admin/orders/AdminOrderReviewModal';
 import { useAdminRaffle } from '@/context/AdminRaffleContext';
 import styles from './AdminViews.module.css';
 
 interface DashboardReceiptCardProps {
   order: OrderWithDetails;
-  onReview: (order: OrderWithDetails) => void;
 }
 
-const DashboardReceiptThumbnail: React.FC<DashboardReceiptCardProps> = ({ order, onReview }) => {
+const DashboardReceiptThumbnail: React.FC<DashboardReceiptCardProps> = ({ order }) => {
   const [signedUrl, setSignedUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const receiptPath = order.receipt_url || '';
@@ -132,10 +131,10 @@ const DashboardReceiptThumbnail: React.FC<DashboardReceiptCardProps> = ({ order,
           Comprobante no disponible
         </div>
       ) : isPdf ? (
-        <div
+        <Link
+          to={`/admin/comprobantes?ref=${encodeURIComponent(order.reference)}`}
           className={`${styles.receiptImageThumbWrapper} ${styles.receiptPdfThumb}`}
-          onClick={() => onReview(order)}
-          title="Clic para revisar comprobante PDF"
+          title="Clic para validar comprobante PDF en bandeja oficial"
         >
           <FileText size={32} color="var(--brand-accent)" />
           <span className={styles.receiptPdfLabel}>
@@ -144,12 +143,12 @@ const DashboardReceiptThumbnail: React.FC<DashboardReceiptCardProps> = ({ order,
           <div className={styles.receiptOverlayZoom}>
             <Eye size={22} />
           </div>
-        </div>
+        </Link>
       ) : (
-        <div
+        <Link
+          to={`/admin/comprobantes?ref=${encodeURIComponent(order.reference)}`}
           className={`${styles.receiptImageThumbWrapper} ${styles.receiptThumbFixed}`}
-          onClick={() => onReview(order)}
-          title="Clic para revisar comprobante"
+          title="Clic para validar comprobante en bandeja oficial"
         >
           <img
             src={signedUrl}
@@ -159,18 +158,19 @@ const DashboardReceiptThumbnail: React.FC<DashboardReceiptCardProps> = ({ order,
           <div className={styles.receiptOverlayZoom}>
             <Eye size={22} />
           </div>
-        </div>
+        </Link>
       )}
 
       <div className={styles.receiptActions}>
-        <button
-          type="button"
+        <Link
+          to={`/admin/comprobantes?ref=${encodeURIComponent(order.reference)}`}
           className={`${styles.btnPrimary} ${styles.receiptFullWidthBtn}`}
-          onClick={() => onReview(order)}
+          title="Ir a Comprobantes para validar"
         >
-          <Eye size={14} />
-          <span>Revisar Comprobante</span>
-        </button>
+          <Receipt size={14} />
+          <span>Validar Comprobante</span>
+          <ArrowUpRight size={14} />
+        </Link>
       </div>
     </div>
   );
@@ -197,7 +197,6 @@ export const DashboardView: React.FC = () => {
   const [recentReceipts, setRecentReceipts] = useState<OrderWithDetails[]>([]);
 
   const { selectedRaffleId, selectedRaffle } = useAdminRaffle();
-  const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = useState<'orders' | 'receipts'>('orders');
   const [selectedOrderForReview, setSelectedOrderForReview] = useState<OrderWithDetails | null>(
@@ -295,29 +294,6 @@ export const DashboardView: React.FC = () => {
     setSelectedOrderForReview(null);
   };
 
-  const handleViewReceipts = () => {
-    // 1. Buscar si hay comprobante pendiente de verificación en los datos cargados en memoria
-    const pendingOrder =
-      recentReceipts.find((o) => o.status === 'pending_verification') ||
-      recentOrders.find((o) => o.status === 'pending_verification');
-
-    // 2. Activar la pestaña de comprobantes
-    setActiveTab('receipts');
-
-    // 3. Desplazar suavemente la pantalla hacia la sección de comprobantes
-    const tabsSection = document.getElementById('dashboard-tabs-section');
-    if (tabsSection) {
-      tabsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-
-    // 4. Si hay una orden pendiente específica, abrir de inmediato su modal de revisión
-    if (pendingOrder) {
-      handleOpenReview(pendingOrder);
-    } else if (!tabsSection && recentReceipts.length === 0) {
-      navigate('/admin/comprobantes');
-    }
-  };
-
   const handleOrderUpdated = async () => {
     await loadData();
   };
@@ -396,12 +372,13 @@ export const DashboardView: React.FC = () => {
                 </div>
               </div>
               <div className={styles.dashboardAlertActions}>
-                <button type="button" className={styles.btnPrimary} onClick={handleViewReceipts}>
-                  <Eye size={16} />
-                  <span>Ver Comprobantes</span>
-                </button>
-                <Link to="/admin/comprobantes" className={styles.btnSecondary}>
-                  <span>Ir a Bandeja</span>
+                <Link
+                  to="/admin/comprobantes?status=pending_verification"
+                  className={styles.btnPrimary}
+                  title="Ir a la bandeja oficial de comprobantes pendientes"
+                >
+                  <Receipt size={16} />
+                  <span>Ir a Bandeja de Comprobantes ({metrics.pendingReceiptsCount})</span>
                   <ArrowUpRight size={16} />
                 </Link>
               </div>
@@ -767,11 +744,7 @@ export const DashboardView: React.FC = () => {
                 ) : (
                   <div className={styles.receiptGrid}>
                     {recentReceipts.map((ord) => (
-                      <DashboardReceiptThumbnail
-                        key={ord.id}
-                        order={ord}
-                        onReview={handleOpenReview}
-                      />
+                      <DashboardReceiptThumbnail key={ord.id} order={ord} />
                     ))}
                   </div>
                 )}

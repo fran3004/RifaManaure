@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { AdminPageHeader } from '@/components/admin/common/AdminPageHeader';
 import { AdminEmptyState } from '@/components/admin/common/AdminEmptyState';
 import { AdminLoadingState } from '@/components/admin/common/AdminLoadingState';
@@ -159,9 +160,30 @@ export const ReceiptsView: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [isForbidden, setIsForbidden] = useState<boolean>(false);
-  const [searchTerm, setSearchTerm] = useState<string>('');
-  const [statusFilter, setStatusFilter] = useState<string>('pending_verification');
+  const [searchParams] = useSearchParams();
+  const initialRef = searchParams.get('ref') || searchParams.get('search') || '';
+  const initialStatus =
+    searchParams.get('status') || (initialRef ? 'ALL' : 'pending_verification');
+
+  const [searchTerm, setSearchTerm] = useState<string>(initialRef);
+  const [statusFilter, setStatusFilter] = useState<string>(initialStatus);
   const [selectedReviewOrder, setSelectedReviewOrder] = useState<OrderWithDetails | null>(null);
+
+  useEffect(() => {
+    const urlRef = searchParams.get('ref') || searchParams.get('search');
+    const urlStatus = searchParams.get('status');
+    if (urlRef !== null && urlRef !== undefined) {
+      setSearchTerm(urlRef);
+      if (!urlStatus) {
+        setStatusFilter('ALL');
+      }
+      setPage(1);
+    }
+    if (urlStatus !== null && urlStatus !== undefined) {
+      setStatusFilter(urlStatus);
+      setPage(1);
+    }
+  }, [searchParams]);
   const { selectedRaffleId, selectedRaffle } = useAdminRaffle();
   const [selectedReceiptUrl, setSelectedReceiptUrl] = useState<string | null>(null);
   const [approvingOrder, setApprovingOrder] = useState<OrderWithDetails | null>(null);
@@ -422,6 +444,19 @@ export const ReceiptsView: React.FC = () => {
             value={searchTerm}
             onChange={handleSearchChange}
           />
+          {searchTerm && (
+            <button
+              type="button"
+              onClick={() => {
+                setSearchTerm('');
+                setPage(1);
+              }}
+              className={styles.searchClearBtn}
+              title="Limpiar búsqueda"
+            >
+              <X size={16} />
+            </button>
+          )}
         </div>
 
         <div className={styles.filterControls}>

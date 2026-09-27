@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { AdminPageHeader } from '@/components/admin/common/AdminPageHeader';
 import { AdminEmptyState } from '@/components/admin/common/AdminEmptyState';
 import { AdminLoadingState } from '@/components/admin/common/AdminLoadingState';
 import { AdminErrorState } from '@/components/admin/common/AdminErrorState';
 import {
   fetchAdminOrdersPaginated,
-  approveOrderPayment,
-  rejectOrderPayment,
   type OrderWithDetails,
 } from '@/services/paymentService';
 import { useAdminRaffle } from '@/context/AdminRaffleContext';
@@ -31,12 +30,11 @@ import {
   Copy,
   Check,
   X,
-  AlertTriangle,
   Phone,
   Mail,
+  Receipt,
 } from 'lucide-react';
 import { AdminOrderReviewModal } from '@/components/admin/orders/AdminOrderReviewModal';
-import { AdminConfirmPaymentModal } from '@/components/admin/orders/AdminConfirmPaymentModal';
 import styles from './AdminViews.module.css';
 
 export const OrdersView: React.FC = () => {
@@ -50,26 +48,34 @@ export const OrdersView: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [isForbidden, setIsForbidden] = useState<boolean>(false);
 
+  // Parámetros de URL para búsqueda y filtrado automático
+  const [searchParams] = useSearchParams();
+  const initialSearch = searchParams.get('search') || searchParams.get('ref') || '';
+  const initialStatus = searchParams.get('status') || 'ALL';
+
   // Filtros, búsqueda y ordenamiento
-  const [searchTerm, setSearchTerm] = useState<string>('');
-  const [statusFilter, setStatusFilter] = useState<string>('ALL');
+  const [searchTerm, setSearchTerm] = useState<string>(initialSearch);
+  const [statusFilter, setStatusFilter] = useState<string>(initialStatus);
+
+  useEffect(() => {
+    const urlSearch = searchParams.get('search') || searchParams.get('ref');
+    const urlStatus = searchParams.get('status');
+    if (urlSearch !== null && urlSearch !== undefined) {
+      setSearchTerm(urlSearch);
+      setPage(1);
+    }
+    if (urlStatus !== null && urlStatus !== undefined) {
+      setStatusFilter(urlStatus);
+      setPage(1);
+    }
+  }, [searchParams]);
   const [sortBy, setSortBy] = useState<'created_at' | 'status' | 'total_amount'>('created_at');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
   // Acciones y Modales
   const [selectedReviewOrder, setSelectedReviewOrder] = useState<OrderWithDetails | null>(null);
   const { selectedRaffleId, selectedRaffle } = useAdminRaffle();
-  const [processingId, setProcessingId] = useState<string | null>(null);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
-  const [approvingOrder, setApprovingOrder] = useState<OrderWithDetails | null>(null);
-  const [rejectingOrder, setRejectingOrder] = useState<OrderWithDetails | null>(null);
-  const [rejectionReason, setRejectionReason] = useState<string>(
-    'Comprobante no recibido, ilegible o no coincide con los valores recibidos'
-  );
-  const [actionMessage, setActionMessage] = useState<{
-    type: 'success' | 'error';
-    text: string;
-  } | null>(null);
 
   // Reiniciar a página 1 si cambia la rifa seleccionada
   const [prevRaffleId, setPrevRaffleId] = useState(selectedRaffleId);
@@ -216,76 +222,6 @@ export const OrdersView: React.FC = () => {
     setTimeout(() => setCopiedKey(null), 2000);
   };
 
-  // Abrir modal de confirmación de aprobación (requiere comprobante y estado de verificación)
-  const handleApprove = (order: OrderWithDetails) => {
-    if (!order.receipt_url || order.status === 'pending') {
-      return;
-    }
-    setApprovingOrder(order);
-  };
-
-  // Confirmar y ejecutar aprobación de pago
-  const handleConfirmApprove = async () => {
-    if (!approvingOrder) return;
-
-    setProcessingId(approvingOrder.id);
-    setActionMessage(null);
-
-    const result = await approveOrderPayment(approvingOrder.id);
-
-    if (result.success) {
-      setActionMessage({
-        type: 'success',
-        text: `¡Orden ${approvingOrder.reference} aprobada con éxito! ${approvingOrder.ticket_count} boletos marcados como vendidos.`,
-      });
-      setApprovingOrder(null);
-      await loadOrders();
-    } else {
-      const normalized = normalizeAppError(
-        { message: result.error, code: result.code },
-        'No se pudo aprobar el pago de la orden.'
-      );
-      logAppError('OrdersView.handleConfirmApprove', normalized);
-      setActionMessage({
-        type: 'error',
-        text: normalized.userMessage,
-      });
-    }
-
-    setProcessingId(null);
-  };
-
-  // Confirmar rechazo de orden y liberar boletos
-  const handleConfirmReject = async () => {
-    if (!rejectingOrder) return;
-
-    setProcessingId(rejectingOrder.id);
-    setActionMessage(null);
-
-    const result = await rejectOrderPayment(rejectingOrder.id, rejectionReason);
-
-    if (result.success) {
-      setActionMessage({
-        type: 'success',
-        text: `Orden ${rejectingOrder.reference} rechazada y ${rejectingOrder.ticket_count} boletos liberados al público.`,
-      });
-      setRejectingOrder(null);
-      await loadOrders();
-    } else {
-      const normalized = normalizeAppError(
-        { message: result.error, code: result.code },
-        'No se pudo rechazar la orden.'
-      );
-      logAppError('OrdersView.handleConfirmReject', normalized);
-      setActionMessage({
-        type: 'error',
-        text: normalized.userMessage,
-      });
-    }
-
-    setProcessingId(null);
-  };
-
   const fromCount = totalCount === 0 ? 0 : (page - 1) * pageSize + 1;
   const toCount = Math.min(page * pageSize, totalCount);
 
@@ -315,19 +251,6 @@ export const OrdersView: React.FC = () => {
           </button>
         }
       />
-
-      {actionMessage && (
-        <div
-          className={`${styles.actionBanner} ${actionMessage.type === 'success' ? styles.actionBannerSuccess : styles.actionBannerError}`}
-        >
-          {actionMessage.type === 'success' ? (
-            <CheckCircle2 size={18} />
-          ) : (
-            <AlertTriangle size={18} />
-          )}
-          <span>{actionMessage.text}</span>
-        </div>
-      )}
 
       {/* Barra de Búsqueda, Filtros y Ordenamiento */}
       <div className={styles.filterBar}>
@@ -438,7 +361,6 @@ export const OrdersView: React.FC = () => {
                 </thead>
                 <tbody>
                   {orders.map((ord) => {
-                    const isProcessing = processingId === ord.id;
                     const dateStr = new Date(ord.created_at).toLocaleString('es-CO', {
                       dateStyle: 'short',
                       timeStyle: 'short',
@@ -561,39 +483,36 @@ export const OrdersView: React.FC = () => {
                         {/* 11. Acciones: la revisión contiene el comprobante cuando existe */}
                         <td className={styles.thAlignRight}>
                           <div className={styles.tableActions}>
-                            <button
-                              type="button"
-                              className={`${styles.btnSecondary} ${styles.btnSmallSecondary}`}
-                              onClick={() => setSelectedReviewOrder(ord)}
-                              title="Abrir auditoría completa de la orden"
-                            >
-                              <Eye size={14} />
-                              <span>Revisar</span>
-                            </button>
-
-                            {isPendingAction && (
+                            {isPendingAction ? (
                               <>
+                                <Link
+                                  to={`/admin/comprobantes?ref=${encodeURIComponent(ord.reference)}`}
+                                  className={styles.btnValidateReceipt}
+                                  title="Ir a Comprobantes para contrastar comprobante y procesar pago"
+                                >
+                                  <Receipt size={14} />
+                                  <span>Validar Comprobante ↗</span>
+                                </Link>
                                 <button
                                   type="button"
-                                  className={`${styles.btnSuccess} ${styles.btnSmallSecondary}`}
-                                  onClick={() => void handleApprove(ord)}
-                                  disabled={isProcessing}
-                                  title="Aprobar pago y confirmar boletos vendidos"
+                                  className={`${styles.btnSecondary} ${styles.btnSmallSecondary}`}
+                                  onClick={() => setSelectedReviewOrder(ord)}
+                                  title="Abrir auditoría completa de la orden"
                                 >
-                                  <CheckCircle2 size={14} />
-                                  <span>Aprobar</span>
-                                </button>
-                                <button
-                                  type="button"
-                                  className={`${styles.btnDanger} ${styles.btnSmallSecondary}`}
-                                  onClick={() => setRejectingOrder(ord)}
-                                  disabled={isProcessing}
-                                  title="Rechazar orden y liberar boletos"
-                                >
-                                  <XCircle size={14} />
-                                  <span>Rechazar</span>
+                                  <Eye size={14} />
+                                  <span>Detalle</span>
                                 </button>
                               </>
+                            ) : (
+                              <button
+                                type="button"
+                                className={`${styles.btnSecondary} ${styles.btnSmallSecondary}`}
+                                onClick={() => setSelectedReviewOrder(ord)}
+                                title="Abrir auditoría completa de la orden"
+                              >
+                                <Eye size={14} />
+                                <span>Ver Detalle</span>
+                              </button>
                             )}
                           </div>
                         </td>
@@ -678,64 +597,6 @@ export const OrdersView: React.FC = () => {
         )}
       </div>
 
-      {/* Modal para Motivo de Rechazo */}
-      {rejectingOrder && (
-        <div className={styles.adminModalBackdrop} onClick={() => setRejectingOrder(null)}>
-          <div className={styles.adminModalCard} onClick={(e) => e.stopPropagation()}>
-            <div className={styles.modalHeaderBetween}>
-              <h3 className={styles.rejectModalTitle}>
-                <XCircle size={22} />
-                Rechazar Orden {rejectingOrder.reference}
-              </h3>
-              <button
-                type="button"
-                className={`${styles.btnSecondary} ${styles.modalCloseMiniBtn}`}
-                onClick={() => setRejectingOrder(null)}
-              >
-                <X size={16} />
-              </button>
-            </div>
-
-            <p className={styles.modalDescriptionText}>
-              Al rechazar esta orden, los{' '}
-              <strong className={styles.highlightText}>{rejectingOrder.ticket_count} boletos</strong>{' '}
-              reservados serán liberados inmediatamente a la plataforma pública.
-            </p>
-
-            <div>
-              <label className={styles.modalFieldLabel}>
-                Motivo del Rechazo:
-              </label>
-              <textarea
-                value={rejectionReason}
-                onChange={(e) => setRejectionReason(e.target.value)}
-                rows={3}
-                className={styles.modalReasonTextarea}
-              />
-            </div>
-
-            <div className={styles.modalFooterActions}>
-              <button
-                type="button"
-                className={styles.btnSecondary}
-                onClick={() => setRejectingOrder(null)}
-              >
-                Cancelar
-              </button>
-              <button
-                type="button"
-                className={styles.btnDanger}
-                onClick={() => void handleConfirmReject()}
-                disabled={Boolean(processingId)}
-              >
-                <XCircle size={16} />
-                <span>Confirmar Rechazo y Liberar Boletos</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Modal Principal de Revisión y Auditoría Administrativa */}
       <AdminOrderReviewModal
         order={selectedReviewOrder}
@@ -744,14 +605,6 @@ export const OrdersView: React.FC = () => {
         onOrderUpdated={loadOrders}
       />
 
-      {/* Modal de Confirmación de Aprobación de Pago */}
-      <AdminConfirmPaymentModal
-        isOpen={Boolean(approvingOrder)}
-        order={approvingOrder}
-        isProcessing={Boolean(processingId)}
-        onConfirm={handleConfirmApprove}
-        onClose={() => setApprovingOrder(null)}
-      />
-    </div>
+      </div>
   );
 };
