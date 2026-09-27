@@ -91,4 +91,32 @@ describe('Blindaje y Resiliencia Táctil Móvil en FilaAliados (Mobile Touch & A
       expect(css).toContain('touch-action: pan-x pan-y;');
     });
   });
+
+  describe('6. Experiencia Exclusiva para Teléfonos Móviles (Velocidad Acelerada y Flujo Táctil)', () => {
+    it('debe calcular una velocidad superior para teléfonos móviles (0.054 vs 0.038 en PC)', () => {
+      expect(tsx).toContain('const isMobilePhone =');
+      expect(tsx).toContain('window.innerWidth <= 768');
+      expect(tsx).toContain("window.matchMedia('(max-width: 768px)')");
+      expect(tsx).toContain('const baseSpeed = isMobilePhone ? 0.054 : 0.038;');
+    });
+
+    it('debe incluir isTouchingRef.current en isHalted para detener el carrusel de inmediato al posar el dedo', () => {
+      expect(tsx).toContain('const isTouchingRef = useRef(false);');
+      expect(tsx).toContain('isTouchingRef.current');
+      expect(tsx).toContain('isTouchingRef.current;');
+    });
+
+    it('debe activar isTouchingRef en onTouchStart para congelar el carrusel al posar el dedo', () => {
+      expect(tsx).toContain('isTouchingRef.current = true; // Detención instantánea al posar el dedo sobre la grilla');
+    });
+
+    it('debe desactivar isTouchingRef en onTouchEnd y onTouchCancel para reanudar el flujo inmediatamente al soltar el dedo', () => {
+      expect(tsx).toContain('isTouchingRef.current = false; // Al quitar el dedo, reanudar inmediatamente el flujo de movimiento');
+      expect(tsx).toContain('isTouchingRef.current = false; // Al cancelar/quitar el dedo, reanudar inmediatamente');
+    });
+
+    it('debe desactivar isTouchingRef si el usuario realiza scroll vertical para no congelar la animación ni obstaculizar la página', () => {
+      expect(tsx).toContain('isTouchingRef.current = false; // Liberar detención táctil si es scroll vertical');
+    });
+  });
 });

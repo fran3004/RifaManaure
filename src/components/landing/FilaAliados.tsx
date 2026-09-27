@@ -77,6 +77,7 @@ export const FilaAliados: React.FC = () => {
   // Referencias para el arrastre y detección direccional de gestos táctiles (MED-04)
   const isDraggingRef = useRef(false);
   const isTrackingTouchRef = useRef(false);
+  const isTouchingRef = useRef(false); // Detención instantánea al posar el dedo en móviles
   const gestureDirectionRef = useRef<'undetermined' | 'horizontal' | 'vertical'>('undetermined');
   const startXRef = useRef(0);
   const startYRef = useRef(0);
@@ -237,7 +238,8 @@ export const FilaAliados: React.FC = () => {
         isPausedRef.current ||
         isHoveredRef.current ||
         isFocusedRef.current ||
-        isDraggingRef.current;
+        isDraggingRef.current ||
+        isTouchingRef.current;
 
       if (!isHalted) {
         // Auto-recuperación si el ancho no se había podido calcular en el primer paint
@@ -252,7 +254,14 @@ export const FilaAliados: React.FC = () => {
         }
 
         if (oneSetWidthRef.current > 0) {
-          let deltaScroll = 0.038 * deltaTime;
+          // En teléfonos móviles (pantalla <= 768px), movimiento continuo y más dinámico que en PC
+          const isMobilePhone =
+            typeof window !== 'undefined' &&
+            (window.innerWidth <= 768 ||
+              (window.matchMedia && window.matchMedia('(max-width: 768px)').matches));
+
+          const baseSpeed = isMobilePhone ? 0.054 : 0.038;
+          let deltaScroll = baseSpeed * deltaTime;
 
           // Desaceleración suave por momentum tras soltar arrastre
           if (Math.abs(momentumVelocityRef.current) > 0.01) {
@@ -442,6 +451,7 @@ export const FilaAliados: React.FC = () => {
 
       isHoveredRef.current = false;
       isTrackingTouchRef.current = true;
+      isTouchingRef.current = true; // Detención instantánea al posar el dedo sobre la grilla
       gestureDirectionRef.current = 'undetermined';
       isDraggingRef.current = false;
       momentumVelocityRef.current = 0;
@@ -463,6 +473,7 @@ export const FilaAliados: React.FC = () => {
 
       // Si el gesto fue catalogado como scroll vertical, se libera al navegador sin interferir
       if (gestureDirectionRef.current === 'vertical') {
+        isTouchingRef.current = false;
         return;
       }
 
@@ -487,6 +498,7 @@ export const FilaAliados: React.FC = () => {
         if (absY >= 14 && absY >= absX * 1.35) {
           gestureDirectionRef.current = 'vertical';
           isTrackingTouchRef.current = false;
+          isTouchingRef.current = false; // Liberar detención táctil si es scroll vertical
           isDraggingRef.current = false;
           setIsDraggingState(false);
           return;
@@ -494,16 +506,19 @@ export const FilaAliados: React.FC = () => {
           // Movimiento horizontal confirmado
           gestureDirectionRef.current = 'horizontal';
           isDraggingRef.current = true;
+          isTouchingRef.current = true;
           setIsDraggingState(true);
         } else if (absY >= absX * 1.15 && absY >= 12) {
           gestureDirectionRef.current = 'vertical';
           isTrackingTouchRef.current = false;
+          isTouchingRef.current = false;
           isDraggingRef.current = false;
           setIsDraggingState(false);
           return;
         } else if (absX > absY) {
           gestureDirectionRef.current = 'horizontal';
           isDraggingRef.current = true;
+          isTouchingRef.current = true;
           setIsDraggingState(true);
         } else {
           // Ambigüedad en los primeros píxeles: esperar al siguiente evento sin bloquear
@@ -552,6 +567,7 @@ export const FilaAliados: React.FC = () => {
     const onTouchEnd = () => {
       lastTouchEndTimeRef.current = performance.now();
       isHoveredRef.current = false;
+      isTouchingRef.current = false; // Al quitar el dedo, reanudar inmediatamente el flujo de movimiento
 
       if (gestureDirectionRef.current === 'horizontal') {
         const timeSinceLast = performance.now() - lastTouchTimeRef.current;
@@ -574,6 +590,7 @@ export const FilaAliados: React.FC = () => {
     const onTouchCancel = () => {
       lastTouchEndTimeRef.current = performance.now();
       isHoveredRef.current = false;
+      isTouchingRef.current = false; // Al cancelar/quitar el dedo, reanudar inmediatamente
       isTrackingTouchRef.current = false;
       isDraggingRef.current = false;
       gestureDirectionRef.current = 'undetermined';
