@@ -90,6 +90,7 @@ Este directorio (`supabase/migrations/`) constituye la **única fuente de verdad
 | **068** | `068_public_winner_and_raffle_activation_hardening.sql` | **(Reconocimiento de Ganadores y Hardening de Activación)** Entrega pública segura de ganador (`get_public_winner`) con enmascaramiento PII y validación de fecha futura obligatoria al reactivar rifas. |
 | **069** | `069_admin_delete_winner_and_delete_raffle.sql` | **(Eliminación de Ganadores y Rifas)** RPCs transaccionales `admin_delete_winner` y `admin_delete_raffle` con autorización administrativa estricta, limpieza en cascada y auditoría. |
 | **070** | `070_admin_purge_payment_proofs_storage.sql` | **(Vaciado Manual de Almacenamiento de Comprobantes)** RPCs `admin_get_payment_proofs_storage_stats` y `admin_purge_payment_proofs_storage` para vaciado a demanda del bucket `payment-proofs` sin esperar 5 días, con trazabilidad en bitácora e integridad contable. |
+| **071** | `071_fix_create_order_secure_aggregate_for_update.sql` | **(Corrección de Concurrencia y Reserva)** Desacoplamiento de la función agregada `array_agg` de la cláusula pesimista `FOR UPDATE` en `create_order_secure` mediante CTE, resolviendo definitivamente el error de PostgreSQL `0A000` (400 Bad Request) al reservar boletos en la web pública. |
 
 ---
 

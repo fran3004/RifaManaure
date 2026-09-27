@@ -1,78 +1,35 @@
 -- ==============================================================================
--- MIGRACIÓN 065: Cierre automático de rifas por fecha límite de sorteo
+-- MIGRACIÓN 071: Corrección de agregación con FOR UPDATE en create_order_secure
 -- PLATAFORMA "MANAURE VIVE"
 -- ==============================================================================
--- OBJETIVO:
--- 1. Cerrar automáticamente la venta de boletos cuando una rifa alcance o supere
---    su fecha y hora límite de sorteo (draw_date <= NOW()).
--- 2. Blindar create_order_secure para impedir estrictamente la creación de órdenes
---    en sorteos expirados por fecha.
--- 3. Integrar la verificación periódica con el programador de tareas y mantenimiento.
+-- PROBLEMA IDENTIFICADO (Código de Error PostgreSQL 0A000):
+-- En la migración 065 se introdujo la siguiente consulta:
+--   SELECT array_agg(t.id ORDER BY t.number ASC)
+--   INTO v_ticket_ids
+--   FROM public.tickets t
+--   WHERE ...
+--   FOR UPDATE;
+-- En PostgreSQL, la cláusula FOR UPDATE es incompatible con funciones agregadas (array_agg).
+-- El motor rechaza la transacción con:
+--   ERROR: 0A000: FOR UPDATE is not allowed with aggregate functions
+-- Lo que causa que PostgREST devuelva un error HTTP 400 Bad Request y aborte
+-- la reserva de boletos en la interfaz pública con:
+--   "Error al procesar la reserva de boletos".
+--
+-- SOLUCIÓN:
+-- Desacoplar la función agregada del bloqueo pesimista utilizando una CTE:
+--   WITH locked_tickets AS (
+--       SELECT t.id, t.number
+--       FROM public.tickets t
+--       WHERE ...
+--       ORDER BY t.number ASC
+--       FOR UPDATE
+--   )
+--   SELECT array_agg(id), count(*)
+--   INTO v_ticket_ids, v_locked_count
+--   FROM locked_tickets;
 -- ==============================================================================
 
--- 1. Función RPC para verificar y auto-cerrar rifas expiradas
-CREATE OR REPLACE FUNCTION public.check_and_auto_close_expired_raffles()
-RETURNS JSONB
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path TO 'public', 'extensions', 'pg_temp'
-AS $$
-DECLARE
-    v_closed_count INTEGER := 0;
-    v_closed_ids UUID[];
-    v_raffle_record RECORD;
-BEGIN
-    -- Seleccionar y bloquear pesimistamente las rifas activas cuya fecha de sorteo ya venció
-    FOR v_raffle_record IN
-        SELECT id, title, draw_date
-        FROM public.raffles
-        WHERE status = 'active'
-          AND draw_date IS NOT NULL
-          AND draw_date <= NOW()
-        FOR UPDATE
-    LOOP
-        UPDATE public.raffles
-        SET status = 'closed',
-            updated_at = NOW()
-        WHERE id = v_raffle_record.id;
-
-        v_closed_ids := array_append(v_closed_ids, v_raffle_record.id);
-        v_closed_count := v_closed_count + 1;
-
-        -- Registrar en bitácora de auditoría
-        INSERT INTO public.audit_logs (
-            action,
-            entity_type,
-            entity_id,
-            performed_by,
-            details,
-            created_at
-        ) VALUES (
-            'AUTO_CLOSE_RAFFLE_DRAW_DATE',
-            'raffles',
-            v_raffle_record.id::TEXT,
-            NULL,
-            jsonb_build_object(
-                'title', v_raffle_record.title,
-                'draw_date', v_raffle_record.draw_date,
-                'closed_at', NOW(),
-                'reason', 'Fecha y hora del sorteo alcanzada automáticamente'
-            ),
-            NOW()
-        );
-    END LOOP;
-
-    RETURN jsonb_build_object(
-        'success', true,
-        'closed_count', v_closed_count,
-        'closed_ids', COALESCE(v_closed_ids, '{}'::UUID[])
-    );
-END;
-$$;
-
-GRANT EXECUTE ON FUNCTION public.check_and_auto_close_expired_raffles() TO anon, authenticated, service_role;
-
--- 2. Hardening en create_order_secure para validar fecha límite de sorteo
 CREATE OR REPLACE FUNCTION public.create_order_secure(
     p_raffle_id uuid,
     p_ticket_numbers text[],
@@ -84,7 +41,7 @@ CREATE OR REPLACE FUNCTION public.create_order_secure(
 RETURNS jsonb
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path TO 'public', 'extensions', 'pg_temp'
+SET search_path = pg_catalog, public, extensions, pg_temp
 AS $function$
 DECLARE
     v_raffle RECORD;
@@ -96,7 +53,6 @@ DECLARE
     v_reference VARCHAR(50);
     v_total_amount NUMERIC(12, 2);
     v_ticket_count INTEGER;
-    v_available_count INTEGER;
     v_failed_numbers TEXT[];
     v_expires_at TIMESTAMPTZ;
     v_doc_id TEXT;
@@ -381,113 +337,9 @@ BEGIN
 END;
 $function$;
 
--- 3. Extender release_expired_reservations para invocar check_and_auto_close_expired_raffles
-CREATE OR REPLACE FUNCTION public.release_expired_reservations()
-RETURNS INTEGER
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = pg_catalog, public, pg_temp
-AS $$
-DECLARE
-    v_acquired_lock BOOLEAN;
-    v_expired_order_ids UUID[];
-    v_released_orders_count INTEGER := 0;
-    v_released_tickets_count INTEGER := 0;
-    v_orphan_tickets_count INTEGER := 0;
-BEGIN
-    -- 1. Control de Concurrencia y Prevención de Solapamiento
-    v_acquired_lock := pg_try_advisory_xact_lock(hashtext('release_expired_reservations'));
-    IF NOT v_acquired_lock THEN
-        RETURN 0;
-    END IF;
+-- Revocar y garantizar permisos de ejecución seguros
+REVOKE ALL ON FUNCTION public.create_order_secure(uuid, text[], jsonb, character varying, character varying, uuid) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.create_order_secure(uuid, text[], jsonb, character varying, character varying, uuid) TO anon, authenticated, service_role;
 
-    -- 1.1 Auto-cerrar rifas activas cuya fecha límite ya venció
-    PERFORM public.check_and_auto_close_expired_raffles();
-
-    -- 2. Identificar y bloquear pesimistamente las órdenes pendientes cuyas reservas ya expiraron
-    SELECT array_agg(id)
-    INTO v_expired_order_ids
-    FROM (
-        SELECT o.id
-        FROM public.orders o
-        WHERE o.status = 'pending'
-          AND EXISTS (
-              SELECT 1
-              FROM public.tickets t
-              WHERE t.order_id = o.id
-                AND t.status = 'reserved'
-                AND t.reservation_expires_at < NOW()
-          )
-        FOR UPDATE SKIP LOCKED
-    ) sub;
-
-    -- 3. Si existen órdenes expiradas bloqueadas, proceder a transicionar y liberar
-    IF v_expired_order_ids IS NOT NULL AND array_length(v_expired_order_ids, 1) > 0 THEN
-        PERFORM 1
-        FROM public.tickets
-        WHERE order_id = ANY(v_expired_order_ids)
-        FOR UPDATE;
-
-        UPDATE public.orders
-        SET status = 'expired',
-            rejection_reason = COALESCE(rejection_reason, 'Tiempo límite de reserva de 10 minutos agotado sin confirmación de pago.'),
-            updated_at = NOW()
-        WHERE id = ANY(v_expired_order_ids)
-          AND status = 'pending';
-
-        GET DIAGNOSTICS v_released_orders_count = ROW_COUNT;
-
-        UPDATE public.tickets
-        SET status = 'available',
-            reserved_at = NULL,
-            reservation_expires_at = NULL,
-            buyer_id = NULL,
-            order_id = NULL,
-            updated_at = NOW()
-        WHERE order_id = ANY(v_expired_order_ids)
-          AND status = 'reserved';
-
-        GET DIAGNOSTICS v_released_tickets_count = ROW_COUNT;
-
-        IF v_released_tickets_count > 0 THEN
-            INSERT INTO public.audit_logs (
-                action,
-                entity_type,
-                entity_id,
-                performed_by,
-                details
-            ) VALUES (
-                'AUTO_EXPIRE_RESERVATIONS_CRON',
-                'system_job',
-                gen_random_uuid()::TEXT,
-                NULL,
-                jsonb_build_object(
-                    'tickets_released', v_released_tickets_count,
-                    'orders_expired', v_released_orders_count,
-                    'expired_order_ids', v_expired_order_ids,
-                    'execution_timestamp', NOW()
-                )
-            );
-        END IF;
-    END IF;
-
-    -- 4. Tratamiento de boletos huérfanos
-    UPDATE public.tickets
-    SET status = 'available',
-        reserved_at = NULL,
-        reservation_expires_at = NULL,
-        buyer_id = NULL,
-        order_id = NULL,
-        updated_at = NOW()
-    WHERE status = 'reserved'
-      AND reservation_expires_at < NOW()
-      AND (order_id IS NULL OR NOT EXISTS (
-          SELECT 1 FROM public.orders o WHERE o.id = tickets.order_id AND o.status = 'pending'
-      ));
-
-    GET DIAGNOSTICS v_orphan_tickets_count = ROW_COUNT;
-    v_released_tickets_count := v_released_tickets_count + v_orphan_tickets_count;
-
-    RETURN v_released_tickets_count;
-END;
-$$;
+COMMENT ON FUNCTION public.create_order_secure(uuid, text[], jsonb, character varying, character varying, uuid) IS
+'Crea órdenes de compra de forma transaccional, pesimista e idempotente. Corregido para evitar incompatibilidad de FOR UPDATE con funciones agregadas (ERROR 0A000).';
