@@ -1388,6 +1388,34 @@
   border: 1px solid var(--brand-coral, #B23A09);
 }
 
+.uploadingNoticeBox {
+  color: var(--brand-primary, #0F2E1D);
+  font-size: 0.875rem;
+  line-height: 1.45;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-weight: 500;
+  padding: 0.75rem 1rem;
+  background-color: var(--brand-accent-soft, #FDF1D8);
+  border-radius: var(--radius-md, 14px);
+  border: 1px solid var(--brand-accent, #E0A93B);
+  animation: fadeIn 200ms ease-out;
+}
+
+.uploadingNoticeBox strong {
+  display: block;
+  font-weight: 700;
+  color: var(--brand-primary, #0F2E1D);
+  margin-bottom: 0.15rem;
+}
+
+.uploadingNoticeBox p {
+  margin: 0;
+  color: var(--text-secondary, #4B5563);
+  font-size: 0.8125rem;
+}
+
 /* --- Paso 7: Confirmación y Éxito --- */
 .successState {
   padding: 1.5rem;

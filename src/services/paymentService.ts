@@ -580,8 +580,17 @@ export async function adminPurgePaymentProofsStorage(options?: {
 }
 
 /**
+ * Tiempo límite para subida de comprobantes de pago.
+ * Se establece en 60 segundos para permitir la transmisión de archivos binarios (imágenes/PDF de hasta 5 MB)
+ * en redes móviles o conexiones residenciales sin provocar falsos timeouts de red.
+ */
+export const PROOF_UPLOAD_TIMEOUT_MS = 60000;
+
+/**
  * Sube el comprobante de pago al bucket PRIVADO 'payment-proofs' y lo asocia
  * de manera transaccional con la rifa, orden, comprador y boletos.
+ * Incluye rollback automático de almacenamiento para garantizar Cero Basura
+ * si la transacción en base de datos no culmina con éxito.
  */
 export async function uploadPaymentProof(
   file: File,
@@ -590,8 +599,10 @@ export async function uploadPaymentProof(
   _buyerId: string,
   paymentReference?: string,
   idempotencyKey?: string,
-  timeoutMs: number = DEFAULT_REQUEST_TIMEOUT_MS
+  timeoutMs: number = PROOF_UPLOAD_TIMEOUT_MS
 ): Promise<SubmitProofResult> {
+  let uploadedFilePath: string | null = null;
+
   try {
     // 1. Validaciones estrictas de archivo
     const val = validateProofFile(file);
@@ -610,7 +621,7 @@ export async function uploadPaymentProof(
     const cleanFileName = `${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${ext}`;
     const filePath = `proofs/${raffleId}/${orderId}/${cleanFileName}`;
 
-    // 3. Subida al bucket PRIVADO 'payment-proofs'
+    // 3. Subida al bucket PRIVADO 'payment-proofs' (exclusivamente cuando el usuario pulsa Enviar)
     const { error: uploadError } = await withTimeout(
       supabase.storage
         .from('payment-proofs')
@@ -633,6 +644,9 @@ export async function uploadPaymentProof(
       };
     }
 
+    // Registrar que el archivo se subió a storage para limpieza inmediata en caso de fallo en DB
+    uploadedFilePath = filePath;
+
     // 4. Invocar procedimiento backend atómico submit_payment_proof
     const { data: rpcData, error: rpcError } = await withTimeout(
       (signal) => {
@@ -654,6 +668,13 @@ export async function uploadPaymentProof(
     );
 
     if (rpcError) {
+      // Rollback preventivo: eliminar el archivo huérfano para evitar basura en el almacenamiento
+      if (uploadedFilePath) {
+        try {
+          await supabase.storage.from('payment-proofs').remove([uploadedFilePath]);
+          uploadedFilePath = null;
+        } catch {}
+      }
       const normalized = normalizeAppError(rpcError, 'Error al registrar el comprobante de pago.');
       logAppError('paymentService.uploadPaymentProof.rpc', normalized);
       return {
@@ -685,6 +706,15 @@ export async function uploadPaymentProof(
           isReplacement: res.is_replacement,
         };
       }
+
+      // Si la transacción no tuvo éxito en DB, eliminar archivo para evitar basura
+      if (uploadedFilePath) {
+        try {
+          await supabase.storage.from('payment-proofs').remove([uploadedFilePath]);
+          uploadedFilePath = null;
+        } catch {}
+      }
+
       const normalized = normalizeAppError(
         { message: res.error, code: res.code },
         'Error al validar el comprobante de pago.'
@@ -697,18 +727,33 @@ export async function uploadPaymentProof(
       };
     }
 
+    // Respuesta inesperada: eliminar archivo para evitar residuos huérfanos
+    if (uploadedFilePath) {
+      try {
+        await supabase.storage.from('payment-proofs').remove([uploadedFilePath]);
+        uploadedFilePath = null;
+      } catch {}
+    }
+
     return {
       success: false,
       error: 'No fue posible validar tu comprobante en este momento. Por favor intenta de nuevo.',
       code: 'UNEXPECTED_RESPONSE',
     };
   } catch (err: unknown) {
+    // Si ocurrió cualquier excepción o timeout antes de confirmar la orden, limpiar archivo huérfano
+    if (uploadedFilePath) {
+      try {
+        await supabase.storage.from('payment-proofs').remove([uploadedFilePath]);
+      } catch {}
+    }
+
     const classified = classifyRequestError(err);
     if (classified.isTimeout) {
       return {
         success: false,
         error:
-          'El envío del comprobante tardó más de 15 segundos en responder. Tu comprobante y datos se mantienen protegidos. Por favor pulsa en «Confirmar y Enviar Comprobante» para intentar de nuevo de forma segura.',
+          'No pudimos completar el envío de tu comprobante en este momento. Por favor verifica tu conexión a internet y pulsa nuevamente en «Confirmar y Enviar Comprobante».',
         code: 'CLIENT_TIMEOUT',
         isTimeout: true,
       };

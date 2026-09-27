@@ -312,7 +312,7 @@ describe('requestTimeout - Mecanismo centralizado de timeout y resiliencia de re
       expect(res.success).toBe(false);
       expect(res.code).toBe('CLIENT_TIMEOUT');
       expect(res.isTimeout).toBe(true);
-      expect(res.error).toContain('15 segundos');
+      expect(res.error).toContain('No pudimos completar el envío');
     });
 
     it('14. uploadPaymentProof reintentado tras timeout debe preservar y reenviar la misma proofIdempotencyKey', async () => {

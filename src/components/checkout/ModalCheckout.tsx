@@ -573,7 +573,7 @@ export const ModalCheckout: React.FC = () => {
         if (orderResult.code === 'CLIENT_TIMEOUT' || orderResult.isTimeout) {
           setErrorMessage(
             orderResult.error ||
-              'La solicitud de reserva tardó más de 15 segundos en responder. Tu selección de boletos se mantiene protegida. Por favor pulsa en "Confirmar Reserva y Ver Cuentas" para intentar de nuevo sin perder tus boletos.'
+              'Tu selección de boletos se mantiene protegida. Por favor pulsa en "Confirmar Reserva y Ver Cuentas" para intentar de nuevo sin perder tus boletos.'
           );
           return;
         }
@@ -1599,7 +1599,17 @@ export const ModalCheckout: React.FC = () => {
                 />
               </div>
 
-              {errorMessage && (
+              {isSubmittingProof && (
+                <div className={styles.uploadingNoticeBox} role="status">
+                  <div className={`${styles.spinner} ${styles.spinnerSm}`} />
+                  <div>
+                    <strong>Cargando comprobante...</strong>
+                    <p>Estamos enviando tu archivo de forma segura. Por favor espera un momento.</p>
+                  </div>
+                </div>
+              )}
+
+              {!isSubmittingProof && errorMessage && (
                 <div className={styles.errorMessageBox} role="alert">
                   <AlertCircle size={16} aria-hidden="true" />
                   <span>{errorMessage}</span>
@@ -1627,7 +1637,7 @@ export const ModalCheckout: React.FC = () => {
                 {isSubmittingProof ? (
                   <>
                     <div className={`${styles.spinner} ${styles.spinnerSm}`} />
-                    <span>Enviando Comprobante...</span>
+                    <span>Cargando comprobante...</span>
                   </>
                 ) : (
                   <>
