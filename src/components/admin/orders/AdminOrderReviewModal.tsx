@@ -54,6 +54,7 @@ import {
   formatReceiptAttachmentFileName,
 } from '@/services/emailService';
 import { generateDigitalReceiptCanvas } from '@/services/receiptGeneratorService';
+import { useSystemSettings } from '@/hooks/useSystemSettings';
 import styles from './AdminOrderReviewModal.module.css';
 
 interface AdminOrderReviewModalProps {
@@ -86,6 +87,10 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
   onClose,
   onOrderUpdated,
 }) => {
+  // Configuración del sistema dinámica
+  const systemSettings = useSystemSettings();
+  const reservationMinutes = systemSettings?.reservation_duration_minutes || 10;
+
   // Estados de comprobante seguro
   const [signedProofUrl, setSignedProofUrl] = useState<string | null>(null);
   const [isLoadingProof, setIsLoadingProof] = useState<boolean>(false);
@@ -802,7 +807,7 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
                   <p className={styles.verificationRuleText}>
                     {order.status === 'pending' && !hasReceipt ? (
                       <>
-                        Esta orden se encuentra en reserva temporal de 10 minutos. No es posible aprobar ni rechazar el pago hasta que el comprador adjunte su soporte bancario.
+                        Esta orden se encuentra en reserva temporal de {reservationMinutes} minutos. No es posible aprobar ni rechazar el pago hasta que el comprador adjunte su soporte bancario.
                       </>
                     ) : (
                       <>
@@ -882,7 +887,7 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
                       />
                       <span className={styles.proofEmptyText}>
                         {proofError || (order.status === 'pending'
-                          ? 'El comprador aún no ha subido el comprobante de pago (reserva temporal de 10 min).'
+                          ? `El comprador aún no ha subido el comprobante de pago (reserva temporal de ${reservationMinutes} min).`
                           : 'Sin archivo de comprobante adjunto')}
                       </span>
                     </div>
@@ -1395,7 +1400,7 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
             {canReviewPayment ? (
               <span>⚠️ La orden tiene comprobante adjunto y requiere verificación manual.</span>
             ) : order.status === 'pending' ? (
-              <span>⏳ Reserva temporal (10 min): en espera de que el comprador suba su comprobante.</span>
+              <span>⏳ Reserva temporal ({reservationMinutes} min): en espera de que el comprador suba su comprobante.</span>
             ) : (
               <span>
                 Orden en estado <strong>{order.status}</strong>.

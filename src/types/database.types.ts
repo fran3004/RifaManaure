@@ -954,6 +954,14 @@ export type Database = {
         };
         Returns: Json;
       };
+      release_checkout_reservation: {
+        Args: {
+          p_order_id: string;
+          p_client_idempotency_key?: string | null;
+          p_order_reference?: string | null;
+        };
+        Returns: Json;
+      };
       verify_public_order_or_tickets: {
         Args: {
           p_search_term: string;

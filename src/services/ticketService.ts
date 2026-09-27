@@ -515,3 +515,104 @@ export async function getTicketsByBuyerDocument(documentId: string): Promise<{
     return { buyer: null, tickets: [] };
   }
 }
+
+export interface ReleaseCheckoutReservationResult {
+  success: boolean;
+  orderId?: string;
+  reference?: string;
+  status?: string;
+  ticketsReleased?: number;
+  message?: string;
+  error?: string;
+  code?: string;
+  isTimeout?: boolean;
+}
+
+/**
+ * Libera de inmediato los boletos de una orden en checkout cuando el usuario sale del modal.
+ * Invoca la RPC segura release_checkout_reservation con validación anti-IDOR mediante
+ * clave de idempotencia o referencia oficial de la orden.
+ */
+export async function releaseCheckoutReservation(
+  orderId: string,
+  clientKey?: string,
+  orderReference?: string,
+  timeoutMs: number = DEFAULT_REQUEST_TIMEOUT_MS
+): Promise<ReleaseCheckoutReservationResult> {
+  if (!orderId) {
+    return { success: false, error: 'Identificador de orden requerido.' };
+  }
+
+  try {
+    const { data, error } = await withTimeout(
+      (signal) => {
+        const query = supabase.rpc('release_checkout_reservation', {
+          p_order_id: orderId,
+          p_client_idempotency_key: clientKey || null,
+          p_order_reference: orderReference || null,
+        });
+        if (query && typeof (query as any).abortSignal === 'function') {
+          (query as any).abortSignal(signal);
+        }
+        return query;
+      },
+      { timeoutMs }
+    );
+
+    if (error) {
+      const normalized = normalizeAppError(error, 'Error al liberar la reserva de boletos.');
+      logAppError('ticketService.releaseCheckoutReservation.rpc', normalized);
+      return {
+        success: false,
+        error: normalized.userMessage,
+        code: normalized.code || error.code,
+      };
+    }
+
+    const res = data as {
+      success: boolean;
+      order_id?: string;
+      reference?: string;
+      status?: string;
+      tickets_released?: number;
+      message?: string;
+      error?: string;
+      code?: string;
+    };
+
+    if (!res || !res.success) {
+      return {
+        success: false,
+        error: res?.error || 'No fue posible liberar la reserva.',
+        code: res?.code,
+      };
+    }
+
+    return {
+      success: true,
+      orderId: res.order_id,
+      reference: res.reference,
+      status: res.status,
+      ticketsReleased: res.tickets_released,
+      message: res.message,
+    };
+  } catch (err: unknown) {
+    const classified = classifyRequestError(err);
+    if (classified.isTimeout) {
+      return {
+        success: false,
+        error: 'La solicitud de liberación tardó más tiempo del esperado.',
+        code: 'CLIENT_TIMEOUT',
+        isTimeout: true,
+      };
+    }
+    const normalized = normalizeAppError(err, 'Error inesperado al liberar la reserva.');
+    logAppError('ticketService.releaseCheckoutReservation.catch', normalized);
+    return {
+      success: false,
+      error: normalized.userMessage,
+      code: normalized.code || classified.code || 'UNKNOWN_ERROR',
+    };
+  }
+}
+

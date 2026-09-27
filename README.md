@@ -151,7 +151,7 @@ RifaManaure/
 
 1. **Row Level Security (RLS):** Todas las tablas cuentan con RLS activo. El usuario público solo puede leer información no sensible de rifas y números de boletos libres.
 2. **Prevención de Condiciones de Carrera (Doble Venta):** Las funciones de ordenamiento y reserva adquieren bloqueo pesimista transaccional (`pg_advisory_xact_lock`) por ID de rifa para serializar solicitudes de compra concurrentes.
-3. **Liberación Automática de Boletos Expirados:** Las reservas temporales caducan a los 10 minutos (configurables vía `system_settings`) si no se registra comprobante, reactivando los números automáticamente.
+3. **Liberación Automática de Boletos Expirados:** Las reservas temporales caducan al tiempo límite configurado por el administrador en `system_settings` (sincronizado dinámicamente en todo el sistema y en tiempo real) si no se registra comprobante, reactivando los números automáticamente. Al salir del modal de compra en cualquier fase, los boletos se liberan de forma inmediata en la base de datos.
 4. **Almacenamiento de Comprobantes:** Los soportes de pago se guardan en el bucket privado `payment-proofs` y solo se visualizan mediante URLs firmadas con vencimiento de 15 minutos (`createSignedUrl`).
 5. **Regeneración de Tipos de Base de Datos:**
    Para sincronizar los tipos TypeScript cuando se apliquen nuevas migraciones SQL en Supabase:

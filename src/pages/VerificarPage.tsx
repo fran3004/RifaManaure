@@ -449,7 +449,7 @@ export const VerificarPage: React.FC = () => {
                           <div>
                             <h3 className={styles.statusTitle}>Orden Expirada o Cancelada</h3>
                             <p className={styles.statusDescription}>
-                              El tiempo límite de 10 minutos para adjuntar el comprobante concluyó y
+                              El tiempo límite de {systemSettings.reservation_duration_minutes || 10} minutos para adjuntar el comprobante concluyó y
                               los números fueron liberados nuevamente para la venta pública.
                             </p>
                           </div>

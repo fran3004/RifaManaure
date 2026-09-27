@@ -91,6 +91,7 @@ Este directorio (`supabase/migrations/`) constituye la **única fuente de verdad
 | **069** | `069_admin_delete_winner_and_delete_raffle.sql` | **(Eliminación de Ganadores y Rifas)** RPCs transaccionales `admin_delete_winner` y `admin_delete_raffle` con autorización administrativa estricta, limpieza en cascada y auditoría. |
 | **070** | `070_admin_purge_payment_proofs_storage.sql` | **(Vaciado Manual de Almacenamiento de Comprobantes)** RPCs `admin_get_payment_proofs_storage_stats` y `admin_purge_payment_proofs_storage` para vaciado a demanda del bucket `payment-proofs` sin esperar 5 días, con trazabilidad en bitácora e integridad contable. |
 | **071** | `071_fix_create_order_secure_aggregate_for_update.sql` | **(Corrección de Concurrencia y Reserva)** Desacoplamiento de la función agregada `array_agg` de la cláusula pesimista `FOR UPDATE` en `create_order_secure` mediante CTE, resolviendo definitivamente el error de PostgreSQL `0A000` (400 Bad Request) al reservar boletos en la web pública. |
+| **072** | `072_release_checkout_reservation_on_exit.sql` | **(Liberación de Boletos y Expiración Dinámica)** RPC pública segura `release_checkout_reservation` para liberación inmediata de boletos al salir del modal de compra en cualquier fase previa al comprobante, con protección anti-IDOR por clave de idempotencia o referencia, y dinamización del motivo de rechazo en `release_expired_reservations` según `system_settings.reservation_duration_minutes`. |
 
 ---
 

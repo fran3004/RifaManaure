@@ -32,7 +32,7 @@ import {
   isValidEmail,
   parseNumericPrice,
 } from '@/lib/utils';
-import { createOrder } from '@/services/ticketService';
+import { createOrder, releaseCheckoutReservation } from '@/services/ticketService';
 import { normalizeAppError, logAppError } from '@/lib/errorHandling';
 import {
   getPaymentAccounts,
@@ -207,7 +207,16 @@ export const ModalCheckout: React.FC = () => {
   const [confirmedTotalAmount, setConfirmedTotalAmount] = useState<number>(0);
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
-  const [timeLeftSeconds, setTimeLeftSeconds] = useState<number>(600); // 10 minutos
+  const [timeLeftSeconds, setTimeLeftSeconds] = useState<number>(
+    () => reservationDurationMinutes * 60
+  );
+
+  // Sincronizar el temporizador inicial con la duración configurada mientras no haya orden activa
+  useEffect(() => {
+    if (!createdOrderId) {
+      setTimeLeftSeconds(reservationDurationMinutes * 60);
+    }
+  }, [reservationDurationMinutes, createdOrderId]);
 
   // Cuentas de Pago y Método Seleccionado (Paso 4)
   const [paymentAccounts, setPaymentAccounts] = useState<PaymentAccountRow[]>([]);
@@ -272,9 +281,13 @@ export const ModalCheckout: React.FC = () => {
   }, [currentStep, handleClose]);
 
   // Confirmación definitiva de salida: libera números inmediatamente y restablece todo el proceso
-  const handleConfirmExit = useCallback(() => {
+  const handleConfirmExit = useCallback(async () => {
     setShowExitConfirm(false);
-    clearSelection(); // Liberar boletos seleccionados
+    const orderIdToRelease = createdOrderId;
+    const keyToRelease = idempotencyKey;
+    const refToRelease = orderReference;
+
+    clearSelection(); // Liberar boletos seleccionados en memoria local
     setCurrentStep(1);
     setCreatedOrderId('');
     setCreatedBuyerId('');
@@ -299,10 +312,20 @@ export const ModalCheckout: React.FC = () => {
       typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
         ? crypto.randomUUID()
         : ''
-      );
+    );
     closeCheckout();
+
+    // Si la orden ya había sido creada y bloqueada en PostgreSQL (fase 3 en adelante),
+    // cancelarla atómicamente y liberar los números en la base de datos
+    if (orderIdToRelease) {
+      try {
+        await releaseCheckoutReservation(orderIdToRelease, keyToRelease, refToRelease);
+      } catch (err: unknown) {
+        logAppError('ModalCheckout.handleConfirmExit.release', err);
+      }
+    }
     void refreshTickets();
-  }, [clearSelection, closeCheckout, refreshTickets]);
+  }, [createdOrderId, idempotencyKey, orderReference, clearSelection, closeCheckout, refreshTickets]);
 
   // Gestión de foco inicial, restauración al cerrar y bloqueo de scroll del body
   useEffect(() => {
@@ -403,7 +426,7 @@ export const ModalCheckout: React.FC = () => {
     };
   }, [isCheckoutOpen]);
 
-  // Temporizador de expiración de reserva temporal (10 minutos) entre los pasos 4 y 6
+  // Temporizador de expiración de reserva temporal entre los pasos 4 y 6
   useEffect(() => {
     if (currentStep < 4 || currentStep > 6 || timeLeftSeconds <= 0) return;
 
@@ -415,6 +438,11 @@ export const ModalCheckout: React.FC = () => {
           setErrorMessage(
             `El tiempo de reserva de tus boletos (${reservationDurationMinutes} minutos) ha expirado. Por favor selecciona nuevamente tus números.`
           );
+          if (createdOrderId) {
+            void releaseCheckoutReservation(createdOrderId, idempotencyKey, orderReference).then(() => {
+              void refreshTickets();
+            });
+          }
           return 0;
         }
         return prev - 1;
@@ -422,7 +450,15 @@ export const ModalCheckout: React.FC = () => {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [currentStep, timeLeftSeconds, reservationDurationMinutes]);
+  }, [
+    currentStep,
+    timeLeftSeconds,
+    reservationDurationMinutes,
+    createdOrderId,
+    idempotencyKey,
+    orderReference,
+    refreshTickets,
+  ]);
 
   if (!isCheckoutOpen) return null;
 
@@ -807,14 +843,34 @@ export const ModalCheckout: React.FC = () => {
               <button
                 type="button"
                 className={styles.cancelBtn}
-                onClick={() => {
+                onClick={async () => {
+                  const orderIdToRelease = createdOrderId;
+                  const keyToRelease = idempotencyKey;
+                  const refToRelease = orderReference;
+
                   setHasReservationError(false);
                   setCurrentStep(1);
+                  setCreatedOrderId('');
+                  setCreatedBuyerId('');
+                  setOrderReference('');
+                  setConfirmedTickets([]);
+                  setConfirmedTotalAmount(0);
+                  setReceiptFile(null);
+                  setReceiptPreview(null);
+                  clearSelection();
                   setIdempotencyKey(
                     typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
                       ? crypto.randomUUID()
                       : ''
                   );
+                  if (orderIdToRelease) {
+                    try {
+                      await releaseCheckoutReservation(orderIdToRelease, keyToRelease, refToRelease);
+                    } catch (err: unknown) {
+                      logAppError('ModalCheckout.resetReservationError.release', err);
+                    }
+                  }
+                  void refreshTickets();
                 }}
               >
                 Elegir otros boletos
@@ -1169,7 +1225,8 @@ export const ModalCheckout: React.FC = () => {
                   Reserva garantizada de números:
                 </strong>
                 Al pulsar en el botón a continuación, tus números quedarán asegurados y
-                apartados por 10 minutos exclusivamente a tu nombre para que realices tu
+                apartados por {reservationDurationMinutes}{' '}
+                {reservationDurationMinutes === 1 ? 'minuto' : 'minutos'} exclusivamente a tu nombre para que realices tu
                 transferencia bancaria.
               </div>
             </div>
