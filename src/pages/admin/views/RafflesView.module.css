@@ -35,7 +35,9 @@
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 1rem;
-  margin-bottom: 1rem;
+  margin-bottom: 1.25rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--admin-border, #e5e0d3);
 }
 
 .statusBadgesGroup {
@@ -73,16 +75,17 @@
 .badgeInPanelFocus {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
-  padding: 0.28rem 0.65rem;
+  gap: 0.4rem;
+  padding: 0.35rem 0.75rem;
   border-radius: var(--radius-full, 9999px);
   font-size: 0.75rem;
-  line-height: 1.2;
+  line-height: 1;
   font-weight: 600;
   white-space: nowrap;
   background-color: #f1f5f9;
   color: #334155;
   border: 1px solid #cbd5e1;
+  box-sizing: border-box;
 }
 
 .badgePublicLive,
@@ -91,15 +94,16 @@
 .badgeFinished {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
-  padding: 0.28rem 0.7rem;
+  gap: 0.45rem;
+  padding: 0.35rem 0.75rem;
   border-radius: var(--radius-full, 9999px);
   font-size: 0.75rem;
-  line-height: 1.2;
+  line-height: 1;
   font-weight: 600;
   white-space: nowrap;
   border-width: 1px;
   border-style: solid;
+  box-sizing: border-box;
 }
 
 .badgePublicLive {
@@ -126,20 +130,20 @@
   border-color: #bfdbfe;
 }
 
-/* ── Toolbar de Acciones Unificada (Organizada y sin ruido visual) ── */
+/* ── Toolbar de Acciones Unificada (Organizada, elegante y sin ruido visual) ── */
 .cardActionsToolbar {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   flex-wrap: wrap;
-  position: relative;
 }
 
 .btnActionActivate {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
-  padding: 0.45rem 0.9rem;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.45rem 0.95rem;
   font-size: 0.8125rem;
   font-weight: 600;
   border-radius: 8px;
@@ -163,32 +167,36 @@
 .btnActionPause {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
-  padding: 0.45rem 0.9rem;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.45rem 0.95rem;
   font-size: 0.8125rem;
   font-weight: 600;
   border-radius: 8px;
-  border: 1px solid #f59e0b;
+  border: 1px solid #fcd34d;
   background: #fffbeb;
   color: #92400e;
   cursor: pointer;
   transition: all 0.15s ease;
   white-space: nowrap;
   min-height: 36px;
+  box-shadow: 0 1px 2px rgba(245, 158, 11, 0.1);
 }
 
 .btnActionPause:hover {
   background: #fef3c7;
-  border-color: #d97706;
+  border-color: #f59e0b;
   color: #78350f;
   transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(245, 158, 11, 0.15);
 }
 
 .btnActionEdit {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
-  padding: 0.45rem 0.9rem;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.45rem 0.95rem;
   font-size: 0.8125rem;
   font-weight: 600;
   border-radius: 8px;
@@ -207,6 +215,34 @@
   border-color: #94a3b8;
   color: #0f172a;
   transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+.btnActionDelete {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.45rem 0.9rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  border-radius: 8px;
+  border: 1px solid #fecaca;
+  background: #ffffff;
+  color: #dc2626;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  min-height: 36px;
+  box-shadow: 0 1px 2px rgba(220, 38, 38, 0.04);
+}
+
+.btnActionDelete:hover {
+  background: #fef2f2;
+  border-color: #f87171;
+  color: #b91c1c;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(220, 38, 38, 0.12);
 }
 
 .moreActionsContainer {
@@ -315,52 +351,29 @@
   color: #b91c1c;
 }
 
-/* Compatibilidad de botones heredados */
-.cardHeader,
-.cardHeaderLeft,
-.badgesRow,
-.cardActions {
-  display: flex;
-}
-
-.btnActivatePublic {
-  composes: btnActionActivate;
-}
-
-.btnPausePublic {
-  composes: btnActionPause;
-}
-
-.btnEditMain {
-  composes: btnActionEdit;
-}
-
-.btnDeleteMain {
-  composes: dropdownMenuItemDanger;
-}
-
 /* ── 2. Bloque de Identidad ── */
 .identitySection {
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
-  margin-bottom: 1.25rem;
+  gap: 0.45rem;
+  margin-bottom: 1.35rem;
 }
 
 .raffleTitle {
-  font-size: 1.5rem;
+  font-size: 1.45rem;
   font-weight: 700;
   color: var(--admin-text, #16261c);
   margin: 0;
-  line-height: 1.25;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
 }
 
 .raffleDescription {
-  font-size: 0.875rem;
-  line-height: 1.55;
+  font-size: 0.9rem;
+  line-height: 1.6;
   color: var(--admin-text-2, #41564a);
   margin: 0;
-  max-width: 840px;
+  max-width: 860px;
 }
 
 /* ── 3. Barra de Progreso y Rendimiento de Ventas ── */
@@ -857,3 +870,43 @@
     transform: translateY(0);
   }
 }
+
+/* ── Media Queries para Tarjeta Principal y Responsive Layout ── */
+@media (max-width: 768px) {
+  .activeRaffleCard {
+    padding: 1.25rem;
+  }
+
+  .cardTopMetaBar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.85rem;
+  }
+
+  .cardActionsToolbar {
+    width: 100%;
+    justify-content: flex-start;
+    gap: 0.5rem;
+  }
+
+  .raffleTitle {
+    font-size: 1.25rem;
+  }
+}
+
+@media (max-width: 520px) {
+  .cardActionsToolbar {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .btnActionActivate,
+  .btnActionPause,
+  .btnActionEdit,
+  .btnActionDelete {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
