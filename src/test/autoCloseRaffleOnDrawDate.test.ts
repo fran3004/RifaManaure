@@ -189,4 +189,56 @@ describe('Cierre Automático de Rifas por Límite de Fecha y Estado de Espera de
       expect(result).toBe(false);
     });
   });
+
+  describe('5. Activación Dinámica del Portal de Edición Cerrada (isRaffleClosedMode)', () => {
+    const computeIsRaffleClosedMode = (params: {
+      status?: string;
+      drawDate?: string;
+      hasWinner?: boolean;
+    }) => {
+      const isDrawDatePassed = Boolean(
+        params.drawDate && new Date(params.drawDate).getTime() <= Date.now()
+      );
+      return params.status === 'closed' && !isDrawDatePassed && !params.hasWinner;
+    };
+
+    it('debe activar el portal de edición cerrada cuando el admin selecciona status "closed" antes del sorteo', () => {
+      const futureDate = new Date(Date.now() + 86400000).toISOString();
+      const isClosedMode = computeIsRaffleClosedMode({
+        status: 'closed',
+        drawDate: futureDate,
+        hasWinner: false,
+      });
+      expect(isClosedMode).toBe(true);
+    });
+
+    it('NO debe activar el portal de edición cerrada si la rifa está activa', () => {
+      const futureDate = new Date(Date.now() + 86400000).toISOString();
+      const isClosedMode = computeIsRaffleClosedMode({
+        status: 'active',
+        drawDate: futureDate,
+        hasWinner: false,
+      });
+      expect(isClosedMode).toBe(false);
+    });
+
+    it('NO debe activar el portal de edición cerrada si la rifa está en status "finished"', () => {
+      const isClosedMode = computeIsRaffleClosedMode({
+        status: 'finished',
+        drawDate: new Date(Date.now() + 86400000).toISOString(),
+        hasWinner: false,
+      });
+      expect(isClosedMode).toBe(false);
+    });
+
+    it('NO debe activar el portal de edición cerrada si ya se cumplió la fecha de sorteo (aplica espera de ganador)', () => {
+      const pastDate = new Date(Date.now() - 3600000).toISOString();
+      const isClosedMode = computeIsRaffleClosedMode({
+        status: 'closed',
+        drawDate: pastDate,
+        hasWinner: false,
+      });
+      expect(isClosedMode).toBe(false);
+    });
+  });
 });

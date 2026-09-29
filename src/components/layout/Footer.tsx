@@ -8,7 +8,11 @@ import { useActiveRaffle } from '@/hooks/useActiveRaffle';
 import { PAYMENT_METHODS } from '@/data/faqFallback';
 import styles from './Footer.module.css';
 
-export const Footer: React.FC = () => {
+interface FooterProps {
+  isRaffleClosed?: boolean;
+}
+
+export const Footer: React.FC<FooterProps> = ({ isRaffleClosed = false }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const systemSettings = useSystemSettings();
@@ -19,7 +23,9 @@ export const Footer: React.FC = () => {
 
   const whatsappUrl = createWhatsAppLink(
     whatsappNumber,
-    'Hola Manaure Vive, deseo información sobre la Gran Rifa Ecoturística.'
+    isRaffleClosed
+      ? 'Hola Manaure Vive, deseo información sobre la próxima edición de la Gran Rifa Ecoturística.'
+      : 'Hola Manaure Vive, deseo información sobre la Gran Rifa Ecoturística.'
   );
 
   const handleSectionClick = (e: React.MouseEvent<HTMLAnchorElement>, sectionId: string) => {
@@ -56,54 +62,74 @@ export const Footer: React.FC = () => {
             <span>Manaure Balcón del Cesar, Colombia</span>
           </div>
 
-          {/* Bloque Oficial de Métodos de Pago */}
-          <div className={styles.paymentMethodsBlock}>
-            <span className={styles.paymentTitle}>Métodos de Pago</span>
-            <div className={styles.paymentChipsList} aria-label="Métodos de pago autorizados">
-              {PAYMENT_METHODS.map((method) => (
-                <span key={method} className={styles.paymentChip}>
-                  {method}
-                </span>
-              ))}
+          {/* Bloque Oficial de Métodos de Pago (Solo cuando hay venta activa de rifa) */}
+          {!isRaffleClosed && (
+            <div className={styles.paymentMethodsBlock}>
+              <span className={styles.paymentTitle}>Métodos de Pago</span>
+              <div className={styles.paymentChipsList} aria-label="Métodos de pago autorizados">
+                {PAYMENT_METHODS.map((method) => (
+                  <span key={method} className={styles.paymentChip}>
+                    {method}
+                  </span>
+                ))}
+              </div>
+              <p className={styles.noCardsNotice}>
+                No recibimos pagos con tarjeta de crédito ni débito.
+              </p>
             </div>
-            <p className={styles.noCardsNotice}>
-              No recibimos pagos con tarjeta de crédito ni débito.
-            </p>
-          </div>
+          )}
         </div>
 
         {/* Columna 2: Navegación Rápida */}
         <div className={styles.linksCol}>
           <h3 className={styles.colTitle}>Navegación</h3>
           <ul className={styles.linkList}>
-            <li>
-              <a href="/#premio" onClick={(e) => handleSectionClick(e, 'premio')}>
-                Detalle del Premio
-              </a>
-            </li>
-            <li>
-              <a href="/#boletos" onClick={(e) => handleSectionClick(e, 'boletos')}>
-                Comprar Boletos
-              </a>
-            </li>
-            <li>
-              <a href="/#galeria" onClick={(e) => handleSectionClick(e, 'galeria')}>
-                Galería de Fotos
-              </a>
-            </li>
-            <li>
-              <a href="/#aliados" onClick={(e) => handleSectionClick(e, 'aliados')}>
-                Red de Aliados
-              </a>
-            </li>
-            <li>
-              <a href="/#faq" onClick={(e) => handleSectionClick(e, 'faq')}>
-                Preguntas Frecuentes
-              </a>
-            </li>
-            <li>
-              <Link to="/verificar">Consultar Boletos Adquiridos</Link>
-            </li>
+            {isRaffleClosed ? (
+              <>
+                <li>
+                  <Link to="/verificar">Consultar Boletos Adquiridos</Link>
+                </li>
+                <li>
+                  <a href="/#aliados" onClick={(e) => handleSectionClick(e, 'aliados')}>
+                    Red de Aliados Ecoturísticos
+                  </a>
+                </li>
+                <li>
+                  <Link to="/terminos">Términos y Condiciones</Link>
+                </li>
+              </>
+            ) : (
+              <>
+                <li>
+                  <a href="/#premio" onClick={(e) => handleSectionClick(e, 'premio')}>
+                    Detalle del Premio
+                  </a>
+                </li>
+                <li>
+                  <a href="/#boletos" onClick={(e) => handleSectionClick(e, 'boletos')}>
+                    Comprar Boletos
+                  </a>
+                </li>
+                <li>
+                  <a href="/#galeria" onClick={(e) => handleSectionClick(e, 'galeria')}>
+                    Galería de Fotos
+                  </a>
+                </li>
+                <li>
+                  <a href="/#aliados" onClick={(e) => handleSectionClick(e, 'aliados')}>
+                    Red de Aliados
+                  </a>
+                </li>
+                <li>
+                  <a href="/#faq" onClick={(e) => handleSectionClick(e, 'faq')}>
+                    Preguntas Frecuentes
+                  </a>
+                </li>
+                <li>
+                  <Link to="/verificar">Consultar Boletos Adquiridos</Link>
+                </li>
+              </>
+            )}
           </ul>
         </div>
 
@@ -158,7 +184,11 @@ export const Footer: React.FC = () => {
           </div>
           <div className={styles.guaranteeNote}>
             <ShieldCheck size={16} aria-hidden="true" />
-            <span>Sorteo auditable con {lotteryReference}</span>
+            <span>
+              {isRaffleClosed
+                ? 'Iniciativa Ecoturística y Cultural Manaure Vive'
+                : `Sorteo auditable con ${lotteryReference}`}
+            </span>
           </div>
           <div className={styles.madeWith}>
             <span>
