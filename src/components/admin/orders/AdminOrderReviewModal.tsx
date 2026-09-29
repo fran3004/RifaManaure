@@ -49,6 +49,42 @@ interface AdminOrderReviewModalProps {
   allowPaymentActions?: boolean;
 }
 
+const getOrderStatusLabel = (status: string) => {
+  switch (status) {
+    case 'pending_verification':
+      return 'Pendiente de revisión';
+    case 'pending':
+      return 'En reserva';
+    case 'paid':
+      return 'Pagado';
+    case 'rejected':
+      return 'Rechazado';
+    case 'expired':
+      return 'Vencido';
+    case 'cancelled':
+      return 'Cancelado';
+    default:
+      return 'Estado no disponible';
+  }
+};
+
+const getPaymentMethodLabel = (method: string | null | undefined) => {
+  switch (method?.toLowerCase()) {
+    case 'wompi':
+      return 'Wompi';
+    case 'bold':
+      return 'Bold';
+    case 'mercadopago':
+      return 'Mercado Pago';
+    case 'transfer_manual':
+      return 'Transferencia bancaria';
+    case 'cash':
+      return 'Efectivo';
+    default:
+      return method ? 'Otro medio de pago' : 'No registrado';
+  }
+};
+
 export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
   order,
   isOpen,
@@ -56,7 +92,7 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
   onOrderUpdated,
   allowPaymentActions = false,
 }) => {
-  // ConfiguraciÃ³n del sistema dinÃ¡mica
+  // Configuración del sistema
   const systemSettings = useSystemSettings();
   const reservationMinutes = systemSettings?.reservation_duration_minutes || 10;
 
@@ -252,9 +288,9 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
           <div className={styles.modalHeaderTitle}>
             <ShieldCheck size={24} color="var(--brand-accent)" />
             <div>
-              <h2 className={styles.modalTitleText}>RevisiÃ³n Administrativa de Orden</h2>
+          <h2 className={styles.modalTitleText}>Revisión del pedido</h2>
               <span className={styles.modalSubtitle}>
-                AuditorÃ­a manual de comprobante y confirmaciÃ³n de venta
+            Revisión manual del comprobante y confirmación de los boletos
               </span>
             </div>
           </div>
@@ -262,7 +298,7 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
             type="button"
             className={styles.closeButton}
             onClick={onClose}
-            aria-label="Cerrar modal"
+            aria-label="Cerrar ventana de revisión"
           >
             <X size={20} />
           </button>
@@ -299,10 +335,10 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
                 </div>
                 <div className={styles.topWhatsAppTextGroup}>
                   <strong className={styles.topWhatsAppTitle}>
-                    Canal WhatsApp Directo: {currentOrderWhatsApp.isPaid ? 'ConfirmaciÃ³n de Pago' : 'NotificaciÃ³n de Rechazo'}
+                    Mensaje por WhatsApp: {currentOrderWhatsApp.isPaid ? 'pago aprobado' : 'pago rechazado'}
                   </strong>
                   <span className={styles.topWhatsAppDesc}>
-                    Destinatario: {currentOrderWhatsApp.phone} &bull; Mensaje oficial estructurado listo para enviar
+                    Para: {currentOrderWhatsApp.phone} &bull; El mensaje está listo para enviar
                   </span>
                 </div>
               </div>
@@ -337,7 +373,7 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
             <div className={styles.reviewCard}>
               <div className={styles.reviewCardHeader}>
                 <Hash size={16} />
-                <span className={styles.reviewCardHeaderTitle}>1. InformaciÃ³n de Orden</span>
+                <span className={styles.reviewCardHeaderTitle}>1. Datos del pedido</span>
               </div>
 
               <div className={styles.infoRow}>
@@ -348,7 +384,7 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
                     type="button"
                     onClick={() => handleCopy(order.reference, 'ref')}
                     className={styles.copyIconButton}
-                    title="Copiar referencia"
+                    title="Copiar número de referencia"
                   >
                     {copiedKey === 'ref' ? <Check size={12} color="var(--admin-success, var(--color-success))" /> : <Copy size={12} />}
                   </button>
@@ -364,21 +400,21 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
               </div>
 
               <div className={styles.infoRow}>
-                <span className={styles.infoLabel}>Estado Actual:</span>
+                <span className={styles.infoLabel}>Estado:</span>
                 <div>
                   {order.status === 'pending_verification' && (
                     <span className={styles.badgeWarning}>
-                      <Clock size={12} /> Por Validar
+                      <Clock size={12} /> Pendiente de revisión
                     </span>
                   )}
                   {order.status === 'pending' && (
                     <span className={styles.badgeInfo}>
-                      <Clock size={12} /> Reserva Temporal
+                      <Clock size={12} /> En reserva
                     </span>
                   )}
                   {order.status === 'paid' && (
                     <span className={styles.badgeSuccess}>
-                      <CheckCircle2 size={12} /> Pagada / Aprobada
+                      <CheckCircle2 size={12} /> Pagado
                     </span>
                   )}
                   {order.status === 'rejected' && (
@@ -388,7 +424,7 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
                   )}
                   {order.status === 'expired' && (
                     <span className={`${styles.badgeDanger} ${styles.badgeMuted}`}>
-                      <AlertTriangle size={12} /> Expirada
+                      <AlertTriangle size={12} /> Vencido
                     </span>
                   )}
                   {order.status === 'cancelled' && (
@@ -400,7 +436,7 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
               </div>
 
               <div className={styles.infoRow}>
-                <span className={styles.infoLabel}>Total Liquidado:</span>
+                <span className={styles.infoLabel}>Valor del pedido:</span>
                 <span className={`${styles.infoValue} ${styles.totalValue}`}>
                   {formatCOP(order.total_amount)}
                 </span>
@@ -422,7 +458,7 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
             <div className={styles.reviewCard}>
               <div className={styles.reviewCardHeader}>
                 <User size={16} />
-                <span className={styles.reviewCardHeaderTitle}>2. Datos del Comprador</span>
+                <span className={styles.reviewCardHeaderTitle}>2. Datos del comprador</span>
               </div>
 
               <div className={styles.infoRow}>
@@ -436,12 +472,12 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
                   <span className={`${styles.infoValue} ${styles.documentValue}`}>
                     {maskDocumentId(order.buyers?.document_id)}
                   </span>
-                  <span className={styles.protectedLabel}>(Protegido)</span>
+                  <span className={styles.protectedLabel}>(Número parcialmente oculto)</span>
                 </div>
               </div>
 
               <div className={styles.infoRow}>
-                <span className={styles.infoLabel}>TelÃ©fono Celular:</span>
+                <span className={styles.infoLabel}>Teléfono:</span>
                 <div className={styles.contactValueGroup}>
                   {order.buyers?.phone ? (
                     <>
@@ -450,7 +486,7 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
                         target="_blank"
                         rel="noopener noreferrer"
                         className={styles.whatsappLink}
-                        title="Contactar directamente por WhatsApp"
+                        title="Escribir al comprador por WhatsApp"
                       >
                         <Phone size={13} />
                         {order.buyers.phone}
@@ -459,7 +495,7 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
                         type="button"
                         onClick={() => handleCopy(order.buyers!.phone, 'phone')}
                         className={styles.copyIconButton}
-                        title="Copiar telÃ©fono"
+                        title="Copiar número de teléfono"
                       >
                         {copiedKey === 'phone' ? (
                           <Check size={12} color="var(--admin-success, var(--color-success))" />
@@ -475,7 +511,7 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
               </div>
 
               <div className={styles.infoRow}>
-                <span className={styles.infoLabel}>Correo ElectrÃ³nico:</span>
+                <span className={styles.infoLabel}>Correo:</span>
                 {order.buyers?.email ? (
                   <a
                     href={`mailto:${order.buyers.email}`}
@@ -497,13 +533,13 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
               )}
 
               <div className={styles.infoRow}>
-                <span className={styles.infoLabel}>Preferencia de Contacto:</span>
+                <span className={styles.infoLabel}>Medio de contacto elegido:</span>
                 <div>
                   {(!order.contact_preference || order.contact_preference === 'both') && (
                     <span
                       className={`${styles.badgeSuccess} ${styles.contactPreferenceBadge}`}
                     >
-                      <Phone size={11} /> WhatsApp + <Mail size={11} /> Correo
+                      <Phone size={11} /> WhatsApp y <Mail size={11} /> correo
                     </span>
                   )}
                   {order.contact_preference === 'whatsapp' && (
@@ -517,7 +553,7 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
                     <span
                       className={`${styles.badgeWarning} ${styles.contactPreferenceBadge}`}
                     >
-                      <Mail size={11} /> Solo Correo ElectrÃ³nico
+                      <Mail size={11} /> Solo correo
                     </span>
                   )}
                 </div>
@@ -530,8 +566,8 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
             <div className={styles.reviewCardHeader}>
               <Ticket size={16} />
               <span className={styles.reviewCardHeaderTitle}>
-                3. Boletos Reservados ({order.ticket_count}{' '}
-                {order.ticket_count === 1 ? 'nÃºmero' : 'nÃºmeros'})
+                  3. Boletos reservados ({order.ticket_count}{' '}
+                  {order.ticket_count === 1 ? 'número' : 'números'})
               </span>
             </div>
 
@@ -544,7 +580,7 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
                 ))
               ) : (
                 <span className={styles.emptyTicketsText}>
-                  No se registran boletos detallados para esta orden.
+                No hay boletos registrados para este pedido.
                 </span>
               )}
             </div>
@@ -555,16 +591,16 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
             <div className={styles.reviewCardHeader}>
               <CreditCard size={16} />
               <span className={styles.reviewCardHeaderTitle}>
-                4. VerificaciÃ³n de Pago y Comprobante
+                4. Revisión del pago y comprobante
               </span>
             </div>
 
             <div className={`${styles.sectionGrid} ${styles.paymentSectionGrid}`}>
               <div className={styles.paymentDetailsColumn}>
                 <div className={styles.infoRow}>
-                  <span className={styles.infoLabel}>MÃ©todo Reportado:</span>
+                  <span className={styles.infoLabel}>Medio de pago:</span>
                   <span className={`${styles.infoValue} ${styles.capitalizeValue}`}>
-                    {order.payment_method || 'Transferencia Manual'}
+                    {getPaymentMethodLabel(order.payment_method)}
                   </span>
                 </div>
 
@@ -577,16 +613,16 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
 
                 <div className={styles.verificationRuleBox}>
                   <span className={styles.verificationRuleTitle}>
-                    Regla de VerificaciÃ³n Manual:
+                    Revisión del pago:
                   </span>
                   <p className={styles.verificationRuleText}>
                     {order.status === 'pending' && !hasReceipt ? (
                       <>
-                        Esta orden se encuentra en reserva temporal de {reservationMinutes} minutos. No es posible aprobar ni rechazar el pago hasta que el comprador adjunte su soporte bancario.
+                        Este pedido está reservado por {reservationMinutes} minutos. Podrás aprobarlo o rechazarlo cuando el comprador adjunte el comprobante bancario.
                       </>
                     ) : (
                       <>
-                        Verifique en la app bancaria correspondiente que los{' '}
+                        Confirma en la aplicación de tu banco que los{' '}
                         <strong>{formatCOP(order.total_amount)}</strong> hayan ingresado efectivamente
                         antes de aprobar la orden.
                       </>
@@ -598,7 +634,7 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
               {/* Visor Seguro del Comprobante */}
               <div>
                 <span className={styles.proofLabel}>
-                  Soporte Adjunto (Acceso Seguro Temporal 15 min):
+                  Comprobante adjunto (disponible durante 15 minutos):
                 </span>
 
                 {/* Avisos de RetenciÃ³n de 5 dÃ­as */}
@@ -606,7 +642,7 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
                   <div className={styles.retentionNoticePill}>
                     <Clock size={15} className={styles.retentionNoticeIcon} />
                     <span>
-                      <strong>PolÃ­tica de RetenciÃ³n (5 dÃ­as):</strong> Este comprobante se conserva temporalmente para auditorÃ­a hasta el{' '}
+                      <strong>Conservación del comprobante (5 días):</strong> Este comprobante se guardará hasta el{' '}
                       <strong>
                         {order.verified_at
                           ? new Date(new Date(order.verified_at).getTime() + 5 * 24 * 60 * 60 * 1000).toLocaleDateString('es-CO', {
@@ -614,8 +650,8 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
                               month: 'long',
                               year: 'numeric',
                             })
-                          : 'cumplimiento de los 5 dÃ­as posteriores a su validaciÃ³n'}
-                      </strong>. Tras esa fecha, el adjunto se depura automÃ¡ticamente para mantener optimizado el almacenamiento.
+                          : 'cumplirse 5 días desde su revisión'}
+                      </strong>. Después, el archivo se eliminará automáticamente para liberar espacio.
                     </span>
                   </div>
                 )}
@@ -624,7 +660,7 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
                   <div className={styles.retentionPendingPill}>
                     <ShieldCheck size={15} className={styles.retentionNoticeIcon} />
                     <span>
-                      <strong>Soporte protegido:</strong> Los comprobantes en revisiÃ³n se preservan permanentemente en el sistema hasta que sean aprobados o rechazados. Nunca se eliminan pagos pendientes.
+                      <strong>Comprobante protegido:</strong> El archivo de este pedido se conservará hasta que el pago sea aprobado o rechazado. Los pagos pendientes no se eliminan.
                     </span>
                   </div>
                 )}
@@ -633,25 +669,25 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
                   {isLoadingProof ? (
                     <div className={styles.proofLoading}>
                       <Clock size={24} className={styles.proofStatusIcon} />
-                      <span className={styles.proofLoadingText}>Generando acceso seguro privado...</span>
+                      <span className={styles.proofLoadingText}>Preparando el comprobante...</span>
                     </div>
                   ) : isPurged ? (
                     <div className={styles.proofPurgedCard}>
                       <ShieldCheck size={36} className={styles.proofPurgedIcon} />
                       <h4 className={styles.proofPurgedTitle}>
-                        Soporte archivado y depurado automÃ¡ticamente
+                        Comprobante eliminado después de su conservación
                       </h4>
                       <p className={styles.proofPurgedDesc}>
-                        El archivo adjunto original fue depurado tras cumplir los <strong>5 dÃ­as de retenciÃ³n</strong> para optimizar el almacenamiento del sistema.
+                        El archivo se eliminó después de conservarse durante <strong>5 días</strong> para liberar espacio.
                       </p>
                       <div className={styles.proofPurgedMeta}>
-                        <span>Estado orden: <strong>{order.status === 'paid' ? 'Pago Aprobado' : 'Rechazada'}</strong></span>
+                        <span>Estado del pedido: <strong>{getOrderStatusLabel(order.status)}</strong></span>
                         {order.receipt_purged_at && (
-                          <span>Depurado: <strong>{new Date(order.receipt_purged_at).toLocaleDateString('es-CO', { dateStyle: 'medium' })}</strong></span>
+                          <span>Fecha de eliminación: <strong>{new Date(order.receipt_purged_at).toLocaleDateString('es-CO', { dateStyle: 'medium' })}</strong></span>
                         )}
                       </div>
                       <div className={styles.proofPurgedGuarantee}>
-                        âœ“ La orden #{order.reference}, el comprador y los boletos asignados permanecen 100% confirmados e inalterables en el sistema.
+                      El pedido #{order.reference}, el comprador y los boletos asignados permanecen registrados.
                       </div>
                     </div>
                   ) : proofError || !signedProofUrl ? (
@@ -662,14 +698,14 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
                       />
                       <span className={styles.proofEmptyText}>
                         {proofError || (order.status === 'pending'
-                          ? `El comprador aÃºn no ha subido el comprobante de pago (reserva temporal de ${reservationMinutes} min).`
-                          : 'Sin archivo de comprobante adjunto')}
+                          ? `El comprador aún no ha adjuntado el comprobante de pago. La reserva dura ${reservationMinutes} minutos.`
+                          : 'No hay un comprobante adjunto')}
                       </span>
                     </div>
                   ) : isPdf ? (
                     <iframe
                       src={signedProofUrl}
-                      title="Comprobante PDF"
+                      title="Vista del comprobante"
                       className={styles.proofIframe}
                     />
                   ) : (
@@ -682,7 +718,7 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
 
                   {signedProofUrl && !isPurged && (
                     <div className={styles.proofToolbar}>
-                      <span>* El enlace estarÃ¡ disponible durante 15 minutos</span>
+                      <span>El comprobante estará disponible durante 15 minutos.</span>
                       <a
                         href={signedProofUrl}
                         target="_blank"
@@ -690,7 +726,7 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
                         className={styles.proofOpenLink}
                       >
                         <ExternalLink size={13} />
-                        Abrir en tamaÃ±o original
+                        Ver comprobante en tamaño original
                       </a>
                     </div>
                   )}
@@ -706,10 +742,10 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
             {order.status === 'pending_verification' ? (
               !allowPaymentActions ? (
                 <span className={styles.centralizedNoticeText}>
-                  ðŸ”’ <strong>ValidaciÃ³n centralizada:</strong> Para aprobar o rechazar pagos, procesa el soporte en la bandeja oficial de <strong>Comprobantes</strong>.
+                  <strong>Este pago se revisa desde la sección Comprobantes.</strong> Para aprobarlo o rechazarlo, abre allí este pedido.
                 </span>
               ) : (
-                <span>âš ï¸ La orden tiene comprobante adjunto y requiere verificaciÃ³n manual.</span>
+                <span>Este pedido tiene un comprobante adjunto y requiere revisión manual.</span>
               )
             ) : order.status === 'pending' ? (
               <span>â³ Reserva temporal ({reservationMinutes} min): en espera de que el comprador suba su comprobante.</span>
@@ -728,7 +764,7 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
                 onClick={() => setIsReceiptModalOpen(true)}
               >
                 <Download size={15} />
-                <span>Emitir Comprobante Digital</span>
+                <span>Crear comprobante digital</span>
               </button>
             )}
 
@@ -745,10 +781,10 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
                 to={`/admin/comprobantes?ref=${encodeURIComponent(order.reference)}`}
                 onClick={onClose}
                 className={styles.btnPrimary}
-                title="Ir a Comprobantes para validar el pago"
+                title="Abrir la sección Comprobantes para revisar el pago"
               >
                 <Receipt size={16} />
-                <span>Validar en Comprobantes â†—</span>
+                <span>Revisar en Comprobantes</span>
               </Link>
             )}
 
