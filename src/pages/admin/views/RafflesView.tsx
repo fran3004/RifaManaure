@@ -298,7 +298,6 @@ export const RafflesView: React.FC = () => {
       case 'active':
         return (
           <span className={styles.badgePublicLive} title="Esta rifa está actualmente visible y abierta a compras en la página web pública">
-            <span className={styles.livePulseDot} aria-hidden="true" />
             <Globe size={13} aria-hidden="true" />
             Visible y Activa en Web Pública
           </span>
@@ -461,76 +460,72 @@ export const RafflesView: React.FC = () => {
         <>
           {/* ── Tarjeta de Rifa en Gestión del Panel (Principal) ── */}
           <div className={styles.activeRaffleCard}>
-            {/* ── 1. Barra Superior: Metadatos de Estado y Acciones Rápidas ── */}
-            <div className={styles.cardTopMetaBar}>
-              <div className={styles.statusBadgesGroup}>
-                {/* Badge de estado en la web pública */}
-                {renderPanelRaffleStatusBadge(panelRaffle.status)}
+            <div className={styles.cardHeader}>
+              <div className={styles.cardHeaderLeft}>
+                <div className={styles.badgesRow}>
+                  {/* Badge de estado en la web pública */}
+                  {renderPanelRaffleStatusBadge(panelRaffle.status)}
 
-                {/* Badge de foco en el panel de control */}
-                <span
-                  className={styles.badgeInPanelFocus}
-                  title="Esta es la edición sobre la que operan todos los módulos del panel (boletos, órdenes, compradores)"
-                >
-                  <Layers size={13} aria-hidden="true" />
-                  Rifa en Gestión del Panel
-                </span>
+                  {/* Badge de foco en el panel de control */}
+                  <span
+                    className={styles.badgeInPanelFocus}
+                    title="Esta es la edición sobre la que operan todos los módulos del panel (boletos, órdenes, compradores)"
+                  >
+                    <Layers size={13} aria-hidden="true" />
+                    Rifa en Gestión del Panel
+                  </span>
+                </div>
+
+                <h2 className={styles.raffleTitle}>{panelRaffle.title}</h2>
+                <p className={styles.raffleDescription}>{panelRaffle.description}</p>
               </div>
 
-              <div className={styles.cardActionsToolbar}>
+              <div className={styles.cardActions}>
                 {/* Acción de venta pública */}
                 {panelRaffle.status === 'active' ? (
                   <button
                     type="button"
-                    className={styles.btnActionPause}
+                    className={styles.btnPausePublic}
                     onClick={() => openActivationModal(panelRaffle, 'pause')}
                     title="Pausar temporalmente la venta pública de esta rifa"
                   >
-                    <Pause size={14} aria-hidden="true" />
+                    <Pause size={15} aria-hidden="true" />
                     <span>Pausar Venta Pública</span>
                   </button>
                 ) : (
                   <button
                     type="button"
-                    className={styles.btnActionActivate}
+                    className={styles.btnActivatePublic}
                     onClick={() => openActivationModal(panelRaffle, 'activate')}
                     title="Publicar esta rifa en la web para compradores"
                   >
-                    <Globe size={14} aria-hidden="true" />
+                    <Globe size={15} aria-hidden="true" />
                     <span>Activar en Web Pública</span>
                   </button>
                 )}
 
-                {/* Botón Editar: Modificar parámetros */}
+                {/* Botón Editar: SIEMPRE disponible en la rifa que se está viendo en el panel */}
                 <button
                   type="button"
-                  className={styles.btnActionEdit}
+                  className={styles.btnEditMain}
                   onClick={() => setSelectedRaffleToEdit(panelRaffle)}
                   title="Modificar precio, fecha de sorteo, lotería y parámetros de esta rifa"
                 >
-                  <Edit3 size={14} aria-hidden="true" />
+                  <Edit3 size={15} aria-hidden="true" />
                   <span>Editar Parámetros</span>
                 </button>
 
                 {/* Botón Eliminar Rifa */}
                 <button
                   type="button"
-                  className={styles.btnActionDelete}
+                  className={styles.btnDeleteMain}
                   onClick={() => handleOpenDeleteRaffleModal(panelRaffle)}
                   title={`Eliminar la edición "${panelRaffle.title}"`}
                 >
-                  <Trash2 size={14} aria-hidden="true" />
+                  <Trash2 size={15} aria-hidden="true" />
                   <span>Eliminar Rifa</span>
                 </button>
               </div>
-            </div>
-
-            {/* ── 2. Bloque de Identidad de la Rifa ── */}
-            <div className={styles.identitySection}>
-              <h2 className={styles.raffleTitle}>{panelRaffle.title}</h2>
-              {panelRaffle.description ? (
-                <p className={styles.raffleDescription}>{panelRaffle.description}</p>
-              ) : null}
             </div>
 
             {/* Barra de Progreso de Emisión y Ventas */}

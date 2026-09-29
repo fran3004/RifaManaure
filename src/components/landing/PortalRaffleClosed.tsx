@@ -1,107 +1,20 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
-import {
-  Lock,
-  Search,
-  MessageCircle,
-  Sparkles,
-  ShieldCheck,
-  Handshake,
-  ExternalLink,
-} from 'lucide-react';
-import { logoPrincipalCompleto, aliados as fallbackAliados } from '@/assets/assets';
-import { getActivePartners } from '@/services/partnerService';
-import { getOptimizedCloudinaryUrl } from '@/services/cloudinaryService';
+import { Lock, Search, MessageCircle, Sparkles, ShieldCheck } from 'lucide-react';
+import { logoPrincipalCompleto } from '@/assets/assets';
 import { useSystemSettings } from '@/hooks/useSystemSettings';
 import { createWhatsAppLink } from '@/lib/utils';
 import { Button } from '@/components/public/ui/Button';
-import type { PartnerRow } from '@/types/raffle.types';
 import styles from './PortalRaffleClosed.module.css';
-
-// Enlaces de Instagram de respaldo para aliados
-const DEFAULT_INSTAGRAM_URLS: Record<string, string> = {
-  photours: 'https://www.instagram.com/photour_?stkn=ZDNlZDc0MzIxNw==',
-  'cuatri-tours-manaure': 'https://www.instagram.com/cuatritours_manaure?stkn=ZDNlZDc0MzIxNw==',
-  'villa-adelaida': 'https://www.instagram.com/restaurantevilladelaida?stkn=ZDNlZDc0MzIxNw==',
-  'absolom-casita-de-la-mora': 'https://www.instagram.com/lacasitadelamora?stkn=ZDNlZDc0MzIxNw==',
-  'mashiramo-glamping': 'https://www.instagram.com/mashiramo_glamping?stkn=ZDNlZDc0MzIxNw==',
-  'los-pinos-manaure': 'https://www.instagram.com/lospinosmanaure?stkn=ZDNlZDc0MzIxNw==',
-  metallura: 'https://www.instagram.com/metalluraturismo?stkn=ZDNlZDc0MzIxNw==',
-  'manaure-aventura': 'https://www.instagram.com/manaureaventura?stkn=ZDNlZDc0MzIxNw==',
-  coruscans: 'https://www.instagram.com/elcoruscans?stkn=ZDNlZDc0MzIxNw==',
-};
-
-const localAliadosMap = new Map(
-  fallbackAliados.map((a) => [
-    a.slug,
-    {
-      grid: a.logoGrid,
-      grid2x: a.logoGrid2x,
-      name: a.nombre,
-      category: a.categoria,
-    },
-  ])
-);
 
 export const PortalRaffleClosed: React.FC = () => {
   const systemSettings = useSystemSettings();
-  const [partners, setPartners] = useState<PartnerRow[]>([]);
-  const [isLoadedFromDb, setIsLoadedFromDb] = useState(false);
 
   const whatsappNumber = systemSettings.support_whatsapp_number || '573001234567';
   const whatsappUrl = createWhatsAppLink(
     whatsappNumber,
     'Hola Manaure Vive, deseo información sobre la próxima edición de la Gran Rifa Ecoturística.'
   );
-
-  useEffect(() => {
-    let isMounted = true;
-    getActivePartners()
-      .then((data) => {
-        if (isMounted && data && data.length > 0) {
-          setPartners(data);
-          setIsLoadedFromDb(true);
-        }
-      })
-      .catch((err) => {
-        console.warn('[PortalRaffleClosed] Usando catálogo local de aliados:', err);
-      });
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
-  // Lista normalizada de aliados
-  const displayPartners = useMemo(() => {
-    if (isLoadedFromDb && partners.length > 0) {
-      return partners.map((p) => {
-        const localAsset = localAliadosMap.get(p.slug);
-        const hasCustomLogo = Boolean(p.logo_url && p.logo_url.trim() !== '');
-        const instagramUrl = p.instagram_url?.trim() || DEFAULT_INSTAGRAM_URLS[p.slug] || '#';
-
-        return {
-          id: p.id,
-          slug: p.slug,
-          name: p.name,
-          category: p.category,
-          logoSrc: hasCustomLogo
-            ? getOptimizedCloudinaryUrl(p.logo_url!, { width: 300 })
-            : localAsset?.grid || '',
-          instagramUrl,
-        };
-      });
-    }
-
-    return fallbackAliados.map((a) => ({
-      id: a.slug,
-      slug: a.slug,
-      name: a.nombre,
-      category: a.categoria,
-      logoSrc: a.logoGrid,
-      instagramUrl: DEFAULT_INSTAGRAM_URLS[a.slug] || '#',
-    }));
-  }, [isLoadedFromDb, partners]);
 
   return (
     <div className={styles.closedPortalContainer}>
@@ -134,7 +47,7 @@ export const PortalRaffleClosed: React.FC = () => {
             title="Consultar boletos adquiridos de cualquier sorteo"
           >
             <Search size={16} aria-hidden="true" />
-            <span>Consultar mis Boletos</span>
+            <span className={styles.topVerifyText}>Consultar mis Boletos</span>
           </Link>
         </div>
       </header>
@@ -148,7 +61,7 @@ export const PortalRaffleClosed: React.FC = () => {
             <span>Ventas Concluidas · Edición Cerrada</span>
           </div>
 
-          {/* Gran Título Informativo y Llamativo */}
+          {/* Gran Título Informativo y Dinámico */}
           <h1 id="titulo-edicion-cerrada" className={styles.mainTitle}>
             ¡Gracias por tu Participación!
             <span className={styles.accentGold}>Muy Pronto Nuestra Próxima Edición</span>
@@ -167,11 +80,11 @@ export const PortalRaffleClosed: React.FC = () => {
               <div className={styles.expectationIconWrap} aria-hidden="true">
                 <Sparkles size={22} />
               </div>
-              <div>
+              <div className={styles.expectationHeaderText}>
                 <h2 className={styles.expectationTitle}>
                   Estamos preparando una nueva gran experiencia
                 </h2>
-                <span className={styles.partnerCategory}>
+                <span className={styles.expectationSubtitle}>
                   Nuevos premios, rutas campestres y sorpresas inolvidables
                 </span>
               </div>
@@ -219,59 +132,6 @@ export const PortalRaffleClosed: React.FC = () => {
             >
               Contactar por WhatsApp
             </Button>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Vitrina de Aliados Ecoturísticos (Diseño solemne y refinado) ── */}
-      <section
-        id="aliados"
-        className={styles.partnersSection}
-        aria-labelledby="titulo-aliados-cerrada"
-      >
-        <div className="container">
-          <div className={styles.partnersHeader}>
-            <div className={styles.partnersBadge}>
-              <Handshake size={15} aria-hidden="true" />
-              <span>Comunidad & Operadores</span>
-            </div>
-            <h2 id="titulo-aliados-cerrada" className={styles.partnersTitle}>
-              Nuestra Red de Aliados Ecoturísticos
-            </h2>
-            <p className={styles.partnersSubtitle}>
-              Empresas, operadores campestres y emprendimientos locales que impulsan el desarrollo
-              sostenible y hacen posibles las experiencias en Manaure Balcón del Cesar.
-            </p>
-          </div>
-
-          <div className={styles.partnersGrid}>
-            {displayPartners.map((aliado) => (
-              <a
-                key={aliado.slug}
-                href={aliado.instagramUrl}
-                target={aliado.instagramUrl !== '#' ? '_blank' : undefined}
-                rel={aliado.instagramUrl !== '#' ? 'noopener noreferrer' : undefined}
-                className={styles.partnerCard}
-                title={`Conocer a ${aliado.name} en Instagram`}
-              >
-                <div className={styles.partnerLogoWrap}>
-                  <img
-                    src={aliado.logoSrc}
-                    alt={`Logo de ${aliado.name}`}
-                    className={styles.partnerLogo}
-                    loading="lazy"
-                  />
-                </div>
-                <div className={styles.partnerInfo}>
-                  <strong className={styles.partnerName}>{aliado.name}</strong>
-                  <span className={styles.partnerCategory}>{aliado.category}</span>
-                  <span className={styles.partnerLinkHint}>
-                    <span>Ver perfil oficial</span>
-                    <ExternalLink size={12} aria-hidden="true" />
-                  </span>
-                </div>
-              </a>
-            ))}
           </div>
         </div>
       </section>

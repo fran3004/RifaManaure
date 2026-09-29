@@ -42,6 +42,7 @@ const HomePageContent: React.FC = () => {
       <div className="landing-layout" data-theme="public">
         <main id="contenido-principal" tabIndex={-1}>
           <PortalRaffleClosed />
+          <FilaAliados />
         </main>
         <Footer isRaffleClosed />
         <FloatingWhatsAppBtn />
