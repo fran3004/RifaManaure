@@ -97,6 +97,36 @@ export const AdminRejectPaymentModal: React.FC<AdminRejectPaymentModalProps> = (
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, phase, isProcessing, onClose]);
 
+  // ── HOOKS ── Siempre antes del early return para cumplir las Reglas de Hooks ──
+  // Estos useMemo deben ejecutarse en TODOS los renders, incluso cuando el modal
+  // está cerrado. El early return va DESPUÉS de todos los hooks.
+  const finalReason = useMemo(() => {
+    return formatRejectionReason(selectedPreset, customReason);
+  }, [selectedPreset, customReason]);
+
+  const whatsAppText = useMemo(() => {
+    if (!order) return '';
+    const bName = order.buyers?.full_name || 'Comprador Desconocido';
+    const bPhone = order.buyers?.phone || 'Sin teléfono';
+    const bEmail = order.buyers?.email?.trim();
+    const tks = (order.tickets || []).map((t) => formatTicketNumber(t.number));
+    const raf = (order as any)?.raffle || (order as any)?.raffles;
+    return buildPaymentRejectedMessage({
+      reference: order.reference,
+      buyerName: bName,
+      buyerPhone: bPhone,
+      buyerEmail: bEmail,
+      ticketNumbers: tks,
+      totalAmount: order.total_amount,
+      raffleTitle: raf?.title,
+      supportPhone: raf?.support_phone,
+      rejectionReason: finalReason,
+      verifyUrl:
+        typeof window !== 'undefined' ? `${window.location.origin}/verificar` : '/verificar',
+    });
+  }, [order, finalReason]);
+  // ─────────────────────────────────────────────────────────────────────────────
+
   if (!isOpen || !order) return null;
 
   const buyerName = order.buyers?.full_name || 'Comprador Desconocido';
@@ -113,27 +143,6 @@ export const AdminRejectPaymentModal: React.FC<AdminRejectPaymentModalProps> = (
       buyerPhone !== 'Sin teléfono' &&
       !buyerPhone.toLowerCase().includes('sin')
   );
-
-  const finalReason = useMemo(() => {
-    return formatRejectionReason(selectedPreset, customReason);
-  }, [selectedPreset, customReason]);
-
-  const whatsAppText = useMemo(() => {
-    if (!order) return '';
-    return buildPaymentRejectedMessage({
-      reference: order.reference,
-      buyerName,
-      buyerPhone,
-      buyerEmail,
-      ticketNumbers: formattedTickets,
-      totalAmount: order.total_amount,
-      raffleTitle: raffle?.title,
-      supportPhone: raffle?.support_phone,
-      rejectionReason: finalReason,
-      verifyUrl:
-        typeof window !== 'undefined' ? `${window.location.origin}/verificar` : '/verificar',
-    });
-  }, [order, buyerName, buyerPhone, buyerEmail, formattedTickets, raffle, finalReason]);
 
   const whatsAppLink = hasValidPhone ? createWhatsAppLink(buyerPhone, whatsAppText) : '';
 
