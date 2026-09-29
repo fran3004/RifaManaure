@@ -26,6 +26,10 @@ export const RaffleClosedWaitingWinner: React.FC<RaffleClosedWaitingWinnerProps>
   drawDateFormatted,
   cifrasText,
 }) => {
+  const isLimitReached = Boolean(
+    raffle?.draw_date && new Date(raffle.draw_date).getTime() <= Date.now()
+  );
+
   return (
     <section id="boletos" className={styles.section} aria-labelledby="titulo-sorteo-cerrado">
       <div className={styles.container}>
@@ -50,8 +54,10 @@ export const RaffleClosedWaitingWinner: React.FC<RaffleClosedWaitingWinnerProps>
             </h2>
             <p className={styles.subtitle}>
               La emisión de boletos para{' '}
-              <strong>{raffle?.title || 'la edición actual'}</strong> ha finalizado exitosamente al
-              haberse cumplido la fecha límite oficial de venta.
+              <strong>{raffle?.title || 'la edición actual'}</strong> ha finalizado exitosamente{' '}
+              {isLimitReached
+                ? 'al haberse cumplido la fecha límite oficial de venta.'
+                : 'al haber concluido la fase de venta de esta edición.'}
             </p>
           </div>
 

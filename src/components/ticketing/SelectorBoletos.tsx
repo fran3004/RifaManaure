@@ -67,6 +67,12 @@ export const SelectorBoletos: React.FC = () => {
   const isRafflePaused = raffle?.status === 'paused' && !isDrawDatePassed;
   const isMaxLimitReached = selectedTickets.length >= maxTicketsPerBuyer;
 
+  // El mensaje de esperar a que el admin ponga al ganador ("¡Venta Cerrada! Esperando al Ganador Oficial")
+  // SOLO debe aparecer en dos casos:
+  // 1. Cuando la rifa concluya automáticamente por el límite de tiempo establecido que ya se cumplió (isDrawDatePassed).
+  // 2. O porque el admin decida cerrar la rifa antes de la fecha específicamente en la opción de "finalizada" (sorteo realizado / ganador premiado).
+  const isWaitingWinner = !winner && (isDrawDatePassed || raffle?.status === 'finished');
+
   const totalTickets = raffle?.total_tickets || 1000;
   const ticketDigits = useMemo(() => getTicketDigits(totalTickets), [totalTickets]);
 
@@ -272,8 +278,9 @@ export const SelectorBoletos: React.FC = () => {
     return <GanadorShowcase winner={winner} />;
   }
 
-  // 2. Si la rifa está cerrada (por fecha límite de sorteo cumplida o estado 'closed'/'finished') y aún no hay ganador
-  if (isRaffleClosed) {
+  // 2. El mensaje de esperar al ganador ("¡Venta Cerrada! Esperando al Ganador Oficial")
+  // SOLO se muestra si se cumplió la fecha límite automáticamente o si el admin la marcó como 'finished' (sorteo realizado / ganador premiado)
+  if (isWaitingWinner) {
     return (
       <RaffleClosedWaitingWinner
         raffle={raffle}

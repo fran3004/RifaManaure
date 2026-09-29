@@ -127,4 +127,66 @@ describe('Cierre Automático de Rifas por Límite de Fecha y Estado de Espera de
       expect(isRaffle2Closed).toBe(false);
     });
   });
+
+  describe('4. Regla Estricta para la Pantalla "Esperando al Ganador Oficial"', () => {
+    const shouldDisplayWaitingWinner = (params: {
+      hasWinner: boolean;
+      status: string;
+      drawDate: string;
+    }) => {
+      const isDrawDatePassed =
+        Boolean(params.drawDate) && new Date(params.drawDate).getTime() <= Date.now();
+      return !params.hasWinner && (isDrawDatePassed || params.status === 'finished');
+    };
+
+    it('debe mostrar "Esperando al Ganador" si la fecha límite ya se cumplió automáticamente', () => {
+      const pastDate = new Date(Date.now() - 100000).toISOString();
+      const result = shouldDisplayWaitingWinner({
+        hasWinner: false,
+        status: 'active',
+        drawDate: pastDate,
+      });
+      expect(result).toBe(true);
+    });
+
+    it('debe mostrar "Esperando al Ganador" si el admin seleccionó estado "finished" antes de la fecha', () => {
+      const futureDate = new Date(Date.now() + 1000000).toISOString();
+      const result = shouldDisplayWaitingWinner({
+        hasWinner: false,
+        status: 'finished',
+        drawDate: futureDate,
+      });
+      expect(result).toBe(true);
+    });
+
+    it('NO debe mostrar "Esperando al Ganador" si el estado es "closed" y la fecha no se ha cumplido', () => {
+      const futureDate = new Date(Date.now() + 1000000).toISOString();
+      const result = shouldDisplayWaitingWinner({
+        hasWinner: false,
+        status: 'closed',
+        drawDate: futureDate,
+      });
+      expect(result).toBe(false);
+    });
+
+    it('NO debe mostrar "Esperando al Ganador" si el estado es "paused" y la fecha no se ha cumplido', () => {
+      const futureDate = new Date(Date.now() + 1000000).toISOString();
+      const result = shouldDisplayWaitingWinner({
+        hasWinner: false,
+        status: 'paused',
+        drawDate: futureDate,
+      });
+      expect(result).toBe(false);
+    });
+
+    it('NO debe mostrar "Esperando al Ganador" si ya existe un ganador proclamado (incluso con fecha cumplida o finished)', () => {
+      const pastDate = new Date(Date.now() - 100000).toISOString();
+      const result = shouldDisplayWaitingWinner({
+        hasWinner: true,
+        status: 'finished',
+        drawDate: pastDate,
+      });
+      expect(result).toBe(false);
+    });
+  });
 });
