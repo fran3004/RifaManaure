@@ -40,6 +40,7 @@ const HomePageContent: React.FC = () => {
   if (isRaffleClosedMode) {
     return (
       <div className="landing-layout" data-theme="public">
+        <Navbar isRaffleClosed />
         <main id="contenido-principal" tabIndex={-1}>
           <PortalRaffleClosed />
           <FilaAliados />

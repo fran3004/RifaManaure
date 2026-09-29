@@ -10,6 +10,8 @@ import {
   Handshake,
   HelpCircle,
   Leaf,
+  ArrowLeft,
+  Search,
 } from 'lucide-react';
 import { Button } from '@/components/public/ui/Button';
 import styles from './Navbar.module.css';
@@ -27,7 +29,11 @@ const NAV_ITEMS: NavItem[] = [
   { id: 'faq', label: 'Preguntas', icon: HelpCircle },
 ];
 
-export const Navbar: React.FC = () => {
+export interface NavbarProps {
+  isRaffleClosed?: boolean;
+}
+
+export const Navbar: React.FC<NavbarProps> = ({ isRaffleClosed = false }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState<string>('');
@@ -210,135 +216,172 @@ export const Navbar: React.FC = () => {
           />
         </Link>
 
-        {/* Enlaces de escritorio (>= 900px) */}
-        <nav className={styles.desktopNav} aria-label="Navegación principal">
-          <div className={styles.linksGroup}>
-            {NAV_ITEMS.map((item) => {
-              const Icon = item.icon;
-              const isActive = effectiveActiveSection === item.id;
-              return (
-                <a
-                  key={item.id}
-                  href={`/#${item.id}`}
-                  className={`${styles.navLink} ${isActive ? styles.navLinkActive : ''}`}
-                  aria-current={isActive ? 'location' : undefined}
-                  onClick={(e) => handleSectionClick(e, item.id)}
+        {isRaffleClosed ? (
+          <div className={styles.closedNavAction}>
+            {location.pathname === '/verificar' ? (
+              <Button
+                as="a"
+                href="/"
+                variant="secondary"
+                size="sm"
+                className={styles.consultarBtn}
+                leftIcon={<ArrowLeft size={16} aria-hidden="true" />}
+              >
+                <span className={styles.btnFullText}>Volver al Inicio</span>
+                <span className={styles.btnShortText}>Inicio</span>
+              </Button>
+            ) : (
+              <Button
+                as="a"
+                href="/verificar"
+                variant="secondary"
+                size="sm"
+                className={styles.consultarBtn}
+                leftIcon={<Search size={16} aria-hidden="true" />}
+                onClick={handleConsultarClick}
+              >
+                <span className={styles.btnFullText}>Consultar Boletos</span>
+                <span className={styles.btnShortText}>Consultar</span>
+              </Button>
+            )}
+          </div>
+        ) : (
+          <>
+            {/* Enlaces de escritorio (>= 900px) */}
+            <nav className={styles.desktopNav} aria-label="Navegación principal">
+              <div className={styles.linksGroup}>
+                {NAV_ITEMS.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = effectiveActiveSection === item.id;
+                  return (
+                    <a
+                      key={item.id}
+                      href={`/#${item.id}`}
+                      className={`${styles.navLink} ${isActive ? styles.navLinkActive : ''}`}
+                      aria-current={isActive ? 'location' : undefined}
+                      onClick={(e) => handleSectionClick(e, item.id)}
+                    >
+                      <Icon size={16} aria-hidden="true" className={styles.navIcon} />
+                      <span>{item.label}</span>
+                    </a>
+                  );
+                })}
+              </div>
+
+              <div className={styles.actionsGroup}>
+                <Button
+                  as="a"
+                  href="/verificar"
+                  variant="secondary"
+                  size="sm"
+                  className={styles.consultarBtn}
+                  leftIcon={<Leaf size={16} aria-hidden="true" />}
+                  onClick={handleConsultarClick}
                 >
-                  <Icon size={16} aria-hidden="true" className={styles.navIcon} />
-                  <span>{item.label}</span>
-                </a>
-              );
-            })}
-          </div>
+                  <span className={styles.btnFullText}>Consultar Boletos</span>
+                  <span className={styles.btnShortText}>Consultar</span>
+                </Button>
+                <Button
+                  as="a"
+                  href="/#boletos"
+                  variant="primary"
+                  size="sm"
+                  className={styles.comprarBtn}
+                  leftIcon={<Ticket size={17} aria-hidden="true" />}
+                  onClick={(e) => handleSectionClick(e, 'boletos')}
+                >
+                  <span className={styles.btnFullText}>Comprar Boletos</span>
+                  <span className={styles.btnShortText}>Comprar</span>
+                </Button>
+              </div>
+            </nav>
 
-          <div className={styles.actionsGroup}>
-            <Button
-              as="a"
-              href="/verificar"
-              variant="secondary"
-              size="sm"
-              className={styles.consultarBtn}
-              leftIcon={<Leaf size={16} aria-hidden="true" />}
-              onClick={handleConsultarClick}
+            {/* Botón menú móvil */}
+            <button
+              ref={menuToggleRef}
+              type="button"
+              className={`${styles.menuToggle} ${mobileMenuOpen ? styles.menuToggleActive : ''}`}
+              onClick={() => setMobileMenuOpen((prev) => !prev)}
+              aria-expanded={mobileMenuOpen}
+              aria-controls="mobile-menu-drawer"
+              aria-label={mobileMenuOpen ? 'Cerrar menú' : 'Abrir menú'}
             >
-              <span className={styles.btnFullText}>Consultar Boletos</span>
-              <span className={styles.btnShortText}>Consultar</span>
-            </Button>
-            <Button
-              as="a"
-              href="/#boletos"
-              variant="primary"
-              size="sm"
-              className={styles.comprarBtn}
-              leftIcon={<Ticket size={17} aria-hidden="true" />}
-              onClick={(e) => handleSectionClick(e, 'boletos')}
-            >
-              <span className={styles.btnFullText}>Comprar Boletos</span>
-              <span className={styles.btnShortText}>Comprar</span>
-            </Button>
-          </div>
-        </nav>
-
-        {/* Botón menú móvil */}
-        <button
-          ref={menuToggleRef}
-          type="button"
-          className={`${styles.menuToggle} ${mobileMenuOpen ? styles.menuToggleActive : ''}`}
-          onClick={() => setMobileMenuOpen((prev) => !prev)}
-          aria-expanded={mobileMenuOpen}
-          aria-controls="mobile-menu-drawer"
-          aria-label={mobileMenuOpen ? 'Cerrar menú' : 'Abrir menú'}
-        >
-          {mobileMenuOpen ? (
-            <X size={24} aria-hidden="true" />
-          ) : (
-            <Menu size={24} aria-hidden="true" />
-          )}
-        </button>
+              {mobileMenuOpen ? (
+                <X size={24} aria-hidden="true" />
+              ) : (
+                <Menu size={24} aria-hidden="true" />
+              )}
+            </button>
+          </>
+        )}
       </div>
 
-      {/* Backdrop oscuro translúcido para cerrar el menú y evitar toques accidentales en el fondo */}
-      <div
-        className={`${styles.mobileBackdrop} ${mobileMenuOpen ? styles.mobileBackdropOpen : ''}`}
-        onClick={closeMenu}
-        aria-hidden="true"
-      />
+      {!isRaffleClosed && (
+        <>
+          {/* Backdrop oscuro translúcido para cerrar el menú y evitar toques accidentales en el fondo */}
+          <div
+            className={`${styles.mobileBackdrop} ${mobileMenuOpen ? styles.mobileBackdropOpen : ''}`}
+            onClick={closeMenu}
+            aria-hidden="true"
+          />
 
-      {/* Menú Móvil Desplegable con animación y foco atrapado */}
-      <nav
-        id="mobile-menu-drawer"
-        ref={mobileMenuRef}
-        className={`${styles.mobileMenu} ${mobileMenuOpen ? styles.mobileMenuOpen : ''}`}
-        aria-label="Menú de navegación móvil"
-        aria-hidden={!mobileMenuOpen}
-        inert={!mobileMenuOpen ? true : undefined}
-      >
-        <div className={styles.mobileLinksList}>
-          {NAV_ITEMS.map((item) => {
-            const Icon = item.icon;
-            const isActive = effectiveActiveSection === item.id;
-            return (
-              <a
-                key={item.id}
-                href={`/#${item.id}`}
-                className={`${styles.mobileNavLink} ${isActive ? styles.mobileNavLinkActive : ''}`}
-                aria-current={isActive ? 'location' : undefined}
-                onClick={(e) => handleSectionClick(e, item.id)}
+          {/* Menú Móvil Desplegable con animación y foco atrapado */}
+          <nav
+            id="mobile-menu-drawer"
+            ref={mobileMenuRef}
+            className={`${styles.mobileMenu} ${mobileMenuOpen ? styles.mobileMenuOpen : ''}`}
+            aria-label="Menú de navegación móvil"
+            aria-hidden={!mobileMenuOpen}
+            inert={!mobileMenuOpen ? true : undefined}
+          >
+            <div className={styles.mobileLinksList}>
+              {NAV_ITEMS.map((item) => {
+                const Icon = item.icon;
+                const isActive = effectiveActiveSection === item.id;
+                return (
+                  <a
+                    key={item.id}
+                    href={`/#${item.id}`}
+                    className={`${styles.mobileNavLink} ${isActive ? styles.mobileNavLinkActive : ''}`}
+                    aria-current={isActive ? 'location' : undefined}
+                    onClick={(e) => handleSectionClick(e, item.id)}
+                  >
+                    <Icon size={18} aria-hidden="true" className={styles.mobileNavIcon} />
+                    <span>{item.label}</span>
+                  </a>
+                );
+              })}
+            </div>
+
+            <hr className={styles.mobileDivider} />
+
+            <div className={styles.mobileActions}>
+              <Button
+                as="a"
+                href="/verificar"
+                variant="secondary"
+                size="md"
+                className={styles.mobileConsultarBtn}
+                leftIcon={<Leaf size={18} aria-hidden="true" />}
+                onClick={handleConsultarClick}
               >
-                <Icon size={18} aria-hidden="true" className={styles.mobileNavIcon} />
-                <span>{item.label}</span>
-              </a>
-            );
-          })}
-        </div>
-
-        <hr className={styles.mobileDivider} />
-
-        <div className={styles.mobileActions}>
-          <Button
-            as="a"
-            href="/verificar"
-            variant="secondary"
-            size="md"
-            className={styles.mobileConsultarBtn}
-            leftIcon={<Leaf size={18} aria-hidden="true" />}
-            onClick={handleConsultarClick}
-          >
-            Consultar Boletos
-          </Button>
-          <Button
-            as="a"
-            href="/#boletos"
-            variant="primary"
-            size="lg"
-            className={styles.mobileComprarBtn}
-            leftIcon={<Ticket size={20} aria-hidden="true" />}
-            onClick={(e) => handleSectionClick(e, 'boletos')}
-          >
-            Comprar Boletos
-          </Button>
-        </div>
-      </nav>
+                Consultar Boletos
+              </Button>
+              <Button
+                as="a"
+                href="/#boletos"
+                variant="primary"
+                size="lg"
+                className={styles.mobileComprarBtn}
+                leftIcon={<Ticket size={20} aria-hidden="true" />}
+                onClick={(e) => handleSectionClick(e, 'boletos')}
+              >
+                Comprar Boletos
+              </Button>
+            </div>
+          </nav>
+        </>
+      )}
     </header>
   );
 };
