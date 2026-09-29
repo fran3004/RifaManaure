@@ -102,7 +102,7 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
   const [proofError, setProofError] = useState<string | null>(null);
   const [isPurgedProof, setIsPurgedProof] = useState<boolean>(false);
 
-  // Modales de AprobaciÃ³n y Rechazo guiados
+  // Modales de Aprobación y Rechazo guiados
   const [isConfirmApproveOpen, setIsConfirmApproveOpen] = useState<boolean>(false);
   const [isRejectModalOpen, setIsRejectModalOpen] = useState<boolean>(false);
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
@@ -172,11 +172,11 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
   }, [isOpen, order?.id, order?.receipt_url, order?.receipt_purged]);
 
   // â”€â”€ HOOKS â”€â”€ Siempre antes de cualquier early return â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  // Canal directo de WhatsApp para la orden actual (si estÃ¡ pagada o rechazada)
+  // Canal directo de WhatsApp para la orden actual (si está pagada o rechazada)
   const currentOrderWhatsApp = useMemo(() => {
     if (!order || !['paid', 'rejected'].includes(order.status)) return null;
     const phone = order.buyers?.phone;
-    if (!phone || phone.trim().length === 0 || phone === 'Sin telÃ©fono') return null;
+    if (!phone || phone.trim().length === 0 || phone === 'Sin teléfono') return null;
 
     const formattedTkts = (order.tickets || []).map((t) => formatTicketNumber(t.number));
     const isPaid = order.status === 'paid';
@@ -244,8 +244,8 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
     setIsConfirmApproveOpen(false);
     setActionSuccess(
       emailSent && updatedOrder.buyers?.email
-        ? `Â¡Pago aprobado! Se confirmaron definitivamente ${updatedOrder.ticket_count} boletos y se despachÃ³ el comprobante a ${updatedOrder.buyers.email}.`
-        : `Â¡Pago aprobado! Se confirmaron definitivamente ${updatedOrder.ticket_count} boletos como vendidos.`
+        ? `¡Pago aprobado! Se confirmaron definitivamente ${updatedOrder.ticket_count} boletos y se despachó el comprobante a ${updatedOrder.buyers.email}.`
+        : `¡Pago aprobado! Se confirmaron definitivamente ${updatedOrder.ticket_count} boletos como vendidos.`
     );
     await onOrderUpdated();
   };
@@ -259,13 +259,13 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
     setIsRejectModalOpen(false);
     setActionSuccess(
       emailSent && updatedOrder.buyers?.email
-        ? `Â¡Orden rechazada y boletos liberados! Se despachÃ³ el correo de notificaciÃ³n a ${updatedOrder.buyers.email}.`
-        : `Â¡Orden rechazada y boletos liberados! La orden quedÃ³ registrada como no aprobada.`
+        ? `¡Orden rechazada y boletos liberados! Se despachó el correo de notificación a ${updatedOrder.buyers.email}.`
+        : `¡Orden rechazada y boletos liberados! La orden quedó registrada como no aprobada.`
     );
     await onOrderUpdated();
   };
 
-  // Abrir WhatsApp del banner superior (registra el evento en auditorÃ­a)
+  // Abrir WhatsApp del banner superior (registra el evento en auditoría)
   const handleOpenWhatsAppManual = async (whatsAppLink?: string) => {
     if (!order || !whatsAppLink) return;
     window.open(whatsAppLink, '_blank', 'noopener,noreferrer');
@@ -314,7 +314,7 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
 
         {/* Cuerpo del Modal con las 4 Secciones Requeridas */}
         <div className={styles.modalBody}>
-          {/* Banner Persistente Superior de NotificaciÃ³n Directa WhatsApp */}
+          {/* Banner Persistente Superior de Notificación Directa WhatsApp */}
           {currentOrderWhatsApp && (
             <div
               className={`${styles.topWhatsAppBanner} ${
@@ -637,7 +637,7 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
                   Comprobante adjunto (disponible durante 15 minutos):
                 </span>
 
-                {/* Avisos de RetenciÃ³n de 5 dÃ­as */}
+                {/* Avisos de Retención de 5 días */}
                 {!isPurged && (order.status === 'paid' || order.status === 'rejected') && (
                   <div className={styles.retentionNoticePill}>
                     <Clock size={15} className={styles.retentionNoticeIcon} />
@@ -821,7 +821,7 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
         />
       )}
 
-      {/* Modal de ConfirmaciÃ³n de AprobaciÃ³n de Pago */}
+      {/* Modal de Confirmación de Aprobación de Pago */}
       <AdminConfirmPaymentModal
         isOpen={isConfirmApproveOpen}
         order={order}
@@ -829,7 +829,7 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
         onClose={() => setIsConfirmApproveOpen(false)}
       />
 
-      {/* Modal Guiado de Rechazo de Pago y LiberaciÃ³n de Boletos */}
+      {/* Modal Guiado de Rechazo de Pago y Liberación de Boletos */}
       <AdminRejectPaymentModal
         isOpen={isRejectModalOpen}
         order={order}

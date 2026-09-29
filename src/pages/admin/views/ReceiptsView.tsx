@@ -103,11 +103,11 @@ const ReceiptThumbnail: React.FC<ReceiptThumbnailProps> = ({
     return (
       <div
         className={`${styles.receiptThumbNotice} ${styles.receiptThumbNoticePurged}`}
-        title="Soporte depurado automÃ¡ticamente por polÃ­tica de retenciÃ³n de 5 dÃ­as."
+        title="Soporte depurado automáticamente por política de retención de 5 días."
       >
         <ShieldCheck size={22} className={styles.receiptThumbNoticeIcon} />
         <span className={styles.receiptPurgedMainText}>Soporte depurado</span>
-        <span className={styles.receiptPurgedSubText}>5 dÃ­as cumplidos</span>
+        <span className={styles.receiptPurgedSubText}>5 días cumplidos</span>
       </div>
     );
   }
@@ -152,7 +152,7 @@ const ReceiptThumbnail: React.FC<ReceiptThumbnailProps> = ({
     <div
       className={styles.receiptImageThumbWrapper}
       onClick={() => onSelect(signedUrl)}
-      title="Clic para ver comprobante en tamaÃ±o completo"
+      title="Clic para ver comprobante en tamaño completo"
     >
       <img
         src={signedUrl}
@@ -230,13 +230,13 @@ export const ReceiptsView: React.FC = () => {
       text:
         res.message ||
         (res.purgedProofsCount > 0
-          ? `Almacenamiento vaciado con Ã©xito: se depuraron ${res.purgedProofsCount} comprobante(s).`
+          ? `Almacenamiento vaciado con éxito: se depuraron ${res.purgedProofsCount} comprobante(s).`
           : 'No se encontraron comprobantes pendientes por vaciar para los filtros seleccionados.'),
     });
     void loadReceipts();
   };
 
-  // Reiniciar pÃ¡gina a 1 si cambia la rifa seleccionada
+  // Reiniciar página a 1 si cambia la rifa seleccionada
   const [prevRaffleId, setPrevRaffleId] = useState(selectedRaffleId);
   if (prevRaffleId !== selectedRaffleId) {
     setPrevRaffleId(selectedRaffleId);
@@ -333,15 +333,15 @@ export const ReceiptsView: React.FC = () => {
     setActionMessage({
       type: 'success',
       text: emailSent && approvedOrd.buyers?.email
-        ? `Â¡Orden ${approvedOrd.reference} aprobada! Boletos confirmados y comprobante oficial enviado a ${approvedOrd.buyers.email}.`
-        : `Â¡Orden ${approvedOrd.reference} aprobada con Ã©xito! Boletos confirmados como vendidos.`,
+        ? `¡Orden ${approvedOrd.reference} aprobada! Boletos confirmados y comprobante oficial enviado a ${approvedOrd.buyers.email}.`
+        : `¡Orden ${approvedOrd.reference} aprobada con éxito! Boletos confirmados como vendidos.`,
     });
     setApprovingOrder(null);
     await loadReceipts();
   };
 
   // Rechazo exitoso coordinado desde AdminRejectPaymentModal
-  // (incluye: liberaciÃ³n de boletos + correo automÃ¡tico + WhatsApp opcional)
+  // (incluye: liberación de boletos + correo automático + WhatsApp opcional)
   const handleRejectSuccess = async (rejectedOrd: OrderWithDetails, emailSent: boolean) => {
     setActionMessage({
       type: 'success',
@@ -356,15 +356,20 @@ export const ReceiptsView: React.FC = () => {
   return (
     <div className={styles.viewContainer}>
       <AdminPageHeader
-        title="ValidaciÃ³n de Comprobantes"
+        title="Validación de Comprobantes"
         description={
           selectedRaffle
-            ? `AuditorÃ­a visual de transferencias bancarias para: ${selectedRaffle.title}`
-            : 'AuditorÃ­a visual de transferencias bancarias y confirmaciÃ³n transaccional de ventas.'
+            ? `Auditoría visual de transferencias bancarias para: ${selectedRaffle.title}`
+            : 'Auditoría visual de transferencias bancarias y confirmación transaccional de ventas.'
         }
         badge={
           selectedRaffle
-            ? `${totalCount} en bandeja (${selectedRaffle.status})`
+            ? `${totalCount} en bandeja (${
+                selectedRaffle.status === 'active' ? 'Activa' :
+                selectedRaffle.status === 'closed' ? 'Finalizada' :
+                selectedRaffle.status === 'paused' ? 'Pausada' :
+                selectedRaffle.status
+              })`
             : `${totalCount} en bandeja`
         }
         actions={
@@ -405,26 +410,26 @@ export const ReceiptsView: React.FC = () => {
         </div>
       )}
 
-      {/* PolÃ­tica Informativa de RetenciÃ³n del Sistema (5 dÃ­as) */}
+      {/* Política Informativa de Retención del Sistema (5 días) */}
       <div className={styles.retentionNoticeBanner}>
         <ShieldCheck size={22} className={styles.retentionNoticeBannerIcon} />
         <div className={styles.retentionNoticeBannerContent}>
           <div className={styles.retentionNoticeHeaderRow}>
             <strong className={styles.retentionNoticeBannerTitle}>
-              PolÃ­tica de RetenciÃ³n y DepuraciÃ³n de Soportes (5 dÃ­as)
+              Política de Retención y Depuración de Soportes (5 días)
             </strong>
             <button
               type="button"
               className={styles.btnPurgeInline}
               onClick={() => setIsPurgeModalOpen(true)}
-              title="Vaciar almacenamiento de comprobantes de inmediato sin esperar los 5 dÃ­as"
+              title="Vaciar almacenamiento de comprobantes de inmediato sin esperar los 5 días"
             >
               <Trash2 size={13} />
               <span>Vaciar Almacenamiento Ahora</span>
             </button>
           </div>
           <p className={styles.retentionNoticeBannerDesc}>
-            Para optimizar el almacenamiento del sistema, los comprobantes de Ã³rdenes <strong>aprobadas o rechazadas</strong> se conservan durante <strong>5 dÃ­as</strong> para auditorÃ­a y luego son depurados automÃ¡ticamente. Los comprobantes pendientes de validaciÃ³n <strong>nunca se eliminan</strong>. Toda la informaciÃ³n contable, referencia, datos del comprador y boletos asignados permanecen 100% protegidos y registrados de forma permanente.
+            Para optimizar el almacenamiento del sistema, los comprobantes de órdenes <strong>aprobadas o rechazadas</strong> se conservan durante <strong>5 días</strong> para auditoría y luego son depurados automáticamente. Los comprobantes pendientes de validación <strong>nunca se eliminan</strong>. Toda la información contable, referencia, datos del comprador y boletos asignados permanecen 100% protegidos y registrados de forma permanente.
           </p>
         </div>
       </div>
@@ -436,7 +441,7 @@ export const ReceiptsView: React.FC = () => {
           <input
             type="text"
             className={styles.searchInput}
-            placeholder="Buscar por referencia, cÃ©dula o comprador..."
+            placeholder="Buscar por referencia, cédula o comprador..."
             value={searchTerm}
             onChange={handleSearchChange}
           />
@@ -448,7 +453,7 @@ export const ReceiptsView: React.FC = () => {
                 setPage(1);
               }}
               className={styles.searchClearBtn}
-              title="Limpiar bÃºsqueda"
+              title="Limpiar búsqueda"
             >
               <X size={16} />
             </button>
@@ -489,8 +494,8 @@ export const ReceiptsView: React.FC = () => {
         <div className={styles.cardSection}>
           <AdminEmptyState
             icon={<CheckCircle2 size={36} />}
-            title="Bandeja al dÃ­a"
-            description="No hay transferencias pendientes de validaciÃ³n en este momento."
+            title="Bandeja al día"
+            description="No hay transferencias pendientes de validación en este momento."
           />
         </div>
       ) : (
@@ -585,7 +590,7 @@ export const ReceiptsView: React.FC = () => {
                 {/* Boletos Asociados */}
                 <div>
                   <span className={styles.receiptTicketsLabel}>
-                    NÃºmeros Reservados:
+                    Números Reservados:
                   </span>
                   <div className={styles.receiptTicketsRow}>
                     {(ord.tickets || []).map((t) => (
@@ -602,7 +607,7 @@ export const ReceiptsView: React.FC = () => {
                     type="button"
                     className={`${styles.btnSecondary} ${styles.btnFlex}`}
                     onClick={() => setSelectedReviewOrder(ord)}
-                    title="Abrir auditorÃ­a completa con datos del comprador y comprobante"
+                    title="Abrir auditoría completa con datos del comprador y comprobante"
                   >
                     <Eye size={15} />
                     <span>Revisar</span>
@@ -636,7 +641,7 @@ export const ReceiptsView: React.FC = () => {
         </div>
       )}
 
-      {/* Barra de PaginaciÃ³n */}
+      {/* Barra de Paginación */}
       {!isLoading && totalCount > 0 && (
         <div className={styles.paginationBar}>
           <div className={styles.paginationInfo}>
@@ -647,7 +652,7 @@ export const ReceiptsView: React.FC = () => {
           <div className={styles.paginationControls}>
             <div className={styles.pageSizeRow}>
               <span className={styles.pageSizeLabel}>
-                Por pÃ¡g.:
+                Por pág.:
               </span>
               <select
                 className={styles.pageSizeSelect}
@@ -666,7 +671,7 @@ export const ReceiptsView: React.FC = () => {
               className={styles.paginationBtn}
               onClick={() => setPage(1)}
               disabled={page <= 1 || isLoading}
-              title="Primera pÃ¡gina"
+              title="Primera página"
             >
               <ChevronsLeft size={16} />
             </button>
@@ -676,14 +681,14 @@ export const ReceiptsView: React.FC = () => {
               className={styles.paginationBtn}
               onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
               disabled={page <= 1 || isLoading}
-              title="PÃ¡gina anterior"
+              title="Página anterior"
             >
               <ChevronLeft size={16} />
               <span>Anterior</span>
             </button>
 
             <span className={styles.paginationPageBadge}>
-              PÃ¡g. {page} de {totalPages}
+              Pág. {page} de {totalPages}
             </span>
 
             <button
@@ -691,7 +696,7 @@ export const ReceiptsView: React.FC = () => {
               className={styles.paginationBtn}
               onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))}
               disabled={page >= totalPages || isLoading}
-              title="PÃ¡gina siguiente"
+              title="Página siguiente"
             >
               <span>Siguiente</span>
               <ChevronRight size={16} />
@@ -702,7 +707,7 @@ export const ReceiptsView: React.FC = () => {
               className={styles.paginationBtn}
               onClick={() => setPage(totalPages)}
               disabled={page >= totalPages || isLoading}
-              title="Ãšltima pÃ¡gina"
+              title="Ãšltima página"
             >
               <ChevronsRight size={16} />
             </button>
@@ -710,7 +715,7 @@ export const ReceiptsView: React.FC = () => {
         </div>
       )}
 
-      {/* Modal de Imagen / PDF de Comprobante en Alta ResoluciÃ³n */}
+      {/* Modal de Imagen / PDF de Comprobante en Alta Resolución */}
       {selectedReceipt && (
         <div
           className={styles.adminModalBackdrop}
@@ -726,7 +731,7 @@ export const ReceiptsView: React.FC = () => {
             className={`${styles.adminModalCard} ${styles.receiptViewerCard}`}
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Cabecera del Visor con TÃ­tulo y Estado */}
+            {/* Cabecera del Visor con Título y Estado */}
             <div className={styles.receiptModalHeader}>
               <div className={styles.receiptModalHeaderLeft}>
                 <div className={styles.receiptModalTitleRow}>
@@ -812,7 +817,7 @@ export const ReceiptsView: React.FC = () => {
               )}
             </div>
 
-            {/* Barra de Herramientas de VisualizaciÃ³n */}
+            {/* Barra de Herramientas de Visualización */}
             <div className={styles.receiptToolbar}>
               <div className={styles.receiptToolbarLeft}>
                 <span className={styles.receiptTypeTag}>
@@ -858,7 +863,7 @@ export const ReceiptsView: React.FC = () => {
                       type="button"
                       className={styles.receiptToolBtn}
                       onClick={() => setReceiptZoom(1)}
-                      title="Restablecer tamaÃ±o original (100%)"
+                      title="Restablecer tamaño original (100%)"
                       aria-label="Restablecer zoom"
                     >
                       <RotateCcw size={14} />
@@ -898,7 +903,7 @@ export const ReceiptsView: React.FC = () => {
               <div className={styles.receiptSecurityNotice}>
                 <ShieldCheck size={16} className={styles.receiptSecurityNoticeIcon} />
                 <span>
-                  Enlace seguro cifrado con expiraciÃ³n de 15 minutos. Protege la informaciÃ³n bancaria y privacidad del comprador.
+                  Enlace seguro cifrado con expiración de 15 minutos. Protege la información bancaria y privacidad del comprador.
                 </span>
               </div>
               <div className={styles.receiptModalFooterActions}>
@@ -927,7 +932,7 @@ export const ReceiptsView: React.FC = () => {
                   className={`${styles.btnSecondary} ${styles.receiptOpenLinkBtn}`}
                 >
                   <ExternalLink size={15} />
-                  <span>Abrir en PestaÃ±a Nueva</span>
+                  <span>Abrir en Pestaña Nueva</span>
                 </a>
                 <button
                   type="button"
@@ -945,7 +950,7 @@ export const ReceiptsView: React.FC = () => {
         </div>
       )}
 
-      {/* Modal Guiado de Rechazo de Pago â€” con correo automÃ¡tico y WhatsApp */}
+      {/* Modal Guiado de Rechazo de Pago â€” con correo automático y WhatsApp */}
       <AdminRejectPaymentModal
         isOpen={Boolean(rejectingOrder)}
         order={rejectingOrder}
@@ -953,7 +958,7 @@ export const ReceiptsView: React.FC = () => {
         onClose={() => setRejectingOrder(null)}
       />
 
-      {/* Modal Principal de AuditorÃ­a y VerificaciÃ³n */}
+      {/* Modal Principal de Auditoría y Verificación */}
       <AdminOrderReviewModal
         order={selectedReviewOrder}
         isOpen={Boolean(selectedReviewOrder)}
@@ -962,7 +967,7 @@ export const ReceiptsView: React.FC = () => {
         allowPaymentActions={true}
       />
 
-      {/* Modal de ConfirmaciÃ³n de AprobaciÃ³n de Pago */}
+      {/* Modal de Confirmación de Aprobación de Pago */}
       <AdminConfirmPaymentModal
         isOpen={Boolean(approvingOrder)}
         order={approvingOrder}
