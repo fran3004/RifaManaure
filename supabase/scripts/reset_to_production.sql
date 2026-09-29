@@ -3,7 +3,7 @@
 -- ARCHIVO: supabase/scripts/reset_to_production.sql
 -- ==============================================================================
 -- PROPÓSITO:
--- Permite vaciar por completo todos los datos transaccionales de prueba
+-- Vaciar por completo todos los datos transaccionales de prueba
 -- (órdenes, comprobantes, compradores, ganadores, notificaciones y logs)
 -- dejando la plataforma en blanco, limpia y lista para entregas o nuevas ediciones,
 -- PRESERVANDO INTACTOS TODOS LOS ACTIVOS ESENCIALES:
@@ -17,105 +17,115 @@
 --   8. Usuarios administradores y superadministradores (admin_users).
 --   9. Ajustes de la plataforma y preguntas frecuentes (system_settings, faq_items).
 -- ==============================================================================
+-- TÉCNICA: session_replication_role = 'replica'
+--   • Bypasea TODOS los triggers de usuario (incluyendo validaciones comerciales)
+--     SIN necesitar ALTER TABLE DISABLE TRIGGER (que falla con pending trigger events).
+--   • NO desactiva los triggers de sistema (RI_ConstraintTrigger_* de claves foráneas).
+--   • Requiere rol postgres / service_role (Supabase lo permite con acceso total).
+--   • Se restaura automáticamente al cerrar la sesión, pero se restaura explícitamente
+--     al final para máxima seguridad.
+-- ==============================================================================
 
 -- ------------------------------------------------------------------------------
--- PASO 1: DESACTIVAR ÚNICAMENTE LOS TRIGGERS DE VALIDACIÓN COMERCIAL POR NOMBRE
--- NOTA IMPORTANTE: En Supabase NO debe usarse 'DISABLE TRIGGER ALL' porque intenta
--- apagar los triggers del sistema de claves foráneas (RI_ConstraintTrigger_*)
--- lo cual genera error 42501. Desactivar por nombre específico es 100% seguro.
+-- PASO 1: ACTIVAR MODO RÉPLICA — bypasea triggers de validación comercial
+-- (Evita el error "cannot ALTER TABLE because it has pending trigger events")
 -- ------------------------------------------------------------------------------
-ALTER TABLE public.tickets DISABLE TRIGGER trg_validate_ticket_status;
-ALTER TABLE public.orders DISABLE TRIGGER trg_validate_order_status;
+SET session_replication_role = 'replica';
 
 -- ------------------------------------------------------------------------------
--- PASO 2: RESTABLECER LA TOTALIDAD DE LOS BOLETOS A DISPONIBLES Y PURGAR PRUEBAS
+-- PASO 2: RESTABLECER BOLETOS A DISPONIBLES (sin restricciones de transición)
 -- ------------------------------------------------------------------------------
--- 2.1 Restablecer todos los boletos al estado original 'available' (libres de comprador, orden y reservas)
+
+-- 2.1 Restablecer todos los boletos al estado original 'available'
 UPDATE public.tickets
-SET 
-    status = 'available',
-    buyer_id = NULL,
-    order_id = NULL,
-    reserved_at = NULL,
+SET
+    status             = 'available',
+    buyer_id           = NULL,
+    order_id           = NULL,
+    reserved_at        = NULL,
     reservation_expires_at = NULL,
-    updated_at = NOW();
+    updated_at         = NOW();
 
 -- 2.2 Sincronizar grilla pública en tiempo real
 UPDATE public.ticket_public_state
-SET 
-    status = 'available',
+SET
+    status     = 'available',
     updated_at = NOW();
 
--- 2.3 Eliminar dependencias de órdenes (ganadores, comprobantes y notificaciones)
+-- ------------------------------------------------------------------------------
+-- PASO 3: BORRAR DATOS TRANSACCIONALES (en orden correcto por FK)
+-- ------------------------------------------------------------------------------
+
+-- 3.1 Tablas dependientes de orders (antes de borrar órdenes)
 DELETE FROM public.winners;
 DELETE FROM public.payment_proofs;
 DELETE FROM public.notification_logs;
 
--- 2.4 Eliminar órdenes de prueba (ya no tienen boletos asociados)
+-- 3.2 Órdenes (ya sin boletos ni dependencias)
 DELETE FROM public.orders;
 
--- 2.5 Eliminar compradores de prueba (Habeas data limpio)
+-- 3.3 Compradores (Habeas data limpio — sin órdenes huérfanas)
 DELETE FROM public.buyers;
 
--- 2.6 Limpiar auditoría transaccional de prueba y bloqueos temporales de rate-limit
+-- 3.4 Logs de auditoría y bloqueos de rate-limit de prueba
 DELETE FROM public.audit_logs;
 DELETE FROM public.verification_rate_limits;
 
--- 2.7 Asegurar que la rifa actual quede en estado activo para ventas reales
+-- ------------------------------------------------------------------------------
+-- PASO 4: ACTIVAR LA RIFA PARA VENTAS REALES
+-- ------------------------------------------------------------------------------
 UPDATE public.raffles
-SET 
-    status = 'active',
+SET
+    status     = 'active',
     updated_at = NOW()
 WHERE status IN ('active', 'closed', 'paused');
 
 -- ------------------------------------------------------------------------------
--- PASO 3: REACTIVAR DE INMEDIATO LOS TRIGGERS DE SEGURIDAD
+-- PASO 5: RESTAURAR MODO NORMAL — reactivar todos los triggers de validación
 -- ------------------------------------------------------------------------------
-ALTER TABLE public.tickets ENABLE TRIGGER trg_validate_ticket_status;
-ALTER TABLE public.orders ENABLE TRIGGER trg_validate_order_status;
-
--- ------------------------------------------------------------------------------
--- PASO 4: ALMACENAMIENTO DE COMPROBANTES (STORAGE)
--- NOTA: Supabase bloquea 'DELETE FROM storage.objects' directo por el trigger protect_delete.
--- Para vaciar las imágenes de prueba del bucket privado 'payment-proofs':
---   Opción A: Ir en Supabase Dashboard a Storage > bucket 'payment-proofs' > Seleccionar archivos > Delete.
---   Opción B: Usar la RPC administrativa integrada en el sistema o la Storage API.
--- ------------------------------------------------------------------------------
-
+SET session_replication_role = 'origin';
 
 -- ==============================================================================
 -- CONSULTA DE CERTIFICACIÓN Y AUDITORÍA POST-PURGA
 -- (Ejecutar para constatar balance en ceros y seguridad activa)
 -- ==============================================================================
 
--- 1. Balance general de datos (Cero ventas, Activos 100% preservados):
-SELECT 
-    (SELECT COUNT(*) FROM public.buyers) AS compradores_prueba,
-    (SELECT COUNT(*) FROM public.orders) AS ordenes_prueba,
-    (SELECT COUNT(*) FROM public.payment_proofs) AS comprobantes_prueba,
-    (SELECT COUNT(*) FROM public.winners) AS ganadores_prueba,
+-- 1. Balance general (cero ventas, activos 100% preservados):
+SELECT
+    (SELECT COUNT(*) FROM public.buyers)                              AS compradores_prueba,
+    (SELECT COUNT(*) FROM public.orders)                              AS ordenes_prueba,
+    (SELECT COUNT(*) FROM public.payment_proofs)                      AS comprobantes_prueba,
+    (SELECT COUNT(*) FROM public.winners)                             AS ganadores_prueba,
+    (SELECT COUNT(*) FROM public.notification_logs)                   AS notificaciones_prueba,
     (SELECT COUNT(*) FROM public.tickets WHERE status != 'available') AS boletos_ocupados,
-    (SELECT COUNT(*) FROM public.tickets WHERE status = 'available') AS boletos_disponibles,
-    (SELECT COUNT(*) FROM public.ticket_public_state WHERE status != 'available') AS grilla_ocupados,
-    (SELECT COUNT(*) FROM public.ticket_public_state WHERE status = 'available') AS grilla_disponibles,
-    (SELECT COUNT(*) FROM public.partners) AS aliados_intactos,
-    (SELECT COUNT(*) FROM public.prize_settings) AS premio_intacto,
-    (SELECT COUNT(*) FROM public.gallery_items) AS fotos_galeria_intactas,
-    (SELECT COUNT(*) FROM public.payment_accounts) AS cuentas_pago_intactas,
-    (SELECT COUNT(*) FROM public.admin_users) AS administradores_intactos;
+    (SELECT COUNT(*) FROM public.tickets WHERE status = 'available')  AS boletos_disponibles,
+    (SELECT COUNT(*) FROM public.partners)                            AS aliados_intactos,
+    (SELECT COUNT(*) FROM public.prize_settings)                      AS premio_intacto,
+    (SELECT COUNT(*) FROM public.gallery_items)                       AS fotos_galeria_intactas,
+    (SELECT COUNT(*) FROM public.payment_accounts)                    AS cuentas_pago_intactas,
+    (SELECT COUNT(*) FROM public.admin_users)                         AS administradores_intactos;
 
--- 2. Certificación de seguridad (Triggers de integridad activos):
-SELECT 
-    c.relname AS tabla,
-    t.tgname AS disparador_seguridad,
+-- 2. Certificación de seguridad (triggers de integridad activos post-purga):
+SELECT
+    c.relname                   AS tabla,
+    t.tgname                    AS disparador_seguridad,
     CASE t.tgenabled
-        WHEN 'O' THEN '✅ Activo (Habilitado)'
+        WHEN 'O' THEN '✅ Activo'
         WHEN 'D' THEN '❌ Deshabilitado'
-        ELSE 'Otro estado'
-    END AS estado_politica
-FROM pg_trigger t
-JOIN pg_class c ON t.tgrelid = c.oid
-JOIN pg_namespace n ON c.relnamespace = n.oid
-WHERE n.nspname = 'public'
-  AND c.relname IN ('tickets', 'orders', 'ticket_public_state', 'buyers', 'raffles')
-  AND NOT t.tgisinternal;
+        ELSE t.tgenabled::text
+    END                         AS estado_politica
+FROM   pg_trigger    t
+JOIN   pg_class      c ON t.tgrelid    = c.oid
+JOIN   pg_namespace  n ON c.relnamespace = n.oid
+WHERE  n.nspname = 'public'
+  AND  c.relname IN ('tickets', 'orders', 'ticket_public_state', 'buyers', 'raffles')
+  AND  NOT t.tgisinternal
+ORDER  BY c.relname, t.tgname;
+
+-- ==============================================================================
+-- NOTA SOBRE ALMACENAMIENTO (storage.objects — bucket 'payment-proofs'):
+-- Las imágenes de comprobantes NO se pueden borrar con DELETE directo por el
+-- trigger storage.protect_delete(). Para vaciarlas usar:
+--   Opción A (recomendada): Supabase Dashboard → Storage → payment-proofs → seleccionar todo → Delete.
+--   Opción B: RPC administrativa o Storage API con service_role key.
+-- ==============================================================================
