@@ -33,12 +33,28 @@ import {
   ChevronsRight,
   ShieldCheck,
   Trash2,
+  ZoomIn,
+  ZoomOut,
+  RotateCcw,
+  ExternalLink,
+  Receipt,
 } from 'lucide-react';
 import { AdminOrderReviewModal } from '@/components/admin/orders/AdminOrderReviewModal';
 import { AdminConfirmPaymentModal } from '@/components/admin/orders/AdminConfirmPaymentModal';
 import { AdminPurgeStorageModal } from '@/components/admin/orders/AdminPurgeStorageModal';
 import type { PurgeStorageResult } from '@/services/paymentService';
 import styles from './AdminViews.module.css';
+
+interface SelectedReceiptPreview {
+  url: string;
+  reference: string;
+  buyerName?: string;
+  buyerDocument?: string;
+  buyerPhone?: string;
+  totalAmount?: number;
+  ticketCount?: number;
+  status?: string;
+}
 
 interface ReceiptThumbnailProps {
   receiptPath: string;
@@ -185,7 +201,22 @@ export const ReceiptsView: React.FC = () => {
     }
   }, [searchParams]);
   const { selectedRaffleId, selectedRaffle } = useAdminRaffle();
-  const [selectedReceiptUrl, setSelectedReceiptUrl] = useState<string | null>(null);
+  const [selectedReceipt, setSelectedReceipt] = useState<SelectedReceiptPreview | null>(null);
+  const [receiptZoom, setReceiptZoom] = useState<number>(1);
+
+  // Atajo de teclado para cerrar el visor con la tecla Escape
+  useEffect(() => {
+    if (!selectedReceipt) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setSelectedReceipt(null);
+        setReceiptZoom(1);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedReceipt]);
+
   const [approvingOrder, setApprovingOrder] = useState<OrderWithDetails | null>(null);
   const [rejectingOrder, setRejectingOrder] = useState<OrderWithDetails | null>(null);
   const [rejectionReason, setRejectionReason] = useState<string>(
@@ -564,7 +595,18 @@ export const ReceiptsView: React.FC = () => {
                     receiptPath={ord.receipt_url}
                     reference={ord.reference}
                     isPurged={ord.receipt_purged}
-                    onSelect={(url) => setSelectedReceiptUrl(url)}
+                    onSelect={(url) =>
+                      setSelectedReceipt({
+                        url,
+                        reference: ord.reference,
+                        buyerName: ord.buyers?.full_name,
+                        buyerDocument: ord.buyers?.document_id,
+                        buyerPhone: ord.buyers?.phone,
+                        totalAmount: ord.total_amount,
+                        ticketCount: ord.ticket_count,
+                        status: ord.status,
+                      })
+                    }
                   />
                 ) : (
                   <div className={styles.receiptEmptyBox}>
@@ -707,58 +749,217 @@ export const ReceiptsView: React.FC = () => {
       )}
 
       {/* Modal de Imagen / PDF de Comprobante en Alta Resolución */}
-      {selectedReceiptUrl && (
-        <div className={styles.adminModalBackdrop} onClick={() => setSelectedReceiptUrl(null)}>
+      {selectedReceipt && (
+        <div
+          className={styles.adminModalBackdrop}
+          onClick={() => {
+            setSelectedReceipt(null);
+            setReceiptZoom(1);
+          }}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="receipt-modal-title"
+        >
           <div
             className={`${styles.adminModalCard} ${styles.receiptViewerCard}`}
             onClick={(e) => e.stopPropagation()}
           >
+            {/* Cabecera del Visor con Título y Estado */}
             <div className={styles.receiptModalHeader}>
-              <div>
-                <h3 className={styles.receiptModalTitle}>
-                  Soporte de Transferencia Bancaria
-                </h3>
-                <span className={styles.receiptModalSubtitle}>
-                  Acceso privado y temporal autorizado (15 minutos de vigencia)
-                </span>
+              <div className={styles.receiptModalHeaderLeft}>
+                <div className={styles.receiptModalTitleRow}>
+                  <div className={styles.receiptModalIconBadge}>
+                    <Receipt size={22} />
+                  </div>
+                  <div>
+                    <h3 id="receipt-modal-title" className={styles.receiptModalTitle}>
+                      Soporte de Transferencia Bancaria
+                    </h3>
+                    <p className={styles.receiptModalSubtitle}>
+                      Acceso seguro y temporal autorizado (15 minutos de vigencia)
+                    </p>
+                  </div>
+                </div>
               </div>
               <button
                 type="button"
                 className={`${styles.btnSecondary} ${styles.btnReceiptModalClose}`}
-                onClick={() => setSelectedReceiptUrl(null)}
+                onClick={() => {
+                  setSelectedReceipt(null);
+                  setReceiptZoom(1);
+                }}
+                aria-label="Cerrar visor"
+                title="Cerrar visor (Esc)"
               >
                 <X size={18} />
               </button>
             </div>
 
-            <div className={styles.receiptViewerContainer}>
-              {selectedReceiptUrl.toLowerCase().includes('.pdf') ? (
-                <iframe
-                  src={selectedReceiptUrl}
-                  title="Comprobante PDF"
-                  className={styles.receiptIframe}
-                />
-              ) : (
-                <img
-                  src={selectedReceiptUrl}
-                  alt="Comprobante de pago"
-                  className={styles.receiptFullImg}
-                />
+            {/* Barra de Contexto de la Orden */}
+            <div className={styles.receiptMetaBar}>
+              <div className={styles.receiptMetaItem}>
+                <span className={styles.receiptMetaLabel}>Referencia</span>
+                <span className={styles.receiptMetaValueMono}>
+                  {selectedReceipt.reference}
+                </span>
+              </div>
+
+              <div className={styles.receiptMetaItem}>
+                <span className={styles.receiptMetaLabel}>Comprador</span>
+                <span className={styles.receiptMetaValue} title={selectedReceipt.buyerName || 'No registrado'}>
+                  {selectedReceipt.buyerName || 'No registrado'}
+                </span>
+              </div>
+
+              {selectedReceipt.totalAmount !== undefined && (
+                <div className={styles.receiptMetaItem}>
+                  <span className={styles.receiptMetaLabel}>Monto a Validar</span>
+                  <span className={styles.receiptMetaValueHighlight}>
+                    {formatCOP(selectedReceipt.totalAmount)}
+                    {selectedReceipt.ticketCount ? ` (${selectedReceipt.ticketCount} bol.)` : ''}
+                  </span>
+                </div>
+              )}
+
+              {selectedReceipt.status && (
+                <div className={styles.receiptMetaItem}>
+                  <span className={styles.receiptMetaLabel}>Estado Actual</span>
+                  <div>
+                    {selectedReceipt.status === 'pending_verification' && (
+                      <span className={styles.badgeWarning}>
+                        <Clock size={12} /> Por Validar
+                      </span>
+                    )}
+                    {selectedReceipt.status === 'paid' && (
+                      <span className={styles.badgeSuccess}>
+                        <Check size={12} /> Aprobado
+                      </span>
+                    )}
+                    {selectedReceipt.status === 'rejected' && (
+                      <span className={styles.badgeDanger}>
+                        <XCircle size={12} /> Rechazado
+                      </span>
+                    )}
+                    {!['pending_verification', 'paid', 'rejected'].includes(selectedReceipt.status) && (
+                      <span className={styles.badgeNeutral}>
+                        {selectedReceipt.status}
+                      </span>
+                    )}
+                  </div>
+                </div>
               )}
             </div>
 
+            {/* Barra de Herramientas de Visualización */}
+            <div className={styles.receiptToolbar}>
+              <div className={styles.receiptToolbarLeft}>
+                <span className={styles.receiptTypeTag}>
+                  {selectedReceipt.url.toLowerCase().includes('.pdf') ? (
+                    <>
+                      <FileText size={13} /> Documento PDF
+                    </>
+                  ) : (
+                    <>
+                      <Eye size={13} /> Imagen Comprobante
+                    </>
+                  )}
+                </span>
+              </div>
+
+              {!selectedReceipt.url.toLowerCase().includes('.pdf') && (
+                <div className={styles.receiptToolbarRight}>
+                  <button
+                    type="button"
+                    className={styles.receiptToolBtn}
+                    onClick={() => setReceiptZoom((z) => Math.max(0.5, Number((z - 0.25).toFixed(2))))}
+                    disabled={receiptZoom <= 0.5}
+                    title="Alejar (Zoom Out)"
+                    aria-label="Alejar comprobante"
+                  >
+                    <ZoomOut size={16} />
+                  </button>
+                  <span className={styles.receiptZoomBadge}>
+                    {Math.round(receiptZoom * 100)}%
+                  </span>
+                  <button
+                    type="button"
+                    className={styles.receiptToolBtn}
+                    onClick={() => setReceiptZoom((z) => Math.min(3, Number((z + 0.25).toFixed(2))))}
+                    disabled={receiptZoom >= 3}
+                    title="Acercar (Zoom In)"
+                    aria-label="Acercar comprobante"
+                  >
+                    <ZoomIn size={16} />
+                  </button>
+                  {receiptZoom !== 1 && (
+                    <button
+                      type="button"
+                      className={styles.receiptToolBtn}
+                      onClick={() => setReceiptZoom(1)}
+                      title="Restablecer tamaño original (100%)"
+                      aria-label="Restablecer zoom"
+                    >
+                      <RotateCcw size={14} />
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Contenedor del Comprobante */}
+            <div className={styles.receiptViewerContainer}>
+              {selectedReceipt.url.toLowerCase().includes('.pdf') ? (
+                <iframe
+                  src={selectedReceipt.url}
+                  title={`Comprobante PDF - ${selectedReceipt.reference}`}
+                  className={styles.receiptIframe}
+                />
+              ) : (
+                <div
+                  className={styles.receiptImgWrapper}
+                  style={{
+                    transform: `scale(${receiptZoom})`,
+                    transformOrigin: 'top center',
+                  }}
+                >
+                  <img
+                    src={selectedReceipt.url}
+                    alt={`Comprobante de pago para orden ${selectedReceipt.reference}`}
+                    className={styles.receiptFullImg}
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Pie del Modal con Advertencia de Seguridad y Acciones */}
             <div className={styles.receiptModalFooter}>
-              <span className={styles.receiptSecurityNotice}>
-                * Nunca se generan enlaces públicos permanentes para proteger los datos bancarios.
-              </span>
-              <a
-                href={selectedReceiptUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={styles.btnSecondary}
-              >
-                Abrir en Pestaña Nueva
-              </a>
+              <div className={styles.receiptSecurityNotice}>
+                <ShieldCheck size={16} className={styles.receiptSecurityNoticeIcon} />
+                <span>
+                  Enlace seguro cifrado con expiración de 15 minutos. Protege la información bancaria y privacidad del comprador.
+                </span>
+              </div>
+              <div className={styles.receiptModalFooterActions}>
+                <a
+                  href={selectedReceipt.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`${styles.btnSecondary} ${styles.receiptOpenLinkBtn}`}
+                >
+                  <ExternalLink size={15} />
+                  <span>Abrir en Pestaña Nueva</span>
+                </a>
+                <button
+                  type="button"
+                  className={styles.btnPrimary}
+                  onClick={() => {
+                    setSelectedReceipt(null);
+                    setReceiptZoom(1);
+                  }}
+                >
+                  Cerrar
+                </button>
+              </div>
             </div>
           </div>
         </div>
