@@ -6,7 +6,6 @@ import { AdminLoadingState } from '@/components/admin/common/AdminLoadingState';
 import { AdminErrorState } from '@/components/admin/common/AdminErrorState';
 import {
   fetchAdminOrdersPaginated,
-  rejectOrderPayment,
   getSignedProofUrl,
   type OrderWithDetails,
 } from '@/services/paymentService';
@@ -40,6 +39,7 @@ import {
 } from 'lucide-react';
 import { AdminOrderReviewModal } from '@/components/admin/orders/AdminOrderReviewModal';
 import { AdminConfirmPaymentModal } from '@/components/admin/orders/AdminConfirmPaymentModal';
+import { AdminRejectPaymentModal } from '@/components/admin/orders/AdminRejectPaymentModal';
 import { AdminPurgeStorageModal } from '@/components/admin/orders/AdminPurgeStorageModal';
 import type { PurgeStorageResult } from '@/services/paymentService';
 import styles from './AdminViews.module.css';
@@ -218,10 +218,6 @@ export const ReceiptsView: React.FC = () => {
 
   const [approvingOrder, setApprovingOrder] = useState<OrderWithDetails | null>(null);
   const [rejectingOrder, setRejectingOrder] = useState<OrderWithDetails | null>(null);
-  const [rejectionReason, setRejectionReason] = useState<string>(
-    'Comprobante ilegible o no coincide con los valores recibidos'
-  );
-  const [actionProcessingId, setActionProcessingId] = useState<string | null>(null);
   const [actionMessage, setActionMessage] = useState<{
     type: 'success' | 'error';
     text: string;
@@ -344,31 +340,17 @@ export const ReceiptsView: React.FC = () => {
     await loadReceipts();
   };
 
-  const handleConfirmReject = async () => {
-    if (!rejectingOrder) return;
-
-    setActionProcessingId(rejectingOrder.id);
-    setActionMessage(null);
-
-    const result = await rejectOrderPayment(rejectingOrder.id, rejectionReason);
-
-    if (result.success) {
-      setActionMessage({
-        type: 'success',
-        text: `Orden ${rejectingOrder.reference} rechazada y boletos liberados.`,
-      });
-      setRejectingOrder(null);
-      await loadReceipts();
-    } else {
-      const normalized = normalizeAppError(
-        { message: result.error, code: result.code },
-        'No se pudo rechazar la orden.'
-      );
-      logAppError('ReceiptsView.handleConfirmReject', normalized);
-      setActionMessage({ type: 'error', text: normalized.userMessage });
-    }
-
-    setActionProcessingId(null);
+  // Rechazo exitoso coordinado desde AdminRejectPaymentModal
+  // (incluye: liberación de boletos + correo automático + WhatsApp opcional)
+  const handleRejectSuccess = async (rejectedOrd: OrderWithDetails, emailSent: boolean) => {
+    setActionMessage({
+      type: 'success',
+      text: emailSent && rejectedOrd.buyers?.email
+        ? `Orden ${rejectedOrd.reference} rechazada y boletos liberados. Correo enviado a ${rejectedOrd.buyers.email}.`
+        : `Orden ${rejectedOrd.reference} rechazada y boletos liberados.`,
+    });
+    setRejectingOrder(null);
+    await loadReceipts();
   };
 
   return (
@@ -514,7 +496,7 @@ export const ReceiptsView: React.FC = () => {
       ) : (
         <div className={styles.receiptGrid}>
           {orders.map((ord) => {
-            const isProcessing = actionProcessingId === ord.id;
+            const isProcessing = false; // Los modales de acción gestionan su propio estado de carga
             const hasReceipt = Boolean(ord.receipt_url && ord.receipt_url.trim().length > 0);
             const isPending = ord.status === 'pending_verification' && hasReceipt;
 
@@ -966,64 +948,13 @@ export const ReceiptsView: React.FC = () => {
         </div>
       )}
 
-      {/* Modal para Motivo de Rechazo */}
-      {rejectingOrder && (
-        <div className={styles.adminModalBackdrop} onClick={() => setRejectingOrder(null)}>
-          <div className={styles.adminModalCard} onClick={(e) => e.stopPropagation()}>
-            <div className={styles.modalHeaderBetween}>
-              <h3 className={styles.rejectModalTitle}>
-                <XCircle size={22} />
-                Rechazar Orden {rejectingOrder.reference}
-              </h3>
-              <button
-                type="button"
-                className={`${styles.btnSecondary} ${styles.modalCloseMiniBtn}`}
-                onClick={() => setRejectingOrder(null)}
-              >
-                <X size={16} />
-              </button>
-            </div>
-
-            <p className={styles.modalDescriptionText}>
-              Al rechazar esta orden, los{' '}
-              <strong className={styles.highlightText}>{rejectingOrder.ticket_count} boletos</strong>{' '}
-              reservados serán liberados inmediatamente a la plataforma pública para que otros
-              usuarios puedan adquirirlos.
-            </p>
-
-            <div>
-              <label className={styles.modalFieldLabel}>
-                Motivo del Rechazo:
-              </label>
-              <textarea
-                value={rejectionReason}
-                onChange={(e) => setRejectionReason(e.target.value)}
-                rows={3}
-                className={styles.modalReasonTextarea}
-              />
-            </div>
-
-            <div className={styles.modalFooterActions}>
-              <button
-                type="button"
-                className={styles.btnSecondary}
-                onClick={() => setRejectingOrder(null)}
-              >
-                Cancelar
-              </button>
-              <button
-                type="button"
-                className={styles.btnDanger}
-                onClick={() => void handleConfirmReject()}
-                disabled={Boolean(actionProcessingId)}
-              >
-                <XCircle size={16} />
-                <span>Confirmar Rechazo y Liberar Boletos</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Modal Guiado de Rechazo de Pago — con correo automático y WhatsApp */}
+      <AdminRejectPaymentModal
+        isOpen={Boolean(rejectingOrder)}
+        order={rejectingOrder}
+        onSuccess={handleRejectSuccess}
+        onClose={() => setRejectingOrder(null)}
+      />
 
       {/* Modal Principal de Auditoría y Verificación */}
       <AdminOrderReviewModal
