@@ -592,3 +592,4 @@ export const AdminRejectPaymentModal: React.FC<AdminRejectPaymentModalProps> = (
     </div>
   );
 };
+

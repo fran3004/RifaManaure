@@ -40,6 +40,18 @@ export interface OrderWithDetails extends OrderRow {
   tickets?: Array<Pick<TicketRow, 'id' | 'number' | 'status'>>;
   receipt_purged?: boolean | null;
   receipt_purged_at?: string | null;
+  raffle?: {
+    id?: string;
+    title?: string;
+    draw_date?: string;
+    support_phone?: string;
+  } | null;
+  raffles?: {
+    id?: string;
+    title?: string;
+    draw_date?: string;
+    support_phone?: string;
+  } | null;
 }
 
 export type PaymentAccountInsert = Database['public']['Tables']['payment_accounts']['Insert'];

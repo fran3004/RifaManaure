@@ -448,16 +448,28 @@ ${cleanSiteUrl}
  * ------------------------------------------------------------------------------
  */
 export function buildPaymentRejectedEmail(params: EmailTemplateParams): EmailTemplateResult {
-  const { order, buyer, raffle, siteUrl } = params;
+  const { order, buyer, raffle, tickets = [], siteUrl } = params;
   const supportEmail = params.supportEmail || 'soporte@rifamanaure.com';
   const supportPhone = params.supportPhone || '+57 300 000 0000';
 
   const subject = `Actualización sobre tu orden — Manaure Vive (${order.reference})`;
   const cleanSiteUrl = siteUrl.replace(/\/$/, '');
+  const totalFormatted = formatCurrencyCOP(order.totalAmount);
   const reasonText =
     order.rejectionReason && order.rejectionReason.trim().length > 0
       ? order.rejectionReason.trim()
       : 'El comprobante adjunto no pudo ser validado o la referencia de pago no coincide con los registros bancarios.';
+
+  const formattedTickets = tickets.map(formatTicketNumber);
+  const ticketBadgesHtml = formattedTickets
+    .map(
+      (ticket) => `
+        <span style="display:inline-block;background-color:#FEE2E2;border:1px solid #FCA5A5;color:#991B1B;font-weight:700;font-size:15px;font-family:'Courier New',Courier,monospace;padding:6px 12px;margin:3px 4px;border-radius:6px;letter-spacing:1px;">
+          ${ticket}
+        </span>
+      `
+    )
+    .join('');
 
   const bodyContentHtml = `
     <!-- Saludo Personalizado -->
@@ -466,35 +478,64 @@ export function buildPaymentRejectedEmail(params: EmailTemplateParams): EmailTem
     </p>
 
     <p style="margin:0 0 20px 0;font-size:15px;color:${BRAND_COLORS.textSecondary};line-height:1.6;">
-      Te informamos que tras la revisión administrativa de tu orden para la rifa <strong>${raffle.title}</strong>, el pago no pudo ser confirmado por el siguiente motivo:
+      Te informamos que tras la revisión administrativa de tu orden para la rifa <strong>${raffle.title}</strong>, tu comprobante de pago no pudo ser confirmado por el siguiente motivo:
     </p>
 
-    <!-- Caja de Motivo de Rechazo -->
+    <!-- Caja de Motivo de Rechazo Destacada -->
     <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="width:100%;margin-bottom:24px;background-color:${BRAND_COLORS.brandCoralSoft};border-left:4px solid ${BRAND_COLORS.danger};border-radius:8px;">
       <tr>
         <td style="padding:16px 20px;">
           <div style="font-size:12px;text-transform:uppercase;letter-spacing:1px;font-weight:700;color:${BRAND_COLORS.danger};margin-bottom:6px;">
             Motivo de la no aprobación:
           </div>
-          <div style="font-size:14px;color:${BRAND_COLORS.textPrimary};line-height:1.5;">
+          <div style="font-size:14px;color:${BRAND_COLORS.textPrimary};line-height:1.5;font-weight:500;">
             ${reasonText}
           </div>
         </td>
       </tr>
     </table>
 
+    ${
+      formattedTickets.length > 0
+        ? `
+      <!-- Boletos Liberados -->
+      <div style="background-color:${BRAND_COLORS.bgSurface};border:1px solid ${BRAND_COLORS.borderSubtle};border-radius:10px;padding:18px;margin-bottom:24px;text-align:center;">
+        <div style="font-size:12px;text-transform:uppercase;letter-spacing:1px;font-weight:700;color:${BRAND_COLORS.danger};margin-bottom:8px;">
+          Boletos que estaban en reserva (${formattedTickets.length} ${formattedTickets.length === 1 ? 'boleto' : 'boletos'}) &bull; Liberados
+        </div>
+        <div style="margin:6px 0;">${ticketBadgesHtml}</div>
+        <div style="font-size:12px;color:${BRAND_COLORS.textMuted};margin-top:6px;">
+          Estos números se han puesto nuevamente a disposición del público general.
+        </div>
+      </div>
+      `
+        : ''
+    }
+
     <!-- Resumen de la Orden -->
     <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="width:100%;margin-bottom:24px;border-collapse:collapse;font-size:14px;">
       <tr style="border-bottom:1px solid ${BRAND_COLORS.borderSubtle};">
         <td style="padding:11px 0;color:${BRAND_COLORS.textMuted};">Referencia de orden:</td>
-        <td style="padding:11px 0;font-weight:700;text-align:right;color:${BRAND_COLORS.brandDeep};font-family:monospace;">
+        <td style="padding:11px 0;font-weight:700;text-align:right;color:${BRAND_COLORS.brandDeep};font-family:monospace;font-size:15px;">
           ${order.reference}
         </td>
       </tr>
       <tr style="border-bottom:1px solid ${BRAND_COLORS.borderSubtle};">
+        <td style="padding:11px 0;color:${BRAND_COLORS.textMuted};">Sorteo:</td>
+        <td style="padding:11px 0;font-weight:600;text-align:right;color:${BRAND_COLORS.textPrimary};">
+          ${raffle.title}
+        </td>
+      </tr>
+      <tr style="border-bottom:1px solid ${BRAND_COLORS.borderSubtle};">
+        <td style="padding:11px 0;color:${BRAND_COLORS.textMuted};">Total registrado:</td>
+        <td style="padding:11px 0;text-align:right;color:${BRAND_COLORS.brandDeep};font-weight:700;">
+          ${totalFormatted}
+        </td>
+      </tr>
+      <tr style="border-bottom:1px solid ${BRAND_COLORS.borderSubtle};">
         <td style="padding:11px 0;color:${BRAND_COLORS.textMuted};">Estado actual:</td>
-        <td style="padding:11px 0;font-weight:600;text-align:right;color:${BRAND_COLORS.danger};">
-          No Aprobado / Liberado
+        <td style="padding:11px 0;font-weight:700;text-align:right;color:${BRAND_COLORS.danger};">
+          No Aprobado / Boletos Liberados
         </td>
       </tr>
     </table>
@@ -506,17 +547,17 @@ export function buildPaymentRejectedEmail(params: EmailTemplateParams): EmailTem
       </h3>
       <ul style="margin:0;padding-left:20px;font-size:14px;color:${BRAND_COLORS.textSecondary};line-height:1.6;">
         <li style="margin-bottom:8px;">
-          <strong>Si ya realizaste la transferencia:</strong> Contáctanos indicando tu número de referencia (<strong>${order.reference}</strong>) y adjuntando un comprobante claro donde se aprecie la fecha, hora y número de aprobación bancaria.
+          <strong>Si ya realizaste la transferencia:</strong> Responde a este correo o contáctanos por WhatsApp indicando tu referencia (<strong>${order.reference}</strong>) y adjuntando un comprobante legible donde se aprecie fecha, hora y comprobante bancario.
         </li>
         <li>
-          <strong>Si deseas realizar una nueva compra:</strong> Los boletos previamente reservados han sido liberados para garantizar la transparencia del sorteo. Puedes ingresar a la plataforma y seleccionar nuevamente tus números favoritos.
+          <strong>Si deseas realizar una nueva compra:</strong> Puedes ingresar nuevamente a la plataforma y seleccionar tus números favoritos disponibles.
         </li>
       </ul>
     </div>
 
     <!-- Botón de Contacto / Plataforma -->
     <div style="text-align:center;margin:28px 0 20px 0;">
-      <a href="${cleanSiteUrl}" target="_blank" style="background-color:${BRAND_COLORS.brandDeep};color:#ffffff;text-decoration:none;padding:12px 26px;border-radius:8px;font-weight:700;font-size:14px;display:inline-block;">
+      <a href="${cleanSiteUrl}" target="_blank" style="background-color:${BRAND_COLORS.brandDeep};color:#ffffff;text-decoration:none;padding:14px 28px;border-radius:8px;font-weight:700;font-size:14px;display:inline-block;letter-spacing:0.3px;box-shadow:0 4px 10px rgba(27,74,46,0.2);">
         Ir a Manaure Vive &rarr;
       </a>
     </div>
@@ -527,8 +568,8 @@ export function buildPaymentRejectedEmail(params: EmailTemplateParams): EmailTem
 
   const htmlContent = wrapInEmailLayout({
     bannerColor: '#991B1B',
-    bannerTitle: 'Actualización sobre tu orden',
-    bannerSubtitle: `Orden #${order.reference} &bull; Verificación no completada`,
+    bannerTitle: 'Actualización sobre tu Pago',
+    bannerSubtitle: `Orden #${order.reference} &bull; Revisión de comprobante`,
     bannerBadgeHtml: `<span style="background-color:#FEE2E2;color:${BRAND_COLORS.danger};font-weight:700;font-size:12px;padding:4px 10px;border-radius:20px;text-transform:uppercase;letter-spacing:0.5px;">No Aprobado</span>`,
     bodyContentHtml,
     siteUrl: cleanSiteUrl,
@@ -541,17 +582,19 @@ ACTUALIZACIÓN SOBRE TU ORDEN — MANAURE VIVE
 
 Hola, ${buyer.fullName}.
 
-Te informamos que tras la revisión administrativa de tu orden para la rifa ${raffle.title}, el pago no pudo ser confirmado.
+Te informamos que tras la revisión administrativa de tu orden para la rifa ${raffle.title}, el comprobante de pago no pudo ser confirmado.
 
 REFERENCIA: ${order.reference}
-ESTADO: No Aprobado / Liberado
+ESTADO: No Aprobado / Boletos Liberados
+TOTAL: ${totalFormatted}
 
-MOTIVO:
+MOTIVO DE LA NO APROBACIÓN:
 ${reasonText}
 
+${formattedTickets.length > 0 ? `BOLETOS LIBERADOS: ${formattedTickets.join(', ')}\n` : ''}
 ¿QUÉ PUEDES HACER?
 1. Si ya realizaste la transferencia y consideras que hubo un error al revisar el soporte, comunícate con nosotros indicando tu referencia (${order.reference}) para verificarlo manualmente.
-2. Los números previamente apartados han sido liberados. Si lo deseas, puedes ingresar nuevamente al portal para generar una nueva reserva.
+2. Los números previamente apartados han sido liberados. Si lo deseas, puedes ingresar nuevamente al portal para generar una nueva compra.
 
 Soporte: ${supportEmail} | ${supportPhone}
 Portal: ${cleanSiteUrl}
