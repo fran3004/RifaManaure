@@ -24,15 +24,15 @@
   top: -12%;
   left: 50%;
   transform: translateX(-50%);
-  width: min(900px, 120vw);
-  height: 520px;
+  width: min(850px, 120vw);
+  height: 480px;
   background: radial-gradient(
     circle,
-    rgba(245, 166, 35, 0.12) 0%,
-    rgba(27, 74, 46, 0.05) 45%,
+    rgba(245, 166, 35, 0.08) 0%,
+    rgba(27, 74, 46, 0.03) 45%,
     transparent 70%
   );
-  filter: blur(40px);
+  filter: blur(50px);
 }
 
 .radialGlowBottom {
@@ -43,7 +43,7 @@
   height: 420px;
   background: radial-gradient(
     circle,
-    rgba(27, 74, 46, 0.06) 0%,
+    rgba(27, 74, 46, 0.04) 0%,
     transparent 70%
   );
   filter: blur(50px);
@@ -51,13 +51,15 @@
 
 .logoWatermark {
   position: absolute;
-  top: 15%;
+  top: 6%;
   left: 50%;
-  transform: translate(-50%, -5%);
-  width: min(450px, 75vw);
-  max-width: 500px;
-  opacity: 0.035;
-  filter: grayscale(100%);
+  transform: translateX(-50%);
+  width: min(460px, 80vw);
+  max-width: 480px;
+  opacity: 0.018;
+  filter: blur(8px) grayscale(100%) contrast(80%);
+  -webkit-mask-image: radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0.7) 10%, transparent 68%);
+  mask-image: radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0.7) 10%, transparent 68%);
   user-select: none;
   pointer-events: none;
 }

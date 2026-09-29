@@ -9,22 +9,13 @@ import styles from './TerminosPage.module.css';
 
 export const TerminosPage: React.FC = () => {
   useDocumentTitle('Términos y Condiciones Oficiales');
-  const { raffle, lotteryReference, totalTickets, ticketRange, cifrasText } = useActiveRaffle();
-
-  const isRaffleClosed = React.useMemo(() => {
-    if (!raffle) return false;
-    const isDrawDatePassed = raffle.draw_date
-      ? !isNaN(new Date(raffle.draw_date).getTime()) && new Date(raffle.draw_date).getTime() <= Date.now()
-      : false;
-    return raffle.status === 'closed' && !isDrawDatePassed;
-  }, [raffle]);
-
+  const { lotteryReference, totalTickets, ticketRange, cifrasText } = useActiveRaffle();
   return (
     <div className={styles.pageLayout} data-theme="public">
       <a href="#contenido-terminos" className="skipLink">
         Saltar al contenido de términos
       </a>
-      <Navbar isRaffleClosed={isRaffleClosed} />
+      <Navbar />
       <main id="contenido-terminos" tabIndex={-1} className={styles.mainContent}>
         <div className={`container ${styles.container}`}>
           <div className={styles.header}>
@@ -144,7 +135,7 @@ export const TerminosPage: React.FC = () => {
           </article>
         </div>
       </main>
-      <Footer isRaffleClosed={isRaffleClosed} />
+      <Footer />
       <FloatingWhatsAppBtn />
     </div>
   );

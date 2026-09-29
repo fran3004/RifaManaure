@@ -50,7 +50,11 @@ function getCachedPartners(): PartnerRow[] {
   return [];
 }
 
-export const FilaAliados: React.FC = () => {
+export interface FilaAliadosProps {
+  isRaffleClosed?: boolean;
+}
+
+export const FilaAliados: React.FC<FilaAliadosProps> = ({ isRaffleClosed = false }) => {
   const cachedPartners = getCachedPartners();
   const [partners, setPartners] = useState<PartnerRow[]>(cachedPartners);
   const [isLoadedFromDb, setIsLoadedFromDb] = useState<boolean>(() => cachedPartners.length > 0);
@@ -631,7 +635,11 @@ export const FilaAliados: React.FC = () => {
           badge="Red de Convenios y Turismo Local"
           icon={<Handshake size={16} aria-hidden="true" />}
           title="Nuestros Aliados Oficiales"
-          subtitle="Empresas, operadores turísticos y restaurantes locales que hacen posible el premio y respaldan este sorteo. Pulsa en cualquier logo para abrir su perfil oficial en Instagram."
+          subtitle={
+            isRaffleClosed
+              ? 'Empresas, operadores turísticos y emprendimientos locales que impulsan el desarrollo de nuestra región y preparan nuevas experiencias para la próxima edición. Pulsa en cualquier logo para abrir su perfil oficial en Instagram.'
+              : 'Empresas, operadores turísticos y restaurantes locales que hacen posible el premio y respaldan este sorteo. Pulsa en cualquier logo para abrir su perfil oficial en Instagram.'
+          }
         >
           {/* Barra de Controles: Guía de uso y botón accesible de Pausar / Reanudar */}
           <div className={styles.controlsBar}>

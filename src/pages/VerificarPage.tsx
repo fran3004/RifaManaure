@@ -22,22 +22,12 @@ import type { DigitalReceiptData } from '@/services/receiptGeneratorService';
 import { FloatingWhatsAppBtn } from '@/components/common/FloatingWhatsAppBtn';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useSystemSettings } from '@/hooks/useSystemSettings';
-import { useActiveRaffle } from '@/hooks/useActiveRaffle';
 import styles from './VerificarPage.module.css';
 
 export const VerificarPage: React.FC = () => {
   useDocumentTitle('Verificación Oficial de Boletos y Órdenes');
   const systemSettings = useSystemSettings();
   const supportPhone = systemSettings.support_whatsapp_number || '573001234567';
-
-  const { raffle } = useActiveRaffle();
-  const isRaffleClosed = React.useMemo(() => {
-    if (!raffle) return false;
-    const isDrawDatePassed = raffle.draw_date
-      ? !isNaN(new Date(raffle.draw_date).getTime()) && new Date(raffle.draw_date).getTime() <= Date.now()
-      : false;
-    return raffle.status === 'closed' && !isDrawDatePassed;
-  }, [raffle]);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [secondaryQuery, setSecondaryQuery] = useState('');
@@ -197,7 +187,7 @@ export const VerificarPage: React.FC = () => {
       <a href="#contenido-verificar" className="skipLink">
         Saltar al contenido de verificación
       </a>
-      <Navbar isRaffleClosed={isRaffleClosed} />
+      <Navbar />
       <main id="contenido-verificar" tabIndex={-1} className={styles.mainContent}>
         <div className={`container ${styles.container}`}>
           <div className={styles.header}>
@@ -606,7 +596,7 @@ export const VerificarPage: React.FC = () => {
         />
       )}
 
-      <Footer isRaffleClosed={isRaffleClosed} />
+      <Footer />
       <FloatingWhatsAppBtn />
     </div>
   );

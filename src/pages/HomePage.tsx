@@ -43,7 +43,7 @@ const HomePageContent: React.FC = () => {
         <Navbar isRaffleClosed />
         <main id="contenido-principal" tabIndex={-1}>
           <PortalRaffleClosed />
-          <FilaAliados />
+          <FilaAliados isRaffleClosed />
         </main>
         <Footer isRaffleClosed />
         <FloatingWhatsAppBtn />

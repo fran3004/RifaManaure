@@ -1,6 +1,7 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Lock, Search, MessageCircle, Sparkles, ShieldCheck } from 'lucide-react';
-import { logoPrincipal } from '@/assets/assets';
+import { logoPrincipalCompleto } from '@/assets/assets';
 import { useSystemSettings } from '@/hooks/useSystemSettings';
 import { createWhatsAppLink } from '@/lib/utils';
 import { Button } from '@/components/public/ui/Button';
@@ -22,12 +23,34 @@ export const PortalRaffleClosed: React.FC = () => {
         <div className={styles.radialGlowTop} />
         <div className={styles.radialGlowBottom} />
         <img
-          src={logoPrincipal.web}
+          src={logoPrincipalCompleto.web}
           alt=""
           className={styles.logoWatermark}
           loading="eager"
         />
       </div>
+
+      {/* ── Barra Superior Minimalista de Marca (Sustituye al Navbar estándar) ── */}
+      <header className={styles.topBrandBar}>
+        <div className={`container ${styles.topBarContainer}`}>
+          <Link to="/" className={styles.brandLogoLink} title="Manaure Vive - Inicio">
+            <img
+              src={logoPrincipalCompleto.web}
+              alt="Manaure Vive"
+              className={styles.topBarLogo}
+            />
+          </Link>
+
+          <Link
+            to="/verificar"
+            className={styles.topVerifyBtn}
+            title="Consultar boletos adquiridos de cualquier sorteo"
+          >
+            <Search size={16} aria-hidden="true" />
+            <span className={styles.topVerifyText}>Consultar mis Boletos</span>
+          </Link>
+        </div>
+      </header>
 
       {/* ── Mensaje Principal Hero: Venta Concluida & Próxima Edición ── */}
       <section className={styles.heroSection} aria-labelledby="titulo-edicion-cerrada">
@@ -38,10 +61,10 @@ export const PortalRaffleClosed: React.FC = () => {
             <span>Ventas Concluidas · Edición Cerrada</span>
           </div>
 
-          {/* Gran Título Informativo con Paleta Oficial */}
+          {/* Gran Título Informativo y Dinámico */}
           <h1 id="titulo-edicion-cerrada" className={styles.mainTitle}>
             ¡Gracias por tu Participación!
-            <span className={styles.accentBrand}>Muy Pronto Nuestra Próxima Edición</span>
+            <span className={styles.accentGold}>Muy Pronto Nuestra Próxima Edición</span>
           </h1>
 
           {/* Mensaje descriptivo tranquilizador y de comunidad */}
@@ -51,7 +74,7 @@ export const PortalRaffleClosed: React.FC = () => {
             turismo de naturaleza, aventura y cultura de <strong>Manaure Balcón del Cesar</strong>.
           </p>
 
-          {/* Tarjeta de Expectativa / Novedades en Paleta Clara Cálida */}
+          {/* Tarjeta de Expectativa / Novedades */}
           <div className={styles.expectationCard}>
             <div className={styles.expectationHeader}>
               <div className={styles.expectationIconWrap} aria-hidden="true">
