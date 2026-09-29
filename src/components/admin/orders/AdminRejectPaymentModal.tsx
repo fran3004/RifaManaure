@@ -135,7 +135,7 @@ export const AdminRejectPaymentModal: React.FC<AdminRejectPaymentModalProps> = (
   const tickets = order.tickets || [];
   const ticketCount = tickets.length || order.ticket_count || 0;
   const formattedTickets = tickets.map((t) => formatTicketNumber(t.number));
-  const raffle = (order as any)?.raffle || (order as any)?.raffles;
+
 
   const hasValidPhone = Boolean(
     buyerPhone &&
