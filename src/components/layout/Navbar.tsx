@@ -14,6 +14,7 @@ import {
   Search,
 } from 'lucide-react';
 import { Button } from '@/components/public/ui/Button';
+import { useActiveRaffle } from '@/hooks/useActiveRaffle';
 import styles from './Navbar.module.css';
 
 interface NavItem {
@@ -33,7 +34,10 @@ export interface NavbarProps {
   isRaffleClosed?: boolean;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ isRaffleClosed = false }) => {
+export const Navbar: React.FC<NavbarProps> = ({ isRaffleClosed: propIsRaffleClosed }) => {
+  const { isRaffleClosed: hookIsRaffleClosed } = useActiveRaffle();
+  const isRaffleClosed = propIsRaffleClosed ?? hookIsRaffleClosed;
+
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState<string>('');
@@ -226,6 +230,10 @@ export const Navbar: React.FC<NavbarProps> = ({ isRaffleClosed = false }) => {
                 size="sm"
                 className={styles.consultarBtn}
                 leftIcon={<ArrowLeft size={16} aria-hidden="true" />}
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate('/');
+                }}
               >
                 <span className={styles.btnFullText}>Volver al Inicio</span>
                 <span className={styles.btnShortText}>Inicio</span>

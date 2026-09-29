@@ -12,11 +12,12 @@ interface FooterProps {
   isRaffleClosed?: boolean;
 }
 
-export const Footer: React.FC<FooterProps> = ({ isRaffleClosed = false }) => {
+export const Footer: React.FC<FooterProps> = ({ isRaffleClosed: propIsRaffleClosed }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const systemSettings = useSystemSettings();
-  const { lotteryReference } = useActiveRaffle();
+  const { lotteryReference, isRaffleClosed: hookIsRaffleClosed } = useActiveRaffle();
+  const isRaffleClosed = propIsRaffleClosed ?? hookIsRaffleClosed;
 
   const whatsappNumber = systemSettings.support_whatsapp_number || '573001234567';
   const supportEmail = systemSettings.support_email || 'soporte@manaurevive.com';

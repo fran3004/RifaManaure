@@ -22,11 +22,13 @@ import type { DigitalReceiptData } from '@/services/receiptGeneratorService';
 import { FloatingWhatsAppBtn } from '@/components/common/FloatingWhatsAppBtn';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useSystemSettings } from '@/hooks/useSystemSettings';
+import { useActiveRaffle } from '@/hooks/useActiveRaffle';
 import styles from './VerificarPage.module.css';
 
 export const VerificarPage: React.FC = () => {
   useDocumentTitle('Verificación Oficial de Boletos y Órdenes');
   const systemSettings = useSystemSettings();
+  const { isRaffleClosed } = useActiveRaffle();
   const supportPhone = systemSettings.support_whatsapp_number || '573001234567';
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -187,7 +189,7 @@ export const VerificarPage: React.FC = () => {
       <a href="#contenido-verificar" className="skipLink">
         Saltar al contenido de verificación
       </a>
-      <Navbar />
+      <Navbar isRaffleClosed={isRaffleClosed} />
       <main id="contenido-verificar" tabIndex={-1} className={styles.mainContent}>
         <div className={`container ${styles.container}`}>
           <div className={styles.header}>
@@ -596,7 +598,7 @@ export const VerificarPage: React.FC = () => {
         />
       )}
 
-      <Footer />
+      <Footer isRaffleClosed={isRaffleClosed} />
       <FloatingWhatsAppBtn />
     </div>
   );

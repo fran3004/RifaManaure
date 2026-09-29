@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Lock, Search, MessageCircle, Sparkles, ShieldCheck } from 'lucide-react';
 import { logoPrincipalCompleto } from '@/assets/assets';
 import { useSystemSettings } from '@/hooks/useSystemSettings';
@@ -8,6 +8,7 @@ import { Button } from '@/components/public/ui/Button';
 import styles from './PortalRaffleClosed.module.css';
 
 export const PortalRaffleClosed: React.FC = () => {
+  const navigate = useNavigate();
   const systemSettings = useSystemSettings();
 
   const whatsappNumber = systemSettings.support_whatsapp_number || '573001234567';
@@ -29,28 +30,6 @@ export const PortalRaffleClosed: React.FC = () => {
           loading="eager"
         />
       </div>
-
-      {/* ── Barra Superior Minimalista de Marca (Sustituye al Navbar estándar) ── */}
-      <header className={styles.topBrandBar}>
-        <div className={`container ${styles.topBarContainer}`}>
-          <Link to="/" className={styles.brandLogoLink} title="Manaure Vive - Inicio">
-            <img
-              src={logoPrincipalCompleto.web}
-              alt="Manaure Vive"
-              className={styles.topBarLogo}
-            />
-          </Link>
-
-          <Link
-            to="/verificar"
-            className={styles.topVerifyBtn}
-            title="Consultar boletos adquiridos de cualquier sorteo"
-          >
-            <Search size={16} aria-hidden="true" />
-            <span className={styles.topVerifyText}>Consultar mis Boletos</span>
-          </Link>
-        </div>
-      </header>
 
       {/* ── Mensaje Principal Hero: Venta Concluida & Próxima Edición ── */}
       <section className={styles.heroSection} aria-labelledby="titulo-edicion-cerrada">
@@ -116,6 +95,10 @@ export const PortalRaffleClosed: React.FC = () => {
               size="lg"
               leftIcon={<Search size={18} aria-hidden="true" />}
               className={styles.btnPrimaryAction}
+              onClick={(e) => {
+                e.preventDefault();
+                navigate('/verificar');
+              }}
             >
               Consultar Boletos Adquiridos
             </Button>

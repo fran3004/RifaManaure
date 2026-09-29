@@ -156,6 +156,12 @@
   min-height: 44px;
 }
 
+.closedNavAction {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .menuToggle {
   display: none;
   align-items: center;
@@ -407,6 +413,16 @@
     justify-content: center;
     box-shadow: var(--shadow-sm, 0 2px 6px rgba(15, 46, 29, 0.08));
     border-radius: var(--radius-md, 14px);
+  }
+}
+
+@media (max-width: 520px) {
+  .btnFullText {
+    display: none;
+  }
+
+  .btnShortText {
+    display: inline;
   }
 }
 

@@ -147,6 +147,7 @@ export interface UseActiveRaffleResult {
   drawDateFormatted: string;
   ticketPrice: number;
   isLoading: boolean;
+  isRaffleClosed: boolean;
   refresh: () => Promise<void>;
 }
 
@@ -242,6 +243,17 @@ export function useActiveRaffle(): UseActiveRaffleResult {
     return activeRaffle?.ticket_price ? Number(activeRaffle.ticket_price) : 0;
   }, [activeRaffle?.ticket_price]);
 
+  const isRaffleClosed = useMemo(() => {
+    if (!activeRaffle) return false;
+    if (activeRaffle.status !== 'closed') return false;
+    if (cartContext?.winner) return false;
+    if (activeRaffle.draw_date) {
+      const drawTime = new Date(activeRaffle.draw_date).getTime();
+      if (!isNaN(drawTime) && drawTime <= Date.now()) return false;
+    }
+    return true;
+  }, [activeRaffle, cartContext?.winner]);
+
   return {
     raffle: activeRaffle,
     lotteryReference,
@@ -252,6 +264,7 @@ export function useActiveRaffle(): UseActiveRaffleResult {
     drawDateFormatted,
     ticketPrice,
     isLoading,
+    isRaffleClosed,
     refresh,
   };
 }
