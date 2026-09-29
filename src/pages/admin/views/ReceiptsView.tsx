@@ -6,7 +6,6 @@ import { AdminLoadingState } from '@/components/admin/common/AdminLoadingState';
 import { AdminErrorState } from '@/components/admin/common/AdminErrorState';
 import {
   fetchAdminOrdersPaginated,
-  approveOrderPayment,
   rejectOrderPayment,
   getSignedProofUrl,
   type OrderWithDetails,
@@ -334,31 +333,15 @@ export const ReceiptsView: React.FC = () => {
     setApprovingOrder(order);
   };
 
-  const handleConfirmApprove = async () => {
-    if (!approvingOrder) return;
-
-    setActionProcessingId(approvingOrder.id);
-    setActionMessage(null);
-
-    const result = await approveOrderPayment(approvingOrder.id);
-
-    if (result.success) {
-      setActionMessage({
-        type: 'success',
-        text: `¡Orden ${approvingOrder.reference} aprobada! Boletos vendidos confirmados.`,
-      });
-      setApprovingOrder(null);
-      await loadReceipts();
-    } else {
-      const normalized = normalizeAppError(
-        { message: result.error, code: result.code },
-        'No se pudo aprobar el pago.'
-      );
-      logAppError('ReceiptsView.handleConfirmApprove', normalized);
-      setActionMessage({ type: 'error', text: normalized.userMessage });
-    }
-
-    setActionProcessingId(null);
+  const handleApproveSuccess = async (approvedOrd: OrderWithDetails, emailSent: boolean) => {
+    setActionMessage({
+      type: 'success',
+      text: emailSent && approvedOrd.buyers?.email
+        ? `¡Orden ${approvedOrd.reference} aprobada! Boletos confirmados y comprobante oficial enviado a ${approvedOrd.buyers.email}.`
+        : `¡Orden ${approvedOrd.reference} aprobada con éxito! Boletos confirmados como vendidos.`,
+    });
+    setApprovingOrder(null);
+    await loadReceipts();
   };
 
   const handleConfirmReject = async () => {
@@ -940,6 +923,24 @@ export const ReceiptsView: React.FC = () => {
                 </span>
               </div>
               <div className={styles.receiptModalFooterActions}>
+                {selectedReceipt.status === 'pending_verification' && (
+                  <button
+                    type="button"
+                    className={styles.btnSuccess}
+                    onClick={() => {
+                      const matched = orders.find((o) => o.reference === selectedReceipt.reference);
+                      if (matched) {
+                        setSelectedReceipt(null);
+                        setReceiptZoom(1);
+                        handleApprove(matched);
+                      }
+                    }}
+                    title="Aprobar el pago de esta transferencia bancaria"
+                  >
+                    <CheckCircle2 size={16} />
+                    <span>Aprobar Pago</span>
+                  </button>
+                )}
                 <a
                   href={selectedReceipt.url}
                   target="_blank"
@@ -1037,8 +1038,7 @@ export const ReceiptsView: React.FC = () => {
       <AdminConfirmPaymentModal
         isOpen={Boolean(approvingOrder)}
         order={approvingOrder}
-        isProcessing={Boolean(actionProcessingId)}
-        onConfirm={handleConfirmApprove}
+        onSuccess={handleApproveSuccess}
         onClose={() => setApprovingOrder(null)}
       />
 

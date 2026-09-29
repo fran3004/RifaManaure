@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   type OrderWithDetails,
-  approveOrderPayment,
   rejectOrderPayment,
   getSignedProofUrl,
 } from '@/services/paymentService';
@@ -48,7 +47,6 @@ import {
 import { DigitalReceiptModal } from '@/components/receipt/DigitalReceiptModal';
 import { AdminConfirmPaymentModal } from './AdminConfirmPaymentModal';
 import {
-  sendPaymentApprovedEmail,
   sendPaymentRejectedEmail,
   shouldSendEmail,
   buildDigitalReceiptDataFromOrder,
@@ -220,73 +218,16 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
 
   const emailTraceability = computeEmailTraceability(order, notificationLogs);
 
-  // APROBAR PAGO
-  const handleApprove = async () => {
-    if (!order || !canReviewPayment) return;
-
-    setIsProcessing(true);
-    setActionError(null);
-
-    try {
-      const res = await approveOrderPayment(order.id);
-
-      if (res.success) {
-        setIsConfirmApproveOpen(false);
-        setActionSuccess(
-          `¡Pago aprobado! Se confirmaron definitivamente ${order.ticket_count} boletos como vendidos.`
-        );
-
-        // 1. Despacho de Correo Transaccional con Comprobante PNG adjunto si aplica
-        if (shouldSendEmail(order.contact_preference)) {
-          try {
-            const emailRes = await sendPaymentApprovedEmail(order);
-            if (!emailRes.success) {
-              console.warn(
-                'Aviso: El correo de confirmación no pudo ser entregado:',
-                emailRes.error
-              );
-            }
-          } catch (emailErr) {
-            console.warn('Error al procesar correo de confirmación de pago:', emailErr);
-          }
-        }
-
-        // 2. Despachar notificaciones centralizadas según contactPreference de la orden
-        const dispatchResult = await dispatchOrderNotifications({
-          orderId: order.id,
-          contactPreference: order.contact_preference || 'both',
-          eventType: NOTIFICATION_EVENT_TYPES.PAYMENT_APPROVED,
-          skipEmail: true, // Ya despachado de forma segura con comprobante PNG
-          notificationData: {
-            reference: order.reference,
-            buyerName: order.buyers?.full_name || 'Comprador',
-            buyerPhone: order.buyers?.phone || '',
-            buyerEmail: order.buyers?.email,
-            ticketNumbers: formattedTickets,
-            totalAmount: order.total_amount,
-            verifyUrl:
-              typeof window !== 'undefined' ? `${window.location.origin}/verificar` : '/verificar',
-          },
-        });
-
-        // Actualizar historial completo de trazabilidad en tiempo real
-        void getOrderNotificationLogs(order.id).then(setNotificationLogs);
-
-        // Asignar plantilla de WhatsApp si aplica o como soporte para el administrador
-        if (dispatchResult.whatsappNotification) {
-          setIsWhatsAppOpened(false);
-          setPreparedNotification(dispatchResult.whatsappNotification);
-        }
-
-        await onOrderUpdated();
-      } else {
-        setActionError(res.error || 'No se pudo aprobar el pago de la orden.');
-      }
-    } catch (err) {
-      setActionError(err instanceof Error ? err.message : 'Error inesperado al aprobar pago.');
-    } finally {
-      setIsProcessing(false);
-    }
+  // APROBACIÓN EXITOSA (coordinada desde AdminConfirmPaymentModal)
+  const handleApproveSuccess = async (updatedOrder: OrderWithDetails, emailSent: boolean) => {
+    setIsConfirmApproveOpen(false);
+    setActionSuccess(
+      emailSent && updatedOrder.buyers?.email
+        ? `¡Pago aprobado! Se confirmaron definitivamente ${updatedOrder.ticket_count} boletos y se despachó el comprobante a ${updatedOrder.buyers.email}.`
+        : `¡Pago aprobado! Se confirmaron definitivamente ${updatedOrder.ticket_count} boletos como vendidos.`
+    );
+    void getOrderNotificationLogs(updatedOrder.id).then(setNotificationLogs);
+    await onOrderUpdated();
   };
 
   // RECHAZAR PAGO
@@ -1490,8 +1431,7 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
       <AdminConfirmPaymentModal
         isOpen={isConfirmApproveOpen}
         order={order}
-        isProcessing={isProcessing}
-        onConfirm={handleApprove}
+        onSuccess={handleApproveSuccess}
         onClose={() => setIsConfirmApproveOpen(false)}
       />
     </div>
