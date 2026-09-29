@@ -177,6 +177,52 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
     };
   }, [isOpen, order?.id, order?.receipt_url, order?.receipt_purged]);
 
+  // ── HOOKS ── Deben declararse siempre, antes de cualquier early return ──────
+  // Canal directo de WhatsApp para la orden actual (si está pagada o rechazada)
+  // IMPORTANTE: este useMemo debe estar ANTES del early return para cumplir las
+  // Reglas de Hooks de React (nunca llamar hooks condicionalmente).
+  const currentOrderWhatsApp = useMemo(() => {
+    if (!order || !['paid', 'rejected'].includes(order.status)) return null;
+    const phone = order.buyers?.phone;
+    if (!phone || phone.trim().length === 0 || phone === 'Sin teléfono') return null;
+
+    const formattedTkts = (order.tickets || []).map((t) => formatTicketNumber(t.number));
+    const isPaid = order.status === 'paid';
+    const raffleObj = (order as any).raffle || (order as any).raffles;
+
+    const text = isPaid
+      ? buildPaymentApprovedMessage({
+          reference: order.reference,
+          buyerName: order.buyers?.full_name || 'Comprador',
+          buyerPhone: phone,
+          buyerEmail: order.buyers?.email,
+          ticketNumbers: formattedTkts,
+          totalAmount: order.total_amount,
+          raffleTitle: raffleObj?.title,
+          drawDate: raffleObj?.draw_date,
+          supportPhone: raffleObj?.support_phone,
+          verifyUrl:
+            typeof window !== 'undefined' ? `${window.location.origin}/verificar` : '/verificar',
+        })
+      : buildPaymentRejectedMessage({
+          reference: order.reference,
+          buyerName: order.buyers?.full_name || 'Comprador',
+          buyerPhone: phone,
+          buyerEmail: order.buyers?.email,
+          ticketNumbers: formattedTkts,
+          totalAmount: order.total_amount,
+          raffleTitle: raffleObj?.title,
+          supportPhone: raffleObj?.support_phone,
+          rejectionReason: order.rejection_reason || undefined,
+          verifyUrl:
+            typeof window !== 'undefined' ? `${window.location.origin}/verificar` : '/verificar',
+        });
+
+    const link = createWhatsAppLink(phone, text);
+    return { phone, text, link, isPaid };
+  }, [order]);
+  // ────────────────────────────────────────────────────────────────────────────
+
   if (!isOpen || !order) return null;
 
   const handleCopy = (text: string, key: string) => {
@@ -230,48 +276,6 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
     void getOrderNotificationLogs(updatedOrder.id).then(setNotificationLogs);
     await onOrderUpdated();
   };
-
-  // Canal directo de WhatsApp para la orden actual (si está pagada o rechazada)
-  const currentOrderWhatsApp = useMemo(() => {
-    if (!order || !['paid', 'rejected'].includes(order.status)) return null;
-    const phone = order.buyers?.phone;
-    if (!phone || phone.trim().length === 0 || phone === 'Sin teléfono') return null;
-
-    const formattedTkts = (order.tickets || []).map((t) => formatTicketNumber(t.number));
-    const isPaid = order.status === 'paid';
-    const raffleObj = (order as any).raffle || (order as any).raffles;
-
-    const text = isPaid
-      ? buildPaymentApprovedMessage({
-          reference: order.reference,
-          buyerName: order.buyers?.full_name || 'Comprador',
-          buyerPhone: phone,
-          buyerEmail: order.buyers?.email,
-          ticketNumbers: formattedTkts,
-          totalAmount: order.total_amount,
-          raffleTitle: raffleObj?.title,
-          drawDate: raffleObj?.draw_date,
-          supportPhone: raffleObj?.support_phone,
-          verifyUrl:
-            typeof window !== 'undefined' ? `${window.location.origin}/verificar` : '/verificar',
-        })
-      : buildPaymentRejectedMessage({
-          reference: order.reference,
-          buyerName: order.buyers?.full_name || 'Comprador',
-          buyerPhone: phone,
-          buyerEmail: order.buyers?.email,
-          ticketNumbers: formattedTkts,
-          totalAmount: order.total_amount,
-          raffleTitle: raffleObj?.title,
-          supportPhone: raffleObj?.support_phone,
-          rejectionReason: order.rejection_reason || undefined,
-          verifyUrl:
-            typeof window !== 'undefined' ? `${window.location.origin}/verificar` : '/verificar',
-        });
-
-    const link = createWhatsAppLink(phone, text);
-    return { phone, text, link, isPaid };
-  }, [order]);
 
   // Control de apertura y confirmación manual de WhatsApp
   const handleOpenWhatsAppManual = async (whatsAppLink?: string) => {
