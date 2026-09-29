@@ -1,13 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import {
   type OrderWithDetails,
-  rejectOrderPayment,
   getSignedProofUrl,
 } from '@/services/paymentService';
 import { formatCOP, formatTicketNumber, maskDocumentId } from '@/lib/utils';
 import {
-  dispatchOrderNotifications,
   getOrderNotificationLogs,
   generateOrderNotification,
   recordWhatsAppOpened,
@@ -17,9 +15,12 @@ import {
   verifyAndRetryEmailNotification,
   maskEmail,
   NOTIFICATION_EVENT_TYPES,
+  buildPaymentApprovedMessage,
+  buildPaymentRejectedMessage,
   type GeneratedNotification,
   type NotificationLogRow,
 } from '@/services/notificationService';
+import { createWhatsAppLink } from '@/services/whatsappService';
 import {
   X,
   CheckCircle2,
@@ -46,9 +47,8 @@ import {
 } from 'lucide-react';
 import { DigitalReceiptModal } from '@/components/receipt/DigitalReceiptModal';
 import { AdminConfirmPaymentModal } from './AdminConfirmPaymentModal';
+import { AdminRejectPaymentModal } from './AdminRejectPaymentModal';
 import {
-  sendPaymentRejectedEmail,
-  shouldSendEmail,
   buildDigitalReceiptDataFromOrder,
   convertCanvasToBase64,
   formatReceiptAttachmentFileName,
@@ -64,15 +64,6 @@ interface AdminOrderReviewModalProps {
   onOrderUpdated: () => void | Promise<void>;
   allowPaymentActions?: boolean;
 }
-
-const REJECTION_PRESETS = [
-  'Comprobante ilegible o borroso',
-  'Valor incorrecto o incompleto',
-  'Transferencia no identificada en cuenta bancaria',
-  'Datos inconsistentes / no coinciden con el comprador',
-  'Comprobante duplicado o reutilizado',
-  'Otro motivo',
-];
 
 function formatNotificationEventLabel(eventType?: string): string {
   if (!eventType) return 'Notificación';
@@ -99,16 +90,10 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
   const [proofError, setProofError] = useState<string | null>(null);
   const [isPurgedProof, setIsPurgedProof] = useState<boolean>(false);
 
-  // Estados de acciones
-  const [isProcessing, setIsProcessing] = useState<boolean>(false);
+  // Modales de Aprobación y Rechazo guiados
   const [isConfirmApproveOpen, setIsConfirmApproveOpen] = useState<boolean>(false);
-  const [actionError, setActionError] = useState<string | null>(null);
+  const [isRejectModalOpen, setIsRejectModalOpen] = useState<boolean>(false);
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
-
-  // Modo de rechazo
-  const [showRejectionForm, setShowRejectionForm] = useState<boolean>(false);
-  const [selectedPreset, setSelectedPreset] = useState<string>(REJECTION_PRESETS[0]);
-  const [customReason, setCustomReason] = useState<string>('');
 
   // Notificación generada
   const [preparedNotification, setPreparedNotification] = useState<GeneratedNotification | null>(
@@ -230,81 +215,63 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
     await onOrderUpdated();
   };
 
-  // RECHAZAR PAGO
-  const handleReject = async () => {
-    if (!order || !canReviewPayment) return;
+  // RECHAZO EXITOSO (coordinado desde AdminRejectPaymentModal)
+  const handleRejectSuccess = async (
+    updatedOrder: OrderWithDetails,
+    emailSent: boolean,
+    _reason: string
+  ) => {
+    setIsRejectModalOpen(false);
+    setActionSuccess(
+      emailSent && updatedOrder.buyers?.email
+        ? `¡Orden rechazada y boletos liberados! Se despachó el correo de notificación a ${updatedOrder.buyers.email}.`
+        : `¡Orden rechazada y boletos liberados! La orden quedó registrada como no aprobada.`
+    );
+    void getOrderNotificationLogs(updatedOrder.id).then(setNotificationLogs);
+    await onOrderUpdated();
+  };
 
-    const finalReason =
-      selectedPreset === 'Otro motivo'
-        ? customReason.trim()
-        : `${selectedPreset}${customReason.trim() ? `: ${customReason.trim()}` : ''}`;
+  // Canal directo de WhatsApp para la orden actual (si está pagada o rechazada)
+  const currentOrderWhatsApp = useMemo(() => {
+    if (!order || !['paid', 'rejected'].includes(order.status)) return null;
+    const phone = order.buyers?.phone;
+    if (!phone || phone.trim().length === 0 || phone === 'Sin teléfono') return null;
 
-    if (!finalReason) {
-      setActionError('Es obligatorio indicar el motivo del rechazo.');
-      return;
-    }
+    const formattedTkts = (order.tickets || []).map((t) => formatTicketNumber(t.number));
+    const isPaid = order.status === 'paid';
+    const raffleObj = (order as any).raffle || (order as any).raffles;
 
-    setIsProcessing(true);
-    setActionError(null);
-
-    try {
-      const res = await rejectOrderPayment(order.id, finalReason);
-
-      if (res.success) {
-        setActionSuccess(
-          `Orden rechazada exitosamente. Los ${order.ticket_count} boletos fueron liberados inmediatamente a disponibles.`
-        );
-
-        // 1. Despachar correo transaccional de rechazo si aplica
-        if (shouldSendEmail(order.contact_preference)) {
-          try {
-            const emailRes = await sendPaymentRejectedEmail(order.id, order.contact_preference);
-            if (!emailRes.success) {
-              console.warn('Aviso: Falló el despacho de correo de rechazo:', emailRes.error);
-            }
-          } catch (emailErr) {
-            console.warn('Error al procesar correo de rechazo:', emailErr);
-          }
-        }
-
-        // 2. Despachar notificaciones centralizadas por WhatsApp
-        const dispatchResult = await dispatchOrderNotifications({
-          orderId: order.id,
-          contactPreference: order.contact_preference || 'both',
-          eventType: NOTIFICATION_EVENT_TYPES.PAYMENT_REJECTED,
-          skipEmail: true, // Ya despachado arriba
-          notificationData: {
-            reference: order.reference,
-            buyerName: order.buyers?.full_name || 'Comprador',
-            buyerPhone: order.buyers?.phone || '',
-            buyerEmail: order.buyers?.email,
-            ticketNumbers: formattedTickets,
-            totalAmount: order.total_amount,
-            rejectionReason: finalReason,
-            verifyUrl:
-              typeof window !== 'undefined' ? `${window.location.origin}/verificar` : '/verificar',
-          },
+    const text = isPaid
+      ? buildPaymentApprovedMessage({
+          reference: order.reference,
+          buyerName: order.buyers?.full_name || 'Comprador',
+          buyerPhone: phone,
+          buyerEmail: order.buyers?.email,
+          ticketNumbers: formattedTkts,
+          totalAmount: order.total_amount,
+          raffleTitle: raffleObj?.title,
+          drawDate: raffleObj?.draw_date,
+          supportPhone: raffleObj?.support_phone,
+          verifyUrl:
+            typeof window !== 'undefined' ? `${window.location.origin}/verificar` : '/verificar',
+        })
+      : buildPaymentRejectedMessage({
+          reference: order.reference,
+          buyerName: order.buyers?.full_name || 'Comprador',
+          buyerPhone: phone,
+          buyerEmail: order.buyers?.email,
+          ticketNumbers: formattedTkts,
+          totalAmount: order.total_amount,
+          raffleTitle: raffleObj?.title,
+          supportPhone: raffleObj?.support_phone,
+          rejectionReason: order.rejection_reason || undefined,
+          verifyUrl:
+            typeof window !== 'undefined' ? `${window.location.origin}/verificar` : '/verificar',
         });
 
-        // Actualizar historial completo de trazabilidad en tiempo real
-        void getOrderNotificationLogs(order.id).then(setNotificationLogs);
-
-        // Asignar plantilla de WhatsApp si aplica o como soporte para el administrador
-        if (dispatchResult.whatsappNotification) {
-          setIsWhatsAppOpened(false);
-          setPreparedNotification(dispatchResult.whatsappNotification);
-        }
-
-        await onOrderUpdated();
-      } else {
-        setActionError(res.error || 'No se pudo rechazar la orden.');
-      }
-    } catch (err) {
-      setActionError(err instanceof Error ? err.message : 'Error inesperado al rechazar orden.');
-    } finally {
-      setIsProcessing(false);
-    }
-  };
+    const link = createWhatsAppLink(phone, text);
+    return { phone, text, link, isPaid };
+  }, [order]);
 
   // Control de apertura y confirmación manual de WhatsApp
   const handleOpenWhatsAppManual = async (whatsAppLink?: string) => {
@@ -486,13 +453,6 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
         </div>
 
         {/* Mensajes de feedback */}
-        {actionError && (
-          <div className={styles.feedbackError}>
-            <AlertTriangle size={18} />
-            <span>{actionError}</span>
-          </div>
-        )}
-
         {actionSuccess && (
           <div className={styles.feedbackSuccess}>
             <CheckCircle2 size={18} />
@@ -502,6 +462,60 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
 
         {/* Cuerpo del Modal con las 4 Secciones Requeridas */}
         <div className={styles.modalBody}>
+          {/* Banner Persistente Superior de Notificación Directa WhatsApp */}
+          {currentOrderWhatsApp && (
+            <div
+              className={`${styles.topWhatsAppBanner} ${
+                currentOrderWhatsApp.isPaid
+                  ? styles.topWhatsAppBannerPaid
+                  : styles.topWhatsAppBannerRejected
+              }`}
+            >
+              <div className={styles.topWhatsAppInfoGroup}>
+                <div
+                  className={`${styles.topWhatsAppIconWrapper} ${
+                    currentOrderWhatsApp.isPaid
+                      ? styles.topWhatsAppIconPaid
+                      : styles.topWhatsAppIconRejected
+                  }`}
+                >
+                  <MessageSquare size={18} />
+                </div>
+                <div className={styles.topWhatsAppTextGroup}>
+                  <strong className={styles.topWhatsAppTitle}>
+                    Canal WhatsApp Directo: {currentOrderWhatsApp.isPaid ? 'Confirmación de Pago' : 'Notificación de Rechazo'}
+                  </strong>
+                  <span className={styles.topWhatsAppDesc}>
+                    Destinatario: {currentOrderWhatsApp.phone} &bull; Mensaje oficial estructurado listo para enviar
+                  </span>
+                </div>
+              </div>
+
+              <div className={styles.topWhatsAppActions}>
+                <button
+                  type="button"
+                  onClick={() => void handleOpenWhatsAppManual(currentOrderWhatsApp.link)}
+                  className={styles.topBtnWhatsApp}
+                >
+                  <ExternalLink size={14} />
+                  <span>Abrir WhatsApp</span>
+                </button>
+                <button
+                  type="button"
+                  className={styles.topBtnCopy}
+                  onClick={() => handleCopy(currentOrderWhatsApp.text, 'top_wa')}
+                  title="Copiar texto del mensaje al portapapeles"
+                >
+                  {copiedKey === 'top_wa' ? (
+                    <Check size={13} color="var(--admin-success, #10b981)" />
+                  ) : (
+                    <Copy size={13} />
+                  )}
+                  <span>{copiedKey === 'top_wa' ? 'Copiado' : 'Copiar Texto'}</span>
+                </button>
+              </div>
+            </div>
+          )}
           <div className={styles.sectionGrid}>
             {/* 1. INFORMACIÓN DE ORDEN */}
             <div className={styles.reviewCard}>
@@ -868,83 +882,6 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
               </div>
             </div>
           </div>
-
-          {/* Formulario de Rechazo si está activo */}
-          {showRejectionForm && (
-            <div className={styles.rejectionSection}>
-              <div className={styles.rejectionHeader}>
-                <h4
-                  className={styles.rejectionTitle}
-                >
-                  <XCircle size={18} />
-                  Indicar Motivo de Rechazo (Obligatorio)
-                </h4>
-                <button
-                  type="button"
-                  onClick={() => setShowRejectionForm(false)}
-                  className={styles.cancelRejectionButton}
-                >
-                  Cancelar Rechazo
-                </button>
-              </div>
-
-              <p className={styles.rejectionDescription}>
-                Selecciona uno de los motivos comunes o describe la causa del rechazo. Los boletos
-                serán liberados automáticamente para la venta pública.
-              </p>
-
-              <div className={styles.presetReasonsGrid}>
-                {REJECTION_PRESETS.map((preset) => (
-                  <button
-                    key={preset}
-                    type="button"
-                    className={`${styles.presetReasonButton} ${
-                      selectedPreset === preset ? styles.presetReasonButtonActive : ''
-                    }`}
-                    onClick={() => setSelectedPreset(preset)}
-                  >
-                    {preset}
-                  </button>
-                ))}
-              </div>
-
-              <div>
-                <label
-                  className={styles.rejectionDetailsLabel}
-                >
-                  Detalles o instrucciones adicionales para el comprador:
-                </label>
-                <textarea
-                  className={styles.rejectionTextarea}
-                  placeholder="Ej: El valor transferido fue de $20.000 pero el total de la orden es $30.000..."
-                  value={customReason}
-                  onChange={(e) => setCustomReason(e.target.value)}
-                />
-              </div>
-
-              <div className={styles.rejectionActions}>
-                <button
-                  type="button"
-                  className={styles.btnSecondary}
-                  onClick={() => setShowRejectionForm(false)}
-                  disabled={isProcessing}
-                >
-                  Regresar
-                </button>
-                <button
-                  type="button"
-                  className={styles.btnDanger}
-                  onClick={() => void handleReject()}
-                  disabled={isProcessing}
-                >
-                  <XCircle size={16} />
-                  <span>
-                    {isProcessing ? 'Procesando Rechazo...' : 'Confirmar Rechazo y Liberar Boletos'}
-                  </span>
-                </button>
-              </div>
-            </div>
-          )}
 
           {/* Notificación Lista para Enviar por WhatsApp tras Aprobación / Rechazo */}
           {preparedNotification && (
@@ -1375,7 +1312,6 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
               type="button"
               className={styles.btnSecondary}
               onClick={onClose}
-              disabled={isProcessing}
             >
               Cerrar
             </button>
@@ -1392,13 +1328,12 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
               </Link>
             )}
 
-            {isPendingAction && !showRejectionForm && (
+            {isPendingAction && (
               <>
                 <button
                   type="button"
                   className={styles.btnDanger}
-                  onClick={() => setShowRejectionForm(true)}
-                  disabled={isProcessing}
+                  onClick={() => setIsRejectModalOpen(true)}
                 >
                   <XCircle size={16} />
                   <span>Rechazar Pago</span>
@@ -1408,10 +1343,9 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
                   type="button"
                   className={styles.btnPrimary}
                   onClick={() => setIsConfirmApproveOpen(true)}
-                  disabled={isProcessing}
                 >
                   <CheckCircle2 size={16} />
-                  <span>{isProcessing ? 'Aprobando...' : 'Aprobar Pago'}</span>
+                  <span>Aprobar Pago</span>
                 </button>
               </>
             )}
@@ -1433,6 +1367,14 @@ export const AdminOrderReviewModal: React.FC<AdminOrderReviewModalProps> = ({
         order={order}
         onSuccess={handleApproveSuccess}
         onClose={() => setIsConfirmApproveOpen(false)}
+      />
+
+      {/* Modal Guiado de Rechazo de Pago y Liberación de Boletos */}
+      <AdminRejectPaymentModal
+        isOpen={isRejectModalOpen}
+        order={order}
+        onSuccess={handleRejectSuccess}
+        onClose={() => setIsRejectModalOpen(false)}
       />
     </div>
   );

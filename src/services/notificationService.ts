@@ -313,6 +313,70 @@ export function buildPaymentApprovedMessage(data: OrderNotificationData): string
   return message;
 }
 
+export interface RejectionReasonItem {
+  id: string;
+  label: string;
+  defaultExplanation: string;
+}
+
+export const REJECTION_REASONS_CATALOG: RejectionReasonItem[] = [
+  {
+    id: 'receipt_unreadable',
+    label: 'Comprobante ilegible o borroso',
+    defaultExplanation: 'La imagen o documento del comprobante no permite visualizar claramente la fecha, valor o número de transacción.',
+  },
+  {
+    id: 'amount_mismatch',
+    label: 'Valor incorrecto o incompleto',
+    defaultExplanation: 'El monto reflejado en la consignación no coincide con el valor total liquidado de la orden.',
+  },
+  {
+    id: 'not_found_in_bank',
+    label: 'Transferencia no identificada en cuenta bancaria',
+    defaultExplanation: 'Tras cotejar con la cuenta bancaria oficial, no se registra el abono con la referencia o titular indicado.',
+  },
+  {
+    id: 'buyer_mismatch',
+    label: 'Datos inconsistentes con el comprador',
+    defaultExplanation: 'Los datos del titular emisor o soporte no corresponden a la persona registrada en la orden de compra.',
+  },
+  {
+    id: 'duplicate_receipt',
+    label: 'Comprobante duplicado o reutilizado',
+    defaultExplanation: 'El soporte de pago adjunto ya fue utilizado y validado en otra orden del sorteo.',
+  },
+  {
+    id: 'other',
+    label: 'Otro motivo administrativo',
+    defaultExplanation: 'El comprobante no cumple con los criterios de validación establecidos para este sorteo.',
+  },
+];
+
+export function formatRejectionReason(
+  preset: RejectionReasonItem | string,
+  note?: string
+): string {
+  const noteClean = note?.trim();
+  if (typeof preset === 'string') {
+    const found = REJECTION_REASONS_CATALOG.find(
+      (r) => r.id === preset || r.label === preset
+    );
+    if (found) {
+      if (found.id === 'other') return noteClean || found.defaultExplanation;
+      return noteClean
+        ? `${found.label}: ${found.defaultExplanation} (${noteClean})`
+        : `${found.label}: ${found.defaultExplanation}`;
+    }
+    return noteClean ? `${preset} (${noteClean})` : preset;
+  }
+  if (preset.id === 'other') {
+    return noteClean || preset.defaultExplanation;
+  }
+  return noteClean
+    ? `${preset.label}: ${preset.defaultExplanation} (${noteClean})`
+    : `${preset.label}: ${preset.defaultExplanation}`;
+}
+
 /**
  * 3. Plantilla: PAGO RECHAZADO (Comprobante no válido / Boletos liberados)
  */
@@ -321,16 +385,51 @@ export function buildPaymentRejectedMessage(data: OrderNotificationData): string
     data.rejectionReason?.trim() ||
     'Comprobante no legible o no coincide con los valores en cuenta.';
 
-  return (
-    `Hola ${data.buyerName}.\n\n` +
-    `Te contactamos respecto a tu solicitud de compra con orden *${data.reference}* en ${data.raffleTitle || DEFAULT_RAFFLE_TITLE}.\n\n` +
-    `❌ *No fue posible aprobar tu comprobante de pago.*\n\n` +
-    `📌 *Motivo informado:* ${reason}\n\n` +
-    `⚠️ Los boletos que tenías en reserva temporal han sido liberados.\n\n` +
-    `Si consideras que se trata de un error o deseas suministrar un nuevo soporte de transferencia, por favor comunícate directamente con nuestro equipo de atención respondiendo a este mensaje o a través de nuestros canales oficiales.\n\n` +
-    `Atentamente,\n` +
-    `${data.supportPhone || DEFAULT_SUPPORT_CONTACT}`
-  );
+  const formattedTickets =
+    Array.isArray(data.ticketNumbers) && data.ticketNumbers.length > 0
+      ? data.ticketNumbers.map((n) => formatTicketNumber(n)).join(', ')
+      : '';
+
+  const siteUrl =
+    typeof window !== 'undefined' && window.location.origin
+      ? window.location.origin
+      : 'https://manaurevive.com';
+
+  const verifyLink = data.verifyUrl || `${siteUrl}/verificar`;
+  const supportContact = data.supportPhone || DEFAULT_SUPPORT_CONTACT;
+  const raffleName = data.raffleTitle || DEFAULT_RAFFLE_TITLE;
+
+  let message =
+    `¡Hola ${data.buyerName}! 👋\n\n` +
+    `Te contactamos desde *${raffleName}* respecto a tu solicitud de compra para la orden *#${data.reference}*.\n\n` +
+    `❌ *No fue posible aprobar tu comprobante de pago*\n\n` +
+    `Tras la revisión administrativa de tu soporte de transferencia, la orden no pudo ser confirmada.\n\n` +
+    `📋 *Motivo de la no aprobación:*\n` +
+    `👉 ${reason}\n\n`;
+
+  if (formattedTickets) {
+    message +=
+      `🎟️ *Boletos que estaban en reserva:* *${formattedTickets}*\n` +
+      `⚠️ Para garantizar la transparencia y equidad del sorteo, estos números han sido liberados y están disponibles nuevamente para la venta pública.\n\n`;
+  } else {
+    message += `⚠️ Los boletos que tenías en reserva temporal han sido liberados.\n\n`;
+  }
+
+  if (data.totalAmount && data.totalAmount > 0) {
+    message += `💰 *Valor de la orden:* *${formatCOP(data.totalAmount)}*\n\n`;
+  }
+
+  message +=
+    `📌 *¿Qué puedes hacer a continuación?*\n` +
+    `1️⃣ *Si ya realizaste la transferencia:* Responde directamente a este mensaje de WhatsApp adjuntando un comprobante claro donde se aprecie fecha, hora y comprobante bancario para revisarlo manualmente.\n` +
+    `2️⃣ *Si deseas realizar una nueva compra:* Puedes ingresar a nuestro sitio oficial para seleccionar nuevamente tus números favoritos:\n` +
+    `${siteUrl}\n\n` +
+    `🔍 Puedes consultar el estado de tus compras en:\n` +
+    `${verifyLink}\n\n` +
+    `📞 *Canal de soporte:* ${supportContact}\n\n` +
+    `Agradecemos tu comprensión y quedamos atentos a cualquier inquietud.`;
+
+  return message;
 }
 
 /**

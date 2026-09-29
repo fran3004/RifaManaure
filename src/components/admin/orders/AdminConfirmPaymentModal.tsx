@@ -8,7 +8,10 @@ import { sendPaymentApprovedEmail } from '@/services/emailService';
 import {
   dispatchOrderNotifications,
   NOTIFICATION_EVENT_TYPES,
+  buildPaymentApprovedMessage,
+  recordWhatsAppOpened,
 } from '@/services/notificationService';
+import { createWhatsAppLink } from '@/services/whatsappService';
 import {
   CheckCircle2,
   X,
@@ -18,6 +21,9 @@ import {
   Loader2,
   Check,
   AlertTriangle,
+  MessageSquare,
+  Copy,
+  ExternalLink,
 } from 'lucide-react';
 import styles from './AdminConfirmPaymentModal.module.css';
 
@@ -44,6 +50,11 @@ export const AdminConfirmPaymentModal: React.FC<AdminConfirmPaymentModalProps> =
   const [statusMessage, setStatusMessage] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [emailDelivered, setEmailDelivered] = useState<boolean>(false);
+  const [confirmedOrder, setConfirmedOrder] = useState<OrderWithDetails | null>(null);
+
+  // Estados interactivos para WhatsApp
+  const [copiedWhatsApp, setCopiedWhatsApp] = useState<boolean>(false);
+  const [showWhatsAppPreview, setShowWhatsAppPreview] = useState<boolean>(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -82,6 +93,52 @@ export const AdminConfirmPaymentModal: React.FC<AdminConfirmPaymentModalProps> =
   const preference = (order.contact_preference || (hasEmail ? 'both' : 'whatsapp')).toLowerCase();
   const willSendEmail = hasEmail && (preference === 'email' || preference === 'both');
 
+  const formattedTickets = tickets.map((t) => formatTicketNumber(t.number));
+  const raffle = (order as any)?.raffle || (order as any)?.raffles;
+  const hasValidPhone = Boolean(
+    buyerPhone &&
+      buyerPhone.trim().length >= 7 &&
+      buyerPhone !== 'Sin teléfono' &&
+      !buyerPhone.toLowerCase().includes('sin')
+  );
+
+  const whatsAppText = order
+    ? buildPaymentApprovedMessage({
+        reference: order.reference,
+        buyerName,
+        buyerPhone,
+        buyerEmail,
+        ticketNumbers: formattedTickets,
+        totalAmount: order.total_amount,
+        raffleTitle: raffle?.title,
+        drawDate: raffle?.draw_date,
+        supportPhone: raffle?.support_phone,
+        verifyUrl:
+          typeof window !== 'undefined' ? `${window.location.origin}/verificar` : '/verificar',
+      })
+    : '';
+
+  const whatsAppLink = hasValidPhone ? createWhatsAppLink(buyerPhone, whatsAppText) : '';
+
+  const handleOpenWhatsApp = () => {
+    if (!order || !whatsAppLink) return;
+    window.open(whatsAppLink, '_blank', 'noopener,noreferrer');
+    if (buyerPhone) {
+      void recordWhatsAppOpened(
+        order.id,
+        NOTIFICATION_EVENT_TYPES.PAYMENT_APPROVED,
+        buyerPhone
+      );
+    }
+  };
+
+  const handleCopyWhatsApp = () => {
+    if (!whatsAppText) return;
+    void navigator.clipboard.writeText(whatsAppText);
+    setCopiedWhatsApp(true);
+    setTimeout(() => setCopiedWhatsApp(false), 2000);
+  };
+
   const finishProcess = async (paidOrder: OrderWithDetails, emailOk: boolean) => {
     try {
       if (onSuccess) {
@@ -117,6 +174,7 @@ export const AdminConfirmPaymentModal: React.FC<AdminConfirmPaymentModalProps> =
         status: 'paid',
         verified_at: new Date().toISOString(),
       };
+      setConfirmedOrder(paidOrder);
 
       // 2. Despacho de Correo Transaccional con Comprobante Oficial si aplica
       let emailOk = false;
@@ -143,7 +201,6 @@ export const AdminConfirmPaymentModal: React.FC<AdminConfirmPaymentModalProps> =
 
       // 3. Despachar notificaciones centralizadas y registrar log de auditoría
       try {
-        const formattedTickets = (order.tickets || []).map((t) => formatTicketNumber(t.number));
         await dispatchOrderNotifications({
           orderId: order.id,
           contactPreference: (order.contact_preference || 'both') as any,
@@ -151,7 +208,7 @@ export const AdminConfirmPaymentModal: React.FC<AdminConfirmPaymentModalProps> =
           skipEmail: true, // Ya despachado de forma segura con comprobante PNG
           notificationData: {
             reference: order.reference,
-            buyerName: order.buyers?.full_name || 'Comprador',
+            buyerName,
             buyerPhone: order.buyers?.phone || '',
             buyerEmail: order.buyers?.email,
             ticketNumbers: formattedTickets,
@@ -164,18 +221,13 @@ export const AdminConfirmPaymentModal: React.FC<AdminConfirmPaymentModalProps> =
         console.warn('[AdminConfirmPaymentModal] Error al registrar trazabilidad de notificación:', notifErr);
       }
 
-      // 4. Fase de Éxito
+      // 4. Fase de Éxito guiada (sin cierre abrupto)
       setPhase('success');
       if (emailOk && buyerEmail) {
         setStatusMessage(`¡Pago aprobado con éxito! Comprobante digital enviado a ${buyerEmail}.`);
       } else {
         setStatusMessage('¡Pago aprobado con éxito! Boletos confirmados definitivamente como vendidos.');
       }
-
-      // 5. Finalización automática suave tras 1.4s
-      setTimeout(() => {
-        void finishProcess(paidOrder, emailOk);
-      }, 1400);
 
     } catch (err: unknown) {
       setPhase('error');
@@ -288,21 +340,89 @@ export const AdminConfirmPaymentModal: React.FC<AdminConfirmPaymentModalProps> =
               <div className={styles.successAuditCard}>
                 <div className={styles.successAuditRow}>
                   <ShieldCheck size={16} className={styles.successAuditIcon} />
-                  <span>Boletos asegurados como <strong>VENDIDOS</strong></span>
+                  <span>
+                    {ticketCount} {ticketCount === 1 ? 'boleto asegurado' : 'boletos asegurados'} como <strong>VENDIDOS</strong>
+                  </span>
                 </div>
-                {emailDelivered && buyerEmail && (
+                {emailDelivered && buyerEmail ? (
                   <div className={styles.successAuditRow}>
                     <Mail size={16} className={styles.successAuditIcon} />
                     <span>
                       Comprobante digital enviado a <strong>{buyerEmail}</strong>
                     </span>
                   </div>
+                ) : (
+                  <div className={styles.successAuditRow}>
+                    <Mail size={16} className={styles.successAuditIcon} />
+                    <span>
+                      Correo transaccional: <strong>{hasEmail ? 'No despachado' : 'No requerido'}</strong>
+                    </span>
+                  </div>
                 )}
               </div>
 
-              <span className={styles.autoFinalizeNotice}>
-                Finalizando proceso de aceptación automáticamente...
-              </span>
+              {/* Tarjeta Destacada de Envío Directo por WhatsApp */}
+              {hasValidPhone ? (
+                <div className={styles.whatsappActionCard}>
+                  <div className={styles.whatsappCardHeader}>
+                    <div className={styles.whatsappHeaderLeft}>
+                      <div className={styles.whatsappIconCircle}>
+                        <MessageSquare size={18} />
+                      </div>
+                      <div className={styles.whatsappTitleGroup}>
+                        <span className={styles.whatsappTitle}>Notificar por WhatsApp al comprador</span>
+                        <span className={styles.whatsappSubtitle}>Plantilla oficial de felicitación y confirmación lista</span>
+                      </div>
+                    </div>
+                    <span className={styles.whatsappRecipientBadge}>
+                      {buyerPhone}
+                    </span>
+                  </div>
+
+                  <div className={styles.whatsappActionsRow}>
+                    <button
+                      type="button"
+                      className={styles.btnWhatsAppPrimary}
+                      onClick={handleOpenWhatsApp}
+                      title="Abrir WhatsApp Web o Móvil con el mensaje ya estructurado"
+                    >
+                      <ExternalLink size={15} />
+                      <span>Abrir WhatsApp y Enviar</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      className={styles.btnCopyText}
+                      onClick={handleCopyWhatsApp}
+                      title="Copiar texto oficial al portapapeles"
+                    >
+                      {copiedWhatsApp ? (
+                        <Check size={14} color="var(--admin-success, #10b981)" />
+                      ) : (
+                        <Copy size={14} />
+                      )}
+                      <span>{copiedWhatsApp ? '¡Copiado!' : 'Copiar Texto'}</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      className={styles.btnTogglePreview}
+                      onClick={() => setShowWhatsAppPreview((prev) => !prev)}
+                    >
+                      {showWhatsAppPreview ? 'Ocultar plantilla' : 'Ver plantilla del mensaje'}
+                    </button>
+                  </div>
+
+                  {showWhatsAppPreview && (
+                    <pre className={styles.whatsappMessagePreview}>{whatsAppText}</pre>
+                  )}
+                </div>
+              ) : (
+                <div className={styles.warningNotice}>
+                  <AlertCircle size={16} className={styles.warningIcon} />
+                  <span>El comprador no cuenta con número de WhatsApp válido para notificación directa.</span>
+                </div>
+              )}
             </div>
           )}
 
@@ -391,11 +511,11 @@ export const AdminConfirmPaymentModal: React.FC<AdminConfirmPaymentModalProps> =
           {phase === 'success' ? (
             <button
               type="button"
-              className={styles.btnConfirm}
-              onClick={() => void finishProcess(order, emailDelivered)}
+              className={styles.btnFinishProcess}
+              onClick={() => void finishProcess(confirmedOrder || order, emailDelivered)}
             >
               <Check size={16} />
-              <span>Finalizar Ahora</span>
+              <span>Finalizar y Volver</span>
             </button>
           ) : isWorking ? (
             <button type="button" className={styles.btnConfirm} disabled>

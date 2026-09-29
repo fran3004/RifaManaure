@@ -109,6 +109,7 @@ interface SendEmailRequestBody {
   receiptFileName?: string;
   siteUrl?: string;
   isRetry?: boolean;
+  ticketNumbers?: string[];
 }
 
 /**
@@ -328,7 +329,12 @@ serve(async (req: Request) => {
     .select("number")
     .eq("order_id", order.id);
 
-  const ticketNumbers = (ticketsData || []).map((t) => t.number).sort();
+  const ticketNumbers =
+    ticketsData && ticketsData.length > 0
+      ? ticketsData.map((t) => t.number).sort()
+      : Array.isArray((body as any).ticketNumbers)
+        ? (body as any).ticketNumbers.map(String).sort()
+        : [];
 
   // Extraer datos validados del comprador y rifa
   const buyer = order.buyer as any;

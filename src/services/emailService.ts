@@ -36,6 +36,7 @@ export interface SendEmailPayload {
   receiptPngBase64?: string;
   receiptFileName?: string;
   isRetry?: boolean;
+  ticketNumbers?: string[];
 }
 
 export interface SendEmailResult {
@@ -153,6 +154,7 @@ export async function sendTransactionalEmail(
       receiptPngBase64: sanitizedBase64,
       receiptFileName: payload.receiptFileName,
       isRetry: payload.isRetry,
+      ticketNumbers: payload.ticketNumbers,
     };
 
     const { data, error } = await supabase.functions.invoke('send-brevo-email', {
@@ -246,7 +248,7 @@ export async function sendPaymentApprovedEmail(
 export async function sendPaymentRejectedEmail(
   orderId: string,
   contactPreference?: ContactPreference | string | null,
-  options?: { isRetry?: boolean }
+  options?: { isRetry?: boolean; ticketNumbers?: string[] }
 ): Promise<SendEmailResult> {
   if (!shouldSendEmail(contactPreference)) {
     return {
@@ -259,5 +261,6 @@ export async function sendPaymentRejectedEmail(
     orderId,
     eventType: 'payment_rejected',
     isRetry: options?.isRetry,
+    ticketNumbers: options?.ticketNumbers,
   });
 }
